@@ -1,0 +1,42 @@
+{
+  "first_name": {
+    "default": "input#firstname",
+    "alternatives": ["input[placeholder='Enter your first name']"]
+  },
+  "surname": {
+    "default": "input#surname",
+    "alternatives": ["input[placeholder='Enter your surname']"]
+  },
+  "gender": {
+    "default": "select#gender",
+    "alternatives": ["text=Gender >> select"]
+  },
+  "red_radio": {
+    "default": "input#red",
+    "alternatives": ["input[value='Red']"]
+  },
+  "blue_radio": {
+    "default": "input#blue",
+    "alternatives": ["input[value='Blue']"]
+  },
+  "email_checkbox": {
+    "default": "input#checkbox1",
+    "alternatives": ["label:has-text('Email') input[type='checkbox']"]
+  },
+  "sms_checkbox": {
+    "default": "input#checkbox2",
+    "alternatives": ["label:has-text('SMS') input[type='checkbox']"]
+  },
+  "tell_more": {
+    "default": "textarea[placeholder='Tell us some fun stuff!']",
+    "alternatives": ["textarea"]
+  },
+  "continents": {
+    "default": "select#continent",
+    "alternatives": ["text=Which continents have you visited? >> select"]
+  },
+  "submit_button": {
+    "default": "button#submitbutton",
+    "alternatives": ["button:has-text('I do nothing!')"]
+  }
+}

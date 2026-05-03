@@ -1,0 +1,12 @@
+pytest>=8.0
+pytest-reportportal>=3.1
+pytest-playwright>=0.4.0
+pytest-xdist>=3.0
+playwright>=1.40.0
+requests>=2.30.0
+gql>=3.0.0
+PyYAML>=6.0
+pydantic>=2.9
+loguru>=0.7.0
+jsonschema>=4.0.0
+appium-python-client>=2.11.0
