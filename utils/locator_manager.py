@@ -1,6 +1,9 @@
 import json
+import logging
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+_log = logging.getLogger(__name__)
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,7 +28,11 @@ class LocatorManager:
         if locator is None:
             raise KeyError(f"Locator '{key}' not found in {locator_file}")
         if isinstance(locator, dict):
-            return locator.get(self.locale, locator.get("default"))
+            value = locator.get(self.locale)
+            if value is None:
+                _log.warning("Locale '%s' not found for '%s' in %s — using default", self.locale, key, locator_file)
+                value = locator.get("default")
+            return value
         return locator
 
     def get_alternatives(self, locator_file: str, key: str) -> list:

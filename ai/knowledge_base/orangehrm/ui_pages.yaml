@@ -1,0 +1,171 @@
+pages:
+  - name: "Login Page"
+    url: "/web/index.php/auth/login"
+    description: "Application entry point - username/password authentication"
+    fields:
+      - id: username
+        label: "Username"
+        type: text_input
+        required: true
+      - id: password
+        label: "Password"
+        type: password_input
+        required: true
+      - id: login_button
+        label: "Login"
+        type: button
+      - id: error_message
+        label: "Error message"
+        type: text
+    test_scenarios:
+      positive:
+        - "Admin user logs in with valid credentials and lands on dashboard"
+        - "ESS user logs in and sees limited navigation menu"
+      negative:
+        - "Wrong password shows 'Invalid credentials' error"
+        - "Empty username shows validation error"
+        - "Empty password shows validation error"
+        - "Both fields empty shows validation error"
+        - "SQL injection in username shows error, not 500"
+      edge_cases:
+        - "Username is case-sensitive (Admin != admin)"
+        - "Browser back button after login does not expose session"
+        - "Session expires after inactivity"
+
+  - name: "Dashboard"
+    url: "/web/index.php/dashboard/index"
+    description: "Main landing page after login with quick launch widgets"
+    fields:
+      - id: quick_launch_panel
+        label: "Quick Launch"
+        type: widget
+      - id: leave_widget
+        label: "My Leave"
+        type: widget
+      - id: user_dropdown
+        label: "User dropdown"
+        type: dropdown
+      - id: logout_link
+        label: "Logout"
+        type: link
+    test_scenarios:
+      positive:
+        - "Dashboard loads all widgets after login"
+        - "Quick launch shortcuts navigate to correct modules"
+        - "Logout redirects to login page and clears session"
+
+  - name: "PIM - Employee List"
+    url: "/web/index.php/pim/viewEmployeeList"
+    description: "List of all employees with search and filter"
+    fields:
+      - id: employee_name_filter
+        label: "Employee Name"
+        type: text_input
+      - id: employee_id_filter
+        label: "Employee Id"
+        type: text_input
+      - id: search_button
+        label: "Search"
+        type: button
+      - id: add_employee_button
+        label: "Add"
+        type: button
+      - id: employee_table
+        label: "Employee table"
+        type: table
+      - id: employee_count
+        label: "Record count"
+        type: text
+      - id: delete_checkbox
+        label: "Row checkbox"
+        type: checkbox
+    test_scenarios:
+      positive:
+        - "Employee list loads with all employees on page load"
+        - "Search by employee name filters results correctly"
+        - "Search by employee ID filters to exact match"
+        - "Clicking Add navigates to add employee form"
+        - "Record count updates after search"
+      negative:
+        - "Search with non-existent name shows 'No Records Found'"
+        - "Search with special characters handles gracefully"
+      edge_cases:
+        - "Search is case-insensitive"
+        - "Partial name search returns all matching employees"
+
+  - name: "PIM - Add Employee"
+    url: "/web/index.php/pim/addEmployee"
+    description: "Form to create a new employee record"
+    fields:
+      - id: firstname
+        label: "First Name"
+        type: text_input
+        required: true
+        max_length: 30
+      - id: middlename
+        label: "Middle Name"
+        type: text_input
+        required: false
+        max_length: 30
+      - id: lastname
+        label: "Last Name"
+        type: text_input
+        required: true
+        max_length: 30
+      - id: employee_id
+        label: "Employee Id"
+        type: text_input
+        required: false
+      - id: create_login_toggle
+        label: "Create Login Details"
+        type: toggle
+      - id: save_button
+        label: "Save"
+        type: button
+      - id: cancel_button
+        label: "Cancel"
+        type: button
+    test_scenarios:
+      positive:
+        - "Save with first name and last name creates employee and redirects to profile"
+        - "Save with all fields populates employee record correctly"
+        - "Enable Create Login Details shows username/password fields"
+        - "Cancel navigates back to employee list without saving"
+        - "Auto-generated employee ID is unique"
+      negative:
+        - "Save without first name shows required field error"
+        - "Save without last name shows required field error"
+        - "First name exceeding 30 characters shows validation error"
+        - "Duplicate employee ID shows error"
+      edge_cases:
+        - "First name with only spaces shows validation error"
+        - "Employee ID with special characters is rejected"
+        - "First name with accented characters is accepted"
+
+  - name: "Leave - Leave List"
+    url: "/web/index.php/leave/viewLeaveList"
+    description: "List of leave requests with filters and approval actions"
+    fields:
+      - id: from_date_filter
+        label: "Date From"
+        type: date_input
+      - id: to_date_filter
+        label: "Date To"
+        type: date_input
+      - id: leave_status_filter
+        label: "Show"
+        type: dropdown
+      - id: search_button
+        label: "Search"
+        type: button
+      - id: leave_table
+        label: "Leave request table"
+        type: table
+    test_scenarios:
+      positive:
+        - "Leave list loads with current period leave requests"
+        - "Filter by date range narrows results correctly"
+        - "Admin can approve a pending leave request"
+        - "Admin can reject a pending leave request"
+      negative:
+        - "Date To before Date From shows validation or empty results"

@@ -1,0 +1,283 @@
+"""
+End-to-end pipeline: KB (base + increments) → test case doc → pytest script.
+
+CLI usage:
+    python -m ai.pipeline.orchestrator --feature booking --domain api
+    python -m ai.pipeline.orchestrator --feature booking --domain web --env staging
+    python -m ai.pipeline.orchestrator --increment feature_001_booking_v2.yaml --domain api
+    python -m ai.pipeline.orchestrator --doc docs/test_cases/api/booking.md --domain api --feature booking
+"""
+
+from __future__ import annotations
+
+import argparse
+import logging
+import sys
+from datetime import date
+from pathlib import Path
+
+import yaml
+
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+
+_log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+
+
+class TestPipelineOrchestrator:
+    def __init__(self, ai_client, kb_loader=None):
+        from ai.knowledge_base.kb_loader import KnowledgeBaseLoader
+        self.ai_client = ai_client
+        self._script_client = ai_client  # can be overridden to use a different model
+        self.kb_loader = kb_loader or KnowledgeBaseLoader()
+
+    def run(
+        self,
+        feature_name: str,
+        domain: str,
+        increment_file: str = None,
+        skip_doc: bool = False,
+        skip_script: bool = False,
+        doc_path: Path = None,
+    ) -> dict[str, Path]:
+        """
+        Full pipeline: generate doc then script for a feature + domain.
+
+        skip_doc=True  — reuse existing doc, only regenerate script.
+        skip_script=True — regenerate doc only, never touch existing test script.
+
+        Returns dict with keys 'doc' and 'script' (script may be None when skipped).
+        """
+        _log.info("Pipeline start — feature=%s domain=%s", feature_name, domain)
+
+        if increment_file:
+            self._load_increment(increment_file)
+
+        if skip_doc and doc_path and doc_path.exists():
+            _log.info("Skipping doc generation — using existing: %s", doc_path)
+            test_case_doc = doc_path.read_text(encoding="utf-8")
+            out_doc = doc_path
+        else:
+            out_doc = self._generate_doc(feature_name, domain, doc_path)
+            test_case_doc = out_doc.read_text(encoding="utf-8")
+
+        if skip_script:
+            _log.info("Skipping script generation (--skip-script)")
+            return {"doc": out_doc, "script": None}
+
+        out_script = self._generate_script(test_case_doc, feature_name, domain)
+
+        if increment_file:
+            self._log_increment(increment_file, feature_name, domain, out_doc, out_script)
+
+        _log.info("Pipeline complete — doc=%s script=%s", out_doc, out_script)
+        return {"doc": out_doc, "script": out_script}
+
+    # --- steps ---
+
+    def _generate_doc(self, feature_name: str, domain: str, out_path: Path = None) -> Path:
+        from ai.skills.test_case_doc_kb import TestCaseDocumentationSkill
+        from ai.prompts.prompt_templates import FEATURE_DOC_PROMPT
+
+        skill = TestCaseDocumentationSkill(self.ai_client, self.kb_loader)
+
+        feature_context = self.kb_loader.get_feature_context(feature_name)
+        increments_context = self.kb_loader.get_increments_context()
+        kb_context = self.kb_loader.get_all_context()
+
+        if domain == "api":
+            doc_content = skill.generate_api_test_document(
+                endpoint=f"/{feature_name}",
+                method="ALL",
+                description=f"All {feature_name} API operations",
+                api_type="rest",
+                feature_name=feature_name,
+            )
+        elif domain == "web":
+            doc_content = skill.generate_document(
+                page_url=f"/{feature_name}",
+                form_description=f"{feature_name} UI feature",
+                feature_name=feature_name,
+            )
+        else:
+            prompt = FEATURE_DOC_PROMPT.format(
+                feature_context=feature_context + "\n" + increments_context,
+                kb_context=kb_context,
+            )
+            doc_content = self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()
+
+        if out_path is None:
+            out_path = ROOT_DIR / "docs" / "test_cases" / domain / f"{feature_name}.md"
+
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(doc_content, encoding="utf-8")
+        _log.info("Doc written: %s", out_path)
+        return out_path
+
+    def _generate_script(self, test_case_doc: str, feature_name: str, domain: str) -> Path:
+        from ai.skills.test_script_gen import TestScriptGenSkill
+
+        skill = TestScriptGenSkill(self._script_client, self.kb_loader)
+        code = skill.generate_script(test_case_doc, domain, feature_name)
+
+        out_path = ROOT_DIR / "tests" / domain / f"test_{feature_name}.py"
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(code, encoding="utf-8")
+        _log.info("Script written: %s", out_path)
+        return out_path
+
+    def _load_increment(self, increment_file: str):
+        path = ROOT_DIR / "ai" / "knowledge_base" / "increments" / increment_file
+        if not path.exists():
+            _log.warning("Increment file not found: %s — skipping", path)
+            return
+        self.kb_loader.invalidate()
+        _log.info("Loaded increment: %s", increment_file)
+
+    def _log_increment(
+        self,
+        increment_file: str,
+        feature_name: str,
+        domain: str,
+        doc_path: Path,
+        script_path: Path,
+    ):
+        log_path = ROOT_DIR / "framework_knowledge" / "kb_increments_log.yaml"
+        try:
+            with log_path.open("r", encoding="utf-8") as f:
+                log_data = yaml.safe_load(f) or {}
+        except FileNotFoundError:
+            log_data = {}
+
+        processed = log_data.get("processed") or []
+        processed.append({
+            "increment": increment_file,
+            "processed_date": str(date.today()),
+            "feature": feature_name,
+            "domain": domain,
+            "generated_doc": str(doc_path.relative_to(ROOT_DIR)),
+            "generated_script": str(script_path.relative_to(ROOT_DIR)),
+            "status": "generated_pending_review",
+        })
+        log_data["processed"] = processed
+
+        with log_path.open("w", encoding="utf-8") as f:
+            yaml.dump(log_data, f, default_flow_style=False, sort_keys=False)
+        _log.info("Increment log updated: %s", log_path)
+
+
+def _build_client(model: str, args) -> object:
+    """Build AI client from CLI args or env vars."""
+    import os
+    from utils.ai_factory import create_ai_client
+
+    ai_config = {
+        "enabled": True,
+        "mode": "mistral",
+        "local": args.local,
+        "model": model,
+    }
+    if args.local:
+        ai_config["local_url"] = args.local_url
+    else:
+        api_key = args.api_key or os.environ.get("MISTRAL_API_KEY")
+        if not api_key:
+            _log.error("Cloud mode requires --api-key or MISTRAL_API_KEY env var")
+            sys.exit(1)
+        ai_config["api_key"] = api_key
+
+    return create_ai_client(ai_config)
+
+
+def _parse_args(argv=None):
+    parser = argparse.ArgumentParser(
+        description="SentinelFlux AI pipeline: KB → test doc → pytest script"
+    )
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--feature", help="Feature name (used for file naming and KB lookup)")
+    group.add_argument("--increment", help="Increment YAML filename in ai/knowledge_base/increments/")
+    group.add_argument("--doc", help="Path to existing test case doc (skip doc generation)")
+
+    parser.add_argument("--domain", required=True, choices=["api", "web", "mobile", "security"])
+    parser.add_argument("--skip-script", action="store_true",
+                        help="Generate doc only — do not overwrite existing test script")
+    parser.add_argument("--project", default=None,
+                        help="KB project subdirectory under ai/knowledge_base/ (e.g. orangehrm). "
+                             "Defaults to ai/knowledge_base/ root.")
+    parser.add_argument("--local", action="store_true", default=True, help="Use local Ollama (default)")
+    parser.add_argument("--local-url", default="http://localhost:11434")
+    parser.add_argument("--doc-model", default="mistral:7b-instruct-v0.3-q4_K_M",
+                        help="Ollama model for test case doc generation")
+    parser.add_argument("--script-model", default="qwen2.5-coder:14b-instruct-q4_K_M",
+                        help="Ollama model for pytest script generation")
+    parser.add_argument("--model", default=None,
+                        help="Use same model for both doc and script (overrides --doc-model and --script-model)")
+    parser.add_argument("--api-key", help="Mistral cloud API key (or set MISTRAL_API_KEY)")
+    parser.add_argument("--cloud", action="store_true", help="Use Mistral cloud API instead of local")
+
+    return parser.parse_args(argv)
+
+
+def main(argv=None):
+    args = _parse_args(argv)
+    if args.cloud:
+        args.local = False
+
+    doc_model = args.model or args.doc_model
+    script_model = args.model or args.script_model
+
+    doc_client = _build_client(doc_model, args)
+
+    # Use a separate client for script gen if different model requested
+    if script_model != doc_model:
+        script_client = _build_client(script_model, args)
+    else:
+        script_client = doc_client
+
+    # Resolve KB directory
+    kb_dir = None
+    if args.project:
+        kb_dir = ROOT_DIR / "ai" / "knowledge_base" / args.project
+        if not kb_dir.exists():
+            _log.error("KB project directory not found: %s", kb_dir)
+            sys.exit(1)
+
+    from ai.knowledge_base.kb_loader import KnowledgeBaseLoader
+    kb_loader = KnowledgeBaseLoader(kb_dir=kb_dir)
+
+    orchestrator = TestPipelineOrchestrator(doc_client, kb_loader)
+    # Inject separate script client if using two models
+    orchestrator._script_client = script_client
+
+    skip_script = args.skip_script
+
+    if args.doc:
+        doc_path = Path(args.doc)
+        feature_name = doc_path.stem.removeprefix("test_")
+        orchestrator.run(
+            feature_name=feature_name,
+            domain=args.domain,
+            skip_doc=True,
+            skip_script=skip_script,
+            doc_path=doc_path,
+        )
+    elif args.increment:
+        stem = Path(args.increment).stem
+        parts = stem.split("_", 2)
+        feature_name = parts[2] if len(parts) > 2 else stem
+        orchestrator.run(
+            feature_name=feature_name,
+            domain=args.domain,
+            increment_file=args.increment,
+            skip_script=skip_script,
+        )
+    else:
+        orchestrator.run(
+            feature_name=args.feature,
+            domain=args.domain,
+            skip_script=skip_script,
+        )
+
+
+if __name__ == "__main__":
+    main()

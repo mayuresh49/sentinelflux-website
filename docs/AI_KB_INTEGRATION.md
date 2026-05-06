@@ -81,21 +81,25 @@ rest_api:
 
 **Input**: KB specifications
 
-**Action**: Run test generation scripts
+**Action**: Run the API and web generation scripts
+
+#### API documentation
 ```bash
-# Generate REST API test documentation
 python ai/generate_api_test_doc.py \
   --endpoint /booking \
   --method POST \
   --output docs/test_cases/api/booking_create_tests.md
+```
 
-# Generate GraphQL test documentation
+```bash
 python ai/generate_api_test_doc.py \
   --endpoint countries_list \
   --method QUERY \
   --output docs/test_cases/api/countries_query_tests.md
+```
 
-# Generate UI test documentation
+#### Web UI documentation
+```bash
 python ai/generate_test_case_doc.py \
   --page-url "https://app.com/booking" \
   --description "Booking form with validation" \
@@ -108,6 +112,10 @@ python ai/generate_test_case_doc.py \
 - Negative scenarios
 - Edge cases
 - Expected validations
+
+For a detailed guide, see:
+- [API Test Generation Guide](api_test_generation.md)
+- [Web Test Generation Guide](web_test_generation.md)
 
 ### Step 3: Implement Tests from Documentation
 

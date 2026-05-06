@@ -1,0 +1,18 @@
+{
+  "username": {
+    "primary": "[name='username']",
+    "alternatives": ["input#txtUsername", "//input[@placeholder='Username']"]
+  },
+  "password": {
+    "primary": "[name='password']",
+    "alternatives": ["input#txtPassword", "//input[@type='password']"]
+  },
+  "login_button": {
+    "primary": "[type='submit']",
+    "alternatives": ["//button[normalize-space()='Login']", "button.orangehrm-login-button"]
+  },
+  "error_message": {
+    "primary": ".oxd-alert-content-text",
+    "alternatives": ["//p[contains(@class,'oxd-alert')]"]
+  }
+}

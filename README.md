@@ -30,6 +30,9 @@ A scalable Python test framework for API, Web UI, and Mobile automation with AI-
 3. Run the sample tests:
    ```bash
    pytest -q
+   pytest tests/api/test_rest_api.py -v
+   pytest tests/api/test_graphql_api.py -v
+   pytest tests/web/test_web_ui.py --browser chromium -v
    ```
 
 ## Environment Profiles
@@ -51,7 +54,17 @@ A new AI doc-generation script is available at `ai/generate_test_case_doc.py`.
 
 Run it with:
 ```bash
-python3 ai/generate_test_case_doc.py --config config/env_qa.yaml --output docs/test_cases/generated_test_case_doc.md
+python3 -m ai.generate_test_case_doc --config config/env_qa.yaml --output docs/test_cases/generated_test_case_doc.md
+```
+
+If Python cannot resolve the local package, use:
+```bash
+PYTHONPATH=. python3 ai/generate_test_case_doc.py --config config/env_qa.yaml --output docs/test_cases/generated_test_case_doc.md
+```
+
+Generate API test docs with:
+```bash
+python3 -m ai.generate_api_test_doc --endpoint /booking --method POST --output docs/test_cases/api/booking_create_tests.md
 ```
 
 This writes the generated test case document into `docs/test_cases/` so it can be version controlled.

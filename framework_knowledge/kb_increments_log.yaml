@@ -1,0 +1,11 @@
+# Tracks which KB increment files have been processed through the AI pipeline
+# Format: increment filename → what was generated
+
+processed: []
+
+# Example entry once pipeline is running:
+# - increment: feature_001_booking_v2.yaml
+#   processed_date: 2026-05-10
+#   generated_doc: docs/test_cases/api/booking_v2.md
+#   generated_script: tests/api/test_booking_v2.py
+#   status: reviewed_and_committed

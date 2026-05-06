@@ -1,0 +1,177 @@
+rest_api:
+  base_url: "https://opensource-demo.orangehrmlive.com/web/index.php/api/v2"
+  version: "v2"
+  auth:
+    type: "cookie"
+    description: "Session cookie from login POST; some endpoints accept Basic Auth"
+    login_endpoint: "/auth/login"
+    cookie_name: "orangehrm"
+
+  endpoints:
+    # --- Auth ---
+    - name: "login"
+      path: "/auth/login"
+      method: "POST"
+      description: "Authenticate user and create session"
+      auth_required: false
+      request_body:
+        username: "string (required)"
+        password: "string (required)"
+      response_codes:
+        200: "Login successful, session cookie set"
+        401: "Invalid credentials"
+      negative_cases:
+        - "Empty username returns 401"
+        - "Empty password returns 401"
+        - "Wrong password returns 401"
+        - "Non-existent username returns 401"
+        - "SQL injection in username returns 401 (not 500)"
+
+    # --- PIM - Employees ---
+    - name: "list_employees"
+      path: "/pim/employees"
+      method: "GET"
+      description: "List all employees with pagination"
+      auth_required: true
+      query_params:
+        limit: "integer, default 50"
+        offset: "integer, default 0"
+        nameOrId: "string, search filter"
+        statusId: "integer, 1=Active 2=Inactive"
+      response_codes:
+        200: "Returns {data: [...], meta: {total}}"
+        401: "Unauthorized - session expired"
+      negative_cases:
+        - "Request without session cookie returns 401"
+        - "Invalid limit (negative) returns 400"
+        - "Non-integer offset returns 400"
+
+    - name: "create_employee"
+      path: "/pim/employees"
+      method: "POST"
+      description: "Create a new employee record"
+      auth_required: true
+      request_body:
+        firstName: "string (required, 1-30 chars)"
+        middleName: "string (optional, max 30 chars)"
+        lastName: "string (required, 1-30 chars)"
+        employeeId: "string (optional, auto-generated if omitted)"
+      response_codes:
+        200: "Employee created, returns {data: {empNumber, firstName, lastName, employeeId}}"
+        400: "Validation error - missing required field or duplicate employeeId"
+        401: "Unauthorized"
+      negative_cases:
+        - "Missing firstName returns 400"
+        - "Missing lastName returns 400"
+        - "firstName exceeding 30 chars returns 400"
+        - "Duplicate employeeId returns 400"
+        - "ESS role cannot create employee (returns 403)"
+
+    - name: "get_employee"
+      path: "/pim/employees/{empNumber}"
+      method: "GET"
+      description: "Retrieve a specific employee by empNumber"
+      auth_required: true
+      path_params:
+        empNumber: "integer"
+      response_codes:
+        200: "Returns employee object"
+        404: "Employee not found"
+        401: "Unauthorized"
+      negative_cases:
+        - "Non-existent empNumber returns 404"
+        - "String empNumber returns 404 or 400"
+        - "ESS user accessing another employee's record returns 403"
+
+    - name: "update_employee_personal"
+      path: "/pim/employees/{empNumber}/personal-details"
+      method: "PUT"
+      description: "Update employee personal details"
+      auth_required: true
+      request_body:
+        firstName: "string (required)"
+        lastName: "string (required)"
+        nickName: "string (optional)"
+        gender: "string (optional, Male/Female/Prefer Not to Say)"
+        maritalStatus: "string (optional)"
+        dateOfBirth: "string (optional, YYYY-MM-DD)"
+      response_codes:
+        200: "Updated successfully"
+        400: "Validation error"
+        404: "Employee not found"
+
+    - name: "delete_employees"
+      path: "/pim/employees"
+      method: "DELETE"
+      description: "Delete one or more employees"
+      auth_required: true
+      request_body:
+        ids: "array of empNumbers (required)"
+      response_codes:
+        200: "Deleted successfully"
+        400: "Empty ids array"
+        403: "ESS role cannot delete"
+        404: "One or more empNumbers not found"
+
+    # --- Leave ---
+    - name: "list_leave_types"
+      path: "/leave/leave-types"
+      method: "GET"
+      description: "List all configured leave types"
+      auth_required: true
+      response_codes:
+        200: "Returns {data: [{id, name, situational}]}"
+        401: "Unauthorized"
+
+    - name: "create_leave_request"
+      path: "/leave/leave-requests"
+      method: "POST"
+      description: "Submit a leave request"
+      auth_required: true
+      request_body:
+        leaveTypeId: "integer (required)"
+        fromDate: "string YYYY-MM-DD (required)"
+        toDate: "string YYYY-MM-DD (required)"
+        comment: "string (optional)"
+      response_codes:
+        200: "Leave request submitted"
+        400: "Validation error - invalid dates, insufficient entitlement"
+        401: "Unauthorized"
+      negative_cases:
+        - "toDate before fromDate returns 400"
+        - "Leave on weekend returns 400 (if weekends excluded)"
+        - "Insufficient entitlement returns 400"
+        - "Invalid leaveTypeId returns 400"
+
+    # --- Admin - Users ---
+    - name: "list_system_users"
+      path: "/admin/users"
+      method: "GET"
+      description: "List system users (Admin role only)"
+      auth_required: true
+      response_codes:
+        200: "Returns user list"
+        403: "ESS role returns 403"
+
+    - name: "create_system_user"
+      path: "/admin/users"
+      method: "POST"
+      description: "Create a new system user"
+      auth_required: true
+      request_body:
+        userRoleId: "integer (required, 1=Admin 2=ESS)"
+        firstName: "string (required)"
+        lastName: "string (required)"
+        userName: "string (required, unique)"
+        password: "string (required, min 8 chars, mixed case + number + special)"
+        status: "string (required, Enabled/Disabled)"
+        empNumber: "integer (required)"
+      response_codes:
+        200: "User created"
+        400: "Duplicate username or validation error"
+        403: "ESS role cannot create users"
+      negative_cases:
+        - "Duplicate username returns 400"
+        - "Weak password returns 400"
+        - "Missing empNumber returns 400"
+        - "ESS role attempting user creation returns 403"

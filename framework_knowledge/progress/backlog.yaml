@@ -1,0 +1,86 @@
+- id: P2-01
+  phase: 2
+  title: "TestScriptGenSkill — generate pytest code from test case doc"
+  file: ai/skills/test_script_gen.py
+  priority: high
+  status: done
+
+- id: P2-02
+  phase: 2
+  title: "Orchestrator — end-to-end KB → doc → script pipeline"
+  file: ai/pipeline/orchestrator.py
+  priority: high
+  status: done
+
+- id: P2-03
+  phase: 2
+  title: "KB loader — support increments/ directory"
+  file: ai/knowledge_base/kb_loader.py
+  priority: high
+  status: done
+  notes: >
+    Add load_increments() method that reads all YAMLs from increments/ dir.
+    Merge into base context. Track which increments have been processed in
+    framework_knowledge/kb_increments_log.yaml.
+
+- id: P3-01
+  phase: 3
+  title: "Mobile — BaseMobilePage (Appium)"
+  file: pages/mobile/base_mobile_page.py
+  priority: medium
+  status: todo
+  notes: >
+    Appium-based equivalent of BasePage. Self-healing with MobileBy alternatives.
+    Locators in locators/mobile/{screen_name}.json.
+
+- id: P3-02
+  phase: 3
+  title: "Mobile — sample screen POM + test"
+  file: pages/mobile/booking_screen.py + tests/mobile/test_booking_mobile.py
+  priority: medium
+  status: todo
+  notes: Mirror REST booking test flow on mobile app.
+
+- id: P4-01
+  phase: 4
+  title: "Security tests — auth bypass, injection, IDOR"
+  file: tests/security/test_auth_security.py + tests/security/test_injection.py
+  priority: medium
+  status: todo
+  notes: >
+    OWASP-aligned. Use known_issues from product_knowledge.yaml as test hints.
+    SQL injection, XSS in additionalneeds field (known_issues mentions unsanitized).
+    Auth bypass: no token, expired token, wrong role. IDOR: access other booking IDs.
+
+- id: P4-02
+  phase: 4
+  title: "Security assertions utility"
+  file: utils/security_assertions.py
+  priority: medium
+  status: todo
+
+- id: P5-01
+  phase: 5
+  title: "KB increments log tracker"
+  file: framework_knowledge/kb_increments_log.yaml
+  priority: low
+  status: todo
+  notes: Tracks which increment files have been processed into docs + scripts.
+
+- id: P5-02
+  phase: 5
+  title: "Consolidate dead api/schemas/ directory"
+  file: api/schemas/
+  priority: low
+  status: todo
+  notes: >
+    api/schemas/ is dead code. RestClient uses schemas/rest_schemas/.
+    Verify no references exist, then delete api/schemas/ to avoid confusion.
+
+- id: P5-03
+  phase: 5
+  title: "Locale variants in locator files"
+  file: locators/web/*.json
+  priority: low
+  status: todo
+  notes: Add full locale variants where UI text differs by locale.

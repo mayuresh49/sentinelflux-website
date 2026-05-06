@@ -1,0 +1,35 @@
+# Completed work items — append only, newest first
+
+- id: P2-01+P2-02+P2-03
+  date: 2026-05-06
+  title: "Phase 2 — AI Pipeline: TestScriptGenSkill + Orchestrator + KB increments"
+  outcome: >
+    ai/skills/test_script_gen.py: TestScriptGenSkill converts test case .md docs to runnable
+    pytest files. Domain-specific conventions (api/web/mobile/security) embedded as few-shot
+    context. Strips markdown fences from model output automatically.
+    ai/pipeline/orchestrator.py: TestPipelineOrchestrator runs full KB → doc → script pipeline.
+    CLI: python -m ai.pipeline.orchestrator --feature <name> --domain <api|web|mobile|security>.
+    Supports --increment for feature drops, --doc to skip doc gen.
+    Updates framework_knowledge/kb_increments_log.yaml after each run.
+    ai/prompts/prompt_templates.py: Added TEST_SCRIPT_GEN_PROMPT and FEATURE_DOC_PROMPT.
+
+- id: P1-01
+  date: 2026-05-06
+  title: "Phase 1 — Persistent tracking system (framework_knowledge/)"
+  outcome: >
+    Created framework_knowledge/ with RESUME.md, architecture.md, conventions.md,
+    progress/backlog.yaml, progress/completed.yaml, decisions/ADR-001, ADR-002.
+    Any AI tool can now read RESUME.md and resume work without conversation context.
+
+- id: P0-01
+  date: 2026-05-06
+  title: "Phase 0 — Stability fixes"
+  outcome: >
+    Removed hardcoded RP API key from pytest.ini (env var RP_API_KEY).
+    Added MISTRAL_CLOUD_TIMEOUT_S to Mistral cloud requests.
+    Added content-type guard in RestClient._validate_schema.
+    Fixed lru_cache on instance methods in kb_loader.py (switched to _cache dict).
+    Added locale fallback logging in LocatorManager.
+    Extracted AI factory to utils/ai_factory.py.
+    Created utils/constants.py for all magic numbers.
+    BasePage uses LOCATOR_HEAL_TIMEOUT_MS constant.

@@ -30,6 +30,9 @@ class RestClient:
             self.logger.info(message)
 
     def _validate_schema(self, response: requests.Response, schema_name: str):
+        ct = response.headers.get("Content-Type", "")
+        if "application/json" not in ct:
+            raise AssertionError(f"Expected JSON response but got Content-Type: {ct!r}")
         schema = self._load_json(f"schemas/rest_schemas/{schema_name}.json")
         try:
             validate(instance=response.json(), schema=schema)

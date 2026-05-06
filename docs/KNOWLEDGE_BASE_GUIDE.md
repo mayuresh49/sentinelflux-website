@@ -413,6 +413,7 @@ def get_custom_context(self) -> str:
 
 ## References
 
-- [AI Skills Documentation](../../docs/ai_skills.md)
-- [Test Generation Guide](../../docs/test_generation.md)
-- [Framework Architecture](../../README.md)
+- [AI Skills Documentation](ai_skills.md)
+- [API Test Generation Guide](api_test_generation.md)
+- [Web Test Generation Guide](web_test_generation.md)
+- [Framework Architecture](../README.md)

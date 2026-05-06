@@ -3,6 +3,14 @@ api:
   graphql_endpoint: "https://countries.trevorblades.com/"
 web:
   base_url: "https://automationintesting.com/selenium/testpage/"
+
+# OrangeHRM AUT config
+orangehrm:
+  base_url: "https://opensource-demo.orangehrmlive.com"
+  api_base_url: "https://opensource-demo.orangehrmlive.com/web/index.php/api/v2"
+  credentials:
+    admin_username: "Admin"
+    admin_password: "admin123"
 reportportal:
   endpoint: "http://localhost:8080/"
   project: "sentinelflux"
@@ -13,6 +21,26 @@ browser:
 logging:
   level: "INFO"
   file: "logs/sentinelflux.log"
+mobile:
+  appium_url: "http://localhost:4723"
+  platform: "android"
+  capabilities:
+    platformName: "Android"
+    deviceName: "emulator-5554"
+    automationName: "UiAutomator2"
+    appPackage: "com.example.booking"
+    appActivity: ".MainActivity"
+    noReset: true
+    newCommandTimeout: 60
+  # iOS example (uncomment and adjust):
+  # platform: "ios"
+  # capabilities:
+  #   platformName: "iOS"
+  #   deviceName: "iPhone 14"
+  #   automationName: "XCUITest"
+  #   bundleId: "com.example.booking"
+  #   udid: "your-device-udid"
+
 sentinelflux:
   ai:
     enabled: true
