@@ -13,8 +13,10 @@ except ImportError:
 
 import yaml
 import pytest
+from pytest_html import extras as html_extras
 from utils.logger import create_logger
 from utils.ai_factory import create_ai_client
+from utils.step import reset as _reset_steps, snapshot as _snapshot_steps
 from api.rest_client import RestClient
 from api.graphql_client import GraphQLClient
 
@@ -68,6 +70,12 @@ def _api_log_reset(request):
     yield
 
 
+@pytest.fixture(scope="function", autouse=True)
+def _step_tracker():
+    _reset_steps()
+    yield
+
+
 # ── Console log capture (autouse for web tests) ───────────────────────────────
 
 @pytest.fixture(scope="function", autouse=True)
@@ -108,6 +116,32 @@ def console_log_capture(request):
 def pytest_runtest_makereport(item, call):
     outcome = yield
     report = outcome.get_result()
+
+    # ── Step table (all UI call results — pass and fail) ─────────────────────
+    if report.when == "call":
+        steps = _snapshot_steps()
+        if steps:
+            rows = [
+                '<table style="width:100%;border-collapse:collapse;font-size:13px">',
+                '<tr style="background:#f5f5f5">',
+                '<th style="text-align:left;padding:5px 8px;border-bottom:1px solid #ddd">#</th>',
+                '<th style="text-align:left;padding:5px 8px;border-bottom:1px solid #ddd">Step</th>',
+                '<th style="text-align:left;padding:5px 8px;border-bottom:1px solid #ddd">Status</th>',
+                '</tr>',
+            ]
+            for i, (desc, passed) in enumerate(steps, 1):
+                color = "#27ae60" if passed else "#e74c3c"
+                label = "PASS" if passed else "FAIL"
+                rows.append(
+                    f'<tr>'
+                    f'<td style="padding:4px 8px;border-bottom:1px solid #eee">{i}</td>'
+                    f'<td style="padding:4px 8px;border-bottom:1px solid #eee">{desc}</td>'
+                    f'<td style="padding:4px 8px;border-bottom:1px solid #eee;color:{color};font-weight:bold">{label}</td>'
+                    f'</tr>'
+                )
+            rows.append('</table>')
+            report.extras = getattr(report, "extras", [])
+            report.extras.append(html_extras.html("".join(rows)))
 
     if report.when != "call" or not report.failed:
         return

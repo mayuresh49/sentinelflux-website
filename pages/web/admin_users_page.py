@@ -1,4 +1,5 @@
 from pages.base_page import BasePage
+from utils.step import step_method
 
 
 class AdminUsersPage(BasePage):
@@ -7,19 +8,24 @@ class AdminUsersPage(BasePage):
     def __init__(self, page, locale: str = "en-US"):
         super().__init__(page, locale)
 
+    @step_method("Navigate to system users list")
     def navigate_to_list(self):
         self.navigate(f"{self.BASE_URL}/web/index.php/admin/viewSystemUsers")
         self.page.wait_for_load_state("domcontentloaded")
 
+    @step_method("Navigate to add user form")
     def navigate_to_add(self):
         self.navigate(f"{self.BASE_URL}/web/index.php/admin/saveSystemUser")
         self.page.wait_for_load_state("domcontentloaded")
 
+    @step_method("Search by username")
     def search_by_username(self, username: str):
-        self.page.get_by_role("textbox", name="Username").fill(username)
+        # OrangeHRM Vue labels are not wired via for= attribute; scope to the group container
+        self.page.locator(".oxd-input-group:has(label:has-text('Username')) input").fill(username)
         self.page.get_by_role("button", name="Search").click()
         self.page.wait_for_load_state("networkidle")
 
+    @step_method("Click Add button")
     def click_add(self):
         self.page.get_by_role("button", name="Add").click()
 
@@ -32,23 +38,29 @@ class AdminUsersPage(BasePage):
     def get_record_count_text(self) -> str:
         return self.page.locator("span.oxd-text--span", has_text="Record").first.inner_text()
 
+    @step_method("Select user role")
     def select_user_role(self, role: str):
         self.page.locator(".oxd-select-text").first.click()
         self.page.get_by_role("option", name=role).click()
 
+    @step_method("Select status")
     def select_status(self, status: str):
         self.page.locator(".oxd-select-text").nth(1).click()
         self.page.get_by_role("option", name=status).click()
 
+    @step_method("Fill username")
     def fill_username(self, username: str):
         self.page.locator(".oxd-input-group:has(label:has-text('Username')) input").fill(username)
 
+    @step_method("Fill password")
     def fill_password(self, password: str):
         self.page.locator(".oxd-input-group:has(label:has-text('Password')) input").fill(password)
 
+    @step_method("Fill confirm password")
     def fill_confirm_password(self, password: str):
         self.page.locator(".oxd-input-group:has(label:has-text('Confirm Password')) input").fill(password)
 
+    @step_method("Fill employee name (autocomplete)")
     def fill_employee_name(self, name: str):
         inp = self.page.get_by_placeholder("Type for hints...")
         inp.fill(name)
@@ -56,6 +68,7 @@ class AdminUsersPage(BasePage):
         self.page.locator(".oxd-autocomplete-dropdown").wait_for(state="visible", timeout=10000)
         self.page.locator(".oxd-autocomplete-option").first.click()
 
+    @step_method("Save user form")
     def save(self):
         self.page.get_by_role("button", name="Save").click()
         try:
@@ -71,6 +84,7 @@ class AdminUsersPage(BasePage):
             except Exception:
                 pass
 
+    @step_method("Cancel and return to list")
     def cancel(self):
         self.page.get_by_role("button", name="Cancel").click()
 

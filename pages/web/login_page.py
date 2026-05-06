@@ -1,4 +1,5 @@
 from pages.base_page import BasePage
+from utils.step import step_method
 
 
 class LoginPage(BasePage):
@@ -7,16 +8,20 @@ class LoginPage(BasePage):
     def __init__(self, page, locale: str = "en-US"):
         super().__init__(page, locale)
 
+    @step_method("Navigate to login page")
     def navigate_to_login(self):
         self.navigate(f"{self.BASE_URL}/web/index.php/auth/login")
         self.page.wait_for_load_state("domcontentloaded")
 
+    @step_method("Fill username")
     def fill_username(self, username: str):
         self.page.get_by_placeholder("Username").fill(username)
 
+    @step_method("Fill password")
     def fill_password(self, password: str):
         self.page.get_by_placeholder("Password").fill(password)
 
+    @step_method("Submit login form")
     def submit(self):
         self.page.get_by_role("button", name="Login").click()
         try:
