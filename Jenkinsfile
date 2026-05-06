@@ -1,7 +1,7 @@
 pipeline {
     agent any
 
-    // ── Build parameters ────────────────────────────────────────────────────
+    // ── Build parameters ─────────────────────────────────────────────────────
     parameters {
         choice(
             name: 'ENV',
@@ -28,13 +28,22 @@ pipeline {
         booleanParam(name: 'RUN_WEB_LOGIN', defaultValue: true,  description: 'Login UI suite')
         booleanParam(name: 'RUN_WEB_PIM',   defaultValue: true,  description: 'PIM Employee UI suite')
         booleanParam(name: 'RUN_API',        defaultValue: false, description: 'REST API suite')
+
+        // ReportPortal — requires Jenkins credential 'rp-api-key' (Secret Text) to be configured.
+        // Set ENABLE_RP=false (default) to run without RP; results are still in HTML + JUnit XML.
+        booleanParam(
+            name: 'ENABLE_RP',
+            defaultValue: false,
+            description: 'Send results to ReportPortal (requires rp-api-key Jenkins credential)'
+        )
     }
 
     environment {
         VENV_PYTEST = 'venv/bin/pytest'
-        // Overrides pytest.ini addopts so each suite writes its own --html report
-        // without parallel stages racing to write the same reports/report.html
-        CI_ADDOPTS   = '-ra -q --screenshot=on --video=retain-on-failure'
+        // --override-ini strips the default --html from pytest.ini addopts so each
+        // parallel suite stage writes its own named report without file-write races.
+        // --tracing=retain-on-failure captures Playwright network + browser trace on failure.
+        CI_ADDOPTS = '-ra -q --screenshot=on --video=retain-on-failure --tracing=retain-on-failure'
     }
 
     options {
@@ -44,7 +53,7 @@ pipeline {
         ansiColor('xterm')
     }
 
-    // ── Stages ──────────────────────────────────────────────────────────────
+    // ── Stages ───────────────────────────────────────────────────────────────
     stages {
 
         stage('Setup') {
@@ -53,12 +62,32 @@ pipeline {
                     python3 -m venv venv
                     venv/bin/pip install -r requirements.txt -q
                     venv/bin/playwright install chromium firefox webkit
-                    mkdir -p reports
+                    mkdir -p reports/artifacts test-results
                 '''
             }
         }
 
-        // Suites run in parallel Jenkins stages; xdist handles per-suite parallelism
+        // Inject RP API key from Jenkins credentials store when ENABLE_RP is true.
+        // The credential ID must be 'rp-api-key' (Secret Text). If it is not
+        // configured in Jenkins this stage is skipped and RP reporting is disabled.
+        stage('Inject RP Credentials') {
+            when { expression { return params.ENABLE_RP } }
+            steps {
+                script {
+                    try {
+                        withCredentials([string(credentialsId: 'rp-api-key', variable: 'RP_KEY')]) {
+                            env.RP_API_KEY = env.RP_KEY
+                        }
+                        echo 'ReportPortal credentials loaded.'
+                    } catch (Exception e) {
+                        echo "WARNING: 'rp-api-key' credential not found in Jenkins — RP reporting disabled."
+                        env.RP_API_KEY = ''
+                    }
+                }
+            }
+        }
+
+        // Suites run as parallel Jenkins stages; xdist provides per-suite test-level parallelism.
         stage('Test Suites') {
             parallel {
 
@@ -139,11 +168,18 @@ pipeline {
         }
     }
 
-    // ── Post-run ─────────────────────────────────────────────────────────────
+    // ── Post-run artifacts and reporting ─────────────────────────────────────
     post {
         always {
-            // Screenshots and videos from failed tests
-            archiveArtifacts artifacts: 'reports/**, test-results/**', allowEmptyArchive: true
+            // Collected on every run:
+            //   reports/artifacts/**        — full-page screenshots, console.log, trace.zip (conftest hook)
+            //   test-results/**             — pytest-playwright: viewport screenshot, video.webm, trace.zip
+            //   reports/*.html              — per-suite HTML reports
+            //   reports/*.xml               — JUnit XML (Jenkins test trend graphs)
+            archiveArtifacts(
+                artifacts: 'reports/**, test-results/**',
+                allowEmptyArchive: true
+            )
 
             // Requires "HTML Publisher" Jenkins plugin
             publishHTML(target: [
@@ -156,7 +192,7 @@ pipeline {
             ])
         }
         failure {
-            echo 'One or more suites failed — check Reports tab and archived artifacts'
+            echo 'One or more suites failed — check the Reports tab, archived artifacts, and trace.playwright.dev for trace.zip files'
         }
     }
 }

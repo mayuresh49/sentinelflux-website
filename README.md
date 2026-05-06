@@ -1,74 +1,138 @@
 # SentinelFlux Test Automation Framework
 
-A scalable Python test framework for API, Web UI, and Mobile automation with AI-assisted test generation, POM design, externalized locators, environment profiles, and ReportPortal reporting.
+Production-grade Python test framework for API, Web UI, and Mobile automation with AI-assisted test generation, self-healing locators, environment profiles, ReportPortal reporting, and full failure artifact collection.
 
 ## Features
 
 - REST API and GraphQL API test support
-- Playwright-based Web UI automation
-- Mobile automation skeleton for `mobilewright` / Appium
-- External JSON locators and locale-aware validation
-- Environment profiles: QA, Staging, Prod
-- ReportPortal integration with failure screenshot/video support
-- Custom utilities: logging, assertions, data generation, self-healing locators
-- AI helper modules for requirement parsing and test documentation
+- Playwright Web UI automation with self-healing locators (3-tier: Playwright → Browser-Use → Skyvern)
+- Mobile automation scaffold (Appium)
+- External JSON locators with locale-aware fallback
+- Environment profiles: QA, Staging, Prod (`config/env_*.yaml`)
+- AI-driven test generation: KB → test case doc → pytest script (Mistral)
+- ReportPortal integration: auto-attach screenshot, console log, trace on failure
+- Failure artifacts: full-page screenshot, browser console log, Playwright network trace, screen recording
+- Parallel execution via pytest-xdist with session-scoped login option
+- Jenkins CI/CD pipeline with parameterized suites, browser, environment, and RP toggle
 
 ## Quick Start
 
-1. Create a Python virtual environment:
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   ```
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+playwright install
+```
 
-2. Install Playwright browsers:
-   ```bash
-   playwright install
-   ```
+Run web tests (parallel, session login):
+```bash
+make web
+# or directly:
+python3 -m pytest tests/web/ -m web -n 4 --session-login
+```
 
-3. Run the sample tests:
-   ```bash
-   pytest -q
-   pytest tests/api/test_rest_api.py -v
-   pytest tests/api/test_graphql_api.py -v
-   pytest tests/web/test_web_ui.py --browser chromium -v
-   ```
+Run a specific suite:
+```bash
+python3 -m pytest tests/web/test_login.py -m web -n 4 --session-login
+python3 -m pytest tests/web/test_pim_employee.py -m web -n 4 --session-login
+```
+
+Run API tests:
+```bash
+make api
+```
 
 ## Environment Profiles
 
-Use `--env` to target a different profile:
-
 ```bash
-pytest --env=qa
+pytest --env=qa        # default
 pytest --env=staging
 pytest --env=prod
 ```
 
+## CLI Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--env` | `qa` | Environment profile |
+| `--browser` | `chromium` | Playwright browser (`chromium`, `firefox`, `webkit`) |
+| `-n` | — | xdist worker count (`-n 4` for parallel) |
+| `--session-login` | off | Reuse one login per xdist worker instead of per-test |
+
+## Failure Artifacts
+
+On test failure, the following are collected automatically:
+
+| Artifact | Location | How |
+|----------|----------|-----|
+| Viewport screenshot | `test-results/<test>/` | `--screenshot=on` (pytest-playwright) |
+| Full-page screenshot | `reports/artifacts/<test>/screenshot_full_page.png` | conftest hook |
+| Screen recording | `test-results/<test>/video.webm` | `--video=retain-on-failure` |
+| Network + browser trace | `test-results/<test>/trace.zip` | `--tracing=retain-on-failure` |
+| Browser console log | `reports/artifacts/<test>/console.log` | conftest hook |
+
+Open trace files at [trace.playwright.dev](https://trace.playwright.dev) (no install needed).
+
 ## ReportPortal
 
-Default ReportPortal settings are populated for `sentinelflux` and `sentinelflux-launch`.
-## AI Test Documentation Generation
+When `RP_API_KEY` is set, all artifacts above are also attached to the RP launch automatically:
 
-A new AI doc-generation script is available at `ai/generate_test_case_doc.py`.
-
-Run it with:
 ```bash
-python3 -m ai.generate_test_case_doc --config config/env_qa.yaml --output docs/test_cases/generated_test_case_doc.md
+export RP_API_KEY=your_key_here
+pytest tests/web/ -m web -n 4 --session-login
 ```
 
-If Python cannot resolve the local package, use:
+RP endpoint and project are configured in `pytest.ini` and `config/env_qa.yaml`.
+
+For Jenkins: enable the `ENABLE_RP` parameter and add a `rp-api-key` Secret Text credential in the Jenkins credentials store.
+
+## AI Test Generation
+
+Generate a test case doc from the KB:
 ```bash
-PYTHONPATH=. python3 ai/generate_test_case_doc.py --config config/env_qa.yaml --output docs/test_cases/generated_test_case_doc.md
+python3 -m ai.generate_test_case_doc --config config/env_qa.yaml \
+    --output docs/test_cases/web/my_page.md
 ```
 
-Generate API test docs with:
+Generate an API test case doc:
 ```bash
-python3 -m ai.generate_api_test_doc --endpoint /booking --method POST --output docs/test_cases/api/booking_create_tests.md
+python3 -m ai.generate_api_test_doc --endpoint /booking --method POST \
+    --output docs/test_cases/api/booking_create.md
 ```
 
-This writes the generated test case document into `docs/test_cases/` so it can be version controlled.
-## Notes
+Run the full KB → doc → script pipeline:
+```bash
+./run_pipeline.sh
+```
 
-- Mobile tests are scaffolded and can be connected once the app package and device details are provided.
-- AI modules are designed as helpers for generating test documentation and analyzing requirements.
+See `docs/` for full guides on KB structure, test generation, and AI skill usage.
+
+## Project Structure
+
+```
+ai/               KB loader, Mistral client, test generation skills and pipeline
+api/              REST and GraphQL clients
+config/           Environment YAML profiles
+conftest.py       Fixtures + artifact collection hooks
+docs/             Guides and generated test case docs
+framework_knowledge/  RESUME.md (start here), backlog, architecture decisions
+locators/         JSON locator files (web + mobile)
+pages/            Page Object Models (web + mobile)
+pytest.ini        Test configuration, markers, RP settings
+reports/          HTML reports + failure artifacts (gitignored)
+tests/            Test suites (api/, web/, mobile/, integration/)
+utils/            Logger, locator manager, AI factory, security utils
+```
+
+## CI/CD
+
+```bash
+# Jenkinsfile parameters (Build with Parameters):
+# ENV             qa | staging | prod
+# BROWSER         chromium | firefox | webkit
+# PARALLEL_COUNT  4 | 2 | 1 | 8
+# SESSION_LOGIN   true | false
+# RUN_WEB_LOGIN   true | false
+# RUN_WEB_PIM     true | false
+# RUN_API         true | false
+# ENABLE_RP       true | false  (requires rp-api-key Jenkins credential)
+```

@@ -1,5 +1,8 @@
+import logging
 import os
+import shutil
 from pathlib import Path
+
 import yaml
 import pytest
 from utils.logger import create_logger
@@ -8,12 +11,158 @@ from api.rest_client import RestClient
 from api.graphql_client import GraphQLClient
 
 ROOT_DIR = Path(__file__).resolve().parent
+_ARTIFACT_ROOT = ROOT_DIR / "reports" / "artifacts"
+
+# Artifacts are attached to ReportPortal via Python's logging bridge when RP is active.
+# When RP_API_KEY is not set the extra= attachment fields are silently ignored.
+_rp_log = logging.getLogger(__name__)
 
 
 def pytest_configure(config):
     rp_key = os.environ.get("RP_API_KEY", "")
     if rp_key:
         config._inicache["rp_api_key"] = rp_key
+
+
+# ── Artifact helpers ─────────────────────────────────────────────────────────
+
+def _artifact_dir(item) -> Path:
+    safe = (
+        item.nodeid
+        .replace("/", "_")
+        .replace("::", "__")
+        .replace("[", "_")
+        .replace("]", "")
+    )
+    d = _ARTIFACT_ROOT / safe
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def _safe_page(item):
+    """Return the active Playwright Page for this test, or None for non-browser tests."""
+    for name in ("page", "logged_in_page", "session_authed_page"):
+        pg = item.funcargs.get(name)
+        if pg is not None and hasattr(pg, "screenshot"):
+            return pg
+    return None
+
+
+# ── Console log capture (autouse for web tests) ───────────────────────────────
+
+@pytest.fixture(scope="function", autouse=True)
+def console_log_capture(request):
+    """
+    Attach a console-message listener to the Playwright page when the test uses one.
+    Yields the accumulated log lines so the failure hook can persist/attach them.
+    Skipped for API/non-browser tests (avoids spinning up a browser unnecessarily).
+    """
+    browser_fixtures = {"page", "logged_in_page", "session_authed_page"}
+    if not browser_fixtures.intersection(request.fixturenames):
+        yield []
+        return
+
+    page = None
+    for name in browser_fixtures:
+        if name in request.fixturenames:
+            try:
+                pg = request.getfixturevalue(name)
+                if hasattr(pg, "on"):
+                    page = pg
+                    break
+            except Exception:
+                pass
+
+    if page is None:
+        yield []
+        return
+
+    logs: list[str] = []
+    page.on("console", lambda msg: logs.append(f"[{msg.type.upper()}] {msg.text}"))
+    yield logs
+
+
+# ── Failure artifact hook ─────────────────────────────────────────────────────
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+
+    if report.when != "call" or not report.failed:
+        return
+
+    page = _safe_page(item)
+    if page is None:
+        return
+
+    adir = _artifact_dir(item)
+
+    # 1. Full-page screenshot (pytest-playwright's --screenshot captures viewport only)
+    fp_path = adir / "screenshot_full_page.png"
+    try:
+        page.screenshot(path=str(fp_path), full_page=True)
+    except Exception:
+        pass
+
+    # 2. Console logs captured by the fixture above
+    logs: list = item.funcargs.get("console_log_capture") or []
+    log_path = adir / "console.log"
+    if logs:
+        try:
+            log_path.write_text("\n".join(logs), encoding="utf-8")
+        except Exception:
+            pass
+
+    # 3. Copy playwright trace if it was written to test-results/
+    #    (--tracing=retain-on-failure writes trace.zip alongside video/screenshot)
+    safe_name = item.nodeid.replace("/", "-").replace("::", "-").replace("[", "-").replace("]", "")
+    trace_src = ROOT_DIR / "test-results" / safe_name / "trace.zip"
+    if trace_src.exists():
+        try:
+            shutil.copy(trace_src, adir / "trace.zip")
+        except Exception:
+            pass
+
+    # 4. Attach to ReportPortal via Python logging (no-op when RP is disabled)
+    if fp_path.exists():
+        try:
+            _rp_log.error(
+                "Failure — full-page screenshot",
+                extra={"attachment": {
+                    "name": fp_path.name,
+                    "data": fp_path.read_bytes(),
+                    "mime": "image/png",
+                }},
+            )
+        except Exception:
+            pass
+
+    if logs:
+        try:
+            _rp_log.error(
+                "Failure — browser console log",
+                extra={"attachment": {
+                    "name": "console.log",
+                    "data": "\n".join(logs).encode(),
+                    "mime": "text/plain",
+                }},
+            )
+        except Exception:
+            pass
+
+    if trace_src.exists():
+        try:
+            _rp_log.error(
+                "Failure — Playwright network/browser trace",
+                extra={"attachment": {
+                    "name": "trace.zip",
+                    "data": (adir / "trace.zip").read_bytes(),
+                    "mime": "application/zip",
+                }},
+            )
+        except Exception:
+            pass
 
 
 def load_yaml(path: Path):

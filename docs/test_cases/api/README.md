@@ -1,7 +1,13 @@
-# Generated API Test Documentation
+# API Test Case Documentation
 
-This directory is intended to hold generated API test case documentation markdown files.
-Run `ai/generate_api_test_doc.py` to produce documentation under this directory.
+No generated docs yet — run the pipeline to populate this directory:
 
-For full guidance, see:
-- [API Test Generation Guide](../../api_test_generation.md)
+```bash
+python3 -m ai.generate_api_test_doc --endpoint /booking --method POST \
+    --output docs/test_cases/api/booking_create.md
+
+python3 -m ai.generate_api_test_doc --endpoint /booking --method GET \
+    --output docs/test_cases/api/booking_get.md
+```
+
+See [API Test Generation Guide](../../api_test_generation.md) for full options and GraphQL support.
