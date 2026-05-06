@@ -25,9 +25,13 @@ pipeline {
         )
 
         // Suite toggles
-        booleanParam(name: 'RUN_WEB_LOGIN', defaultValue: true,  description: 'Login UI suite')
-        booleanParam(name: 'RUN_WEB_PIM',   defaultValue: true,  description: 'PIM Employee UI suite')
-        booleanParam(name: 'RUN_API',        defaultValue: false, description: 'REST API suite')
+        booleanParam(name: 'RUN_WEB_LOGIN',  defaultValue: true,  description: 'Login UI suite')
+        booleanParam(name: 'RUN_WEB_PIM',    defaultValue: true,  description: 'PIM Employee UI suite')
+        booleanParam(name: 'RUN_WEB_LEAVE',  defaultValue: true,  description: 'Leave List UI suite')
+        booleanParam(name: 'RUN_WEB_ADMIN',  defaultValue: true,  description: 'Admin Users UI suite')
+        booleanParam(name: 'RUN_API',        defaultValue: false, description: 'Restful Booker REST API suite')
+        booleanParam(name: 'RUN_API_LEAVE',  defaultValue: false, description: 'OrangeHRM Leave API suite')
+        booleanParam(name: 'RUN_API_ADMIN',  defaultValue: false, description: 'OrangeHRM Admin Users API suite')
 
         // ReportPortal — requires Jenkins credential 'rp-api-key' (Secret Text) to be configured.
         // Set ENABLE_RP=false (default) to run without RP; results are still in HTML + JUnit XML.
@@ -143,11 +147,63 @@ pipeline {
                     }
                 }
 
+                stage('Leave UI') {
+                    when { expression { return params.RUN_WEB_LEAVE } }
+                    steps {
+                        script {
+                            def sessionFlag = params.SESSION_LOGIN ? '--session-login' : ''
+                            sh """
+                                ${env.VENV_PYTEST} tests/web/test_leave.py \\
+                                  -m web \\
+                                  --env=${params.ENV} \\
+                                  --browser=${params.BROWSER} \\
+                                  -n ${params.PARALLEL_COUNT} \\
+                                  ${sessionFlag} \\
+                                  --override-ini="addopts=${env.CI_ADDOPTS}" \\
+                                  --html=reports/leave-report.html \\
+                                  --self-contained-html \\
+                                  --junitxml=reports/leave-results.xml
+                            """
+                        }
+                    }
+                    post {
+                        always {
+                            junit allowEmptyResults: true, testResults: 'reports/leave-results.xml'
+                        }
+                    }
+                }
+
+                stage('Admin Users UI') {
+                    when { expression { return params.RUN_WEB_ADMIN } }
+                    steps {
+                        script {
+                            def sessionFlag = params.SESSION_LOGIN ? '--session-login' : ''
+                            sh """
+                                ${env.VENV_PYTEST} tests/web/test_admin_users.py \\
+                                  -m web \\
+                                  --env=${params.ENV} \\
+                                  --browser=${params.BROWSER} \\
+                                  -n ${params.PARALLEL_COUNT} \\
+                                  ${sessionFlag} \\
+                                  --override-ini="addopts=${env.CI_ADDOPTS}" \\
+                                  --html=reports/admin-report.html \\
+                                  --self-contained-html \\
+                                  --junitxml=reports/admin-results.xml
+                            """
+                        }
+                    }
+                    post {
+                        always {
+                            junit allowEmptyResults: true, testResults: 'reports/admin-results.xml'
+                        }
+                    }
+                }
+
                 stage('API') {
                     when { expression { return params.RUN_API } }
                     steps {
                         sh """
-                            ${env.VENV_PYTEST} tests/api/ \\
+                            ${env.VENV_PYTEST} tests/api/test_rest_api.py tests/api/test_graphql_api.py \\
                               -m api \\
                               --env=${params.ENV} \\
                               -n ${params.PARALLEL_COUNT} \\
@@ -160,6 +216,46 @@ pipeline {
                     post {
                         always {
                             junit allowEmptyResults: true, testResults: 'reports/api-results.xml'
+                        }
+                    }
+                }
+
+                stage('Leave API') {
+                    when { expression { return params.RUN_API_LEAVE } }
+                    steps {
+                        sh """
+                            ${env.VENV_PYTEST} tests/api/test_orangehrm_leave.py \\
+                              -m api \\
+                              --env=${params.ENV} \\
+                              --override-ini="addopts=${env.CI_ADDOPTS}" \\
+                              --html=reports/leave-api-report.html \\
+                              --self-contained-html \\
+                              --junitxml=reports/leave-api-results.xml
+                        """
+                    }
+                    post {
+                        always {
+                            junit allowEmptyResults: true, testResults: 'reports/leave-api-results.xml'
+                        }
+                    }
+                }
+
+                stage('Admin API') {
+                    when { expression { return params.RUN_API_ADMIN } }
+                    steps {
+                        sh """
+                            ${env.VENV_PYTEST} tests/api/test_orangehrm_admin.py \\
+                              -m api \\
+                              --env=${params.ENV} \\
+                              --override-ini="addopts=${env.CI_ADDOPTS}" \\
+                              --html=reports/admin-api-report.html \\
+                              --self-contained-html \\
+                              --junitxml=reports/admin-api-results.xml
+                        """
+                    }
+                    post {
+                        always {
+                            junit allowEmptyResults: true, testResults: 'reports/admin-api-results.xml'
                         }
                     }
                 }
@@ -187,7 +283,7 @@ pipeline {
                 alwaysLinkToLastBuild: true,
                 keepAll:               true,
                 reportDir:             'reports',
-                reportFiles:           'login-report.html,pim-report.html,api-report.html',
+                reportFiles:           'login-report.html,pim-report.html,leave-report.html,admin-report.html,api-report.html,leave-api-report.html,admin-api-report.html',
                 reportName:            'SentinelFlux Test Reports'
             ])
         }

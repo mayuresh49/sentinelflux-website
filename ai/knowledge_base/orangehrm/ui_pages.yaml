@@ -169,3 +169,72 @@ pages:
         - "Admin can reject a pending leave request"
       negative:
         - "Date To before Date From shows validation or empty results"
+
+  - name: "Admin - System Users"
+    url: "/web/index.php/admin/viewSystemUsers"
+    description: "Manage system user accounts — list, search, create, delete"
+    fields:
+      - id: username_filter
+        label: "Username"
+        type: text_input
+      - id: user_role_filter
+        label: "User Role"
+        type: dropdown
+        options: ["Admin", "ESS"]
+      - id: employee_name_filter
+        label: "Employee Name"
+        type: autocomplete
+      - id: status_filter
+        label: "Status"
+        type: dropdown
+        options: ["Enabled", "Disabled"]
+      - id: search_button
+        label: "Search"
+        type: button
+      - id: add_button
+        label: "Add"
+        type: button
+      - id: users_table
+        label: "System users table"
+        type: table
+      - id: record_count
+        label: "Record count"
+        type: text
+    add_form_fields:
+      - id: user_role
+        label: "User Role"
+        type: dropdown
+        required: true
+        options: ["Admin", "ESS"]
+      - id: employee_name
+        label: "Employee Name"
+        type: autocomplete
+        required: true
+      - id: status
+        label: "Status"
+        type: dropdown
+        required: true
+        options: ["Enabled", "Disabled"]
+      - id: username
+        label: "Username"
+        type: text_input
+        required: true
+        unique: true
+      - id: password
+        label: "Password"
+        type: password_input
+        required: true
+        rules: ["min 8 chars", "uppercase", "number", "special char"]
+      - id: confirm_password
+        label: "Confirm Password"
+        type: password_input
+        required: true
+    test_scenarios:
+      positive:
+        - "System users list loads with record count on navigation"
+        - "Search by username 'Admin' returns at least one result"
+        - "Cancel on add-user form returns to users list without saving"
+      negative:
+        - "Search with non-existent username shows No Records Found"
+        - "Save add-user form without username shows required field error"
+        - "Save add-user form without password shows required field error"
