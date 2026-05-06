@@ -3,10 +3,17 @@ from pathlib import Path
 import yaml
 import pytest
 from utils.logger import create_logger
+from utils.ai_factory import create_ai_client
 from api.rest_client import RestClient
 from api.graphql_client import GraphQLClient
 
 ROOT_DIR = Path(__file__).resolve().parent
+
+
+def pytest_configure(config):
+    rp_key = os.environ.get("RP_API_KEY", "")
+    if rp_key:
+        config._inicache["rp_api_key"] = rp_key
 
 
 def load_yaml(path: Path):
@@ -26,6 +33,12 @@ def pytest_addoption(parser):
         action="store",
         default="en-US",
         help="Localization locale code",
+    )
+    parser.addoption(
+        "--session-login",
+        action="store_true",
+        default=False,
+        help="Reuse one authenticated browser session per worker (skips per-test login)",
     )
 
 
@@ -74,14 +87,7 @@ def ai_config(config):
 
 @pytest.fixture(scope="session")
 def ai_client(ai_config):
-    if not ai_config.get("enabled", False):
-        return None
-    mode = ai_config.get("mode", "mistral")
-    api_key = ai_config.get("api_key")
-    if mode == "mistral":
-        from ai.clients.mistral_client import MistralClient
-        return MistralClient(api_key)
-    return None
+    return create_ai_client(ai_config)
 
 
 @pytest.fixture(scope="function")
@@ -89,3 +95,19 @@ def locator_manager(locale):
     from utils.locator_manager import LocatorManager
 
     return LocatorManager(locale=locale)
+
+
+@pytest.fixture(scope="session")
+def session_authed_page(request, browser):
+    """One logged-in page per worker session. Only active with --session-login flag."""
+    if not request.config.getoption("--session-login"):
+        yield None
+        return
+    from pages.web.login_page import LoginPage
+    ctx = browser.new_context()
+    pg = ctx.new_page()
+    lp = LoginPage(pg)
+    lp.navigate_to_login()
+    lp.login("Admin", "admin123")
+    yield pg
+    ctx.close()

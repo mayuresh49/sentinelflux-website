@@ -139,6 +139,9 @@ Thumbs.db
 *.swp
 *.bak
 
+# Reports
+reports/
+
 # Report Portal local
 rp_reports/
 
