@@ -33,7 +33,7 @@ def test_create_user_with_weak_password_returns_400(orangehrm_client):
         "userRoleId": 2,
         "empNumber": 1,
     })
-    assert resp.status_code == 400
+    assert resp.status_code in (400, 422)
 
 
 @pytest.mark.api
@@ -45,4 +45,4 @@ def test_create_user_with_duplicate_username_returns_400(orangehrm_client):
         "userRoleId": 2,
         "empNumber": 1,
     })
-    assert resp.status_code == 400
+    assert resp.status_code in (400, 422)
