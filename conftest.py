@@ -1,7 +1,15 @@
 import logging
 import os
 import shutil
+import warnings
 from pathlib import Path
+
+# urllib3 v2 + macOS LibreSSL mismatch — cosmetic warning, not a real issue
+try:
+    from urllib3.exceptions import NotOpenSSLWarning
+    warnings.filterwarnings("ignore", category=NotOpenSSLWarning)
+except ImportError:
+    pass
 
 import yaml
 import pytest
@@ -48,6 +56,18 @@ def _safe_page(item):
     return None
 
 
+# ── API request log reset (autouse — clears per-test so logs are test-scoped) ──
+
+@pytest.fixture(scope="function", autouse=True)
+def _api_log_reset(request):
+    if "orangehrm_client" in request.fixturenames:
+        try:
+            request.getfixturevalue("orangehrm_client").clear_log()
+        except Exception:
+            pass
+    yield
+
+
 # ── Console log capture (autouse for web tests) ───────────────────────────────
 
 @pytest.fixture(scope="function", autouse=True)
@@ -92,11 +112,43 @@ def pytest_runtest_makereport(item, call):
     if report.when != "call" or not report.failed:
         return
 
+    adir = _artifact_dir(item)
+
+    # ── API artifact (non-browser tests) ─────────────────────────────────────
+    api_client = item.funcargs.get("orangehrm_client")
+    if api_client is not None and api_client._request_log:
+        lines = []
+        for i, entry in enumerate(api_client._request_log, 1):
+            lines.append(f"### Request {i}  [{entry['status']}  {entry['elapsed_ms']}ms]")
+            lines.append(entry["curl"])
+            lines.append("")
+            lines.append(f"Response ({entry['status']}):")
+            resp = entry["response"]
+            lines.append(
+                __import__("json").dumps(resp, indent=2) if isinstance(resp, (dict, list)) else str(resp)
+            )
+            lines.append("")
+        log_text = "\n".join(lines)
+        api_log_path = adir / "api_calls.log"
+        try:
+            api_log_path.write_text(log_text, encoding="utf-8")
+        except Exception:
+            pass
+        try:
+            _rp_log.error(
+                "Failure — API request/response log",
+                extra={"attachment": {
+                    "name": "api_calls.log",
+                    "data": log_text.encode(),
+                    "mime": "text/plain",
+                }},
+            )
+        except Exception:
+            pass
+
     page = _safe_page(item)
     if page is None:
         return
-
-    adir = _artifact_dir(item)
 
     # 1. Full-page screenshot (pytest-playwright's --screenshot captures viewport only)
     fp_path = adir / "screenshot_full_page.png"
