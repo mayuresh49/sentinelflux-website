@@ -72,7 +72,6 @@ def test_save_without_username_shows_validation_error(logged_in_page):
 
 
 @pytest.mark.web
-@pytest.mark.xfail(strict=False, reason="Demo site add-user form requires employee lookup which may time out")
 def test_save_without_password_shows_validation_error(logged_in_page):
     admin = AdminUsersPage(logged_in_page)
     admin.navigate_to_add()

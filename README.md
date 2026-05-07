@@ -72,20 +72,21 @@ Every `@step_method`-decorated page object method is automatically recorded as a
 Every `@step_method`-decorated action routes through `BasePage.try_resilient()`:
 
 ```
-Tier 1 — Playwright (deterministic, fast, zero overhead on happy path)
-    ↓ only on playwright.sync_api.TimeoutError
-Tier 2 — Browser-Use + local Ollama LLM  [self-healing: goal-based element discovery]
-    ↓ only on Tier-2 failure
-Tier 3 — Skyvern vision agent            [self-healing: screenshot/visual element discovery]
+Tier 1 — Playwright locator                   same session, deterministic, zero overhead on success
+    ↓ playwright.sync_api.TimeoutError
+Tier 2 — AI reads page HTML → JS              same session, executes via page.evaluate()
+    ↓ still fails
+Tier 3 — AI reads accessibility tree → JS     same session, richer semantic context
+    ↓ still fails → step marked FAIL
 ```
 
-**Execution time impact:** zero on passing tests. Escalation only fires when Playwright already timed out — the test was going to fail anyway.
+**All three tiers operate inside the existing browser session.** SPA state, stepper progress, form data, and auth cookies are fully preserved — no navigation, no replay of prior steps. This is correct for stateful applications where mid-flow recovery would otherwise be impossible with a new browser.
 
-**Tier 2 prerequisites:** Ollama running locally with `qwen2.5:7b` (or override `BROWSER_USE_MODEL` in `utils/constants.py`). Install: `pip install browser-use langchain-ollama`.
+**How Tier 2/3 work:** On timeout, `try_resilient` gets the current page HTML (Tier 2) or Playwright accessibility snapshot (Tier 3), sends it to the configured AI client with the action description, receives a single JavaScript statement, and executes it via `page.evaluate()`.
 
-**Tier 3 prerequisites:** Skyvern running at `SKYVERN_BASE_URL` (default `http://localhost:8000`). Install: `pip install httpx`.
+**Prerequisite:** AI enabled in `config/env_qa.yaml` (`sentinelflux.ai.enabled: true` with a valid Mistral API key). Without it, a `RuntimeError` is raised and only the timed-out step fails.
 
-**Auth:** `try_resilient` extracts `page.context.cookies()` and injects them into Browser-Use's browser context before the agent runs — the agent inherits the existing authenticated session and does not need to log in. Both tiers are lazy-imported: if not installed a `RuntimeError` is raised and only the current step fails.
+**Execution time impact:** zero on passing tests. Escalation only fires when Playwright already timed out. Tier 2 adds one Mistral API call (~1–2s). Tier 3 adds a second call only if Tier 2 also failed.
 
 ## Failure Artifacts
 

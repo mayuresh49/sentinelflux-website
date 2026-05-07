@@ -3,14 +3,7 @@ import logging
 from pathlib import Path
 from typing import Any, Callable, Dict
 from playwright.sync_api import Page, TimeoutError
-from utils.constants import (
-    LOCATOR_HEAL_TIMEOUT_MS,
-    BROWSER_USE_MODEL,
-    BROWSER_USE_OLLAMA_URL,
-    SKYVERN_BASE_URL,
-    SKYVERN_POLL_INTERVAL_S,
-    SKYVERN_MAX_WAIT_S,
-)
+from utils.constants import LOCATOR_HEAL_TIMEOUT_MS
 
 _log = logging.getLogger(__name__)
 
@@ -95,40 +88,64 @@ class BasePage:
 
     def try_resilient(self, description: str, action_fn: Callable, *args, **kwargs):
         """
-        Three-tier resilient action wrapper.
+        Three-tier resilient action wrapper — ALL tiers operate inside the existing browser session.
+        SPA state, stepper position, form data, and auth cookies are preserved across all tiers.
 
-        Tier 1 — Playwright semantic locator (fast, deterministic).
-        Tier 2 — Browser-Use LLM agent (local Ollama) on TimeoutError.
-        Tier 3 — Skyvern vision agent on Browser-Use failure.
+        Tier 1 — Playwright semantic locator (deterministic, zero overhead on success).
+        Tier 2 — AI reads page HTML → generates JS → page.evaluate() in same session.
+        Tier 3 — AI reads accessibility tree (richer semantic context) → JS → same session.
 
-        Usage:
-            self.try_resilient("click Save button on add employee form", self.save)
+        Tiers 2 and 3 require sentinelflux.ai.enabled: true in config.
         """
         try:
             return action_fn(*args, **kwargs)
-        except TimeoutError as exc:
-            _log.warning("[Tier1] Playwright timeout for '%s' — escalating to Browser-Use", description)
-            try:
-                cookies = []
-                try:
-                    cookies = self.page.context.cookies()
-                except Exception:
-                    pass
-                from utils.browser_use_agent import BrowserUseAgent
-                agent = BrowserUseAgent(model=BROWSER_USE_MODEL, ollama_url=BROWSER_USE_OLLAMA_URL)
-                result = agent.act(description, start_url=self.page.url, cookies=cookies)
-                if result.success:
-                    return result
-                raise RuntimeError(result.message)
-            except Exception as bu_exc:
-                _log.warning(
-                    "[Tier2] Browser-Use failed for '%s': %s — escalating to Skyvern",
-                    description, bu_exc,
-                )
-                from utils.skyvern_client import SkyvernClient
-                client = SkyvernClient(
-                    base_url=SKYVERN_BASE_URL,
-                    poll_interval_s=SKYVERN_POLL_INTERVAL_S,
-                    max_wait_s=SKYVERN_MAX_WAIT_S,
-                )
-                return client.run_task(url=self.page.url, navigation_goal=description)
+        except TimeoutError:
+            _log.warning("[Tier1] Playwright timeout for '%s' — escalating to AI JS healing", description)
+
+        from utils.ai_registry import get_ai_client
+        ai_client = get_ai_client()
+        if ai_client is None:
+            raise RuntimeError(
+                f"Playwright timeout on '{description}' and AI client is not configured "
+                "(set sentinelflux.ai.enabled: true to enable self-healing)"
+            )
+
+        # Tier 2: AI + page HTML → JS in same session
+        try:
+            html = self.page.content()[:8000]
+            js = self._ai_js(ai_client, description, context=f"Page HTML:\n{html}")
+            _log.info("[Tier2] Executing AI JS (HTML context): %s", js[:200])
+            result = self.page.evaluate(js)
+            _log.info("[Tier2] succeeded for '%s'", description)
+            return result
+        except Exception as t2_exc:
+            _log.warning("[Tier2] failed for '%s': %s — trying accessibility tree", description, t2_exc)
+
+        # Tier 3: AI + accessibility tree (semantic, richer than HTML) → JS in same session
+        try:
+            import json as _json
+            a11y = _json.dumps(self.page.accessibility.snapshot() or {}, indent=2)[:4000]
+            js = self._ai_js(ai_client, description, context=f"Accessibility tree:\n{a11y}", temperature=0.0)
+            _log.info("[Tier3] Executing AI JS (a11y context): %s", js[:200])
+            result = self.page.evaluate(js)
+            _log.info("[Tier3] succeeded for '%s'", description)
+            return result
+        except Exception as t3_exc:
+            raise RuntimeError(
+                f"All three tiers failed for '{description}'. "
+                f"Tier2: {t2_exc}. Tier3: {t3_exc}."
+            ) from t3_exc
+
+    @staticmethod
+    def _ai_js(ai_client, description: str, context: str, temperature: float = 0.1) -> str:
+        prompt = (
+            f"You are a web automation expert. A Playwright locator timed out for: '{description}'.\n"
+            f"Write ONE JavaScript statement to perform this action on the current page.\n"
+            f"Return ONLY the JavaScript. No explanation, no markdown, no comments.\n"
+            f"Example: document.querySelector('button[type=submit]').click()\n\n"
+            f"{context}"
+        )
+        js = ai_client.generate(prompt, max_tokens=200, temperature=temperature).strip()
+        if js.startswith("```"):
+            js = "\n".join(js.splitlines()[1:]).rstrip("`").strip()
+        return js
