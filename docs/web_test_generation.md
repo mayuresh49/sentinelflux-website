@@ -35,6 +35,18 @@ python3 -m ai.generate_test_case_doc \
   - validation rules and edge cases
   - expected field behavior
 
+## 3-Tier Resilience in generated tests
+
+`@step_method` routes every page object action through `BasePage.try_resilient()`:
+
+1. **Playwright** — fast deterministic locator, zero overhead on success
+2. **Browser-Use + Ollama** — fires only on `playwright.sync_api.TimeoutError`; uses the step description as a natural-language goal to find and interact with the element in its own browser session
+3. **Skyvern** — fires only if Browser-Use also fails; screenshot/vision-based element interaction
+
+No code changes in generated tests needed — the chain is automatic.
+
+> **Auth note:** Tiers 2 and 3 do not share Playwright's session. For authenticated pages, include login context in `@step_method` descriptions when writing page objects for protected flows.
+
 ## Step tracking in generated tests
 
 All page object action methods are decorated with `@step_method("description")` from `utils/step.py`.

@@ -58,17 +58,49 @@ pytest --env=prod
 | `-n` | — | xdist worker count (`-n 4` for parallel) |
 | `--session-login` | off | Reuse one login per xdist worker instead of per-test |
 
+## Step Tracking
+
+Every `@step_method`-decorated page object method is automatically recorded as a numbered step. No changes needed in tests — decoration lives on the page object.
+
+| Destination | What you see |
+|---|---|
+| HTML report (`reports/report.html`) | Inline step table per test: `#`, description, **PASS** (green) / **FAIL** (red) |
+| ReportPortal | Log stream per test via `sentinelflux.steps` logger |
+
+## 3-Tier Resilience (Self-Healing)
+
+Every `@step_method`-decorated action routes through `BasePage.try_resilient()`:
+
+```
+Tier 1 — Playwright (deterministic, fast, zero overhead on happy path)
+    ↓ only on playwright.sync_api.TimeoutError
+Tier 2 — Browser-Use + local Ollama LLM  [self-healing: goal-based element discovery]
+    ↓ only on Tier-2 failure
+Tier 3 — Skyvern vision agent            [self-healing: screenshot/visual element discovery]
+```
+
+**Execution time impact:** zero on passing tests. Escalation only fires when Playwright already timed out — the test was going to fail anyway.
+
+**Tier 2 prerequisites:** Ollama running locally with `qwen2.5:7b` (or override `BROWSER_USE_MODEL` in `utils/constants.py`). Install: `pip install browser-use langchain-ollama`.
+
+**Tier 3 prerequisites:** Skyvern running at `SKYVERN_BASE_URL` (default `http://localhost:8000`). Install: `pip install httpx`.
+
+**Auth limitation:** Browser-Use and Skyvern open independent browser sessions — they do not share Playwright's authenticated context. For protected pages the `@step_method` description should include login instructions so the LLM agent can authenticate. Both tiers are lazy-imported: if not installed a `RuntimeError` is raised and only the current step fails.
+
 ## Failure Artifacts
 
 On test failure, the following are collected automatically:
 
-| Artifact | Location | How |
-|----------|----------|-----|
-| Viewport screenshot | `test-results/<test>/` | `--screenshot=on` (pytest-playwright) |
-| Full-page screenshot | `reports/artifacts/<test>/screenshot_full_page.png` | conftest hook |
-| Screen recording | `test-results/<test>/video.webm` | `--video=retain-on-failure` |
-| Network + browser trace | `test-results/<test>/trace.zip` | `--tracing=retain-on-failure` |
-| Browser console log | `reports/artifacts/<test>/console.log` | conftest hook |
+| Artifact | Location | Applies to |
+|----------|----------|------------|
+| Viewport screenshot | `test-results/<test>/` | Web |
+| Full-page screenshot | `reports/artifacts/<test>/screenshot_full_page.png` | Web |
+| Screen recording | `test-results/<test>/video.webm` | Web |
+| Network + browser trace | `test-results/<test>/trace.zip` | Web |
+| Browser console log | `reports/artifacts/<test>/console.log` | Web |
+| API request/response log | `reports/artifacts/<test>/api_calls.log` | API |
+
+`api_calls.log` — every request in the test as a curl-equivalent (auth headers redacted), status code, elapsed ms, and full JSON response.
 
 Open trace files at [trace.playwright.dev](https://trace.playwright.dev) (no install needed).
 
