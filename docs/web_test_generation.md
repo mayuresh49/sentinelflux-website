@@ -35,6 +35,35 @@ python3 -m ai.generate_test_case_doc \
   - validation rules and edge cases
   - expected field behavior
 
+## Step tracking in generated tests
+
+All page object action methods are decorated with `@step_method("description")` from `utils/step.py`.
+Generated tests call page object methods normally — **no manual step calls needed**.
+
+Steps are captured automatically and appear in two places:
+
+| Destination | What you see |
+|---|---|
+| HTML report (`reports/report.html`) | Inline step table per test — `#`, step name, **PASS** (green) / **FAIL** (red) |
+| ReportPortal | Log stream per test — each step emitted via `sentinelflux.steps` logger |
+
+When the AI generates a new page object, annotate each public action method with `@step_method`:
+
+```python
+from utils.step import step_method
+
+class MyPage(BasePage):
+    @step_method("Navigate to my page")
+    def navigate_to_list(self):
+        ...
+
+    @step_method("Fill search field")
+    def fill_search(self, value: str):
+        ...
+```
+
+Do **not** decorate pure getter/checker methods (`is_*`, `get_*`) — those are assertion helpers, not user actions.
+
 ## Notes
 
 - The script uses `ai/knowledge_base/ui_pages.yaml` and other KB assets to provide context.

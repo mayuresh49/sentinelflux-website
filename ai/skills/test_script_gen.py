@@ -44,25 +44,39 @@ Imports:
 
 Marker: @pytest.mark.web
 
-Fixture: page (Playwright Page, injected by pytest-playwright)
+Fixtures:
+    page          — Playwright Page, injected by pytest-playwright
+    logged_in_page — authenticated page (defined locally in each test file, falls back to session_authed_page)
+
+Step tracking (automatic — do NOT import or call step() manually):
+    Page object action methods are decorated with @step_method("description").
+    Every call to a page object method is automatically recorded as a step.
+    Steps appear in the HTML report and ReportPortal without any extra code in tests.
 
 Pattern:
-    booking_page = BookingPage(page)
-    booking_page.navigate("https://example.com/booking")
-    booking_page.fill_firstname("John")
-    booking_page.select_gender("male")
-    booking_page.submit()
-    assert booking_page.get_firstname_value() == "John"
+    @pytest.fixture(scope="function")
+    def logged_in_page(page, session_authed_page):
+        if session_authed_page is not None:
+            return session_authed_page
+        lp = LoginPage(page)
+        lp.navigate_to_login()
+        lp.login("Admin", "admin123")
+        assert lp.is_on_dashboard()
+        return page
+
+    @pytest.mark.web
+    def test_something(logged_in_page):
+        po = SomePage(logged_in_page)
+        po.navigate_to_list()        # recorded as step automatically
+        po.search_by_name("Alice")   # recorded as step automatically
+        assert po.get_record_count_text() != ""
 
 Example test function:
     @pytest.mark.web
-    def test_booking_form_accepts_valid_input(page):
-        booking_page = BookingPage(page)
-        booking_page.navigate("https://automationintesting.com/booking/")
-        booking_page.fill_firstname("John")
-        booking_page.fill_lastname("Doe")
-        booking_page.submit()
-        assert booking_page.get_firstname_value() == "John"
+    def test_user_list_loads_on_navigation(logged_in_page):
+        admin = AdminUsersPage(logged_in_page)
+        admin.navigate_to_list()
+        assert admin.is_on_list_page()
 """,
 
     "mobile": """\
