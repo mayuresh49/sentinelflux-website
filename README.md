@@ -85,7 +85,7 @@ Tier 3 — Skyvern vision agent            [self-healing: screenshot/visual elem
 
 **Tier 3 prerequisites:** Skyvern running at `SKYVERN_BASE_URL` (default `http://localhost:8000`). Install: `pip install httpx`.
 
-**Auth limitation:** Browser-Use and Skyvern open independent browser sessions — they do not share Playwright's authenticated context. For protected pages the `@step_method` description should include login instructions so the LLM agent can authenticate. Both tiers are lazy-imported: if not installed a `RuntimeError` is raised and only the current step fails.
+**Auth:** `try_resilient` extracts `page.context.cookies()` and injects them into Browser-Use's browser context before the agent runs — the agent inherits the existing authenticated session and does not need to log in. Both tiers are lazy-imported: if not installed a `RuntimeError` is raised and only the current step fails.
 
 ## Failure Artifacts
 

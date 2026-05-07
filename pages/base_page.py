@@ -109,9 +109,14 @@ class BasePage:
         except TimeoutError as exc:
             _log.warning("[Tier1] Playwright timeout for '%s' — escalating to Browser-Use", description)
             try:
+                cookies = []
+                try:
+                    cookies = self.page.context.cookies()
+                except Exception:
+                    pass
                 from utils.browser_use_agent import BrowserUseAgent
                 agent = BrowserUseAgent(model=BROWSER_USE_MODEL, ollama_url=BROWSER_USE_OLLAMA_URL)
-                result = agent.act(description, start_url=self.page.url)
+                result = agent.act(description, start_url=self.page.url, cookies=cookies)
                 if result.success:
                     return result
                 raise RuntimeError(result.message)
