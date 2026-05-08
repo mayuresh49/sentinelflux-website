@@ -21,6 +21,7 @@ def main():
     parser.add_argument("--page-url", default="https://automationintesting.com/selenium/testpage/", help="URL of the page to document")
     parser.add_argument("--output", default=str(ROOT_DIR / "docs" / "test_cases" / "generated_test_case_doc.md"), help="Output markdown file path")
     parser.add_argument("--description", default="A web form with first name, surname, gender, favorite color, contact preferences, message, and continent selection.", help="Description of the form for AI prompt")
+    parser.add_argument("--kb-dir", default=None, help="Path to product KB directory (default: ai/knowledge_base/)")
     parser.add_argument("--local", action="store_true", help="Use local Mistral via Ollama (http://localhost:11434)")
     parser.add_argument("--local-url", default="http://localhost:11434", help="Local Mistral URL")
     args = parser.parse_args()
@@ -33,7 +34,7 @@ def main():
     # Support local Mistral via command line or config
     use_local = args.local or ai_config.get("local", False)
     local_url = args.local_url or ai_config.get("local_url", "http://localhost:11434")
-    
+
     if use_local:
         print(f"Using local Mistral at {local_url}")
         client = MistralClient(api_key=None, model=ai_config.get("model", "mistral"), local=True, local_url=local_url)
@@ -43,7 +44,8 @@ def main():
             raise SystemExit("AI api_key is not set in configuration and --local flag not provided.")
         client = MistralClient(api_key=api_key, model=ai_config.get("model", "mistral-medium"), local=False)
 
-    kb_loader = KnowledgeBaseLoader()
+    kb_dir = Path(args.kb_dir) if args.kb_dir else None
+    kb_loader = KnowledgeBaseLoader(kb_dir=kb_dir)
     skill = TestCaseDocumentationSkill(client, kb_loader)
     document = skill.generate_document(args.page_url, args.description)
 

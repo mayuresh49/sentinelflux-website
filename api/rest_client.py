@@ -4,16 +4,17 @@ from typing import Any, Dict, Optional
 import requests
 from jsonschema import validate, ValidationError
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+_DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent
 
 
 class RestClient:
-    def __init__(self, base_url: str, logger=None):
+    def __init__(self, base_url: str, logger=None, data_dir: Path = None):
         self.base_url = base_url.rstrip("/")
         self.logger = logger
+        self._data_dir = Path(data_dir) if data_dir else _DEFAULT_DATA_DIR
 
     def _load_json(self, relative_path: str) -> Dict[str, Any]:
-        path = ROOT_DIR / relative_path
+        path = self._data_dir / relative_path
         with path.open("r", encoding="utf-8") as stream:
             return json.load(stream)
 

@@ -8,6 +8,7 @@ import typer
 def run(
     config: str = typer.Option("config/env_qa.yaml", help="Environment config path"),
     output: Optional[str] = typer.Option(None, help="Output path for generated test case doc"),
+    kb_dir: Optional[str] = typer.Option(None, "--kb-dir", help="Product KB directory (e.g. ai/knowledge_base/restfulbooker)"),
     endpoint: Optional[str] = typer.Option(None, help="API endpoint for API test generation"),
     method: str = typer.Option("GET", help="HTTP method for API test generation"),
     script: bool = typer.Option(False, "--script", help="Also generate pytest script from doc"),
@@ -15,11 +16,13 @@ def run(
     """Generate test cases from the knowledge base using AI."""
     if endpoint:
         module = "ai.generate_api_test_doc"
-        args = ["--endpoint", endpoint, "--method", method]
+        args = ["--endpoint", endpoint, "--method", method, "--config", config]
     else:
         module = "ai.generate_test_case_doc"
         args = ["--config", config]
 
+    if kb_dir:
+        args += ["--kb-dir", kb_dir]
     if output:
         args += ["--output", output]
 

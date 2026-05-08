@@ -1,98 +1,20 @@
-# Application Configuration and Metadata
-# Used by AI for context-aware test generation and documentation
+# Application metadata — fill in for your product
+# This file is loaded by KnowledgeBaseLoader to provide AI generation context.
+# Copy this file to ai/knowledge_base/<your-product>/ and update all values.
 
 application:
-  name: "SentinelFlux Booking System"
-  version: "1.0.0"
-  description: "An end-to-end test framework for booking management system"
-  environment:
-    qa: "https://api.qa.sentinelflux.local"
-    staging: "https://api.staging.sentinelflux.local"
-    production: "https://api.sentinelflux.local"
+  name: "Your Application"
+  version: "1.0"
+  description: "Brief description of your application"
 
 web_application:
-  test_url: "https://automationintesting.com/selenium/testpage/"
-  description: "Test form with multiple input types"
-  supported_browsers:
-    - chromium
-    - firefox
-    - webkit
+  base_url: "https://your-app.example.com"
+  description: "Describe the web application"
 
 api:
-  base_url: "https://restful-booker-api.herokuapp.com"
+  base_url: "https://your-api.example.com"
   version: "1.0"
   auth_type: "token"
-  default_timeout: 30
 
-features:
-  - name: "Booking Management"
-    version: "1.0"
-    added_date: "2026-01-15"
-    endpoints:
-      - POST /booking (create)
-      - GET /booking/{id} (retrieve)
-      - PUT /booking/{id} (update)
-      - DELETE /booking/{id} (delete)
-    description: "Create, retrieve, update, and delete bookings"
-    
-  - name: "Country Directory"
-    version: "1.0"
-    added_date: "2026-01-20"
-    endpoints:
-      - GraphQL query countries_list
-    description: "Query available countries and their details"
-
-  - name: "Self-Healing Locators"
-    version: "1.0"
-    added_date: "2026-02-10"
-    description: "AI-powered fallback locator suggestions when elements change"
-    
-  - name: "ReportPortal Integration"
-    version: "1.0"
-    added_date: "2026-02-15"
-    description: "Real-time test execution reporting and analytics"
-    
-  - name: "Parallel Test Execution"
-    version: "1.0"
-    added_date: "2026-02-20"
-    description: "Run tests in parallel across multiple workers"
-
-test_data:
-  booking_valid_minimal:
-    firstname: "John"
-    lastname: "Doe"
-    totalprice: 100
-    depositpaid: true
-    bookingdates:
-      checkin: "2026-06-01"
-      checkout: "2026-06-10"
-
-  booking_valid_complete:
-    firstname: "Jane"
-    lastname: "Smith"
-    totalprice: 250
-    depositpaid: true
-    additionalneeds: "Breakfast and WiFi"
-    bookingdates:
-      checkin: "2026-05-15"
-      checkout: "2026-05-25"
-
-  country_valid:
-    code: "US"
-    name: "United States"
-
-validation:
-  required_fields:
-    booking:
-      - firstname
-      - lastname
-      - totalprice
-      - depositpaid
-      - bookingdates
-  max_lengths:
-    firstname: 100
-    lastname: 100
-    additionalneeds: 500
-  price_range:
-    min: 0
-    max: 10000
+features: []
+test_data: {}

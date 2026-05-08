@@ -72,23 +72,29 @@ def main():
         "--description",
         help="Optional custom description for the endpoint"
     )
-    
+    parser.add_argument(
+        "--kb-dir",
+        default=None,
+        help="Path to product KB directory (default: ai/knowledge_base/)"
+    )
+
     args = parser.parse_args()
-    
+
     # Load configuration
     config = load_config(Path(args.config))
     ai_config = config.get("sentinelflux", {}).get("ai", {})
-    
+
     if not ai_config.get("enabled", False):
         raise SystemExit("AI integration is disabled in the configuration.")
-    
+
     api_key = ai_config.get("api_key")
     if not api_key:
         raise SystemExit("AI api_key is not set in configuration.")
-    
+
     # Initialize AI client and knowledge base
     client = MistralClient(api_key=api_key, model=ai_config.get("mode", "mistral-medium"))
-    kb_loader = KnowledgeBaseLoader()
+    kb_dir = Path(args.kb_dir) if args.kb_dir else None
+    kb_loader = KnowledgeBaseLoader(kb_dir=kb_dir)
     skill = TestCaseDocumentationSkill(client, kb_loader)
     
     # Get endpoint information from knowledge base
