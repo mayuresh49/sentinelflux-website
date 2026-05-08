@@ -43,8 +43,9 @@ jobs:
           python-version: "3.11"
       - run: pip install -r requirements.txt
       - run: playwright install --with-deps chromium
-      - name: Collect root tests
-        run: python -m pytest --collect-only -q || true
       - name: Collect orangehrm example tests
         run: python -m pytest --collect-only -q
         working-directory: examples/orangehrm
+      - name: Collect restfulbooker example tests
+        run: python -m pytest --collect-only -q
+        working-directory: examples/restfulbooker

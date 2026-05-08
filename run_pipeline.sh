@@ -1,27 +1,43 @@
 #!/bin/bash
 # SentinelFlux AI Pipeline Runner
-# Usage: ./run_pipeline.sh <project> <feature> <domain> [model]
+# Usage: ./run_pipeline.sh <project> <feature> <domain> [doc-model] [script-model]
 # Example: ./run_pipeline.sh orangehrm login web
-#          ./run_pipeline.sh orangehrm pim_employee web qwen2.5-coder:14b-instruct-q4_K_M
+#          ./run_pipeline.sh restfulbooker booking api qwen2.5-coder:14b-instruct-q4_K_M
 
 set -e
 
 PROJECT="${1:-orangehrm}"
 FEATURE="${2:-login}"
 DOMAIN="${3:-web}"
-DOC_MODEL="${4:-mistral:7b-instruct-v0.3-q4_K_M}"
+DOC_MODEL="${4:-qwen2.5-coder:14b-instruct-q4_K_M}"
 SCRIPT_MODEL="${5:-qwen2.5-coder:14b-instruct-q4_K_M}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+EXAMPLE_DIR="examples/$PROJECT"
+KB_DIR="ai/knowledge_base/$PROJECT"
+
+if [ ! -d "$EXAMPLE_DIR" ]; then
+  echo "ERROR: Example directory not found: $EXAMPLE_DIR"
+  echo "Available projects: $(ls examples/)"
+  exit 1
+fi
+
+if [ ! -d "$KB_DIR" ]; then
+  echo "ERROR: KB directory not found: $KB_DIR"
+  echo "Available KBs: $(ls ai/knowledge_base/ | grep -v '\.yaml$' | grep -v '^increments$')"
+  exit 1
+fi
+
 echo ""
 echo "=== SentinelFlux Pipeline ==="
-echo "Project : $PROJECT"
-echo "Feature : $FEATURE"
-echo "Domain  : $DOMAIN"
-echo "DocModel: $DOC_MODEL"
-echo "ScrModel: $SCRIPT_MODEL"
+echo "Project   : $PROJECT"
+echo "Feature   : $FEATURE"
+echo "Domain    : $DOMAIN"
+echo "DocModel  : $DOC_MODEL"
+echo "ScrModel  : $SCRIPT_MODEL"
+echo "OutputBase: $EXAMPLE_DIR"
 echo ""
 
 # --- Memory check ---
@@ -57,9 +73,10 @@ python3 -m ai.pipeline.orchestrator \
   --domain "$DOMAIN" \
   --project "$PROJECT" \
   --doc-model "$DOC_MODEL" \
-  --script-model "$SCRIPT_MODEL"
+  --script-model "$SCRIPT_MODEL" \
+  --output-base "$EXAMPLE_DIR"
 
 echo ""
 echo "=== Done ==="
-echo "Doc   : docs/test_cases/$DOMAIN/$FEATURE.md"
-echo "Script: tests/$DOMAIN/test_$FEATURE.py"
+echo "Doc   : $EXAMPLE_DIR/docs/test_cases/$DOMAIN/$FEATURE.md"
+echo "Script: $EXAMPLE_DIR/tests/$DOMAIN/test_$FEATURE.py"

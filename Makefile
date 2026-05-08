@@ -1,13 +1,38 @@
-.PHONY: web web-fast api
+.PHONY: web web-serial api \
+        orangehrm-web orangehrm-api \
+        restfulbooker-web restfulbooker-api \
+        framework-tests
 
-# Run web tests in parallel with session-scoped login
+# ── OrangeHRM ──────────────────────────────────────────────────────────────
+orangehrm-web:
+	cd examples/orangehrm && python3 -m pytest tests/web/ -m web -n 4 --session-login
+
+orangehrm-web-serial:
+	cd examples/orangehrm && python3 -m pytest tests/web/ -m web
+
+orangehrm-api:
+	cd examples/orangehrm && python3 -m pytest tests/api/ -m api
+
+# ── Restful Booker ──────────────────────────────────────────────────────────
+restfulbooker-web:
+	cd examples/restfulbooker && python3 -m pytest tests/web/ -m web -n 4
+
+restfulbooker-web-serial:
+	cd examples/restfulbooker && python3 -m pytest tests/web/ -m web
+
+restfulbooker-api:
+	cd examples/restfulbooker && python3 -m pytest tests/api/ -m api
+
+# ── Framework unit/integration tests ───────────────────────────────────────
+framework-tests:
+	python3 -m pytest tests/ -q
+
+# ── Legacy aliases (kept for CI compatibility) ─────────────────────────────
 web:
-	python3 -m pytest tests/web/ -m web -n 4 --session-login
+	$(MAKE) orangehrm-web
 
-# Run web tests serially (debug / CI with limited resources)
 web-serial:
-	python3 -m pytest tests/web/ -m web
+	$(MAKE) orangehrm-web-serial
 
-# Run API tests
 api:
-	python3 -m pytest tests/api/ -m api
+	$(MAKE) orangehrm-api

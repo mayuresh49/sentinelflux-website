@@ -1,15 +1,15 @@
 # SentinelFlux — AI Resume Context
 
-> **READ THIS FIRST.** Any AI tool (Claude, Cursor, Gemini CLI, etc.) working on this project should read this file before anything else. It contains current state, active decisions, and the next action to take.
+> **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-06  
-Framework version: 0.2.0
+Last updated: 2026-05-08  
+Framework version: 0.1.0
 
 ---
 
 ## What This Project Is
 
-Solo-built test automation framework covering API, UI, Mobile, and Security. Dual purpose: learning vehicle + potential product. Owner has 13+ yrs QE/SDE experience. Budget-constrained (individual AI plan) — be token-efficient.
+Solo-built test automation framework covering API, UI, Mobile (scaffold), and Security (scaffold). Dual purpose: learning vehicle + potential product. Owner has 13+ yrs QE/SDE experience. Budget-constrained — be token-efficient.
 
 ---
 
@@ -17,101 +17,107 @@ Solo-built test automation framework covering API, UI, Mobile, and Security. Dua
 
 | Layer | Status | Notes |
 |---|---|---|
-| REST API | Working | Full CRUD, schema validation, data-driven |
+| REST API | Working | Full CRUD, schema validation, data-driven, curl log on failure |
 | GraphQL | Working | Query + variable support |
-| Web UI | Working | POM + self-healing locators |
+| Web UI | Working | POM + self-healing locators (3-tier) |
 | Mobile | Scaffolded | Appium dep present, zero implementation |
-| Security | Marker only | Not implemented |
-| AI/KB Pipeline | Working | Doc generation from KB. Script gen not yet built. |
+| Security | Scaffolded | Marker only, nothing implemented |
+| AI/KB Pipeline | Working | KB → doc → script (Mistral + Ollama/Qwen). `ai/pipeline/orchestrator.py` |
+| CLI | Working | `sentinelflux init/run/generate/doctor` via typer |
+| Examples | Working | OrangeHRM (web+api), Restful Booker (13 API tests passing) |
+| Docs site | Built | mkdocs-material, `mkdocs serve` to preview |
+| Package | Built | `pyproject.toml` + hatchling, `pip install sentinelflux` |
 
 ---
 
-## What Was Just Done (Phase 2 — 2026-05-06)
+## What Was Just Done (Sprints 1–4 + cleanup — 2026-05-08)
 
-**Phase 2 — AI Pipeline (KB → Doc → Script):**
-- Added `TEST_SCRIPT_GEN_PROMPT` + `FEATURE_DOC_PROMPT` to `ai/prompts/prompt_templates.py`
-- Built `ai/skills/test_script_gen.py` — `TestScriptGenSkill`: converts test case docs to runnable pytest code, domain-specific conventions (api/web/mobile/security), strips markdown fences from model output
-- Built `ai/pipeline/orchestrator.py` — `TestPipelineOrchestrator`: full KB → doc → script pipeline with CLI  
-  - `python -m ai.pipeline.orchestrator --feature booking --domain api`
-  - `python -m ai.pipeline.orchestrator --increment feature_001.yaml --domain api`
-  - `python -m ai.pipeline.orchestrator --doc docs/test_cases/api/booking.md --domain api --feature booking`
-  - Updates `framework_knowledge/kb_increments_log.yaml` automatically
+**Productization sprints:**
+- Sprint 1: Apache 2.0 license, `pyproject.toml`, CLI (`init/run/generate`), OrangeHRM moved to `examples/`, GitHub Actions CI
+- Sprint 2: mkdocs docs site, `sentinelflux doctor`, PyPI publish workflow, CONTRIBUTING.md, issue templates
+- Sprint 3: Restful Booker second example (22 tests, 13/13 API passing), `sentinelflux init` smoke-tested, doc fixes
+- Sprint 4: Product KB separation — per-product `ai/knowledge_base/<product>/` dirs, `--kb-dir` CLI flag, `RestClient data_dir` param
 
-## What Was Done Before (Phase 0 + Phase 1 — 2026-05-06)
+**Cleanup (items 6–9):**
+- `Makefile` — per-product targets (`orangehrm-web/api`, `restfulbooker-web/api`, `framework-tests`)
+- `run_pipeline.sh` — passes `--output-base examples/$PROJECT` to orchestrator; correct output path echo
+- `ai/pipeline/orchestrator.py` — added `--output-base` CLI flag + `output_base` param to route doc/script output to example dirs
+- `setup_ai_generator.sh` — full rewrite: installs `sentinelflux[ai]`, checks Ollama, pulls model, shows quick start
+- `docs/test_cases/form_test_cases.md` — deleted (stale generic file)
 
-**Phase 0 — Stability fixes:**
-- Removed hardcoded ReportPortal API key from `pytest.ini` → reads from `RP_API_KEY` env var via `conftest.py:pytest_configure`
-- Added `timeout` to Mistral cloud API calls (`utils/constants.py:MISTRAL_CLOUD_TIMEOUT_S`)
-- Added content-type guard in `api/rest_client.py:_validate_schema` before calling `.json()`
-- Fixed `lru_cache` on instance methods in `kb_loader.py` → replaced with instance `_cache` dict (no memory leak)
-- Added locale fallback logging in `utils/locator_manager.py`
-- Extracted AI client factory into `utils/ai_factory.py`
-- Created `utils/constants.py` — all magic numbers live here
-- `pages/base_page.py` now uses `LOCATOR_HEAL_TIMEOUT_MS` constant
-
-**Phase 1 — Tracking system:**
-- Created `framework_knowledge/` with this file, architecture.md, conventions.md
-- Created `framework_knowledge/progress/backlog.yaml` and `completed.yaml`
-- Created `framework_knowledge/decisions/` for ADRs
-- Created `ai/knowledge_base/increments/` for feature drop YAMLs
+**README + CI (2026-05-08):**
+- README rewritten as product landing page with CLI-first quick start, examples table, self-healing docs
+- CI: added `restfulbooker` collection smoke check, removed `|| true` on root collect
 
 ---
 
-## Next Immediate Action
+## Next Immediate Actions
 
-**Phase 4 — Security: OWASP-aligned test suite**
+These require user action (run/verify locally or publish):
 
-Files to create:
-- `tests/security/test_auth_security.py` — auth bypass, token validation
-- `tests/security/test_injection.py` — SQL injection, XSS (known issue: additionalneeds field unsanitized)
-- `tests/security/test_idor.py` — access other user's booking IDs
-- `utils/security_assertions.py` — shared security assertions
+1. **Test `sentinelflux generate` end-to-end** — user has Qwen running at localhost:11434  
+   `./run_pipeline.sh restfulbooker booking api`
 
-See `framework_knowledge/progress/backlog.yaml` for details.
+2. **Run web tests** — `make restfulbooker-web` and `make orangehrm-web` against live demo sites
+
+3. **`sentinelflux doctor` output check** — run and verify all checks pass
+
+4. **TestPyPI smoke test** — `python -m build && twine upload --repository testpypi dist/*`
+
+5. **GitHub Pages deploy** — `mkdocs gh-deploy`
+
+6. **v0.1.0 tag + PyPI publish** — `git tag v0.1.0 && git push --tags`  
+   Publish workflow in `.github/workflows/publish.yml` triggers on tag push.
+
+Framework-level feature backlog: `framework_knowledge/progress/backlog.yaml`
 
 ---
 
 ## Key Architectural Decisions
 
-- AI client: Mistral (cloud or local Ollama). Abstracted behind `AIClient` base. See `ADR-002`.
-- KB structure: YAML files in `ai/knowledge_base/base/` (stable) + `ai/knowledge_base/increments/` (feature drops). See `ADR-001`.
+- AI client: Mistral (cloud) or Ollama (local). Abstracted behind `AIClient` base. See `ADR-002`.
+- KB structure: YAML files in `ai/knowledge_base/<product>/` (one dir per product). Increments in `ai/knowledge_base/increments/`.
+- Per-product output: `examples/<product>/docs/test_cases/` and `examples/<product>/tests/`. Pass `--output-base examples/<product>` to orchestrator.
 - Schema location: `schemas/rest_schemas/` is canonical. `api/schemas/` is dead code — do not use.
 - All magic numbers: `utils/constants.py`
 - RP API key: env var `RP_API_KEY` only, never committed.
+- `BasePage.__init__(page, locale="en-US")` — NO base_url param; subclass stores URL as instance variable.
+- `booking_client.py` lives at `examples/restfulbooker/` root (not `api/` subdir) — avoids namespace package collision under pytest.
 
 ---
 
 ## Where Things Live
 
 ```
-ai/knowledge_base/base/           Stable product KB (application, api_specs, ui_pages, product_knowledge)
-ai/knowledge_base/increments/     Feature drop YAMLs (feature_001_booking_v2.yaml, etc.)
-ai/knowledge_base/kb_loader.py    Loads base + increments, formats context for prompts
-ai/clients/mistral_client.py      LLM client (cloud + local Ollama)
-ai/skills/                        AI-powered skills (doc gen, script gen, self-healing)
-ai/pipeline/orchestrator.py       [NOT YET BUILT] end-to-end KB → doc → script
-api/rest_client.py                REST API test client
-api/graphql_client.py             GraphQL test client
-pages/base_page.py                Base POM with self-healing locators
-utils/constants.py                All magic numbers
-utils/ai_factory.py               AI client instantiation (do not duplicate in conftest)
-framework_knowledge/              This tracking system
-docs/test_cases/                  Generated test case docs (output)
-tests/                            Generated + hand-written test scripts
+ai/knowledge_base/<product>/   Per-product KB (application, api_specs, ui_pages, product_knowledge)
+ai/knowledge_base/increments/  Feature drop YAMLs
+ai/knowledge_base/kb_loader.py Loads base + increments, formats context for prompts
+ai/clients/mistral_client.py   LLM client (cloud + local Ollama)
+ai/skills/                     AI-powered skills (doc gen, script gen, self-healing)
+ai/pipeline/orchestrator.py    End-to-end KB → doc → script (supports --output-base)
+api/rest_client.py             REST API test client (supports data_dir param)
+api/graphql_client.py          GraphQL test client
+pages/base_page.py             Base POM with self-healing locators
+sentinelflux/                  CLI commands (init, run, generate, doctor)
+utils/constants.py             All magic numbers
+utils/ai_factory.py            AI client instantiation (do not duplicate in conftest)
+conftest.py                    Generic fixtures — NO product references
+examples/orangehrm/            OrangeHRM example (web + API)
+examples/restfulbooker/        Restful Booker example (API)
+framework_knowledge/           This tracking system
 ```
 
 ---
 
 ## Conventions (quick ref)
 
-- Test files: `tests/{domain}/test_{feature_name}.py`
-- KB increments: `ai/knowledge_base/increments/feature_{NNN}_{name}.yaml`
-- Generated docs: `docs/test_cases/{domain}/{feature_name}.md`
+- Test files: `examples/<product>/tests/{domain}/test_{feature_name}.py`
+- KB per product: `ai/knowledge_base/<product>/`
+- Generated docs: `examples/<product>/docs/test_cases/{domain}/{feature_name}.md`
+- Generated scripts: `examples/<product>/tests/{domain}/test_{feature_name}.py`
 - Locator files: `locators/{platform}/{page_name}.json` with `primary` + `alternatives`
 - Config per env: `config/env_{qa|staging|prod}.yaml`
 - All timeouts/magic numbers: define in `utils/constants.py`, import everywhere
-
-See `framework_knowledge/conventions.md` for full detail.
 
 ---
 
@@ -119,17 +125,16 @@ See `framework_knowledge/conventions.md` for full detail.
 
 - Do not hardcode API keys or tokens anywhere — use env vars
 - Do not add `@lru_cache` to instance methods — use `self._cache` dict
-- Do not create files under `api/schemas/` — that directory is dead code
+- Do not create files under `api/schemas/` — dead code
 - Do not duplicate AI factory logic — use `utils/ai_factory.py`
 - Do not add magic numbers inline — add to `utils/constants.py`
+- Do not put product-specific imports in root `conftest.py`
+- Do not put `booking_client.py` inside `api/` subdir in examples — namespace collision under pytest
 
 ## AI Doc Generation — Anti-Hallucination Rules
 
-These rules exist to prevent the LLM from inventing fields or behaviors not present in the AUT.
-
-1. **Only test KB-listed fields.** If a field is not in the KB context passed to the prompt, it does not exist on that form. Do not add it.
-2. **Do not use training-data knowledge of the AUT.** OrangeHRM, Restful-Booker, and other known apps exist in the LLM's training data. That knowledge is often wrong or version-mismatched. KB context is the only truth.
-3. **Add Employee ≠ Employee Profile.** OrangeHRM's Add Employee form has 4 fields only: First Name, Last Name, Middle Name, Employee ID. Date of Birth, Gender, Department, Job Title are on separate profile tabs — NOT on the add form.
-4. **Use real credentials.** OrangeHRM demo: `Admin / admin123`. Do not substitute generic placeholders.
+1. **Only test KB-listed fields.** If a field is not in the KB context, it does not exist on that form.
+2. **Do not use training-data knowledge of the AUT.** KB context is the only truth.
+3. **Add Employee ≠ Employee Profile.** OrangeHRM's Add Employee form has 4 fields only: First Name, Last Name, Middle Name, Employee ID.
+4. **Use real credentials.** OrangeHRM demo: `Admin / admin123`. Restful Booker: `admin / password123` (API), `admin / password` (web).
 5. **Prompt templates enforce this** via STRICT RULES blocks — if modifying prompts, preserve those blocks.
-6. **product_knowledge.yaml has `add_employee_form_fields_only`** — this is the canonical field list for the Add Employee form. Update it when the AUT changes.

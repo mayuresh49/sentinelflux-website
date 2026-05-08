@@ -39,6 +39,7 @@ class TestPipelineOrchestrator:
         skip_doc: bool = False,
         skip_script: bool = False,
         doc_path: Path = None,
+        output_base: Path = None,
     ) -> dict[str, Path]:
         """
         Full pipeline: generate doc then script for a feature + domain.
@@ -58,14 +59,14 @@ class TestPipelineOrchestrator:
             test_case_doc = doc_path.read_text(encoding="utf-8")
             out_doc = doc_path
         else:
-            out_doc = self._generate_doc(feature_name, domain, doc_path)
+            out_doc = self._generate_doc(feature_name, domain, doc_path, output_base=output_base)
             test_case_doc = out_doc.read_text(encoding="utf-8")
 
         if skip_script:
             _log.info("Skipping script generation (--skip-script)")
             return {"doc": out_doc, "script": None}
 
-        out_script = self._generate_script(test_case_doc, feature_name, domain)
+        out_script = self._generate_script(test_case_doc, feature_name, domain, output_base=output_base)
 
         if increment_file:
             self._log_increment(increment_file, feature_name, domain, out_doc, out_script)
@@ -75,7 +76,7 @@ class TestPipelineOrchestrator:
 
     # --- steps ---
 
-    def _generate_doc(self, feature_name: str, domain: str, out_path: Path = None) -> Path:
+    def _generate_doc(self, feature_name: str, domain: str, out_path: Path = None, output_base: Path = None) -> Path:
         from ai.skills.test_case_doc_kb import TestCaseDocumentationSkill
         from ai.prompts.prompt_templates import FEATURE_DOC_PROMPT
 
@@ -107,20 +108,22 @@ class TestPipelineOrchestrator:
             doc_content = self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()
 
         if out_path is None:
-            out_path = ROOT_DIR / "docs" / "test_cases" / domain / f"{feature_name}.md"
+            base = output_base if output_base else ROOT_DIR
+            out_path = base / "docs" / "test_cases" / domain / f"{feature_name}.md"
 
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(doc_content, encoding="utf-8")
         _log.info("Doc written: %s", out_path)
         return out_path
 
-    def _generate_script(self, test_case_doc: str, feature_name: str, domain: str) -> Path:
+    def _generate_script(self, test_case_doc: str, feature_name: str, domain: str, output_base: Path = None) -> Path:
         from ai.skills.test_script_gen import TestScriptGenSkill
 
         skill = TestScriptGenSkill(self._script_client, self.kb_loader)
         code = skill.generate_script(test_case_doc, domain, feature_name)
 
-        out_path = ROOT_DIR / "tests" / domain / f"test_{feature_name}.py"
+        base = output_base if output_base else ROOT_DIR
+        out_path = base / "tests" / domain / f"test_{feature_name}.py"
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(code, encoding="utf-8")
         _log.info("Script written: %s", out_path)
@@ -214,6 +217,9 @@ def _parse_args(argv=None):
                         help="Use same model for both doc and script (overrides --doc-model and --script-model)")
     parser.add_argument("--api-key", help="Mistral cloud API key (or set MISTRAL_API_KEY)")
     parser.add_argument("--cloud", action="store_true", help="Use Mistral cloud API instead of local")
+    parser.add_argument("--output-base", default=None,
+                        help="Root directory for generated docs and scripts "
+                             "(e.g. examples/orangehrm). Defaults to framework root.")
 
     return parser.parse_args(argv)
 
@@ -250,6 +256,7 @@ def main(argv=None):
     orchestrator._script_client = script_client
 
     skip_script = args.skip_script
+    output_base = Path(args.output_base).resolve() if args.output_base else None
 
     if args.doc:
         doc_path = Path(args.doc)
@@ -260,6 +267,7 @@ def main(argv=None):
             skip_doc=True,
             skip_script=skip_script,
             doc_path=doc_path,
+            output_base=output_base,
         )
     elif args.increment:
         stem = Path(args.increment).stem
@@ -270,12 +278,14 @@ def main(argv=None):
             domain=args.domain,
             increment_file=args.increment,
             skip_script=skip_script,
+            output_base=output_base,
         )
     else:
         orchestrator.run(
             feature_name=args.feature,
             domain=args.domain,
             skip_script=skip_script,
+            output_base=output_base,
         )
 
 
