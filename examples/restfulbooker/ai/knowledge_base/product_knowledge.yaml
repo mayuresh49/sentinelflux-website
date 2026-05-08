@@ -1,0 +1,107 @@
+product:
+  name: "Restful Booker"
+  description: "Hotel room booking demo app — public booking + admin panel"
+  version: "1.0"
+
+modules:
+  - name: "Booking Management"
+    description: "Create, retrieve, update, delete hotel bookings"
+    status: "production"
+    business_rules:
+      - "checkout date must be after checkin date"
+      - "firstname, lastname, totalprice, depositpaid, bookingdates are required"
+      - "additionalneeds is optional"
+      - "token required for PUT, PATCH, DELETE operations"
+      - "GET and POST do not require authentication"
+
+  - name: "Authentication"
+    description: "Token-based auth for admin operations"
+    status: "production"
+    business_rules:
+      - "Credentials: admin / password"
+      - "Token returned as string, used in Cookie header"
+      - "Wrong credentials return Bad credentials message"
+
+  - name: "Web Booking"
+    description: "Public web UI for browsing rooms and submitting bookings"
+    status: "production"
+    business_rules:
+      - "firstname and lastname required"
+      - "email must be valid format"
+      - "phone must be 11+ characters"
+      - "check-in and check-out dates must be selected"
+      - "dates must not overlap with existing bookings for the same room"
+
+  - name: "Admin Panel"
+    description: "Admin web UI for managing rooms and viewing reports"
+    status: "production"
+    business_rules:
+      - "Must be logged in to access admin panel"
+      - "Can add/remove rooms"
+      - "Can view booking reports"
+
+personas:
+  - name: "Guest"
+    description: "Anonymous user browsing and booking rooms"
+    access_level: 1
+    features_available:
+      - "View room listings"
+      - "Submit booking via web form"
+      - "Create booking via API (no auth needed)"
+      - "View booking by ID via API"
+
+  - name: "Administrator"
+    description: "Manages rooms and views reports via admin panel"
+    access_level: 2
+    features_available:
+      - "All Guest features"
+      - "Update existing bookings via API"
+      - "Delete bookings via API"
+      - "Manage rooms in admin panel"
+      - "View reports"
+      - "Edit branding"
+
+use_cases:
+  - name: "Create Booking (API)"
+    actors: ["Guest"]
+    test_scenarios:
+      - "Create booking with all required fields"
+      - "Create booking without optional additionalneeds"
+      - "Reject booking with missing firstname"
+      - "Reject booking with checkout before checkin"
+
+  - name: "Read Booking (API)"
+    actors: ["Guest", "Administrator"]
+    test_scenarios:
+      - "Get booking by valid ID returns full details"
+      - "Get non-existent ID returns 404"
+      - "Filter bookings by firstname"
+
+  - name: "Update Booking (API)"
+    actors: ["Administrator"]
+    test_scenarios:
+      - "Full update with valid data succeeds"
+      - "Update without auth token returns 403"
+      - "Partial update changes only specified fields"
+
+  - name: "Delete Booking (API)"
+    actors: ["Administrator"]
+    test_scenarios:
+      - "Delete existing booking returns 201"
+      - "Deleted booking returns 404 on GET"
+      - "Delete without auth returns 403"
+
+  - name: "Web Booking Flow"
+    actors: ["Guest"]
+    test_scenarios:
+      - "Rooms visible on home page load"
+      - "Booking form opens on clicking Book"
+      - "Submit valid form shows confirmation"
+      - "Submit empty form shows validation errors"
+
+  - name: "Admin Login"
+    actors: ["Administrator"]
+    test_scenarios:
+      - "Valid credentials open admin panel"
+      - "Invalid credentials rejected"
+      - "Logout returns to login screen"

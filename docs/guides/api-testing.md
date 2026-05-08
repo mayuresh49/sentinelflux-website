@@ -2,18 +2,25 @@
 
 ## REST client
 
+The built-in `RestClient` uses named endpoints defined in `api/endpoints/rest_endpoints.json` and payloads from `api/payloads/rest_payloads/*.json`.
+
 ```python
 import pytest
-from api.rest_client import RestClient
 
 @pytest.mark.api
 def test_get_booking(rest_client):
-    resp = rest_client.get("/booking/1")
+    # First create a booking to get a valid ID
+    create = rest_client.post("create_booking", payload_name="create_booking")
+    booking_id = create.json()["bookingid"]
+
+    resp = rest_client.get("get_booking", path_params={"booking_id": booking_id})
     assert resp.status_code == 200
     assert resp.json()["firstname"]
 ```
 
 The `rest_client` fixture is session-scoped and reads `config.api.rest_base_url`.
+
+For example projects, it is common to write a dedicated API client class instead (see `examples/restfulbooker/booking_client.py` for a pattern using `requests.Session` directly with per-test request logging built in).
 
 ## GraphQL client
 

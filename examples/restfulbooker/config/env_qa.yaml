@@ -1,0 +1,20 @@
+restfulbooker:
+  api_base_url: "https://restful-booker.herokuapp.com"
+  web_base_url: "https://automationintesting.online"
+  credentials:
+    username: "admin"
+    password: "password123"
+
+browser:
+  timeout: 15000
+
+logging:
+  level: "INFO"
+  file: "logs/sentinelflux.log"
+
+sentinelflux:
+  ai:
+    enabled: false
+    mode: mistral
+    self_healing: false
+    api_key: ""

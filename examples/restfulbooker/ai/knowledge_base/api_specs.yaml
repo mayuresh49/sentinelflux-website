@@ -1,0 +1,81 @@
+rest_api:
+  base_url: "https://restful-booker.herokuapp.com"
+  version: "1.0"
+
+  endpoints:
+    - name: "Create Booking"
+      path: "/booking"
+      method: POST
+      description: "Create a new hotel booking"
+      authentication: not required
+      request_body:
+        required_fields: [firstname, lastname, totalprice, depositpaid, bookingdates]
+        optional_fields: [additionalneeds]
+      response:
+        success_codes: [200]
+        body: "{ bookingid: int, booking: {...} }"
+      negative_cases:
+        - "Missing firstname"
+        - "Missing lastname"
+        - "Missing bookingdates"
+        - "checkout before checkin"
+        - "totalprice as string"
+
+    - name: "Get Booking"
+      path: "/booking/{id}"
+      method: GET
+      description: "Retrieve booking by numeric ID"
+      authentication: not required
+      response:
+        success_codes: [200]
+        error_codes: [404]
+      negative_cases:
+        - "Non-existent ID returns 404"
+        - "Very large ID returns 404"
+
+    - name: "Update Booking"
+      path: "/booking/{id}"
+      method: PUT
+      description: "Full replacement of a booking record"
+      authentication: required (token cookie)
+      request_body:
+        required_fields: [firstname, lastname, totalprice, depositpaid, bookingdates]
+      response:
+        success_codes: [200]
+        error_codes: [403, 404]
+      negative_cases:
+        - "Update without auth returns 403"
+        - "Update non-existent booking"
+
+    - name: "Partial Update Booking"
+      path: "/booking/{id}"
+      method: PATCH
+      description: "Update specific fields of a booking"
+      authentication: required (token cookie)
+      response:
+        success_codes: [200]
+
+    - name: "Delete Booking"
+      path: "/booking/{id}"
+      method: DELETE
+      description: "Delete a booking by ID"
+      authentication: required (token cookie)
+      response:
+        success_codes: [201]
+        error_codes: [403, 404]
+      negative_cases:
+        - "Delete without auth returns 403"
+        - "Delete non-existent booking returns 404"
+
+    - name: "Authenticate"
+      path: "/auth"
+      method: POST
+      description: "Get auth token for mutating operations"
+      request_body:
+        fields: [username, password]
+      response:
+        success: "{ token: string }"
+        failure: "{ reason: 'Bad credentials' }"
+      negative_cases:
+        - "Wrong password returns Bad credentials"
+        - "Empty credentials"

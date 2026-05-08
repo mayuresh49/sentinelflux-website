@@ -1,0 +1,56 @@
+application:
+  name: "Restful Booker"
+  version: "1.0"
+  description: "Hotel room booking demo application with REST API and web UI"
+  environment:
+    qa: "https://restful-booker.herokuapp.com"
+
+web_application:
+  base_url: "https://automationintesting.online"
+  description: "Hotel booking web app with public room listing, booking form, and admin panel"
+  supported_browsers:
+    - chromium
+    - firefox
+    - webkit
+
+api:
+  base_url: "https://restful-booker.herokuapp.com"
+  version: "1.0"
+  auth_type: "token"
+  auth_endpoint: "POST /auth"
+
+features:
+  - name: "Booking CRUD"
+    endpoints:
+      - "POST /booking — create booking"
+      - "GET /booking/{id} — get booking"
+      - "PUT /booking/{id} — full update"
+      - "PATCH /booking/{id} — partial update"
+      - "DELETE /booking/{id} — delete booking"
+    description: "Create, read, update, delete hotel bookings"
+
+  - name: "Authentication"
+    endpoints:
+      - "POST /auth — get token"
+    description: "Token-based authentication for mutating operations"
+
+  - name: "Booking Filter"
+    endpoints:
+      - "GET /booking?firstname=X&lastname=Y — filter by name"
+      - "GET /booking?checkin=YYYY-MM-DD&checkout=YYYY-MM-DD — filter by dates"
+    description: "Filter bookings by various criteria"
+
+test_data:
+  valid_booking:
+    firstname: "James"
+    lastname: "Brown"
+    totalprice: 150
+    depositpaid: true
+    bookingdates:
+      checkin: "2026-08-01"
+      checkout: "2026-08-07"
+    additionalneeds: "Breakfast"
+
+  credentials:
+    username: "admin"
+    password: "password"
