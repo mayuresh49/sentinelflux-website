@@ -1,0 +1,20 @@
+api:
+  rest_base_url: "https://your-api.example.com"
+  graphql_endpoint: "https://your-graphql.example.com/graphql"
+
+web:
+  base_url: "https://your-app.example.com"
+
+browser:
+  timeout: 12000
+
+logging:
+  level: "INFO"
+  file: "logs/sentinelflux.log"
+
+sentinelflux:
+  ai:
+    enabled: false
+    mode: mistral
+    self_healing: false
+    api_key: ""

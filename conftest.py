@@ -51,7 +51,7 @@ def _artifact_dir(item) -> Path:
 
 def _safe_page(item):
     """Return the active Playwright Page for this test, or None for non-browser tests."""
-    for name in ("page", "logged_in_page", "session_authed_page"):
+    for name in ("page", "logged_in_page"):
         pg = item.funcargs.get(name)
         if pg is not None and hasattr(pg, "screenshot"):
             return pg
@@ -62,9 +62,11 @@ def _safe_page(item):
 
 @pytest.fixture(scope="function", autouse=True)
 def _api_log_reset(request):
-    if "orangehrm_client" in request.fixturenames:
+    for name in request.fixturenames:
         try:
-            request.getfixturevalue("orangehrm_client").clear_log()
+            val = request.getfixturevalue(name)
+            if hasattr(val, "clear_log"):
+                val.clear_log()
         except Exception:
             pass
     yield
@@ -85,7 +87,7 @@ def console_log_capture(request):
     Yields the accumulated log lines so the failure hook can persist/attach them.
     Skipped for API/non-browser tests (avoids spinning up a browser unnecessarily).
     """
-    browser_fixtures = {"page", "logged_in_page", "session_authed_page"}
+    browser_fixtures = {"page", "logged_in_page"}
     if not browser_fixtures.intersection(request.fixturenames):
         yield []
         return
@@ -149,8 +151,11 @@ def pytest_runtest_makereport(item, call):
     adir = _artifact_dir(item)
 
     # ── API artifact (non-browser tests) ─────────────────────────────────────
-    api_client = item.funcargs.get("orangehrm_client")
-    if api_client is not None and api_client._request_log:
+    api_client = next(
+        (v for v in item.funcargs.values() if hasattr(v, "_request_log") and v._request_log),
+        None,
+    )
+    if api_client is not None:
         lines = []
         for i, entry in enumerate(api_client._request_log, 1):
             lines.append(f"### Request {i}  [{entry['status']}  {entry['elapsed_ms']}ms]")
@@ -335,17 +340,3 @@ def locator_manager(locale):
     return LocatorManager(locale=locale)
 
 
-@pytest.fixture(scope="session")
-def session_authed_page(request, browser):
-    """One logged-in page per worker session. Only active with --session-login flag."""
-    if not request.config.getoption("--session-login"):
-        yield None
-        return
-    from pages.web.login_page import LoginPage
-    ctx = browser.new_context()
-    pg = ctx.new_page()
-    lp = LoginPage(pg)
-    lp.navigate_to_login()
-    lp.login("Admin", "admin123")
-    yield pg
-    ctx.close()

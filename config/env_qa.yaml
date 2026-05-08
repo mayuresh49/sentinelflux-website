@@ -4,13 +4,6 @@ api:
 web:
   base_url: "https://automationintesting.com/selenium/testpage/"
 
-# OrangeHRM AUT config
-orangehrm:
-  base_url: "https://opensource-demo.orangehrmlive.com"
-  api_base_url: "https://opensource-demo.orangehrmlive.com/web/index.php/api/v2"
-  credentials:
-    admin_username: "Admin"
-    admin_password: "admin123"
 reportportal:
   endpoint: "http://localhost:8080/"
   project: "sentinelflux"

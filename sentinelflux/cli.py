@@ -1,0 +1,15 @@
+import typer
+from sentinelflux.commands import init_cmd, run_cmd, generate_cmd
+
+app = typer.Typer(
+    name="sentinelflux",
+    help="SentinelFlux — production-grade test automation framework CLI",
+    add_completion=False,
+)
+
+app.command("init")(init_cmd.run)
+app.command("run")(run_cmd.run)
+app.command("generate")(generate_cmd.run)
+
+if __name__ == "__main__":
+    app()

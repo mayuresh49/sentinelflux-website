@@ -1,0 +1,20 @@
+orangehrm:
+  base_url: "https://opensource-demo.orangehrmlive.com"
+  api_base_url: "https://opensource-demo.orangehrmlive.com/web/index.php/api/v2"
+  credentials:
+    admin_username: "Admin"
+    admin_password: "admin123"
+
+browser:
+  timeout: 12000
+
+logging:
+  level: "INFO"
+  file: "logs/sentinelflux.log"
+
+sentinelflux:
+  ai:
+    enabled: false
+    mode: mistral
+    self_healing: false
+    api_key: ""
