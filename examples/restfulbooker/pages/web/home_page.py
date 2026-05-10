@@ -10,7 +10,7 @@ class HomePage(BasePage):
 
     @step_method("Navigate to home page")
     def navigate(self):
-        self.page.goto(self._base_url, wait_until="domcontentloaded")
+        self.page.goto(self._base_url, wait_until="networkidle")
 
     @step_method("Verify rooms are listed")
     def rooms_are_listed(self) -> bool:

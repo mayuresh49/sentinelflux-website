@@ -30,4 +30,4 @@ def test_admin_logout(page, rb_web_base, rb_credentials):
     admin.login(rb_credentials["username"], rb_credentials["password"])
     admin.logout()
     assert page.url.endswith("#/") or "admin" not in page.url or \
-           page.locator("input[data-testid='username']").is_visible()
+           page.locator("#username").is_visible()

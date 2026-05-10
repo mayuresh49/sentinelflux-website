@@ -10,19 +10,19 @@ class AdminPage(BasePage):
 
     @step_method("Navigate to admin panel")
     def navigate(self):
-        self.page.goto(f"{self._base_url}/#/admin", wait_until="domcontentloaded")
+        self.page.goto(f"{self._base_url}/#/admin", wait_until="networkidle")
 
     @step_method("Enter admin username")
     def enter_username(self, username: str):
-        self.page.locator("input[data-testid='username']").fill(username)
+        self.page.locator("#username").fill(username)
 
     @step_method("Enter admin password")
     def enter_password(self, password: str):
-        self.page.locator("input[data-testid='password']").fill(password)
+        self.page.locator("#password").fill(password)
 
     @step_method("Click login button")
     def click_login(self):
-        self.page.locator("button[data-testid='submit']").click()
+        self.page.get_by_role("button", name="Login").click()
 
     def login(self, username: str, password: str):
         self.navigate()
@@ -33,7 +33,7 @@ class AdminPage(BasePage):
 
     @step_method("Verify admin panel is visible")
     def is_admin_panel_visible(self) -> bool:
-        return self.page.locator("#root").is_visible()
+        return self.page.get_by_role("link", name="Logout").is_visible()
 
     @step_method("Click Rooms menu")
     def click_rooms(self):
