@@ -11,6 +11,7 @@ from collections import defaultdict
 from utils.activity_log import ActivityLog
 from utils.approval_manager import ApprovalManager
 from dashboard.routers.approval_dispatch import derive_feature
+from dashboard.routers.kb import _list_products
 
 router = APIRouter(tags=["pages"])
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
@@ -20,7 +21,7 @@ _am = ApprovalManager()
 
 
 def _ctx(**kwargs) -> dict:
-    return {"pending_count": len(_am.pending()), **kwargs}
+    return {"pending_count": len(_am.pending()), "all_products": _list_products(), **kwargs}
 
 
 def _queued_gaps() -> list[dict]:
@@ -120,6 +121,16 @@ async def agents_page(request: Request):
         for a in _AGENT_REGISTRY
     ]
     return templates.TemplateResponse(request, "agents.html", context=_ctx(agents=agents_data))
+
+
+@router.get("/quality", response_class=HTMLResponse)
+async def quality_page(request: Request, product: str | None = None):
+    from dashboard.routers.quality import compute_metrics
+    metrics = compute_metrics(product)
+    return templates.TemplateResponse(request, "quality.html", context=_ctx(
+        metrics=metrics,
+        filter_product=product or "",
+    ))
 
 
 @router.get("/kb", response_class=HTMLResponse)

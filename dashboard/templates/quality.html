@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}Quality{% endblock %}
+
+{% block content %}
+{% set s = metrics.summary %}
+{% set per = metrics.per_product %}
+
+<div class="max-w-7xl mx-auto space-y-6">
+
+  <!-- Header + product selector -->
+  <div class="flex items-start justify-between flex-wrap gap-3">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Test Quality</h1>
+      <p class="text-sm text-slate-500 mt-0.5">Coverage, documentation, and health metrics</p>
+    </div>
+    <form method="get" action="/quality" class="flex items-center gap-2">
+      <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Filter</label>
+      <select name="product" onchange="this.form.submit()"
+              class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+        <option value="">All products</option>
+        {% for p in metrics.all_products %}
+        <option value="{{ p }}" {{ 'selected' if metrics.filter_product == p else '' }}>{{ p }}</option>
+        {% endfor %}
+      </select>
+      {% if metrics.filter_product %}
+      <a href="/quality" class="text-xs text-slate-400 hover:text-slate-600">× clear</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Test Scripts</p>
+      <p class="text-3xl font-bold text-slate-900 mt-1">{{ s.scripts }}</p>
+      <p class="text-xs text-slate-400 mt-1">across {{ per | length }} product{{ 's' if per | length != 1 else '' }}</p>
+    </div>
+
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Docs Written</p>
+      <p class="text-3xl font-bold text-slate-900 mt-1">{{ s.docs }}</p>
+      <p class="text-xs text-slate-400 mt-1">test case documents</p>
+    </div>
+
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 {{ 'ring-2 ring-amber-400' if s.doc_coverage < 50 else '' }}">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Doc Coverage</p>
+      <p class="text-3xl font-bold {{ 'text-amber-600' if s.doc_coverage < 50 else 'text-emerald-600' }} mt-1">{{ s.doc_coverage }}%</p>
+      <div class="mt-2 w-full bg-slate-100 rounded-full h-1.5">
+        <div class="h-1.5 rounded-full {{ 'bg-emerald-500' if s.doc_coverage >= 70 else 'bg-amber-400' if s.doc_coverage >= 40 else 'bg-red-400' }}"
+             style="width: {{ s.doc_coverage }}%"></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 {{ 'ring-2 ring-red-400' if s.quarantined > 0 else '' }}">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Quarantined</p>
+      <p class="text-3xl font-bold {{ 'text-red-600' if s.quarantined > 0 else 'text-slate-900' }} mt-1">{{ s.quarantined }}</p>
+      <p class="text-xs text-slate-400 mt-1">tests blocked</p>
+    </div>
+
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Pass Rate (7d)</p>
+      {% if s.pass_rate is not none %}
+      <p class="text-3xl font-bold {{ 'text-emerald-600' if s.pass_rate >= 80 else 'text-amber-600' if s.pass_rate >= 60 else 'text-red-600' }} mt-1">{{ s.pass_rate }}%</p>
+      {% else %}
+      <p class="text-3xl font-bold text-slate-400 mt-1">—</p>
+      <p class="text-xs text-slate-400 mt-1">no recent runs</p>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Charts + table -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Coverage chart -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5 flex flex-col">
+      <h2 class="font-semibold text-slate-800 text-sm mb-4">Script vs Doc Coverage</h2>
+      {% if per %}
+      <div class="flex-1 min-h-0" style="height:220px">
+        <canvas id="coverageChart"></canvas>
+      </div>
+      {% else %}
+      <div class="flex-1 flex items-center justify-center text-sm text-slate-400">No data</div>
+      {% endif %}
+    </div>
+
+    <!-- Per-product table -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100">
+        <h2 class="font-semibold text-slate-800 text-sm">Per-Product Breakdown</h2>
+      </div>
+      {% if per %}
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-slate-100 bg-slate-50/70">
+              <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Product</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Scripts</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Docs</th>
+              <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-32">Doc Coverage</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Pass Rate</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Quar.</th>
+              <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Flaky</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            {% for row in per %}
+            <tr class="hover:bg-slate-50/60 transition-colors">
+              <td class="px-4 py-3 font-medium text-slate-800">
+                <a href="/quality?product={{ row.product }}" class="hover:text-indigo-600 transition-colors">{{ row.product }}</a>
+              </td>
+              <td class="px-4 py-3 text-right text-slate-600">{{ row.scripts }}</td>
+              <td class="px-4 py-3 text-right text-slate-600">{{ row.docs }}</td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2">
+                  <div class="flex-1 bg-slate-100 rounded-full h-1.5">
+                    <div class="h-1.5 rounded-full {{ 'bg-emerald-500' if row.doc_coverage >= 70 else 'bg-amber-400' if row.doc_coverage >= 40 else 'bg-red-400' }}"
+                         style="width: {{ row.doc_coverage }}%"></div>
+                  </div>
+                  <span class="text-xs text-slate-500 w-8 text-right">{{ row.doc_coverage }}%</span>
+                </div>
+              </td>
+              <td class="px-4 py-3 text-right">
+                {% if row.pass_rate is not none %}
+                <span class="text-xs font-medium {{ 'text-emerald-600' if row.pass_rate >= 80 else 'text-amber-600' if row.pass_rate >= 60 else 'text-red-600' }}">{{ row.pass_rate }}%</span>
+                {% else %}
+                <span class="text-slate-300 text-xs">—</span>
+                {% endif %}
+              </td>
+              <td class="px-4 py-3 text-right">
+                <span class="{{ 'text-red-600 font-medium' if row.quarantined > 0 else 'text-slate-400' }}">{{ row.quarantined }}</span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                <span class="{{ 'text-amber-600 font-medium' if row.flaky > 0 else 'text-slate-400' }}">{{ row.flaky }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="py-16 text-center text-sm text-slate-400">No products found in Knowledge Base.</div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- Health signals -->
+  {% if s.flaky > 0 or s.quarantined > 0 %}
+  <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
+    <h2 class="font-semibold text-slate-800 text-sm mb-3">Signals to Investigate</h2>
+    <div class="flex flex-wrap gap-3">
+      {% if s.flaky > 0 %}
+      <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+        <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
+        <span class="text-sm text-amber-800 font-medium">{{ s.flaky }} flaky detection{{ 's' if s.flaky != 1 else '' }}</span>
+        <a href="/activities?agent=flaky_detector" class="text-xs text-amber-600 hover:text-amber-800 underline">view →</a>
+      </div>
+      {% endif %}
+      {% if s.quarantined > 0 %}
+      <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <span class="w-2 h-2 rounded-full bg-red-400 shrink-0"></span>
+        <span class="text-sm text-red-800 font-medium">{{ s.quarantined }} quarantined test{{ 's' if s.quarantined != 1 else '' }}</span>
+        <a href="/approvals" class="text-xs text-red-600 hover:text-red-800 underline">manage →</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if metrics.per_product %}
+<script>
+(function() {
+  const labels = {{ metrics.per_product | map(attribute='product') | list | tojson }};
+  const scripts = {{ metrics.per_product | map(attribute='scripts') | list | tojson }};
+  const docs    = {{ metrics.per_product | map(attribute='docs') | list | tojson }};
+
+  new Chart(document.getElementById('coverageChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Scripts', data: scripts, backgroundColor: 'rgba(99,102,241,0.7)', borderRadius: 4 },
+        { label: 'Docs',    data: docs,    backgroundColor: 'rgba(52,211,153,0.7)', borderRadius: 4 },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { labels: { font: { size: 11 }, boxWidth: 12 } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 11 } } },
+      },
+    },
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

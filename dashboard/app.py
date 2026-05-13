@@ -26,6 +26,7 @@ from fastapi.staticfiles import StaticFiles
 from dashboard.routers import activities, approvals, docs, scripts, agents
 from dashboard.routers import pages, partials
 from dashboard.routers import kb as kb_router, pipeline as pipeline_router
+from dashboard.routers import chat as chat_router, quality as quality_router
 
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -60,6 +61,8 @@ app.include_router(scripts.router, prefix="/api")
 app.include_router(agents.router, prefix="/api")
 app.include_router(kb_router.router, prefix="/api")
 app.include_router(pipeline_router.router, prefix="/api")
+app.include_router(chat_router.router, prefix="/api")
+app.include_router(quality_router.router, prefix="/api")
 
 
 @app.get("/api/health", tags=["health"])

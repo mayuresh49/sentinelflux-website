@@ -81,6 +81,14 @@
 
 {% block scripts %}
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+  const p = new URLSearchParams(location.search).get('product');
+  if (p) {
+    const sel = document.getElementById('script-product-filter');
+    if (sel) { sel.value = p; filterScripts(); }
+  }
+});
+
 function filterScripts(searchVal) {
   const search = (searchVal ?? document.getElementById('script-search').value).toLowerCase();
   const product = document.getElementById('script-product-filter').value;
