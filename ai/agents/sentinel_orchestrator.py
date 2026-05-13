@@ -296,7 +296,8 @@ class SentinelOrchestrator:
             return []
         try:
             from ai.agents.locator_healer_agent import LocatorHealerAgent
-            agent = LocatorHealerAgent(ai_client=self.ai_client, context=ctx)
+            # dry_run=True: propose only — approval_dispatch writes on approval
+            agent = LocatorHealerAgent(ai_client=self.ai_client, context=ctx.extend(dry_run=True))
             heals = []
             for lf in locator_failures:
                 result = agent.run(

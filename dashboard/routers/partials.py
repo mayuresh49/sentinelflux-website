@@ -13,6 +13,7 @@ from fastapi.templating import Jinja2Templates
 
 from utils.activity_log import ActivityLog
 from utils.approval_manager import ApprovalManager
+from dashboard.routers.approval_dispatch import dispatch as _dispatch
 
 router = APIRouter(prefix="/ui", tags=["partials"])
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
@@ -74,20 +75,28 @@ async def script_content(product: str, domain: str, feature: str):
 
 @router.post("/approvals/{approval_id}/approve", response_class=HTMLResponse)
 async def approve_partial(approval_id: str, request: Request):
-    if not _am.get(approval_id):
+    item = _am.get(approval_id)
+    if not item:
         return HTMLResponse(f'<div id="approval-{approval_id}" class="text-red-500 text-sm p-4">Approval not found.</div>')
     _am.resolve(approval_id, decision="approved")
     item = _am.get(approval_id)
-    return templates.TemplateResponse(request, "partials/approval_card.html", context={"item": item})
+    action_result = _dispatch(item, "approved")
+    return templates.TemplateResponse(request, "partials/approval_card.html", context={
+        "item": item, "action_result": action_result,
+    })
 
 
 @router.post("/approvals/{approval_id}/reject", response_class=HTMLResponse)
 async def reject_partial(approval_id: str, request: Request):
-    if not _am.get(approval_id):
+    item = _am.get(approval_id)
+    if not item:
         return HTMLResponse(f'<div id="approval-{approval_id}" class="text-red-500 text-sm p-4">Approval not found.</div>')
     _am.resolve(approval_id, decision="rejected")
     item = _am.get(approval_id)
-    return templates.TemplateResponse(request, "partials/approval_card.html", context={"item": item})
+    action_result = _dispatch(item, "rejected")
+    return templates.TemplateResponse(request, "partials/approval_card.html", context={
+        "item": item, "action_result": action_result,
+    })
 
 
 @router.get("/kb/content", response_class=HTMLResponse)
