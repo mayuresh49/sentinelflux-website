@@ -7,25 +7,10 @@
 
 <div class="max-w-7xl mx-auto space-y-6">
 
-  <!-- Header + product selector -->
-  <div class="flex items-start justify-between flex-wrap gap-3">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-900">Test Quality</h1>
-      <p class="text-sm text-slate-500 mt-0.5">Coverage, documentation, and health metrics</p>
-    </div>
-    <form method="get" action="/quality" class="flex items-center gap-2">
-      <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Filter</label>
-      <select name="product" onchange="this.form.submit()"
-              class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
-        <option value="">All products</option>
-        {% for p in metrics.all_products %}
-        <option value="{{ p }}" {{ 'selected' if metrics.filter_product == p else '' }}>{{ p }}</option>
-        {% endfor %}
-      </select>
-      {% if metrics.filter_product %}
-      <a href="/quality" class="text-xs text-slate-400 hover:text-slate-600">× clear</a>
-      {% endif %}
-    </form>
+  <!-- Header -->
+  <div>
+    <h1 class="text-2xl font-bold text-slate-900">Test Quality</h1>
+    <p class="text-sm text-slate-500 mt-0.5">Coverage, documentation, and health metrics</p>
   </div>
 
   <!-- Summary cards -->
