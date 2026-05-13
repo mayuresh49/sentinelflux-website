@@ -127,6 +127,7 @@ Feature: {feature_name}
 - One pytest function per test case. Name: test_{{action}}_{{expected_outcome}}.
 - If a test case has an ID in the document (format PRODUCT-LAYER-NNN, e.g. RB-API-001), use it as a prefix in the function name: test_{{ID_underscored}}_{{description}} (hyphens → underscores). Example: "RB-API-001" → test_RB_API_001_create_booking.
 - SKIP any test case with status `not_automatable` — do not generate a pytest function for it.
+- For test cases with status `async_dependent`: generate the function, add `@pytest.mark.async_wait` and `@pytest.mark.dependency` markers, and use `wait_for()` from `utils.wait` for polling steps.
 - Use parametrize only when test data sets share identical steps.
 - Do not add comments unless a business rule is non-obvious.
 - Do not import anything not in the conventions or standard library.
@@ -171,7 +172,7 @@ For each test case, use:
 **Steps:** numbered list
 **Expected Result:** ...
 **Category:** positive | negative | edge | security
-**Status:** not_automated (human sets to `automated` when script exists, or `not_automatable` to exclude from script generation)
+**Status:** not_automated (human sets to: `automated` when script exists · `not_automatable` to exclude from script generation · `async_dependent` when the test requires a running scheduler/background job and cannot run standalone)
 
 Output full markdown documentation.
 """)

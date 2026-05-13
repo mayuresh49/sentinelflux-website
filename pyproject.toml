@@ -57,8 +57,11 @@ dashboard = [
     "python-multipart>=0.0.9",
     "markdown>=3.6",
 ]
+integration = [
+    "pytest-depends>=1.0.1",
+]
 all = [
-    "sentinelflux[ai,mobile,reportportal,dashboard]",
+    "sentinelflux[ai,mobile,reportportal,dashboard,integration]",
 ]
 dev = [
     "ruff>=0.4",

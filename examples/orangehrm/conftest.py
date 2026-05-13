@@ -79,6 +79,17 @@ def orangehrm_client(browser, session_authed_page, orangehrm_credentials):
     client.close()
 
 
+@pytest.fixture(scope="session")
+def shared_state():
+    """Mutable bag for passing IDs/data between dependent tests in a session.
+
+    Use with @pytest.mark.dependency (pytest-depends) to declare ordering.
+    Example:
+        shared_state["employee_id"] = resp.json()["data"]["empNumber"]
+    """
+    return {}
+
+
 @pytest.fixture(scope="function", autouse=True)
 def _api_log_reset(request):
     if "orangehrm_client" in request.fixturenames:

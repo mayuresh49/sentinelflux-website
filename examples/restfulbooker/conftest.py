@@ -64,6 +64,17 @@ def booking_client(rb_api_base, rb_credentials):
     client.close()
 
 
+@pytest.fixture(scope="session")
+def shared_state():
+    """Mutable bag for passing IDs/data between dependent tests in a session.
+
+    Use with @pytest.mark.dependency (pytest-depends) to declare ordering.
+    Example:
+        shared_state["booking_id"] = resp.json()["bookingid"]
+    """
+    return {}
+
+
 @pytest.fixture(scope="function", autouse=True)
 def _api_log_reset(request):
     for name in request.fixturenames:
