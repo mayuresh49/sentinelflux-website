@@ -1,8 +1,8 @@
 #!/bin/bash
 # SentinelFlux AI Pipeline Runner
-# Usage: ./run_pipeline.sh <project> <feature> <domain> [doc-model] [script-model]
+# Usage: ./run_pipeline.sh <project> <feature> <domain> [doc-model] [script-model] [tc-prefix] [tc-start]
 # Example: ./run_pipeline.sh orangehrm login web
-#          ./run_pipeline.sh restfulbooker booking api qwen2.5-coder:14b-instruct-q4_K_M
+#          ./run_pipeline.sh orangehrm recruitment web qwen2.5-coder:14b-instruct-q4_K_M qwen2.5-coder:14b-instruct-q4_K_M OH-WEB 58
 
 set -e
 
@@ -11,6 +11,8 @@ FEATURE="${2:-login}"
 DOMAIN="${3:-web}"
 DOC_MODEL="${4:-qwen2.5-coder:14b-instruct-q4_K_M}"
 SCRIPT_MODEL="${5:-qwen2.5-coder:14b-instruct-q4_K_M}"
+TC_PREFIX="${6:-}"
+TC_START="${7:-1}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
@@ -47,6 +49,7 @@ echo "Domain    : $DOMAIN"
 echo "DocModel  : $DOC_MODEL"
 echo "ScrModel  : $SCRIPT_MODEL"
 echo "OutputBase: $EXAMPLE_DIR"
+[ -n "$TC_PREFIX" ] && echo "TC Prefix : $TC_PREFIX (start: $TC_START)"
 echo ""
 
 # --- Memory check ---
@@ -84,6 +87,12 @@ if [ -f "$HAND_WRITTEN_TEST" ]; then
   SKIP_SCRIPT_FLAG="--skip-script"
 fi
 
+# --- Build optional TC prefix flags ---
+TC_FLAGS=""
+if [ -n "$TC_PREFIX" ]; then
+  TC_FLAGS="--tc-prefix $TC_PREFIX --tc-start $TC_START"
+fi
+
 # --- Run pipeline ---
 echo ">>> Generating: $FEATURE ($DOMAIN) ..."
 "$PYTHON" -m ai.pipeline.orchestrator \
@@ -93,7 +102,8 @@ echo ">>> Generating: $FEATURE ($DOMAIN) ..."
   --doc-model "$DOC_MODEL" \
   --script-model "$SCRIPT_MODEL" \
   --output-base "$EXAMPLE_DIR" \
-  $SKIP_SCRIPT_FLAG
+  $SKIP_SCRIPT_FLAG \
+  $TC_FLAGS
 
 echo ""
 echo "=== Done ==="

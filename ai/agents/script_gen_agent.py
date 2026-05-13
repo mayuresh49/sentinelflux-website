@@ -20,6 +20,7 @@ class ScriptGenAgent(BaseAgent):
 
     Extra params (passed via ctx.extend()):
       custom_fixtures — list[str] to override default fixtures for the domain
+      tc_prefix       — TC ID prefix passed to script gen for function naming hints
     """
     name = "script_gen"
 
@@ -33,7 +34,8 @@ class ScriptGenAgent(BaseAgent):
         from ai.skills.test_script_gen import TestScriptGenSkill
 
         skill = TestScriptGenSkill(self.client, self.kb)
-        code = skill.generate_script(test_case_doc, self.ctx.domain, feature_name)
+        tc_prefix = self.ctx.get("tc_prefix", "")
+        code = skill.generate_script(test_case_doc, self.ctx.domain, feature_name, tc_prefix=tc_prefix)
 
         out = output_path or self._default_output(feature_name)
         out.parent.mkdir(parents=True, exist_ok=True)

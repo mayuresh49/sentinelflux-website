@@ -140,22 +140,39 @@ class TestScriptGenSkill:
         self.ai_client = ai_client
         self.kb_loader = kb_loader or KnowledgeBaseLoader()
 
-    def generate_script(self, test_case_doc: str, domain: str, feature_name: str) -> str:
+    def generate_script(
+        self,
+        test_case_doc: str,
+        domain: str,
+        feature_name: str,
+        tc_prefix: str = "",
+    ) -> str:
         """Generate a runnable pytest file from a test case markdown document."""
         conventions = _CONVENTIONS.get(domain, _CONVENTIONS["api"])
+        tc_prefix_hint = (
+            f" If no ID is present and tc_prefix='{tc_prefix}', infer IDs from order in document."
+            if tc_prefix else ""
+        )
         prompt = TEST_SCRIPT_GEN_PROMPT.format(
             domain=domain,
             feature_name=feature_name,
             test_case_doc=test_case_doc,
             conventions=conventions,
+            tc_prefix_hint=tc_prefix_hint,
         )
         code = self.ai_client.generate(prompt, max_tokens=3000, temperature=0.1).strip()
         return _clean_code_output(code)
 
-    def generate_script_from_file(self, doc_path: Path, domain: str, feature_name: str) -> str:
+    def generate_script_from_file(
+        self,
+        doc_path: Path,
+        domain: str,
+        feature_name: str,
+        tc_prefix: str = "",
+    ) -> str:
         """Convenience: read doc from file then generate script."""
         test_case_doc = doc_path.read_text(encoding="utf-8")
-        return self.generate_script(test_case_doc, domain, feature_name)
+        return self.generate_script(test_case_doc, domain, feature_name, tc_prefix=tc_prefix)
 
 
 def _clean_code_output(text: str) -> str:

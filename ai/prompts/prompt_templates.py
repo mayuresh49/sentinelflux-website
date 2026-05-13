@@ -63,7 +63,7 @@ STRICT RULES — violating these will produce incorrect documentation:
 3. If a field is not in the KB context, it does not exist on this form — do not include it.
 4. Use exact test credentials and data from the KB (e.g. actual usernames, passwords, known field values).
 5. Describe expected results based only on documented business rules, not assumptions.
-
+{tc_id_instruction}
 The document should include:
 - Fields on this form (explicit list from KB only)
 - Test case title
@@ -97,7 +97,7 @@ STRICT RULES — violating these will produce incorrect documentation:
 3. Use exact endpoint paths, methods, and field names from the KB context.
 4. Base expected responses only on documented response codes in the KB.
 5. Begin the document with an explicit "Endpoint Scope" section listing only KB-documented fields and codes.
-
+{tc_id_instruction}
 The document should include:
 - Endpoint Scope (method, path, request fields, response codes from KB only)
 - Positive test cases (valid request → expected 2xx)
@@ -125,7 +125,7 @@ Feature: {feature_name}
 - Output ONLY valid Python code. No markdown, no explanations, no code fences.
 - Follow the conventions above exactly (fixtures, imports, markers, assertion style).
 - One pytest function per test case. Name: test_{{action}}_{{expected_outcome}}.
-- If a test case has an ID in the document (format PRODUCT-LAYER-NNN, e.g. RB-API-001), use it as a prefix in the function name: test_{{ID_underscored}}_{{description}} (hyphens → underscores). Example: "RB-API-001" → test_RB_API_001_create_booking.
+- If a test case has an ID in the document (format PRODUCT-LAYER-NNN, e.g. RB-API-001), use it as a prefix in the function name: test_{{ID_underscored}}_{{description}} (hyphens → underscores). Example: "RB-API-001" → test_RB_API_001_create_booking.{tc_prefix_hint}
 - SKIP any test case with status `not_automatable` — do not generate a pytest function for it.
 - For test cases with status `async_dependent`: generate the function, add `@pytest.mark.async_wait` and `@pytest.mark.dependency` markers, and use `wait_for()` from `utils.wait` for polling steps.
 - Use parametrize only when test data sets share identical steps.

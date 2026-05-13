@@ -40,6 +40,8 @@ class TestPipelineOrchestrator:
         skip_script: bool = False,
         doc_path: Path = None,
         output_base: Path = None,
+        tc_prefix: str = "",
+        tc_start: int = 1,
     ) -> dict[str, Path]:
         """
         Full pipeline: generate doc then script for a feature + domain.
@@ -59,14 +61,19 @@ class TestPipelineOrchestrator:
             test_case_doc = doc_path.read_text(encoding="utf-8")
             out_doc = doc_path
         else:
-            out_doc = self._generate_doc(feature_name, domain, doc_path, output_base=output_base)
+            out_doc = self._generate_doc(
+                feature_name, domain, doc_path,
+                output_base=output_base, tc_prefix=tc_prefix, tc_start=tc_start,
+            )
             test_case_doc = out_doc.read_text(encoding="utf-8")
 
         if skip_script:
             _log.info("Skipping script generation (--skip-script)")
             return {"doc": out_doc, "script": None}
 
-        out_script = self._generate_script(test_case_doc, feature_name, domain, output_base=output_base)
+        out_script = self._generate_script(
+            test_case_doc, feature_name, domain, output_base=output_base, tc_prefix=tc_prefix,
+        )
 
         if increment_file:
             self._log_increment(increment_file, feature_name, domain, out_doc, out_script)
@@ -76,20 +83,37 @@ class TestPipelineOrchestrator:
 
     # --- steps ---
 
-    def _generate_doc(self, feature_name: str, domain: str, out_path: Path = None, output_base: Path = None) -> Path:
+    def _generate_doc(
+        self,
+        feature_name: str,
+        domain: str,
+        out_path: Path = None,
+        output_base: Path = None,
+        tc_prefix: str = "",
+        tc_start: int = 1,
+    ) -> Path:
         from ai.agents import DocGenAgent, AgentContext
 
         base = output_base if output_base else ROOT_DIR
-        ctx = AgentContext(domain=domain, output_base=base)
+        ctx = AgentContext(domain=domain, output_base=base).extend(
+            tc_prefix=tc_prefix, tc_start=tc_start,
+        )
         agent = DocGenAgent(ai_client=self.ai_client, kb_loader=self.kb_loader, context=ctx)
         result = agent.run(feature_name=feature_name, output_path=out_path)
         return result["doc_path"]
 
-    def _generate_script(self, test_case_doc: str, feature_name: str, domain: str, output_base: Path = None) -> Path:
+    def _generate_script(
+        self,
+        test_case_doc: str,
+        feature_name: str,
+        domain: str,
+        output_base: Path = None,
+        tc_prefix: str = "",
+    ) -> Path:
         from ai.agents import ScriptGenAgent, AgentContext
 
         base = output_base if output_base else ROOT_DIR
-        ctx = AgentContext(domain=domain, output_base=base)
+        ctx = AgentContext(domain=domain, output_base=base).extend(tc_prefix=tc_prefix)
         agent = ScriptGenAgent(ai_client=self._script_client, kb_loader=self.kb_loader, context=ctx)
         result = agent.run(test_case_doc=test_case_doc, feature_name=feature_name)
         return result["script_path"]
@@ -185,6 +209,10 @@ def _parse_args(argv=None):
     parser.add_argument("--output-base", default=None,
                         help="Root directory for generated docs and scripts "
                              "(e.g. examples/orangehrm). Defaults to framework root.")
+    parser.add_argument("--tc-prefix", default="",
+                        help="Test case ID prefix (e.g. OH-WEB). Injected into doc and script.")
+    parser.add_argument("--tc-start", type=int, default=1,
+                        help="Starting TC number for ID sequence (default: 1).")
 
     return parser.parse_args(argv)
 
@@ -222,6 +250,8 @@ def main(argv=None):
 
     skip_script = args.skip_script
     output_base = Path(args.output_base).resolve() if args.output_base else None
+    tc_prefix = args.tc_prefix or ""
+    tc_start = args.tc_start
 
     if args.doc:
         doc_path = Path(args.doc)
@@ -233,6 +263,8 @@ def main(argv=None):
             skip_script=skip_script,
             doc_path=doc_path,
             output_base=output_base,
+            tc_prefix=tc_prefix,
+            tc_start=tc_start,
         )
     elif args.increment:
         stem = Path(args.increment).stem
@@ -244,6 +276,8 @@ def main(argv=None):
             increment_file=args.increment,
             skip_script=skip_script,
             output_base=output_base,
+            tc_prefix=tc_prefix,
+            tc_start=tc_start,
         )
     else:
         orchestrator.run(
@@ -251,6 +285,8 @@ def main(argv=None):
             domain=args.domain,
             skip_script=skip_script,
             output_base=output_base,
+            tc_prefix=tc_prefix,
+            tc_start=tc_start,
         )
 
 

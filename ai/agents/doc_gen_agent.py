@@ -21,6 +21,8 @@ class DocGenAgent(BaseAgent):
     Extra params (passed via ctx.extend()):
       endpoint  — API endpoint path (api domain only, default /<feature_name>)
       method    — HTTP method (api domain only, default "ALL")
+      tc_prefix — TC ID prefix e.g. "OH-WEB" (optional)
+      tc_start  — first TC number in sequence (default 1)
     """
     name = "doc_gen"
 
@@ -34,6 +36,8 @@ class DocGenAgent(BaseAgent):
 
         skill = TestCaseDocumentationSkill(self.client, self.kb)
         domain = self.ctx.domain
+        tc_prefix = self.ctx.get("tc_prefix", "")
+        tc_start = self.ctx.get("tc_start", 1)
 
         if domain == "api":
             content = skill.generate_api_test_document(
@@ -42,12 +46,16 @@ class DocGenAgent(BaseAgent):
                 description=f"All {feature_name} API operations",
                 api_type="rest",
                 feature_name=feature_name,
+                tc_prefix=tc_prefix,
+                tc_start=tc_start,
             )
         else:
             content = skill.generate_document(
                 page_url=f"/{feature_name}",
                 form_description=f"{feature_name} {domain} feature",
                 feature_name=feature_name,
+                tc_prefix=tc_prefix,
+                tc_start=tc_start,
             )
 
         out = output_path or self._default_output(feature_name)

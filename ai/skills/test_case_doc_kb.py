@@ -11,6 +11,18 @@ from ai.prompts.prompt_templates import (
 from ai.knowledge_base.kb_loader import KnowledgeBaseLoader
 
 
+def _build_tc_id_instruction(tc_prefix: str, tc_start: int) -> str:
+    return (
+        f"\nTest Case ID Rules:\n"
+        f"- Use the prefix '{tc_prefix}' for all test case IDs.\n"
+        f"- Number IDs sequentially starting from {tc_prefix}-{tc_start:03d}.\n"
+        f"- Format each ID as: {tc_prefix}-NNN (e.g. {tc_prefix}-{tc_start:03d})\n"
+        f"- Include a TC Index table at the top of the document with columns: "
+        f"ID | Scenario | Type | Status | Script\n"
+        f"- Default Status for all rows: not_automated\n"
+    )
+
+
 class TestCaseDocumentationSkill:
     def __init__(self, ai_client: AIClient, kb_loader: KnowledgeBaseLoader = None):
         self.ai_client = ai_client
@@ -18,17 +30,26 @@ class TestCaseDocumentationSkill:
 
     # --- web ---
 
-    def generate_document(self, page_url: str, form_description: str, feature_name: str = None) -> str:
+    def generate_document(
+        self,
+        page_url: str,
+        form_description: str,
+        feature_name: str = None,
+        tc_prefix: str = "",
+        tc_start: int = 1,
+    ) -> str:
         """Generate UI test case doc. If feature_name given, injects full page + business rule context."""
         if feature_name:
             kb_context = self._build_web_context(feature_name)
         else:
             kb_context = self.kb_loader.get_ui_context()
 
+        tc_id_instruction = _build_tc_id_instruction(tc_prefix, tc_start) if tc_prefix else ""
         prompt = TEST_CASE_DOC_PROMPT.format(
             page_url=page_url,
             form_description=form_description,
             kb_context=kb_context,
+            tc_id_instruction=tc_id_instruction,
         )
         return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()
 
@@ -120,18 +141,22 @@ class TestCaseDocumentationSkill:
         description: str,
         api_type: str = "rest",
         feature_name: str = None,
+        tc_prefix: str = "",
+        tc_start: int = 1,
     ) -> str:
         if api_type == "rest":
             api_context = self._build_api_context(feature_name)
         else:
             api_context = self.kb_loader.get_graphql_api_context()
 
+        tc_id_instruction = _build_tc_id_instruction(tc_prefix, tc_start) if tc_prefix else ""
         prompt = API_TEST_CASE_DOC_PROMPT.format(
             endpoint=endpoint,
             method=method,
             description=description,
             api_context=api_context,
             kb_context=self.kb_loader.get_feature_context(feature_name),
+            tc_id_instruction=tc_id_instruction,
         )
         return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()
 
@@ -168,7 +193,12 @@ class TestCaseDocumentationSkill:
 
     # --- feature (generic) ---
 
-    def generate_feature_test_documentation(self, feature_name: str) -> str:
+    def generate_feature_test_documentation(
+        self,
+        feature_name: str,
+        tc_prefix: str = "",
+        tc_start: int = 1,
+    ) -> str:
         feature_context = self.kb_loader.get_feature_context(feature_name)
         increments_context = self.kb_loader.get_increments_context()
         kb_context = self.kb_loader.get_all_context()
@@ -176,5 +206,6 @@ class TestCaseDocumentationSkill:
         prompt = FEATURE_DOC_PROMPT.format(
             feature_context=feature_context + "\n" + increments_context,
             kb_context=kb_context,
+            ID_PREFIX=tc_prefix or "TC",
         )
         return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()
