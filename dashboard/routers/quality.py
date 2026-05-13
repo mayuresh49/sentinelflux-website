@@ -33,6 +33,19 @@ def _script_features(product: str) -> set[str]:
     return {py.stem.removeprefix("test_") for py in base.rglob("test_*.py")}
 
 
+def _scripts_by_domain(product: str) -> dict[str, int]:
+    base = _EXAMPLES_DIR / product / "tests"
+    if not base.exists():
+        return {}
+    counts: dict[str, int] = {}
+    for py in base.rglob("test_*.py"):
+        parts = py.relative_to(base).parts
+        if len(parts) >= 2:
+            domain = parts[0]
+            counts[domain] = counts.get(domain, 0) + 1
+    return counts
+
+
 def _doc_features(product: str) -> set[str]:
     base = _EXAMPLES_DIR / product / "docs" / "test_cases"
     if not base.exists():
@@ -68,6 +81,7 @@ def compute_metrics(product: str | None = None) -> dict:
         scripts = _script_features(p)
         docs = _doc_features(p)
         documented = scripts & docs
+        by_domain = _scripts_by_domain(p)
 
         p_entries = [e for e in all_entries if e.get("product") == p and e.get("agent") != "human"]
         recent = [e for e in p_entries if _parse_ts(e.get("timestamp", "")) > cutoff]
@@ -79,6 +93,7 @@ def compute_metrics(product: str | None = None) -> dict:
         per_product.append({
             "product": p,
             "scripts": len(scripts),
+            "scripts_by_domain": by_domain,
             "docs": len(docs),
             "documented": len(documented),
             "doc_coverage": round(len(documented) / len(scripts) * 100) if scripts else 0,
@@ -88,6 +103,10 @@ def compute_metrics(product: str | None = None) -> dict:
         })
 
     total_scripts = sum(r["scripts"] for r in per_product)
+    total_scripts_by_domain: dict[str, int] = {}
+    for r in per_product:
+        for d, n in r["scripts_by_domain"].items():
+            total_scripts_by_domain[d] = total_scripts_by_domain.get(d, 0) + n
     total_docs = sum(r["docs"] for r in per_product)
     total_documented = sum(r["documented"] for r in per_product)
     total_runs = sum(r["pass_rate"] is not None and 1 or 0 for r in per_product)
@@ -99,6 +118,7 @@ def compute_metrics(product: str | None = None) -> dict:
     return {
         "summary": {
             "scripts": total_scripts,
+            "scripts_by_domain": total_scripts_by_domain,
             "docs": total_docs,
             "doc_coverage": round(total_documented / total_scripts * 100) if total_scripts else 0,
             "quarantined": len(quarantined),

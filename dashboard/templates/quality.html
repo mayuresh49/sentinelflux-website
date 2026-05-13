@@ -19,7 +19,13 @@
     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
       <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Test Scripts</p>
       <p class="text-3xl font-bold text-slate-900 mt-1">{{ s.scripts }}</p>
-      <p class="text-xs text-slate-400 mt-1">across {{ per | length }} product{{ 's' if per | length != 1 else '' }}</p>
+      <div class="flex flex-wrap gap-1.5 mt-1.5">
+        {% for domain, count in s.scripts_by_domain.items() | sort %}
+        <span class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-medium">
+          {{ domain }} <span class="text-slate-700">{{ count }}</span>
+        </span>
+        {% endfor %}
+      </div>
     </div>
 
     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
@@ -95,7 +101,16 @@
               <td class="px-4 py-3 font-medium text-slate-800">
                 <a href="/quality?product={{ row.product }}" class="hover:text-indigo-600 transition-colors">{{ row.product }}</a>
               </td>
-              <td class="px-4 py-3 text-right text-slate-600">{{ row.scripts }}</td>
+              <td class="px-4 py-3 text-right text-slate-600">
+                <span class="font-medium">{{ row.scripts }}</span>
+                {% if row.scripts_by_domain %}
+                <div class="flex justify-end flex-wrap gap-1 mt-1">
+                  {% for domain, count in row.scripts_by_domain.items() | sort %}
+                  <span class="text-xs px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">{{ domain }} {{ count }}</span>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </td>
               <td class="px-4 py-3 text-right text-slate-600">{{ row.docs }}</td>
               <td class="px-4 py-3">
                 <div class="flex items-center gap-2">
