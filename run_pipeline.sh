@@ -15,6 +15,15 @@ SCRIPT_MODEL="${5:-qwen2.5-coder:14b-instruct-q4_K_M}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Prefer venv Python over system python3
+if [ -f "$SCRIPT_DIR/.venv/bin/python" ]; then
+  PYTHON="$SCRIPT_DIR/.venv/bin/python"
+elif command -v python3.11 > /dev/null 2>&1; then
+  PYTHON="$(command -v python3.11)"
+else
+  PYTHON="$(command -v python3)"
+fi
+
 EXAMPLE_DIR="examples/$PROJECT"
 KB_DIR="ai/knowledge_base/$PROJECT"
 
@@ -41,7 +50,7 @@ echo "OutputBase: $EXAMPLE_DIR"
 echo ""
 
 # --- Memory check ---
-FREE_MB=$(python3 -c "
+FREE_MB=$("$PYTHON" -c "
 import subprocess
 o=subprocess.check_output(['vm_stat']).decode()
 free=int([l for l in o.split('\n') if 'Pages free' in l][0].split(':')[1].strip().rstrip('.'))*4096//1024//1024
@@ -66,15 +75,25 @@ fi
 echo "Ollama OK"
 echo ""
 
+# --- Guard: skip script generation if hand-written test already exists ---
+HAND_WRITTEN_TEST="$EXAMPLE_DIR/tests/$DOMAIN/test_$FEATURE.py"
+SKIP_SCRIPT_FLAG=""
+if [ -f "$HAND_WRITTEN_TEST" ]; then
+  echo "Hand-written test exists: $HAND_WRITTEN_TEST"
+  echo "Script generation skipped — only regenerating test case doc."
+  SKIP_SCRIPT_FLAG="--skip-script"
+fi
+
 # --- Run pipeline ---
 echo ">>> Generating: $FEATURE ($DOMAIN) ..."
-python3 -m ai.pipeline.orchestrator \
+"$PYTHON" -m ai.pipeline.orchestrator \
   --feature "$FEATURE" \
   --domain "$DOMAIN" \
   --project "$PROJECT" \
   --doc-model "$DOC_MODEL" \
   --script-model "$SCRIPT_MODEL" \
-  --output-base "$EXAMPLE_DIR"
+  --output-base "$EXAMPLE_DIR" \
+  $SKIP_SCRIPT_FLAG
 
 echo ""
 echo "=== Done ==="

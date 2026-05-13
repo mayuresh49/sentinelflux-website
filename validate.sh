@@ -15,6 +15,16 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# ── Python interpreter ────────────────────────────────────────────────────────
+# Prefer .venv (created by setup_ai_generator.sh / pip install -e .), then python3.11, then python3.
+if [ -f "$SCRIPT_DIR/.venv/bin/python" ]; then
+  PYTHON="$SCRIPT_DIR/.venv/bin/python"
+elif command -v python3.11 > /dev/null 2>&1; then
+  PYTHON="$(command -v python3.11)"
+else
+  PYTHON="$(command -v python3)"
+fi
+
 # ── Flags ────────────────────────────────────────────────────────────────────
 SKIP_WEB=false
 SKIP_PIPELINE=false
@@ -79,26 +89,26 @@ skip_step() {
 
 # 1. Restful Booker — API
 run_step "Restful Booker API" "examples/restfulbooker" \
-  python3 -m pytest tests/api/ -m api -q --tb=short
+  "$PYTHON" -m pytest tests/api/ -m api -q --tb=short
 
 # 2. Restful Booker — Web
 if $SKIP_WEB; then
   skip_step "Restful Booker Web"
 else
   run_step "Restful Booker Web" "examples/restfulbooker" \
-    python3 -m pytest tests/web/ -m web -n 4 --tb=short
+    "$PYTHON" -m pytest tests/web/ -m web -n 4 --tb=short
 fi
 
 # 3. OrangeHRM — API
 run_step "OrangeHRM API" "examples/orangehrm" \
-  python3 -m pytest tests/api/ -m api -q --tb=short
+  "$PYTHON" -m pytest tests/api/ -m api -q --tb=short
 
 # 4. OrangeHRM — Web
 if $SKIP_WEB; then
   skip_step "OrangeHRM Web"
 else
   run_step "OrangeHRM Web" "examples/orangehrm" \
-    python3 -m pytest tests/web/ -m web -n 4 --tb=short
+    "$PYTHON" -m pytest tests/web/ -m web -n 4 --tb=short
 fi
 
 # 5. Qwen pipeline (end-to-end generation)
@@ -122,7 +132,7 @@ fi
 
 # 6. Build package
 header "Build package"
-if python3 -m build --quiet; then
+if "$PYTHON" -m build --quiet; then
   pass "Build package"
   RESULTS+=("PASS:Build package")
   WHEEL=$(ls dist/*.whl 2>/dev/null | tail -1)
@@ -139,7 +149,7 @@ if $DO_TESTPYPI; then
     echo -e "  ${YELLOW}TESTPYPI_TOKEN not set — skipping upload${NC}"
     RESULTS+=("SKIP:TestPyPI upload (no token)")
   else
-    if python3 -m twine upload \
+    if "$PYTHON" -m twine upload \
         --repository-url https://test.pypi.org/legacy/ \
         --username __token__ \
         --password "$TESTPYPI_TOKEN" \
