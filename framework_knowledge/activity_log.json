@@ -1,0 +1,131 @@
+{
+  "entries": [
+    {
+      "id": "3482d534-0c2f-471d-90bc-d93f54ba0267",
+      "timestamp": "2026-05-13T06:17:27.909804+00:00",
+      "event_type": "agent_run",
+      "agent": "doc_gen",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "success",
+      "summary": "Generated booking.md (12 test cases)",
+      "output": {},
+      "requires_human": false,
+      "approval_id": null
+    },
+    {
+      "id": "b767465f-f488-4d5d-b10e-369764296d3b",
+      "timestamp": "2026-05-13T06:17:27.910847+00:00",
+      "event_type": "agent_run",
+      "agent": "script_gen",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "success",
+      "summary": "Generated test_booking.py (12 tests)",
+      "output": {},
+      "requires_human": false,
+      "approval_id": null
+    },
+    {
+      "id": "92e6c7fc-a24b-44a0-850a-8ce9ad1cd0bc",
+      "timestamp": "2026-05-13T06:17:27.910974+00:00",
+      "event_type": "agent_run",
+      "agent": "result_analyzer",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "success",
+      "summary": "3 failures classified: 2 assertion, 1 infra",
+      "output": {},
+      "requires_human": false,
+      "approval_id": null
+    },
+    {
+      "id": "3a3147b1-568f-4b7f-88a1-8b1e5c5faf32",
+      "timestamp": "2026-05-13T06:17:27.911095+00:00",
+      "event_type": "agent_run",
+      "agent": "flaky_detector",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "success",
+      "summary": "1 quarantine candidate, 0 unquarantine",
+      "output": {},
+      "requires_human": true,
+      "approval_id": null
+    },
+    {
+      "id": "3c1236f0-cb06-47a6-9a3c-6ce92b4713fb",
+      "timestamp": "2026-05-13T06:17:27.911209+00:00",
+      "event_type": "agent_run",
+      "agent": "regression_guard",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "success",
+      "summary": "2 regressions detected vs baseline",
+      "output": {
+        "regressions": [
+          {
+            "test_id": "test_booking.py::test_create_booking"
+          }
+        ]
+      },
+      "requires_human": true,
+      "approval_id": null
+    },
+    {
+      "id": "91d5db4d-0fdf-420c-bb70-721a8984ab42",
+      "timestamp": "2026-05-13T06:17:27.911317+00:00",
+      "event_type": "agent_run",
+      "agent": "coverage_gap",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "success",
+      "summary": "3 untested scenarios found",
+      "output": {},
+      "requires_human": true,
+      "approval_id": null
+    },
+    {
+      "id": "dc095323-63a7-400c-b44f-9fa6cf82ce6c",
+      "timestamp": "2026-05-13T06:17:27.911439+00:00",
+      "event_type": "agent_run",
+      "agent": "doc_gen",
+      "product": "orangehrm",
+      "domain": "web",
+      "status": "success",
+      "summary": "Generated login.md (8 test cases)",
+      "output": {},
+      "requires_human": false,
+      "approval_id": null
+    },
+    {
+      "id": "e22b3d75-4c33-48a4-b19f-f820ed0decf5",
+      "timestamp": "2026-05-13T06:17:27.911565+00:00",
+      "event_type": "agent_run",
+      "agent": "locator_healer",
+      "product": "orangehrm",
+      "domain": "web",
+      "status": "success",
+      "summary": "2 locator heals proposed",
+      "output": {},
+      "requires_human": true,
+      "approval_id": null
+    },
+    {
+      "id": "6bd103e4-e041-446c-89af-3ebe34f1767c",
+      "timestamp": "2026-05-13T06:17:27.911691+00:00",
+      "event_type": "orchestrator_run",
+      "agent": "sentinel_orchestrator",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "pending",
+      "summary": "3 blockers require human review",
+      "output": {
+        "blockers_count": 3,
+        "failure_count": 3,
+        "regression_count": 2
+      },
+      "requires_human": true,
+      "approval_id": null
+    }
+  ]
+}

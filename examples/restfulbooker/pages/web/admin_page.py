@@ -10,7 +10,7 @@ class AdminPage(BasePage):
 
     @step_method("Navigate to admin panel")
     def navigate(self):
-        self.page.goto(f"{self._base_url}/#/admin", wait_until="networkidle")
+        self.page.goto(f"{self._base_url}/admin", wait_until="networkidle")
 
     @step_method("Enter admin username")
     def enter_username(self, username: str):

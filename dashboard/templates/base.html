@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SentinelFlux{% endblock %} — Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.13.10/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="h-full bg-slate-50 flex overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="w-56 bg-slate-900 flex flex-col shrink-0 h-full">
+    <div class="px-4 py-5 flex items-center gap-2.5 border-b border-slate-700/60">
+      <div class="flex gap-0.5">
+        <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
+        <div class="w-2 h-2 rounded-full bg-violet-400"></div>
+      </div>
+      <span class="text-white font-semibold text-sm tracking-wide">SentinelFlux</span>
+    </div>
+
+    <nav class="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
+      {% set nav_items = [
+        ("/", "Dashboard", "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"),
+        ("/activities", "Activities", "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"),
+        ("/approvals", "Approvals", "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"),
+        ("/docs", "Docs", "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"),
+        ("/scripts", "Scripts", "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"),
+        ("/agents", "Agents", "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2"),
+      ] %}
+      {% for href, label, icon_path in nav_items %}
+        {% set is_active = request.url.path == href %}
+        <a href="{{ href }}"
+           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                  {{ 'bg-indigo-600 text-white font-medium nav-active' if is_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+            <path stroke-linecap="round" stroke-linejoin="round" d="{{ icon_path }}"/>
+          </svg>
+          <span>{{ label }}</span>
+          {% if label == "Approvals" and pending_count > 0 %}
+            <span class="ml-auto bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium leading-none">{{ pending_count }}</span>
+          {% endif %}
+        </a>
+      {% endfor %}
+    </nav>
+
+    <div class="px-4 py-3 border-t border-slate-700/60 flex items-center justify-between">
+      <span class="text-slate-500 text-xs">v0.1.0</span>
+      <a href="/api/docs" target="_blank" class="text-slate-500 hover:text-slate-300 text-xs transition-colors">API</a>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <main class="flex-1 overflow-auto p-6 fade-in">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Docs{% endblock %}
+
+{% block content %}
+<div class="h-full flex flex-col space-y-4" style="height: calc(100vh - 3rem);">
+
+  <div class="flex items-center justify-between shrink-0">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Test Case Docs</h1>
+      <p class="text-sm text-slate-500 mt-0.5">AI-generated test case documentation</p>
+    </div>
+    <span class="text-sm text-slate-400">{{ docs | length }} document{{ 's' if docs | length != 1 else '' }}</span>
+  </div>
+
+  <div class="flex gap-4 flex-1 min-h-0" x-data="{ selected: null }">
+
+    <!-- Left: file list -->
+    <div class="w-72 shrink-0 flex flex-col bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+      <!-- Filters -->
+      <div class="p-3 border-b border-slate-100 space-y-2">
+        <input type="text" placeholder="Search..." id="doc-search"
+               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+               x-on:input="filterDocs($event.target.value)">
+        <div class="flex gap-2">
+          <select id="doc-product-filter" class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
+                  x-on:change="filterDocs()">
+            <option value="">All products</option>
+            {% for p in products %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+          </select>
+          <select id="doc-domain-filter" class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
+                  x-on:change="filterDocs()">
+            <option value="">All domains</option>
+            {% for d in domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <!-- List -->
+      <div class="flex-1 overflow-y-auto divide-y divide-slate-50" id="doc-list">
+        {% for d in docs %}
+        <button data-product="{{ d.product }}" data-domain="{{ d.domain }}" data-feature="{{ d.feature }}"
+                hx-get="/ui/docs/content?product={{ d.product }}&domain={{ d.domain }}&feature={{ d.feature }}"
+                hx-target="#content-viewer"
+                hx-indicator="#content-loading"
+                @click="selected = '{{ d.product }}/{{ d.domain }}/{{ d.feature }}'"
+                :class="selected === '{{ d.product }}/{{ d.domain }}/{{ d.feature }}' ? 'bg-indigo-50 border-l-2 border-indigo-500' : 'hover:bg-slate-50 border-l-2 border-transparent'"
+                class="w-full text-left px-4 py-3 transition-colors">
+          <p class="text-sm font-medium text-slate-700">{{ d.feature | replace('_', ' ') | title }}</p>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-xs text-indigo-600 font-medium">{{ d.product }}</span>
+            <span class="text-xs text-slate-400">{{ d.domain }}</span>
+          </div>
+        </button>
+        {% endfor %}
+        {% if not docs %}
+        <div class="p-6 text-center text-sm text-slate-400">No docs generated yet.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right: content viewer -->
+    <div class="flex-1 min-w-0 bg-white rounded-xl border border-slate-100 shadow-sm flex flex-col overflow-hidden">
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-3 shrink-0">
+        <span class="text-sm font-medium text-slate-600">Document Viewer</span>
+        <span id="content-loading" class="htmx-indicator flex items-center gap-1.5 text-xs text-indigo-600">
+          <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>Loading…
+        </span>
+      </div>
+      <div id="content-viewer" class="flex-1 overflow-auto p-6">
+        <div class="h-full flex items-center justify-center">
+          <p class="text-slate-400 text-sm">Select a document from the list to view its contents.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterDocs(searchVal) {
+  const search = (searchVal ?? document.getElementById('doc-search').value).toLowerCase();
+  const product = document.getElementById('doc-product-filter').value;
+  const domain = document.getElementById('doc-domain-filter').value;
+  document.querySelectorAll('#doc-list button[data-feature]').forEach(btn => {
+    const matchSearch = !search || btn.dataset.feature.includes(search) || btn.dataset.product.includes(search);
+    const matchProduct = !product || btn.dataset.product === product;
+    const matchDomain = !domain || btn.dataset.domain === domain;
+    btn.style.display = (matchSearch && matchProduct && matchDomain) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

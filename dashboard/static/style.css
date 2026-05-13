@@ -1,0 +1,40 @@
+/* Markdown content styling */
+.markdown-content { line-height: 1.7; color: #1e293b; }
+.markdown-content h1 { font-size: 1.75rem; font-weight: 700; margin: 0 0 1rem; color: #0f172a; }
+.markdown-content h2 { font-size: 1.35rem; font-weight: 600; margin: 1.75rem 0 0.75rem; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.35rem; }
+.markdown-content h3 { font-size: 1.1rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: #334155; }
+.markdown-content p { margin-bottom: 1rem; }
+.markdown-content ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+.markdown-content ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+.markdown-content li { margin-bottom: 0.25rem; }
+.markdown-content code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-size: 0.85em; font-family: ui-monospace, monospace; color: #7c3aed; }
+.markdown-content pre { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; margin-bottom: 1rem; }
+.markdown-content pre code { background: none; padding: 0; color: #1e293b; font-size: 0.875rem; }
+.markdown-content table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.9rem; }
+.markdown-content th { background: #f1f5f9; padding: 0.5rem 0.75rem; text-align: left; font-weight: 600; border: 1px solid #e2e8f0; }
+.markdown-content td { padding: 0.5rem 0.75rem; border: 1px solid #e2e8f0; }
+.markdown-content tr:nth-child(even) td { background: #f8fafc; }
+.markdown-content blockquote { border-left: 3px solid #6366f1; padding: 0.5rem 1rem; background: #f8f9ff; color: #475569; margin-bottom: 1rem; border-radius: 0 0.25rem 0.25rem 0; }
+.markdown-content hr { border: none; border-top: 1px solid #e2e8f0; margin: 1.5rem 0; }
+
+/* Code viewer */
+.code-viewer { background: #f8fafc; border-radius: 0.5rem; overflow: auto; }
+.code-viewer pre { margin: 0; padding: 1.25rem; font-size: 0.8125rem; line-height: 1.6; }
+
+/* HTMX loading indicator */
+.htmx-indicator { opacity: 0; transition: opacity 200ms ease; }
+.htmx-request .htmx-indicator { opacity: 1; }
+.htmx-request.htmx-indicator { opacity: 1; }
+
+/* Transitions */
+.fade-in { animation: fadeIn 200ms ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+/* Nav active state refinement */
+.nav-active { position: relative; }
+.nav-active::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 1.25rem; background: #818cf8; border-radius: 0 2px 2px 0; }

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% macro status_badge(status) %}
+  {% set cfg = {
+    "success": "bg-emerald-100 text-emerald-700",
+    "pending": "bg-amber-100 text-amber-700",
+    "error":   "bg-red-100 text-red-700",
+    "failure": "bg-red-100 text-red-700",
+    "skipped": "bg-slate-100 text-slate-500",
+  } %}
+  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium {{ cfg.get(status, 'bg-slate-100 text-slate-500') }}">
+    <span class="w-1.5 h-1.5 rounded-full
+      {% if status == 'success' %}bg-emerald-500
+      {% elif status in ('error','failure') %}bg-red-500
+      {% elif status == 'pending' %}bg-amber-500
+      {% else %}bg-slate-400{% endif %}"></span>
+    {{ status }}
+  </span>
+{% endmacro %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-6">
+
+  <!-- Page header -->
+  <div>
+    <h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+    <p class="text-sm text-slate-500 mt-0.5">Agent activity, blockers, and system health</p>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Activities</p>
+      <p class="text-3xl font-bold text-slate-900 mt-1">{{ total_activities }}</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 {{ 'ring-2 ring-amber-400' if pending_approvals > 0 else '' }}">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Pending Approvals</p>
+      <p class="text-3xl font-bold {{ 'text-amber-600' if pending_approvals > 0 else 'text-slate-900' }} mt-1">{{ pending_approvals }}</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 {{ 'ring-2 ring-red-400' if requires_human_count > 0 else '' }}">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Require Human</p>
+      <p class="text-3xl font-bold {{ 'text-red-600' if requires_human_count > 0 else 'text-slate-900' }} mt-1">{{ requires_human_count }}</p>
+    </div>
+    <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
+      <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Agents</p>
+      <p class="text-3xl font-bold text-slate-900 mt-1">{{ agent_count }}</p>
+    </div>
+  </div>
+
+  <!-- Alert banner -->
+  {% if pending_approvals > 0 %}
+  <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <svg class="w-5 h-5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+      </svg>
+      <p class="text-sm font-medium text-amber-800">{{ pending_approvals }} approval{{ 's' if pending_approvals != 1 else '' }} waiting for your review</p>
+    </div>
+    <a href="/approvals" class="text-sm font-medium text-amber-700 hover:text-amber-900 flex items-center gap-1">
+      Review <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+  {% endif %}
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Recent activity -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h2 class="font-semibold text-slate-800">Recent Activity</h2>
+        <a href="/activities" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">View all</a>
+      </div>
+      {% if recent %}
+      <div class="divide-y divide-slate-50">
+        {% for e in recent %}
+        <div class="px-5 py-3 flex items-start gap-3 hover:bg-slate-50/60 transition-colors">
+          <div class="shrink-0 mt-0.5">
+            {% set cfg = {"success":"bg-emerald-100 text-emerald-600","pending":"bg-amber-100 text-amber-600","error":"bg-red-100 text-red-600","skipped":"bg-slate-100 text-slate-400"} %}
+            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold {{ cfg.get(e.status, 'bg-slate-100 text-slate-400') }}">
+              {% if e.status == 'success' %}✓{% elif e.status in ('error','failure') %}✗{% elif e.status == 'pending' %}~{% else %}-{% endif %}
+            </span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-medium text-slate-700">{{ e.agent | replace('_', ' ') | title }}</span>
+              {% if e.product %}<span class="text-xs bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded font-medium">{{ e.product }}</span>{% endif %}
+              {% if e.requires_human %}<span class="text-xs bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-medium">needs review</span>{% endif %}
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5 truncate">{{ e.summary }}</p>
+          </div>
+          <span class="text-xs text-slate-400 shrink-0">{{ e.timestamp[11:16] }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="px-5 py-12 text-center">
+        <p class="text-sm text-slate-400">No activity yet. Run <code class="bg-slate-100 px-1 rounded">sentinelflux analyze</code> to populate.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Pending approvals quick list -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h2 class="font-semibold text-slate-800">Pending Approvals</h2>
+        <a href="/approvals" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Manage</a>
+      </div>
+      {% if pending_items %}
+      <div class="divide-y divide-slate-50">
+        {% for item in pending_items %}
+        {% set type_colors = {
+          "quarantine": "bg-orange-100 text-orange-700",
+          "unquarantine": "bg-emerald-100 text-emerald-700",
+          "locator_heal": "bg-blue-100 text-blue-700",
+          "script_review": "bg-purple-100 text-purple-700",
+          "coverage_gap": "bg-cyan-100 text-cyan-700",
+          "regression_review": "bg-red-100 text-red-700",
+        } %}
+        <div class="px-5 py-3">
+          <div class="flex items-start gap-2">
+            <span class="text-xs px-1.5 py-0.5 rounded font-medium {{ type_colors.get(item.type, 'bg-slate-100 text-slate-600') }} shrink-0">{{ item.type | replace('_',' ') }}</span>
+          </div>
+          <p class="text-sm text-slate-700 mt-1 truncate">{{ item.title }}</p>
+          <p class="text-xs text-slate-400 mt-0.5">{{ item.proposed_date }}</p>
+        </div>
+        {% endfor %}
+        {% if pending_count > pending_items | length %}
+        <div class="px-5 py-3">
+          <a href="/approvals" class="text-xs text-indigo-600 hover:text-indigo-800">+ {{ pending_count - pending_items | length }} more</a>
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="px-5 py-12 text-center">
+        <p class="text-sm text-slate-400">No pending approvals.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

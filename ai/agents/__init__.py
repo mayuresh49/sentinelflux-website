@@ -7,6 +7,7 @@ from ai.agents.quarantine_manager import QuarantineManager
 from ai.agents.coverage_gap_agent import CoverageGapAgent
 from ai.agents.locator_healer_agent import LocatorHealerAgent
 from ai.agents.regression_guard_agent import RegressionGuardAgent
+from ai.agents.sentinel_orchestrator import SentinelOrchestrator
 
 __all__ = [
     "AgentContext",
@@ -19,4 +20,5 @@ __all__ = [
     "CoverageGapAgent",
     "LocatorHealerAgent",
     "RegressionGuardAgent",
+    "SentinelOrchestrator",
 ]

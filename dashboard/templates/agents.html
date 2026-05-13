@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Agents{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-5">
+
+  <div>
+    <h1 class="text-2xl font-bold text-slate-900">Agents</h1>
+    <p class="text-sm text-slate-500 mt-0.5">Agent registry and last-run status</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for agent in agents %}
+    {% set last = agent.last_run %}
+    {% set status = last.status if last else 'never' %}
+    {% set status_colors = {
+      "success": "bg-emerald-100 text-emerald-700",
+      "pending": "bg-amber-100 text-amber-700",
+      "error": "bg-red-100 text-red-700",
+      "skipped": "bg-slate-100 text-slate-500",
+      "never": "bg-slate-100 text-slate-400",
+    } %}
+    {% set dot_colors = {
+      "success": "bg-emerald-500",
+      "pending": "bg-amber-500",
+      "error": "bg-red-500",
+      "skipped": "bg-slate-300",
+      "never": "bg-slate-200",
+    } %}
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow">
+      <div class="flex items-start justify-between">
+        <div>
+          <h3 class="font-semibold text-slate-800 text-sm">{{ agent.name | replace('_', ' ') | title }}</h3>
+          <p class="text-xs text-slate-500 mt-0.5">{{ agent.description }}</p>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span class="w-2 h-2 rounded-full {{ dot_colors.get(status, 'bg-slate-200') }}"></span>
+          <span class="text-xs font-medium {{ status_colors.get(status, 'text-slate-400') }}">{{ status }}</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 text-xs text-slate-400">
+        <span class="flex items-center gap-1">
+          <span class="font-medium {{ 'text-indigo-500' if not agent.requires_ai else 'text-slate-400' }}">
+            {{ 'Rule-based' if not agent.requires_ai else 'AI-powered' }}
+          </span>
+        </span>
+        <span>·</span>
+        <span>{{ agent.domain }}</span>
+      </div>
+
+      {% if last %}
+      <div class="border-t border-slate-50 pt-3 space-y-1">
+        <p class="text-xs text-slate-400">Last run: <span class="text-slate-600">{{ last.timestamp[5:16].replace('T',' ') }}</span></p>
+        <p class="text-xs text-slate-500 truncate">{{ last.summary }}</p>
+        {% if last.requires_human %}
+        <span class="inline-block text-xs bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-medium">needs review</span>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="border-t border-slate-50 pt-3">
+        <p class="text-xs text-slate-400 italic">Never run</p>
+      </div>
+      {% endif %}
+
+      <a href="/activities?agent={{ agent.name }}"
+         class="mt-auto text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+        View history
+        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

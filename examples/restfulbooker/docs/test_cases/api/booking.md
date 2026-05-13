@@ -1,200 +1,262 @@
-# API Test Case Document for /booking
+## API Test Case Document for `/booking`
 
-## Endpoint Scope
+### Endpoint Scope
 
-### POST /booking: Create a new booking record
+#### **POST /booking**
 - **Method:** POST
-- **Path:** /booking
+- **Path:** `/booking`
 - **Request Fields:**
-  - `firstname` (string) - Required
-  - `lastname` (string) - Required
-  - `totalprice` (number) - Required
-  - `depositpaid` (boolean) - Required
-  - `bookingdates` (object) - Required
-    - `checkin` (date) - Required
-    - `checkout` (date) - Required
-  - `additionalneeds` (string, optional) - Limited to 500 characters
+  - `firstname` (string, required)
+  - `lastname` (string, required)
+  - `totalprice` (number, required)
+  - `depositpaid` (boolean, required)
+  - `bookingdates` (object, required)
+    - `checkin` (string, date in format YYYY-MM-DD, required)
+    - `checkout` (string, date in format YYYY-MM-DD, required)
+  - `additionalneeds` (string, optional)
 - **Response Codes:**
-  - 201 Created
+  - `201 Created`
+  - `400 Bad Request`
 
-### GET /booking/{id}: Retrieve a booking by ID
+#### **GET /booking/{id}**
 - **Method:** GET
-- **Path:** /booking/{id}
+- **Path:** `/booking/{id}`
 - **Request Fields:**
-  - `id` (number) - Required
+  - `id` (integer, required)
 - **Response Codes:**
-  - 200 OK
-  - 404 Not Found
+  - `200 OK`
+  - `404 Not Found`
 
-### PUT /booking/{id}: Update an existing booking
+#### **PUT /booking/{id}**
 - **Method:** PUT
-- **Path:** /booking/{id}
+- **Path:** `/booking/{id}`
 - **Request Fields:**
   - `firstname` (string, optional)
   - `lastname` (string, optional)
   - `totalprice` (number, optional)
   - `depositpaid` (boolean, optional)
-  - `additionalneeds` (string, optional) - Limited to 500 characters
+  - `additionalneeds` (string, optional)
   - `bookingdates` (object, optional)
-    - `checkin` (date, optional)
-    - `checkout` (date, optional)
+    - `checkin` (string, date in format YYYY-MM-DD, optional)
+    - `checkout` (string, date in format YYYY-MM-DD, optional)
 - **Response Codes:**
-  - 200 OK
-  - 404 Not Found
+  - `200 OK`
+  - `404 Not Found`
+  - `400 Bad Request`
 
-### DELETE /booking/{id}: Delete a booking
+#### **DELETE /booking/{id}**
 - **Method:** DELETE
-- **Path:** /booking/{id}
+- **Path:** `/booking/{id}`
 - **Request Fields:**
-  - `id` (number) - Required
+  - `id` (integer, required)
 - **Response Codes:**
-  - 201 Created
+  - `201 Created`
+  - `404 Not Found`
 
-## Positive Test Cases
+### Positive Test Cases
 
-### POST /booking
-- **Description:** Create a new booking with valid data
-- **Input Data:**
-  ```json
-  {
-    "firstname": "John",
-    "lastname": "Doe",
-    "totalprice": 100,
-    "depositpaid": true,
-    "bookingdates": {
-      "checkin": "2024-01-01",
-      "checkout": "2024-01-02"
-    },
-    "additionalneeds": "Breakfast included"
+#### **POST /booking**
+```json
+{
+  "firstname": "John",
+  "lastname": "Doe",
+  "totalprice": 250,
+  "depositpaid": true,
+  "bookingdates": {
+    "checkin": "2024-01-15",
+    "checkout": "2024-01-20"
+  },
+  "additionalneeds": "Breakfast"
+}
+```
+**Expected Response:** `201 Created`
+
+#### **GET /booking/{id}**
+- Assume the booking ID returned from the POST request is `123`.
+
+**Expected Response:**
+```json
+{
+  "firstname": "John",
+  "lastname": "Doe",
+  "totalprice": 250,
+  "depositpaid": true,
+  "bookingdates": {
+    "checkin": "2024-01-15",
+    "checkout": "2024-01-20"
+  },
+  "additionalneeds": "Breakfast"
+}
+```
+**Expected Response Code:** `200 OK`
+
+#### **PUT /booking/{id}**
+```json
+{
+  "firstname": "Jane",
+  "lastname": "Doe",
+  "totalprice": 350,
+  "depositpaid": false,
+  "bookingdates": {
+    "checkin": "2024-01-16",
+    "checkout": "2024-01-21"
+  },
+  "additionalneeds": "Late check-out"
+}
+```
+**Expected Response:** `200 OK`
+
+#### **DELETE /booking/{id}**
+- Assume the booking ID returned from the POST request is `123`.
+
+**Expected Response Code:** `201 Created`
+
+### Negative Test Cases
+
+#### **POST /booking**
+```json
+{
+  "lastname": "Doe",
+  "totalprice": 250,
+  "depositpaid": true,
+  "bookingdates": {
+    "checkin": "2024-01-15",
+    "checkout": "2024-01-20"
   }
-  ```
-- **Expected Response Code:** 201 Created
+}
+```
+**Expected Response Code:** `400 Bad Request`
 
-### GET /booking/{id}
-- **Description:** Retrieve a booking by valid ID
-- **Input Data:**
-  - `id` (integer) - Assume valid ID returned from POST request
-- **Expected Response Code:** 200 OK
-
-### PUT /booking/{id}
-- **Description:** Update an existing booking with valid partial data
-- **Input Data:**
-  - `id` (integer) - Assume valid ID returned from POST request
-  ```json
-  {
-    "firstname": "Jane",
-    "totalprice": 150,
-    "additionalneeds": ""
+#### **POST /booking**
+```json
+{
+  "firstname": "John",
+  "lastname": "Doe",
+  "totalprice": "two fifty",
+  "depositpaid": true,
+  "bookingdates": {
+    "checkin": "2024-01-15",
+    "checkout": "2024-01-20"
   }
-  ```
-- **Expected Response Code:** 200 OK
+}
+```
+**Expected Response Code:** `400 Bad Request`
 
-### DELETE /booking/{id}
-- **Description:** Delete a booking by valid ID
-- **Input Data:**
-  - `id` (integer) - Assume valid ID returned from POST request
-- **Expected Response Code:** 201 Created
+#### **POST /booking**
+```json
+{
+  "firstname": "John",
+  "lastname": "Doe",
+  "totalprice": 250,
+  "depositpaid": "yes",
+  "bookingdates": {
+    "checkin": "2024-01-15",
+    "checkout": "2024-01-20"
+  }
+}
+```
+**Expected Response Code:** `400 Bad Request`
 
-## Negative Test Cases
+#### **POST /booking**
+```json
+{
+  "firstname": "John",
+  "lastname": "Doe",
+  "totalprice": 250,
+  "depositpaid": true,
+  "bookingdates": {
+    "checkin": "15/01/2024",
+    "checkout": "20/01/2024"
+  }
+}
+```
+**Expected Response Code:** `400 Bad Request`
 
-### POST /booking
-- **Description:** Missing required fields
-  - **Field Missing:** `firstname`
-  - **Expected Response Code:** Error response with appropriate error message
-- **Description:** Invalid data types
-  - **Invalid Field:** `totalprice` as string ("100")
-  - **Expected Response Code:** Error response with appropriate error message
-- **Description:** Date validation failure
-  - **Invalid Field:** `checkin` after `checkout`
-  - **Expected Response Code:** Error response with appropriate error message
+#### **POST /booking**
+```json
+{
+  "firstname": "John",
+  "lastname": "Doe",
+  "totalprice": 250,
+  "depositpaid": true,
+  "bookingdates": {
+    "checkin": "2026-01-20",
+    "checkout": "2024-01-15"
+  }
+}
+```
+**Expected Response Code:** `400 Bad Request`
 
-### GET /booking/{id}
-- **Description:** Non-existing booking ID
-  - **Input Data:**
-    - `id` (integer) - 999999999 (assumed non-existent)
-  - **Expected Response Code:** 404 Not Found
+#### **GET /booking/{id}**
+```json
+{
+  "id": "abc"
+}
+```
+**Expected Response Code:** `404 Not Found`
 
-### PUT /booking/{id}
-- **Description:** Update non-existing booking
-  - **Input Data:**
-    - `id` (integer) - 999999999 (assumed non-existent)
-  - **Expected Response Code:** 404 Not Found
+#### **PUT /booking/{id}**
+```json
+{
+  "totalprice": "three hundred"
+}
+```
+**Expected Response Code:** `400 Bad Request`
 
-### DELETE /booking/{id}
-- **Description:** Non-existing booking ID
-  - **Input Data:**
-    - `id` (integer) - 999999999 (assumed non-existent)
-  - **Expected Response Code:** Error response with appropriate error message
+### Edge Cases
 
-## Edge Cases
+#### **POST /booking**
+```json
+{
+  "firstname": "A",
+  "lastname": "B",
+  "totalprice": 0,
+  "depositpaid": false,
+  "bookingdates": {
+    "checkin": "2026-01-01",
+    "checkout": "2026-01-02"
+  }
+}
+```
+**Expected Response:** `201 Created`
 
-### POST /booking
-- **Description:** Maximum stay duration
-  - **Input Data:**
-    ```json
-    {
-      "firstname": "Edge",
-      "lastname": "Case",
-      "totalprice": 100,
-      "depositpaid": true,
-      "bookingdates": {
-        "checkin": "2024-01-01",
-        "checkout": "2025-01-01"
-      },
-      "additionalneeds": ""
-    }
-    ```
-  - **Expected Response Code:** Error response with appropriate error message
+#### **POST /booking**
+```json
+{
+  "firstname": "C",
+  "lastname": "D",
+  "totalprice": 10000,
+  "depositpaid": true,
+  "bookingdates": {
+    "checkin": "2026-01-01",
+    "checkout": "2026-12-31"
+  }
+}
+```
+**Expected Response:** `201 Created`
 
-### PUT /booking/{id}
-- **Description:** Update with empty string for `firstname`
-  - **Input Data:**
-    - `id` (integer) - Assume valid ID returned from POST request
-    ```json
-    {
-      "firstname": ""
-    }
-    ```
-  - **Expected Response Code:** Error response with appropriate error message
+#### **POST /booking**
+```json
+{
+  "firstname": "E",
+  "lastname": "F",
+  "totalprice": 250,
+  "depositpaid": true,
+  "additionalneeds": "A very long string that exceeds 500 characters and is intended to test the length limit of additional needs field. This string should be long enough to exceed the maximum allowed character count for this field."
+}
+```
+**Expected Response:** `400 Bad Request`
 
-### GET /booking/{id}
-- **Description:** Very large booking ID
-  - **Input Data:**
-    - `id` (integer) - 9223372036854775807 (max integer value)
-  - **Expected Response Code:** Error response with appropriate error message
+### Authentication and Authorization Cases
 
-## Authentication and Authorization Cases
+- **Assumption:** No authentication token validation in mock API.
 
-- **Description:** No authentication token validation in mock API
-- **Input Data:**
-  - N/A (no token required for mock testing)
-- **Expected Response Code:** Appropriate response code based on endpoint logic
-
-## Validation Rules
+### Validation Rules
 
 1. **Check-out date must be after check-in date**
-   - **Validation Rule:** Ensure `checkout` > `checkin`
-   - **Error Message:** "Checkout date must be after check-in date"
-
 2. **Booking price must be between 0 and 10000**
-   - **Validation Rule:** Ensure `totalprice` within range
-   - **Error Message:** "Total price must be between 0 and 10000"
-
 3. **Guest first name and last name are mandatory**
-   - **Validation Rule:** Ensure both `firstname` and `lastname` are present
-   - **Error Message:** "First name and last name are required"
-
 4. **Deposit can be optional**
-   - **Validation Rule:** Allow `depositpaid` to be omitted or boolean
-
 5. **Maximum stay duration is 365 days**
-   - **Validation Rule:** Ensure `checkout` within 1 year of `checkin`
-   - **Error Message:** "Maximum stay duration is 365 days"
-
 6. **Bookings cannot be created for past dates**
-   - **Validation Rule:** Ensure `checkin` not in the past
-   - **Error Message:** "Bookings cannot be made for past dates"
-
 7. **Additional needs field is optional and limited to 500 characters**
-   - **Validation Rule:** Allow empty or string with max length 500
-   - **Error Message:** "Additional needs must be less than 500 characters"

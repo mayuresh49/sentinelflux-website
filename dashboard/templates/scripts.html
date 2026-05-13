@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Scripts{% endblock %}
+
+{% block content %}
+<div class="h-full flex flex-col space-y-4" style="height: calc(100vh - 3rem);">
+
+  <div class="flex items-center justify-between shrink-0">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Test Scripts</h1>
+      <p class="text-sm text-slate-500 mt-0.5">Generated pytest scripts</p>
+    </div>
+    <span class="text-sm text-slate-400">{{ scripts | length }} script{{ 's' if scripts | length != 1 else '' }}</span>
+  </div>
+
+  <div class="flex gap-4 flex-1 min-h-0" x-data="{ selected: null }">
+
+    <!-- Left: file list -->
+    <div class="w-72 shrink-0 flex flex-col bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+      <div class="p-3 border-b border-slate-100 space-y-2">
+        <input type="text" placeholder="Search scripts..." id="script-search"
+               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+               x-on:input="filterScripts($event.target.value)">
+        <div class="flex gap-2">
+          <select id="script-product-filter" class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
+                  x-on:change="filterScripts()">
+            <option value="">All products</option>
+            {% for p in products %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+          </select>
+          <select id="script-domain-filter" class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
+                  x-on:change="filterScripts()">
+            <option value="">All domains</option>
+            {% for d in domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto divide-y divide-slate-50" id="script-list">
+        {% for s in scripts %}
+        <button data-product="{{ s.product }}" data-domain="{{ s.domain }}" data-feature="{{ s.feature }}"
+                hx-get="/ui/scripts/content?product={{ s.product }}&domain={{ s.domain }}&feature={{ s.feature }}"
+                hx-target="#script-viewer"
+                hx-indicator="#script-loading"
+                @click="selected = '{{ s.product }}/{{ s.domain }}/{{ s.feature }}'"
+                :class="selected === '{{ s.product }}/{{ s.domain }}/{{ s.feature }}' ? 'bg-indigo-50 border-l-2 border-indigo-500' : 'hover:bg-slate-50 border-l-2 border-transparent'"
+                class="w-full text-left px-4 py-3 transition-colors">
+          <p class="text-sm font-medium text-slate-700 font-mono">test_{{ s.feature }}.py</p>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-xs text-indigo-600 font-medium">{{ s.product }}</span>
+            <span class="text-xs text-slate-400">{{ s.domain }}</span>
+          </div>
+        </button>
+        {% endfor %}
+        {% if not scripts %}
+        <div class="p-6 text-center text-sm text-slate-400">No scripts generated yet.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right: code viewer -->
+    <div class="flex-1 min-w-0 bg-white rounded-xl border border-slate-100 shadow-sm flex flex-col overflow-hidden">
+      <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-3 shrink-0">
+        <span class="text-sm font-medium text-slate-600">Script Viewer</span>
+        <span id="script-loading" class="htmx-indicator flex items-center gap-1.5 text-xs text-indigo-600">
+          <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>Loading…
+        </span>
+      </div>
+      <div id="script-viewer" class="flex-1 overflow-auto code-viewer">
+        <div class="h-full flex items-center justify-center">
+          <p class="text-slate-400 text-sm">Select a script to view the code.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterScripts(searchVal) {
+  const search = (searchVal ?? document.getElementById('script-search').value).toLowerCase();
+  const product = document.getElementById('script-product-filter').value;
+  const domain = document.getElementById('script-domain-filter').value;
+  document.querySelectorAll('#script-list button[data-feature]').forEach(btn => {
+    const matchSearch = !search || btn.dataset.feature.includes(search) || btn.dataset.product.includes(search);
+    const matchProduct = !product || btn.dataset.product === product;
+    const matchDomain = !domain || btn.dataset.domain === domain;
+    btn.style.display = (matchSearch && matchProduct && matchDomain) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

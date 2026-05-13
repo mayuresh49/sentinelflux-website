@@ -1,0 +1,64 @@
+"""
+SentinelFlux Dashboard — FastAPI app serving the monitoring UI and JSON API.
+
+Start:
+    sentinelflux dashboard
+    uvicorn dashboard.app:app --reload   # dev mode
+
+UI pages (HTMX + Tailwind):
+    /                   Dashboard home
+    /activities         Agent activity log
+    /approvals          Human-in-the-loop approval queue
+    /docs               Generated test case docs viewer
+    /scripts            Generated test scripts viewer
+    /agents             Agent registry and status
+
+JSON API:
+    /api/activities, /api/approvals, /api/docs, /api/scripts, /api/agents, /api/health
+    Interactive docs at /api/docs (FastAPI Swagger UI)
+"""
+from pathlib import Path
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
+from dashboard.routers import activities, approvals, docs, scripts, agents
+from dashboard.routers import pages, partials
+
+_STATIC_DIR = Path(__file__).resolve().parent / "static"
+
+app = FastAPI(
+    title="SentinelFlux Dashboard",
+    description="Monitoring, approvals, and artifact review for the SentinelFlux agent system",
+    version="0.1.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Static assets
+app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+
+# HTML UI pages and HTMX partials
+app.include_router(pages.router)
+app.include_router(partials.router)
+
+# JSON API
+app.include_router(activities.router, prefix="/api")
+app.include_router(approvals.router, prefix="/api")
+app.include_router(docs.router, prefix="/api")
+app.include_router(scripts.router, prefix="/api")
+app.include_router(agents.router, prefix="/api")
+
+
+@app.get("/api/health", tags=["health"])
+def health():
+    return {"status": "ok"}
