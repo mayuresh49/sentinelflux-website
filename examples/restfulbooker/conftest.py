@@ -28,7 +28,18 @@ def rb_config(request):
 
 @pytest.fixture(scope="session")
 def rb_credentials(rb_config):
+    """API auth credentials (password123)."""
     creds = rb_config.get("restfulbooker", {}).get("credentials", {})
+    return {
+        "username": creds.get("username", "admin"),
+        "password": creds.get("password", "password123"),
+    }
+
+
+@pytest.fixture(scope="session")
+def rb_web_credentials(rb_config):
+    """Web admin UI credentials (password)."""
+    creds = rb_config.get("restfulbooker", {}).get("web_credentials", {})
     return {
         "username": creds.get("username", "admin"),
         "password": creds.get("password", "password"),

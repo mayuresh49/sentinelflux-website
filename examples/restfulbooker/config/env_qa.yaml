@@ -3,7 +3,10 @@ restfulbooker:
   web_base_url: "https://automationintesting.online"
   credentials:
     username: "admin"
-    password: "password123"
+    password: "password123"   # API auth endpoint
+  web_credentials:
+    username: "admin"
+    password: "password"      # Web admin UI login
 
 browser:
   timeout: 15000
