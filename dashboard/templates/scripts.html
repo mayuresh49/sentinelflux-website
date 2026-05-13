@@ -51,6 +51,8 @@
         {% endfor %}
         {% if not scripts %}
         <div class="p-6 text-center text-sm text-slate-400">No scripts generated yet.</div>
+        {% else %}
+        <div id="script-no-results" class="p-6 text-center text-sm text-slate-400" style="display:none">No matching scripts.</div>
         {% endif %}
       </div>
     </div>
@@ -83,12 +85,17 @@ function filterScripts(searchVal) {
   const search = (searchVal ?? document.getElementById('script-search').value).toLowerCase();
   const product = document.getElementById('script-product-filter').value;
   const domain = document.getElementById('script-domain-filter').value;
+  let visible = 0;
   document.querySelectorAll('#script-list button[data-feature]').forEach(btn => {
-    const matchSearch = !search || btn.dataset.feature.includes(search) || btn.dataset.product.includes(search);
+    const matchSearch = !search || btn.dataset.feature.includes(search) || btn.dataset.product.includes(search) || btn.dataset.domain.includes(search);
     const matchProduct = !product || btn.dataset.product === product;
     const matchDomain = !domain || btn.dataset.domain === domain;
-    btn.style.display = (matchSearch && matchProduct && matchDomain) ? '' : 'none';
+    const show = matchSearch && matchProduct && matchDomain;
+    btn.style.display = show ? '' : 'none';
+    if (show) visible++;
   });
+  const noResults = document.getElementById('script-no-results');
+  if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
 }
 </script>
 {% endblock %}

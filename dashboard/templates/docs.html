@@ -53,6 +53,8 @@
         {% endfor %}
         {% if not docs %}
         <div class="p-6 text-center text-sm text-slate-400">No docs generated yet.</div>
+        {% else %}
+        <div id="doc-no-results" class="p-6 text-center text-sm text-slate-400" style="display:none">No matching documents.</div>
         {% endif %}
       </div>
     </div>
@@ -85,12 +87,17 @@ function filterDocs(searchVal) {
   const search = (searchVal ?? document.getElementById('doc-search').value).toLowerCase();
   const product = document.getElementById('doc-product-filter').value;
   const domain = document.getElementById('doc-domain-filter').value;
+  let visible = 0;
   document.querySelectorAll('#doc-list button[data-feature]').forEach(btn => {
-    const matchSearch = !search || btn.dataset.feature.includes(search) || btn.dataset.product.includes(search);
+    const matchSearch = !search || btn.dataset.feature.includes(search) || btn.dataset.product.includes(search) || btn.dataset.domain.includes(search);
     const matchProduct = !product || btn.dataset.product === product;
     const matchDomain = !domain || btn.dataset.domain === domain;
-    btn.style.display = (matchSearch && matchProduct && matchDomain) ? '' : 'none';
+    const show = matchSearch && matchProduct && matchDomain;
+    btn.style.display = show ? '' : 'none';
+    if (show) visible++;
   });
+  const noResults = document.getElementById('doc-no-results');
+  if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
 }
 </script>
 {% endblock %}
