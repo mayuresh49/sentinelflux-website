@@ -1,0 +1,336 @@
+{% extends "base.html" %}
+{% block title %}Knowledge Base{% endblock %}
+
+{% set increment_template %}feature: "feature_name"
+domain: "api"  # api | web | mobile | security
+description: |
+  Describe what changed or what new capability needs testing.
+
+# For API features
+endpoints:
+  - name: "Endpoint Name"
+    path: "/path"
+    method: GET
+    description: "What this endpoint does"
+    auth_required: true
+
+# Test scenarios to generate
+scenarios:
+  - name: "Happy path"
+    type: happy_path
+    description: "Main success flow"
+  - name: "Error case"
+    type: error
+    description: "Main failure scenario"
+  - name: "Edge case"
+    type: edge_case
+    description: "Boundary or unusual input"
+
+# For web features
+# ui_changes:
+#   - component: "Form name"
+#     action: "What changed"
+{% endset %}
+
+{% block content %}
+<div class="max-w-full space-y-5"
+     x-data="{
+       tab: 'files',
+       selectedProduct: '{{ products[0] if products else '' }}',
+       selectedFile: null,
+       showIncrementForm: false,
+       incrementFilename: '',
+       incrementContent: `{{ increment_template | replace('`', '\\`') }}`,
+     }">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Knowledge Base</h1>
+      <p class="text-sm text-slate-500 mt-0.5">Browse KB files, create increments, trigger test generation</p>
+    </div>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+    {% for t, label, count in [('files','KB Files', none), ('increments','Increments', increments|length), ('pipeline','Pipeline', recent_jobs|length)] %}
+    <button @click="tab = '{{ t }}'"
+            :class="tab === '{{ t }}' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+            class="px-4 py-1.5 text-sm font-medium rounded-lg transition-all">
+      {{ label }}
+      {% if count is not none and count > 0 %}
+      <span class="ml-1.5 text-slate-400 text-xs">({{ count }})</span>
+      {% endif %}
+    </button>
+    {% endfor %}
+  </div>
+
+  <!-- ── TAB 1: KB Files ─────────────────────────────────────────────── -->
+  <div x-show="tab === 'files'" class="flex gap-4" style="height: calc(100vh - 14rem);">
+
+    <!-- Left: product + file list -->
+    <div class="w-64 shrink-0 flex flex-col bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+      <!-- Product selector -->
+      <div class="p-2 border-b border-slate-100 flex flex-wrap gap-1">
+        {% for p in products %}
+        <button @click="selectedProduct = '{{ p }}'; selectedFile = null; document.getElementById('kb-editor-panel').innerHTML = '<div class=\'h-full flex items-center justify-center\'><p class=\'text-slate-400 text-sm\'>Select a file to view and edit.</p></div>'"
+                :class="selectedProduct === '{{ p }}' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                class="px-2.5 py-1 rounded text-xs font-medium transition-colors">{{ p }}</button>
+        {% endfor %}
+      </div>
+      <!-- File list -->
+      {% for p in products %}
+      <div x-show="selectedProduct === '{{ p }}'" class="flex-1 overflow-y-auto divide-y divide-slate-50">
+        {% for f in kb_files[p] %}
+        <button @click="selectedFile = '{{ p }}/{{ f }}'"
+                hx-get="/ui/kb/content?product={{ p }}&file={{ f }}"
+                hx-target="#kb-editor-panel"
+                hx-indicator="#kb-loading"
+                :class="selectedFile === '{{ p }}/{{ f }}' ? 'bg-indigo-50 border-l-2 border-indigo-500' : 'hover:bg-slate-50 border-l-2 border-transparent'"
+                class="w-full text-left px-4 py-2.5 transition-colors">
+          <p class="text-xs font-mono text-slate-700">{{ f }}</p>
+        </button>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Right: YAML editor -->
+    <div class="flex-1 min-w-0 bg-white rounded-xl border border-slate-100 shadow-sm flex flex-col overflow-hidden">
+      <div class="px-4 py-2.5 border-b border-slate-100 flex items-center gap-3 shrink-0 bg-slate-50/50">
+        <span class="text-xs font-medium text-slate-500">YAML Editor</span>
+        <span id="kb-loading" class="htmx-indicator flex items-center gap-1 text-xs text-indigo-600">
+          <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>Loading…
+        </span>
+      </div>
+      <div id="kb-editor-panel" class="flex-1 overflow-auto">
+        <div class="h-full flex items-center justify-center">
+          <p class="text-slate-400 text-sm">Select a file from the list to view and edit.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 2: Increments ───────────────────────────────────────────── -->
+  <div x-show="tab === 'increments'" x-cloak class="space-y-4">
+
+    <!-- Toolbar -->
+    <div class="flex items-center justify-between">
+      <p class="text-sm text-slate-500">Drop a feature YAML here to queue for test generation. Processed increments are tracked in <code class="bg-slate-100 px-1 rounded">kb_increments_log.yaml</code>.</p>
+      <button @click="showIncrementForm = !showIncrementForm"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        New Increment
+      </button>
+    </div>
+
+    <!-- New increment form -->
+    <div x-show="showIncrementForm" x-cloak
+         class="bg-white rounded-xl border border-indigo-100 shadow-sm p-5 space-y-4">
+      <h3 class="font-semibold text-slate-800 text-sm">New Increment YAML</h3>
+      <div class="flex gap-3 items-end">
+        <div class="flex flex-col gap-1 flex-1">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Filename</label>
+          <input x-model="incrementFilename" type="text" placeholder="feature_001_booking_patch.yaml"
+                 class="text-sm font-mono border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+        </div>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Content</label>
+        <textarea x-model="incrementContent" rows="18"
+                  class="font-mono text-xs border border-slate-200 rounded-lg p-3 resize-y focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50"></textarea>
+      </div>
+      <div class="flex gap-2">
+        <button @click="createIncrement(incrementFilename, incrementContent)"
+                class="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+          Save Increment
+        </button>
+        <button @click="showIncrementForm = false"
+                class="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- Increment list -->
+    <div id="increment-list" class="space-y-3">
+      {% if increments %}
+        {% for inc in increments %}
+        <div class="bg-white rounded-xl border {{ 'border-emerald-100' if inc.processed else 'border-slate-100' }} shadow-sm p-4 flex items-start justify-between gap-4">
+          <div class="flex items-start gap-3 flex-1 min-w-0">
+            {% if inc.processed %}
+            <span class="w-5 h-5 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">✓</span>
+            {% else %}
+            <span class="w-5 h-5 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">~</span>
+            {% endif %}
+            <div class="min-w-0">
+              <p class="text-sm font-mono font-medium text-slate-700">{{ inc.filename }}</p>
+              {% if inc.log %}
+              <p class="text-xs text-slate-400 mt-0.5">Processed {{ inc.log.processed_date }} → {{ inc.log.generated_doc or '' }}</p>
+              {% else %}
+              <p class="text-xs text-amber-600 mt-0.5">Not yet processed through pipeline</p>
+              {% endif %}
+            </div>
+          </div>
+          {% if not inc.processed %}
+          <button @click="
+            tab = 'pipeline';
+            document.getElementById('pipeline-feature').value = '{{ inc.filename.replace('.yaml','').replace('.yml','') }}';
+            document.getElementById('pipeline-increment').value = '{{ inc.filename }}';
+          "
+                  class="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-indigo-600 border border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors">
+            Run Pipeline →
+          </button>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="bg-white rounded-xl border border-slate-100 py-12 text-center">
+        <p class="text-slate-400 text-sm">No increments yet. Create one above or drop a YAML into <code class="bg-slate-100 px-1 rounded">ai/knowledge_base/increments/</code>.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── TAB 3: Pipeline ─────────────────────────────────────────────── -->
+  <div x-show="tab === 'pipeline'" x-cloak class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Trigger form -->
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5 space-y-4">
+      <h2 class="font-semibold text-slate-800">Trigger Test Generation</h2>
+      <p class="text-xs text-slate-500">Runs <code class="bg-slate-100 px-1 rounded">KB → doc → pytest script</code> pipeline in the background. Progress appears in the job list and Activity log.</p>
+
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Product</label>
+            <select id="pipeline-product" class="text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              {% for p in products %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Domain</label>
+            <select id="pipeline-domain" class="text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              <option value="api">api</option>
+              <option value="web">web</option>
+              <option value="mobile">mobile</option>
+              <option value="security">security</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Feature name</label>
+          <input id="pipeline-feature" type="text" placeholder="e.g. booking, login, admin_users"
+                 class="text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+        </div>
+
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Increment file <span class="text-slate-400 font-normal">(optional — overrides feature)</span></label>
+          <input id="pipeline-increment" type="text" placeholder="e.g. feature_001_booking_patch.yaml"
+                 class="text-sm font-mono border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+        </div>
+
+        <div x-data="{ open: false }">
+          <button @click="open = !open" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+            <svg class="w-3 h-3 transition-transform" :class="open ? 'rotate-90':''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            Advanced options
+          </button>
+          <div x-show="open" x-cloak class="mt-3 space-y-2 pl-4 border-l-2 border-slate-100">
+            <div class="flex flex-col gap-1">
+              <label class="text-xs text-slate-500">Ollama URL</label>
+              <input id="pipeline-local-url" type="text" value="http://localhost:11434"
+                     class="text-xs font-mono border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs text-slate-500">Doc model</label>
+              <input id="pipeline-doc-model" type="text" value="mistral:7b-instruct-v0.3-q4_K_M"
+                     class="text-xs font-mono border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs text-slate-500">Script model</label>
+              <input id="pipeline-script-model" type="text" value="qwen2.5-coder:14b-instruct-q4_K_M"
+                     class="text-xs font-mono border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none">
+            </div>
+            <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+              <input id="pipeline-skip-script" type="checkbox" class="rounded"> Skip script generation (doc only)
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <button @click="triggerPipeline()"
+              class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Run Pipeline
+      </button>
+    </div>
+
+    <!-- Job list -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="font-semibold text-slate-800">Recent Jobs</h2>
+        <a href="/activities?agent=pipeline" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">View in activity log</a>
+      </div>
+      <div id="pipeline-jobs" class="space-y-3">
+        {% if recent_jobs %}
+          {% for job in recent_jobs %}
+            {% include "partials/pipeline_job.html" %}
+          {% endfor %}
+        {% else %}
+        <div class="bg-white rounded-xl border border-slate-100 py-12 text-center">
+          <p class="text-slate-400 text-sm">No pipeline runs yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function createIncrement(filename, content) {
+  if (!filename) { alert('Enter a filename'); return; }
+  if (!filename.endsWith('.yaml') && !filename.endsWith('.yml')) { alert('Filename must end with .yaml'); return; }
+  const res = await fetch('/api/kb/increments', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ filename, content }),
+  });
+  if (res.ok) {
+    window.location.reload();
+  } else {
+    const err = await res.json();
+    alert('Error: ' + (err.detail || JSON.stringify(err)));
+  }
+}
+
+async function triggerPipeline() {
+  const product = document.getElementById('pipeline-product').value;
+  const feature = document.getElementById('pipeline-feature').value;
+  const domain = document.getElementById('pipeline-domain').value;
+  const increment_file = document.getElementById('pipeline-increment').value;
+  const local_url = document.getElementById('pipeline-local-url')?.value || 'http://localhost:11434';
+  const doc_model = document.getElementById('pipeline-doc-model')?.value || 'mistral:7b-instruct-v0.3-q4_K_M';
+  const script_model = document.getElementById('pipeline-script-model')?.value || 'qwen2.5-coder:14b-instruct-q4_K_M';
+  const skip_script = document.getElementById('pipeline-skip-script')?.checked || false;
+
+  if (!feature && !increment_file) { alert('Enter a feature name or increment file'); return; }
+
+  const res = await fetch('/ui/pipeline/trigger', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ product, feature, domain, increment_file, local_url, doc_model, script_model, skip_script }),
+  });
+  if (res.ok) {
+    const html = await res.text();
+    const list = document.getElementById('pipeline-jobs');
+    list.innerHTML = html + list.innerHTML;
+    // Clear placeholder if present
+    list.querySelectorAll('.text-center').forEach(el => el.closest('.bg-white')?.remove());
+  }
+}
+</script>
+{% endblock %}

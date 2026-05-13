@@ -1,0 +1,55 @@
+{% set is_done = job.status in ("completed", "failed") %}
+<div id="pipeline-job-{{ job.id }}"
+     {% if not is_done %}
+     hx-get="/ui/pipeline/job/{{ job.id }}"
+     hx-trigger="every 4s"
+     hx-swap="outerHTML"
+     {% endif %}
+     class="bg-white rounded-xl border {{ 'border-emerald-100' if job.status == 'completed' else ('border-red-100' if job.status == 'failed' else 'border-amber-100') }} shadow-sm p-4 fade-in"
+     x-data="{ showLog: false }">
+
+  <div class="flex items-start justify-between gap-3">
+    <div class="flex items-start gap-3 flex-1 min-w-0">
+      {% if job.status == 'running' %}
+      <svg class="w-4 h-4 text-amber-500 shrink-0 mt-0.5 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+      </svg>
+      {% elif job.status == 'completed' %}
+      <svg class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+      {% else %}
+      <svg class="w-4 h-4 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      {% endif %}
+      <div class="min-w-0">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-sm font-medium text-slate-700">{{ job.feature or job.increment_file }}</span>
+          <span class="text-xs bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded font-medium">{{ job.product }}</span>
+          <span class="text-xs text-slate-400">{{ job.domain }}</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-0.5">
+          Started {{ job.started[11:16] }}
+          {% if job.finished %} · Finished {{ job.finished[11:16] }}{% endif %}
+          {% if job.status == 'running' %}<span class="text-amber-600 font-medium"> · Running…</span>{% endif %}
+        </p>
+      </div>
+    </div>
+    <span class="shrink-0 text-xs px-2 py-0.5 rounded-full font-medium
+      {{ 'bg-emerald-100 text-emerald-700' if job.status == 'completed' else
+         ('bg-red-100 text-red-700' if job.status == 'failed' else
+          'bg-amber-100 text-amber-700') }}">
+      {{ job.status }}
+    </span>
+  </div>
+
+  {% if job.output %}
+  <div class="mt-3">
+    <button @click="showLog = !showLog" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+      <svg class="w-3 h-3 transition-transform" :class="showLog ? 'rotate-90' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      <span x-text="showLog ? 'Hide log' : 'Show log'"></span>
+    </button>
+    <div x-show="showLog" x-cloak class="mt-2">
+      <pre class="text-xs text-slate-600 bg-slate-50 border border-slate-100 rounded-lg p-3 overflow-auto max-h-48 font-mono whitespace-pre-wrap">{{ job.output[-2000:] }}</pre>
+    </div>
+  </div>
+  {% endif %}
+</div>

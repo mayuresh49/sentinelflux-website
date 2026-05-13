@@ -80,11 +80,44 @@ async def scripts_page(request: Request):
 
 @router.get("/agents", response_class=HTMLResponse)
 async def agents_page(request: Request):
+    import yaml
     from dashboard.routers.agents import _AGENT_REGISTRY
+    from dashboard.agent_meta import AGENT_META
+    config_path = Path(__file__).resolve().parent.parent.parent / "framework_knowledge" / "agent_config.yaml"
+    agent_config: dict = {}
+    if config_path.exists():
+        data = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        agent_config = data.get("agents", {})
     status_map: dict = {}
     for e in reversed(_alog.all()):
         name = e.get("agent", "")
         if name and name not in status_map:
             status_map[name] = e
-    agents_data = [{**a, "last_run": status_map.get(a["name"])} for a in _AGENT_REGISTRY]
+    agents_data = [
+        {**a, "last_run": status_map.get(a["name"]), "meta": AGENT_META.get(a["name"], {}), "config": agent_config.get(a["name"], {})}
+        for a in _AGENT_REGISTRY
+    ]
     return templates.TemplateResponse(request, "agents.html", context=_ctx(agents=agents_data))
+
+
+@router.get("/kb", response_class=HTMLResponse)
+async def kb_page(request: Request):
+    from dashboard.routers.kb import _list_products, _kb_files, _load_increments_log, _INCREMENTS_DIR, _TEXT_SUFFIXES
+    from dashboard.routers.pipeline import _load_jobs
+    products = _list_products()
+    kb_files = {p: _kb_files(p) for p in products}
+    log = _load_increments_log()
+    increment_files: list[str] = []
+    if _INCREMENTS_DIR.exists():
+        increment_files = sorted(
+            f.name for f in _INCREMENTS_DIR.iterdir()
+            if f.suffix in _TEXT_SUFFIXES and f.name != ".gitkeep"
+        )
+    increments = [{"filename": fn, "processed": fn in log, "log": log.get(fn)} for fn in increment_files]
+    recent_jobs = list(reversed(_load_jobs()))[:20]
+    return templates.TemplateResponse(request, "kb.html", context=_ctx(
+        products=products,
+        kb_files=kb_files,
+        increments=increments,
+        recent_jobs=recent_jobs,
+    ))

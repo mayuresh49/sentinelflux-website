@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import html as html_lib
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, Request
+import yaml
+from fastapi import APIRouter, BackgroundTasks, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -85,3 +88,99 @@ async def reject_partial(approval_id: str, request: Request):
     _am.resolve(approval_id, decision="rejected")
     item = _am.get(approval_id)
     return templates.TemplateResponse(request, "partials/approval_card.html", context={"item": item})
+
+
+@router.get("/kb/content", response_class=HTMLResponse)
+async def kb_content(request: Request, product: str, file: str):
+    from dashboard.routers.kb import _KB_DIR
+    path = _KB_DIR / product / file
+    if not path.exists():
+        return HTMLResponse('<p class="text-red-500 text-sm p-4">File not found.</p>')
+    content = path.read_text(encoding="utf-8")
+    return templates.TemplateResponse(request, "partials/kb_file_editor.html", context={
+        "product": product, "filename": file, "content": content,
+    })
+
+
+@router.post("/kb/save", response_class=HTMLResponse)
+async def kb_save(
+    product: str = Form(...),
+    filename: str = Form(...),
+    content: str = Form(...),
+):
+    from dashboard.routers.kb import _KB_DIR
+    path = _KB_DIR / product / filename
+    if not path.exists():
+        return HTMLResponse('<span class="text-red-500 text-xs">File not found</span>')
+    path.write_text(content, encoding="utf-8")
+    return HTMLResponse('<span class="text-emerald-600 text-xs font-medium">Saved ✓</span>')
+
+
+@router.post("/pipeline/trigger", response_class=HTMLResponse)
+async def pipeline_trigger_partial(request: Request, background_tasks: BackgroundTasks):
+    from dashboard.routers.pipeline import TriggerBody, _write_job, _run
+    body_data = await request.json()
+    body = TriggerBody(**body_data)
+    job_id = str(uuid.uuid4())
+    job: dict = {
+        "id": job_id,
+        "started": datetime.now(timezone.utc).isoformat(),
+        "product": body.product,
+        "feature": body.feature,
+        "domain": body.domain,
+        "increment_file": body.increment_file,
+        "status": "running",
+        "output": "",
+        "finished": None,
+    }
+    _write_job(job)
+    background_tasks.add_task(_run, job_id, body)
+    return templates.TemplateResponse(request, "partials/pipeline_job.html", context={"job": job})
+
+
+@router.get("/pipeline/job/{job_id}", response_class=HTMLResponse)
+async def pipeline_job_partial(request: Request, job_id: str):
+    from dashboard.routers.pipeline import _load_jobs
+    job = next((j for j in _load_jobs() if j["id"] == job_id), None)
+    if not job:
+        return HTMLResponse(f'<div id="pipeline-job-{job_id}" class="text-red-500 text-sm p-3">Job not found.</div>')
+    return templates.TemplateResponse(request, "partials/pipeline_job.html", context={"job": job})
+
+
+@router.post("/agents/{name}/config", response_class=HTMLResponse)
+async def save_agent_config(name: str, request: Request):
+    from dashboard.agent_meta import AGENT_META
+    _CONFIG_PATH = _ROOT_DIR / "framework_knowledge" / "agent_config.yaml"
+    meta = AGENT_META.get(name, {})
+    if not meta.get("config_params"):
+        return HTMLResponse('<span class="text-slate-400 text-xs">No configurable params</span>')
+    form = await request.form()
+    data: dict = {}
+    if _CONFIG_PATH.exists():
+        data = yaml.safe_load(_CONFIG_PATH.read_text(encoding="utf-8")) or {}
+    agents_cfg = data.get("agents", {})
+    agent_cfg = dict(agents_cfg.get(name, {}))
+    for param in meta["config_params"]:
+        val = form.get(param["name"])
+        if val is None:
+            continue
+        ptype = param["type"]
+        if ptype == "bool":
+            agent_cfg[param["name"]] = str(val).lower() in ("true", "1", "on", "yes")
+        elif ptype == "int":
+            try:
+                agent_cfg[param["name"]] = int(val)
+            except ValueError:
+                pass
+        elif ptype == "float":
+            try:
+                agent_cfg[param["name"]] = float(val)
+            except ValueError:
+                pass
+        else:
+            agent_cfg[param["name"]] = str(val)
+    agents_cfg[name] = agent_cfg
+    data["agents"] = agents_cfg
+    _CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    _CONFIG_PATH.write_text(yaml.dump(data, default_flow_style=False), encoding="utf-8")
+    return HTMLResponse('<span class="text-emerald-600 text-xs font-medium">Saved ✓</span>')

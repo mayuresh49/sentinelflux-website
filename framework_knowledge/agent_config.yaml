@@ -1,0 +1,22 @@
+# SentinelFlux Agent Configuration Overrides
+# Managed via the dashboard (/agents) or edit directly.
+# Only values that differ from defaults need to be set.
+
+agents:
+  flaky_detector:
+    enabled: true
+    window: 10
+    fail_threshold: 0.3
+    pass_streak: 5
+  regression_guard:
+    enabled: true
+    save_as_baseline: false
+  quarantine_manager:
+    auto_apply: false
+  sentinel_orchestrator:
+    enabled: true
+    run_result_analyzer: true
+    run_flaky_detector: true
+    run_regression_guard: true
+    run_coverage_gap: true
+    run_locator_healer: true
