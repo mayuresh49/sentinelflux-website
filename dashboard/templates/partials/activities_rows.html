@@ -1,23 +1,25 @@
 {% set status_dot = {"success":"bg-emerald-500","pending":"bg-amber-500","error":"bg-red-500","failure":"bg-red-500","skipped":"bg-slate-300"} %}
 {% set status_text = {"success":"text-emerald-700","pending":"text-amber-700","error":"text-red-700","failure":"text-red-700","skipped":"text-slate-500"} %}
+{% if entries %}
 {% for e in entries %}
 <tr class="hover:bg-slate-50/60 transition-colors" x-data="{ open: false }">
   <td class="px-4 py-3 text-xs text-slate-400 whitespace-nowrap font-mono">{{ e.timestamp[5:16].replace('T',' ') }}</td>
-  <td class="px-4 py-3 text-sm font-medium text-slate-700">{{ e.agent | replace('_',' ') | title }}</td>
-  <td class="px-4 py-3 text-sm text-slate-600">
-    {% if e.product %}
-    <span class="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded text-xs font-medium">{{ e.product }}</span>
-    {% else %}<span class="text-slate-300">—</span>{% endif %}
+  <td class="px-4 py-3 text-sm font-medium text-slate-700 whitespace-nowrap">{{ e.agent | replace('_',' ') | title }}</td>
+  <td class="px-4 py-3">
+    {% if e.product %}<span class="bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded text-xs font-medium">{{ e.product }}</span>
+    {% else %}<span class="text-slate-300 text-sm">—</span>{% endif %}
   </td>
   <td class="px-4 py-3 text-sm text-slate-600">{{ e.domain or '—' }}</td>
-  <td class="px-4 py-3">
+  <td class="px-4 py-3 whitespace-nowrap">
     <span class="inline-flex items-center gap-1.5 text-xs font-medium {{ status_text.get(e.status,'text-slate-500') }}">
-      <span class="w-1.5 h-1.5 rounded-full {{ status_dot.get(e.status,'bg-slate-300') }}"></span>
+      <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ status_dot.get(e.status,'bg-slate-300') }}"></span>
       {{ e.status }}
     </span>
   </td>
-  <td class="px-4 py-3 text-sm text-slate-600 max-w-xs truncate">{{ e.summary }}</td>
-  <td class="px-4 py-3">
+  <td class="px-4 py-3 text-sm text-slate-600 max-w-xs">
+    <span class="block truncate">{{ e.summary }}</span>
+  </td>
+  <td class="px-4 py-3 whitespace-nowrap">
     <div class="flex items-center gap-2">
       {% if e.requires_human %}
       <span class="text-xs bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-medium">review</span>
@@ -38,3 +40,10 @@
 </tr>
 {% endif %}
 {% endfor %}
+{% else %}
+<tr>
+  <td colspan="7" class="py-16 text-center">
+    <p class="text-slate-400 text-sm">No matching activities.</p>
+  </td>
+</tr>
+{% endif %}
