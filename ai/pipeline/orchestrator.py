@@ -77,57 +77,22 @@ class TestPipelineOrchestrator:
     # --- steps ---
 
     def _generate_doc(self, feature_name: str, domain: str, out_path: Path = None, output_base: Path = None) -> Path:
-        from ai.skills.test_case_doc_kb import TestCaseDocumentationSkill
-        from ai.prompts.prompt_templates import FEATURE_DOC_PROMPT
-
-        skill = TestCaseDocumentationSkill(self.ai_client, self.kb_loader)
-
-        feature_context = self.kb_loader.get_feature_context(feature_name)
-        increments_context = self.kb_loader.get_increments_context()
-        kb_context = self.kb_loader.get_all_context()
-
-        if domain == "api":
-            doc_content = skill.generate_api_test_document(
-                endpoint=f"/{feature_name}",
-                method="ALL",
-                description=f"All {feature_name} API operations",
-                api_type="rest",
-                feature_name=feature_name,
-            )
-        elif domain == "web":
-            doc_content = skill.generate_document(
-                page_url=f"/{feature_name}",
-                form_description=f"{feature_name} UI feature",
-                feature_name=feature_name,
-            )
-        else:
-            prompt = FEATURE_DOC_PROMPT.format(
-                feature_context=feature_context + "\n" + increments_context,
-                kb_context=kb_context,
-            )
-            doc_content = self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()
-
-        if out_path is None:
-            base = output_base if output_base else ROOT_DIR
-            out_path = base / "docs" / "test_cases" / domain / f"{feature_name}.md"
-
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(doc_content, encoding="utf-8")
-        _log.info("Doc written: %s", out_path)
-        return out_path
-
-    def _generate_script(self, test_case_doc: str, feature_name: str, domain: str, output_base: Path = None) -> Path:
-        from ai.skills.test_script_gen import TestScriptGenSkill
-
-        skill = TestScriptGenSkill(self._script_client, self.kb_loader)
-        code = skill.generate_script(test_case_doc, domain, feature_name)
+        from ai.agents import DocGenAgent, AgentContext
 
         base = output_base if output_base else ROOT_DIR
-        out_path = base / "tests" / domain / f"test_{feature_name}.py"
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(code, encoding="utf-8")
-        _log.info("Script written: %s", out_path)
-        return out_path
+        ctx = AgentContext(domain=domain, output_base=base)
+        agent = DocGenAgent(ai_client=self.ai_client, kb_loader=self.kb_loader, context=ctx)
+        result = agent.run(feature_name=feature_name, output_path=out_path)
+        return result["doc_path"]
+
+    def _generate_script(self, test_case_doc: str, feature_name: str, domain: str, output_base: Path = None) -> Path:
+        from ai.agents import ScriptGenAgent, AgentContext
+
+        base = output_base if output_base else ROOT_DIR
+        ctx = AgentContext(domain=domain, output_base=base)
+        agent = ScriptGenAgent(ai_client=self._script_client, kb_loader=self.kb_loader, context=ctx)
+        result = agent.run(test_case_doc=test_case_doc, feature_name=feature_name)
+        return result["script_path"]
 
     def _load_increment(self, increment_file: str):
         path = ROOT_DIR / "ai" / "knowledge_base" / "increments" / increment_file
