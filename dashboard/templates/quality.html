@@ -154,7 +154,7 @@
       <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
         <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
         <span class="text-sm text-amber-800 font-medium">{{ s.flaky }} flaky detection{{ 's' if s.flaky != 1 else '' }}</span>
-        <a href="/activities?agent=flaky_detector" class="text-xs text-amber-600 hover:text-amber-800 underline">view →</a>
+        <a href="/activities?agent=flaky_detector{% if filter_product %}&product={{ filter_product }}{% endif %}" class="text-xs text-amber-600 hover:text-amber-800 underline">view →</a>
       </div>
     </div>
   </div>
@@ -188,7 +188,7 @@
                  list="sf-test-datalist" oninput="sfQuarAutoFill(this)"
                  class="text-sm border border-slate-200 rounded-lg px-3 py-2 w-60 focus:outline-none focus:ring-2 focus:ring-indigo-300 font-mono bg-white">
           <datalist id="sf-test-datalist">
-            {% for t in all_tests %}<option value="{{ t.name }}">{{ t.product }} / {{ t.domain }}</option>{% endfor %}
+            {% for t in all_tests %}{% if not filter_product or t.product == filter_product %}<option value="{{ t.name }}">{{ t.product }} / {{ t.domain }}</option>{% endif %}{% endfor %}
           </datalist>
         </div>
         <div class="flex flex-col gap-1">
