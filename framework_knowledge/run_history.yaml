@@ -1,0 +1,12 @@
+# SentinelFlux Run History
+# Managed by QuarantineManager.record_run() — do not edit manually.
+# Read by FlakyDetectorAgent to identify flaky test candidates.
+#
+# Structure:
+#   tests:
+#     <test_nodeid>:
+#       - status: passed | failed
+#         date: "YYYY-MM-DD"
+#         duration: 0.45   # seconds
+
+tests: {}

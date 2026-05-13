@@ -340,3 +340,39 @@ def locator_manager(locale):
     return LocatorManager(locale=locale)
 
 
+# ── Quarantine: mark xfail at collection time ─────────────────────────────────
+
+def pytest_collection_modifyitems(config, items):
+    try:
+        from ai.agents.quarantine_manager import QuarantineManager
+        quarantined = QuarantineManager().quarantined_ids()
+        if not quarantined:
+            return
+        marker = pytest.mark.xfail(
+            strict=False,
+            reason="quarantined: flaky — see framework_knowledge/quarantine.yaml",
+        )
+        for item in items:
+            if item.nodeid in quarantined:
+                item.add_marker(marker)
+    except Exception:
+        pass  # never block collection
+
+
+# ── Run history: record pass/fail after each test ─────────────────────────────
+
+def pytest_runtest_logreport(report):
+    if report.when != "call":
+        return
+    try:
+        from ai.agents.quarantine_manager import QuarantineManager
+        status = "failed" if report.failed else "passed"
+        QuarantineManager().record_run(
+            report.nodeid,
+            status,
+            meta={"duration": round(report.duration, 3)},
+        )
+    except Exception:
+        pass  # never interrupt test execution
+
+

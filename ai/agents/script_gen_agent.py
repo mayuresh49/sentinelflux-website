@@ -1,0 +1,46 @@
+"""ScriptGenAgent — generates a pytest script from a test case document."""
+from __future__ import annotations
+
+from pathlib import Path
+
+from ai.agents.base_agent import BaseAgent
+
+_ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+
+
+class ScriptGenAgent(BaseAgent):
+    """
+    Wraps ai.skills.test_script_gen.TestScriptGenSkill.
+
+    Domain controls which markers, fixtures, and conventions are injected:
+      api      → @pytest.mark.api, rest_client fixture
+      web      → @pytest.mark.web, page fixture, BasePage imports
+      mobile   → @pytest.mark.mobile, mobile_driver fixture
+      security → @pytest.mark.security, rest_client fixture
+
+    Extra params (passed via ctx.extend()):
+      custom_fixtures — list[str] to override default fixtures for the domain
+    """
+    name = "script_gen"
+
+    def run(
+        self,
+        *,
+        test_case_doc: str,
+        feature_name: str,
+        output_path: Path | None = None,
+    ) -> dict:
+        from ai.skills.test_script_gen import TestScriptGenSkill
+
+        skill = TestScriptGenSkill(self.client, self.kb)
+        code = skill.generate_script(test_case_doc, self.ctx.domain, feature_name)
+
+        out = output_path or self._default_output(feature_name)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(code, encoding="utf-8")
+        self._log.info("Script written: %s", out)
+        return {"script_path": out, "domain": self.ctx.domain, "feature": feature_name}
+
+    def _default_output(self, feature_name: str) -> Path:
+        base = self.ctx.output_base or _ROOT_DIR
+        return base / "tests" / self.ctx.domain / f"test_{feature_name}.py"
