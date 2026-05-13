@@ -36,7 +36,9 @@ def dispatch(item: dict, decision: str) -> str:
             return _apply_unquarantine(item, details, decision)
         elif atype == "locator_heal":
             return _apply_locator_heal(item, details, decision)
-        elif atype in ("regression_review", "coverage_gap", "script_review"):
+        elif atype == "coverage_gap":
+            return _acknowledge_coverage_gap(item, decision)
+        elif atype in ("regression_review", "script_review"):
             return _log_acknowledgement(item, decision)
     except Exception as exc:
         _log.error("Approval dispatch failed for %s/%s: %s", atype, decision, exc)
@@ -179,6 +181,33 @@ def _apply_locator_heal(item: dict, details: dict, decision: str) -> str:
                 _log.error("Locator heal revert failed: %s", exc)
                 return f"Revert failed: {exc}"
         return f"Rejected — no changes made for '{element_name}'"
+
+
+# ── coverage gap ────────────────────────────────────────────────────────────
+
+def _acknowledge_coverage_gap(item: dict, decision: str) -> str:
+    gaps = (item.get("details") or {}).get("gaps", [])
+    if decision != "approved":
+        _alog.append(
+            event_type="approval_action", agent="human",
+            domain=item.get("domain"), product=item.get("product"),
+            status="skipped", summary=f"Coverage gap dismissed: {item.get('title', '')}",
+        )
+        return "Dismissed — no tests will be generated"
+
+    suggested = [g.get("suggested_test_name", "") for g in gaps if g.get("suggested_test_name")]
+    summary = (
+        f"{len(gaps)} gap(s) queued for generation — trigger from KB page: "
+        + ", ".join(suggested[:5])
+        + (" …" if len(suggested) > 5 else "")
+    ) if suggested else f"{len(gaps)} gap(s) acknowledged"
+    _alog.append(
+        event_type="approval_action", agent="human",
+        domain=item.get("domain"), product=item.get("product"),
+        status="pending", summary=summary,
+        output={"gaps": suggested},
+    )
+    return summary
 
 
 # ── acknowledgement-only types ──────────────────────────────────────────────
