@@ -151,10 +151,12 @@ async def agents_page(request: Request):
 @router.get("/quality", response_class=HTMLResponse)
 async def quality_page(request: Request, product: str | None = None):
     from dashboard.routers.quality import compute_metrics
+    from dashboard.routers.partials import _quarantine_groups
     metrics = compute_metrics(product)
     return templates.TemplateResponse(request, "quality.html", context=_ctx(
         metrics=metrics,
         filter_product=product or "",
+        quarantine_groups=_quarantine_groups(product),
     ))
 
 

@@ -85,6 +85,8 @@ def _apply_quarantine(item: dict, details: dict, decision: str) -> str:
         if not any(q.get("test_id") == test_id for q in quarantined):
             quarantined.append({
                 "test_id": test_id,
+                "product": item.get("product"),
+                "domain": item.get("domain"),
                 "reason": details.get("rule", "flaky"),
                 "quarantined_date": str(date.today()),
                 "consecutive_passes": 0,

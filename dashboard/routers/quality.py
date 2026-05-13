@@ -73,6 +73,7 @@ def compute_metrics(product: str | None = None) -> dict:
         runs_total = len([e for e in recent if e.get("status") in ("success", "failure", "error")])
         runs_success = len([e for e in recent if e.get("status") == "success"])
         flaky = len([e for e in p_entries if e.get("agent") == "flaky_detector"])
+        p_quarantined = [q for q in quarantined if q.get("product") == p]
 
         per_product.append({
             "product": p,
@@ -80,7 +81,7 @@ def compute_metrics(product: str | None = None) -> dict:
             "docs": len(docs),
             "documented": len(documented),
             "doc_coverage": round(len(documented) / len(scripts) * 100) if scripts else 0,
-            "quarantined": len(quarantined),
+            "quarantined": len(p_quarantined),
             "pass_rate": round(runs_success / runs_total * 100) if runs_total else None,
             "flaky": flaky,
         })

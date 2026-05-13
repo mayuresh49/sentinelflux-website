@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import html as html_lib
 import uuid
-from datetime import datetime, timezone
+from collections import defaultdict
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Optional
 
@@ -13,7 +14,8 @@ from fastapi.templating import Jinja2Templates
 
 from utils.activity_log import ActivityLog
 from utils.approval_manager import ApprovalManager
-from dashboard.routers.approval_dispatch import dispatch as _dispatch
+from dashboard.routers.approval_dispatch import dispatch as _dispatch, _load_quarantine, _save_quarantine
+from dashboard.routers.kb import _list_products
 
 router = APIRouter(prefix="/ui", tags=["partials"])
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
@@ -154,6 +156,83 @@ async def pipeline_job_partial(request: Request, job_id: str):
     if not job:
         return HTMLResponse(f'<div id="pipeline-job-{job_id}" class="text-red-500 text-sm p-3">Job not found.</div>')
     return templates.TemplateResponse(request, "partials/pipeline_job.html", context={"job": job})
+
+
+def _quarantine_groups(filter_product: str | None) -> dict:
+    data = _load_quarantine()
+    items = data.get("quarantined", [])
+    if filter_product:
+        items = [q for q in items if q.get("product") == filter_product]
+    groups: dict = defaultdict(list)
+    for q in sorted(items, key=lambda x: (x.get("product") or "", x.get("domain") or "")):
+        groups[(q.get("product") or "—", q.get("domain") or "—")].append(q)
+    return dict(groups)
+
+
+def _quar_ctx(filter_product: str) -> dict:
+    return {
+        "quarantine_groups": _quarantine_groups(filter_product or None),
+        "filter_product": filter_product,
+        "all_products": _list_products(),
+    }
+
+
+@router.get("/quarantine/list", response_class=HTMLResponse)
+async def quarantine_list_partial(request: Request, product: str | None = None):
+    return templates.TemplateResponse(request, "partials/quarantine_list.html",
+                                      context=_quar_ctx(product or ""))
+
+
+@router.post("/quarantine/add", response_class=HTMLResponse)
+async def quarantine_add(
+    request: Request,
+    test_id: str = Form(...),
+    product: str = Form(""),
+    domain: str = Form(""),
+    reason: str = Form("manual"),
+    filter_product: str = Form(""),
+):
+    tid = test_id.strip()
+    if tid:
+        data = _load_quarantine()
+        quarantined = data.setdefault("quarantined", [])
+        if not any(q.get("test_id") == tid for q in quarantined):
+            quarantined.append({
+                "test_id": tid,
+                "product": product or None,
+                "domain": domain or None,
+                "reason": reason or "manual",
+                "quarantined_date": str(date.today()),
+                "consecutive_passes": 0,
+                "added_by": "human",
+            })
+            _save_quarantine(data)
+            _alog.append(
+                event_type="approval_action", agent="human",
+                product=product or None, domain=domain or None,
+                status="success", summary=f"Manually quarantined: {tid}",
+            )
+    return templates.TemplateResponse(request, "partials/quarantine_list.html",
+                                      context=_quar_ctx(filter_product))
+
+
+@router.post("/quarantine/remove", response_class=HTMLResponse)
+async def quarantine_remove(
+    request: Request,
+    test_id: str = Form(...),
+    filter_product: str = Form(""),
+):
+    tid = test_id.strip()
+    if tid:
+        data = _load_quarantine()
+        data["quarantined"] = [q for q in data.get("quarantined", []) if q.get("test_id") != tid]
+        _save_quarantine(data)
+        _alog.append(
+            event_type="approval_action", agent="human",
+            status="success", summary=f"Manually removed from quarantine: {tid}",
+        )
+    return templates.TemplateResponse(request, "partials/quarantine_list.html",
+                                      context=_quar_ctx(filter_product))
 
 
 @router.post("/agents/{name}/config", response_class=HTMLResponse)

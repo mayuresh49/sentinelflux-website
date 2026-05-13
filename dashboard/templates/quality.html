@@ -147,27 +147,75 @@
   </div>
 
   <!-- Health signals -->
-  {% if s.flaky > 0 or s.quarantined > 0 %}
+  {% if s.flaky > 0 %}
   <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-5">
     <h2 class="font-semibold text-slate-800 text-sm mb-3">Signals to Investigate</h2>
     <div class="flex flex-wrap gap-3">
-      {% if s.flaky > 0 %}
       <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
         <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
         <span class="text-sm text-amber-800 font-medium">{{ s.flaky }} flaky detection{{ 's' if s.flaky != 1 else '' }}</span>
         <a href="/activities?agent=flaky_detector" class="text-xs text-amber-600 hover:text-amber-800 underline">view →</a>
       </div>
-      {% endif %}
-      {% if s.quarantined > 0 %}
-      <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-        <span class="w-2 h-2 rounded-full bg-red-400 shrink-0"></span>
-        <span class="text-sm text-red-800 font-medium">{{ s.quarantined }} quarantined test{{ 's' if s.quarantined != 1 else '' }}</span>
-        <a href="/approvals" class="text-xs text-red-600 hover:text-red-800 underline">manage →</a>
-      </div>
-      {% endif %}
     </div>
   </div>
   {% endif %}
+
+  <!-- Quarantine management -->
+  <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"
+       x-data="{ addOpen: false }">
+    <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+      <div>
+        <h2 class="font-semibold text-slate-800">Quarantined Tests</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Tests excluded from CI runs — managed here or by the QuarantineManager agent</p>
+      </div>
+      <button @click="addOpen = !addOpen"
+              :class="addOpen ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-100'"
+              class="flex items-center gap-1.5 text-xs font-medium border rounded-lg px-3 py-1.5 transition-colors">
+        <span x-text="addOpen ? '✕ Cancel' : '+ Add Test'"></span>
+      </button>
+    </div>
+
+    <!-- Add form -->
+    <div x-show="addOpen" x-cloak class="border-b border-slate-100 p-4 bg-slate-50/60">
+      <form hx-post="/ui/quarantine/add"
+            hx-target="#quarantine-list"
+            hx-swap="innerHTML"
+            class="flex flex-wrap gap-3 items-end">
+        <input type="hidden" name="filter_product" value="{{ filter_product }}">
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Test ID / function name</label>
+          <input type="text" name="test_id" required placeholder="test_booking_create"
+                 class="text-sm border border-slate-200 rounded-lg px-3 py-2 w-60 focus:outline-none focus:ring-2 focus:ring-indigo-300 font-mono bg-white">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Product</label>
+          <select name="product" class="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option value="">— none —</option>
+            {% for p in metrics.all_products %}<option value="{{ p }}" {{ 'selected' if filter_product == p }}>{{ p }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Domain</label>
+          <input type="text" name="domain" placeholder="api / web"
+                 class="text-sm border border-slate-200 rounded-lg px-3 py-2 w-28 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Reason</label>
+          <input type="text" name="reason" value="manual" placeholder="flaky / environment"
+                 class="text-sm border border-slate-200 rounded-lg px-3 py-2 w-36 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white">
+        </div>
+        <button type="submit"
+                class="bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg px-4 py-2 transition-colors">
+          Quarantine
+        </button>
+      </form>
+    </div>
+
+    <!-- List (HTMX-swappable) -->
+    <div id="quarantine-list" class="divide-y divide-slate-50 max-h-[480px] overflow-y-auto">
+      {% include "partials/quarantine_list.html" %}
+    </div>
+  </div>
 
 </div>
 {% endblock %}
