@@ -225,7 +225,7 @@ def _parse_args(argv=None):
     group.add_argument("--increment", help="Increment YAML filename in ai/knowledge_base/increments/")
     group.add_argument("--doc", help="Path to existing test case doc (skip doc generation)")
 
-    parser.add_argument("--domain", required=True, choices=["api", "web", "mobile", "security"])
+    parser.add_argument("--domain", required=True, choices=["api", "web", "mobile", "security", "a11y"])
     parser.add_argument("--skip-script", action="store_true",
                         help="Generate doc only — do not overwrite existing test script")
     parser.add_argument("--project", default=None,

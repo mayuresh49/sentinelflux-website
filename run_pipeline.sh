@@ -1,8 +1,11 @@
 #!/bin/bash
 # SentinelFlux AI Pipeline Runner
 # Usage: ./run_pipeline.sh <project> <feature> <domain> [doc-model] [script-model] [tc-prefix] [tc-start]
+# Domains: api | web | mobile | security | a11y
 # Example: ./run_pipeline.sh orangehrm login web
 #          ./run_pipeline.sh orangehrm recruitment web qwen2.5-coder:14b-instruct-q4_K_M qwen2.5-coder:14b-instruct-q4_K_M OH-WEB 58
+#          ./run_pipeline.sh orangehrm security_api security _ _ OH-SEC 1
+#          ./run_pipeline.sh orangehrm accessibility a11y _ _ OH-A11Y 1
 
 set -e
 

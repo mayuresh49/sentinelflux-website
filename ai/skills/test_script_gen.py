@@ -107,30 +107,117 @@ Example test function:
 Imports:
     import pytest
     import requests
-    from utils.assertions import assert_status_code
+    from pages.web.login_page import LoginPage  # only for web security tests
 
-Marker: @pytest.mark.security
+Markers: @pytest.mark.security  PLUS  @pytest.mark.api (API layer) or @pytest.mark.web (browser layer)
 
-Fixtures: rest_client (for API-layer security tests)
+--- API security patterns ---
+Fixtures: product_api_client (authenticated), raw requests for unauthenticated calls
 
-Patterns:
     # Auth bypass
-    response = requests.get(url, headers={})  # no token
-    assert_status_code(response, 401)
+    resp = requests.get(f"{_API_BASE}/resource")
+    assert resp.status_code == 401
 
     # SQL injection
-    response = rest_client.post("create_booking", payload_name="sql_injection_payload")
-    assert response.status_code in (400, 422)
+    resp = product_api_client.get("/resource", params={"q": "' OR '1'='1"})
+    assert resp.status_code != 500
+    assert "sql" not in resp.text.lower()
 
     # IDOR
-    response = rest_client.get("get_booking", path_params={"booking_id": other_user_booking_id})
-    assert_status_code(response, 403)
+    resp = requests.get(f"{_API_BASE}/resource/OTHER_ID")
+    assert resp.status_code in (401, 403)
 
-Example test function:
+    # Response content-type
+    resp = product_api_client.get("/resource")
+    assert "application/json" in resp.headers.get("Content-Type", "")
+
+    # Security headers
+    assert resp.headers.get("X-Content-Type-Options", "").lower() == "nosniff"
+
+Example API test:
+    @pytest.mark.api
     @pytest.mark.security
-    def test_get_booking_without_auth_returns_401(rest_client):
-        response = requests.get(f"{rest_client.base_url}/booking/1")
-        assert_status_code(response, 401)
+    def test_OH_SEC_001_unauthenticated_request_returns_401():
+        resp = requests.get(f"{_API_BASE}/admin/users")
+        assert resp.status_code == 401
+
+--- Web security patterns (Playwright) ---
+Fixtures: page (pytest-playwright)
+
+    # XSS non-execution
+    dialog_fired = []
+    page.on("dialog", lambda d: (dialog_fired.append(d.message), d.dismiss()))
+    page.locator("input[name='field']").fill("<script>window.__xss=true</script>")
+    assert not dialog_fired
+    assert not page.evaluate("() => window.__xss === true")
+
+    # Redirect to login when unauthenticated
+    page.goto(f"{_BASE}/protected-url", wait_until="networkidle")
+    assert "/login" in page.url
+
+    # HttpOnly cookie check
+    cookies = page.context.cookies()
+    for c in [c for c in cookies if "session" in c["name"].lower()]:
+        assert c.get("httpOnly"), f"Cookie {c['name']} missing HttpOnly"
+
+Example web test:
+    @pytest.mark.web
+    @pytest.mark.security
+    def test_OH_SEC_008_xss_in_username_does_not_execute(page):
+        dialog_fired = []
+        page.on("dialog", lambda d: (dialog_fired.append(d.message), d.dismiss()))
+        lp = LoginPage(page)
+        lp.navigate_to_login()
+        lp.login("<script>window.__xss=true</script>", "pass")
+        assert not dialog_fired
+        assert not page.evaluate("() => window.__xss === true")
+""",
+
+    "a11y": """\
+Imports:
+    import pytest
+    from pages.web.<page_module> import <PageClass>
+
+Markers: @pytest.mark.web  @pytest.mark.a11y  (both always present)
+
+Fixtures: page (pytest-playwright)
+
+Patterns:
+    # Labelled inputs
+    inp = page.get_by_label("field name", exact=False)
+    assert inp.count() >= 1
+
+    # Heading present
+    assert page.get_by_role("heading").count() >= 1
+
+    # Keyboard navigation
+    page.keyboard.press("Tab")
+    tag = page.evaluate("document.activeElement.tagName")
+    assert tag in ("INPUT", "BUTTON", "A", "SELECT", "TEXTAREA")
+
+    # Image alt text
+    images = page.locator("img")
+    for i in range(images.count()):
+        assert images.nth(i).get_attribute("alt") is not None
+
+    # Visible error messages
+    error = page.locator(".error, [class*='alert']").first
+    assert error.is_visible()
+
+    # Link/button text
+    for i in range(page.locator("button").count()):
+        btn = page.locator("button").nth(i)
+        text = (btn.inner_text() or "").strip()
+        aria = btn.get_attribute("aria-label") or ""
+        assert text or aria
+
+Example test:
+    @pytest.mark.web
+    @pytest.mark.a11y
+    def test_OH_A11Y_001_login_inputs_have_labels(page):
+        LoginPage(page).navigate_to_login()
+        for field in ("username", "password"):
+            assert page.get_by_label(field, exact=False).count() >= 1
 """,
 }
 
@@ -148,7 +235,9 @@ class TestScriptGenSkill:
         tc_prefix: str = "",
     ) -> str:
         """Generate a runnable pytest file from a test case markdown document."""
-        conventions = _CONVENTIONS.get(domain, _CONVENTIONS["api"])
+        # a11y tests are Playwright-based; security tests may be API or web — fall back sensibly
+        _fallback = "web" if domain == "a11y" else "api"
+        conventions = _CONVENTIONS.get(domain, _CONVENTIONS[_fallback])
         tc_prefix_hint = (
             f" If no ID is present and tc_prefix='{tc_prefix}', infer IDs from order in document."
             if tc_prefix else ""
