@@ -1,0 +1,64 @@
+import requests
+import pytest
+
+_API_BASE = "https://opensource-demo.orangehrmlive.com/web/index.php/api/v2"
+
+
+@pytest.mark.api
+@pytest.mark.security
+def test_OH_SEC_001_unauthenticated_request_to_users_returns_401():
+    resp = requests.get(f"{_API_BASE}/admin/users")
+    assert resp.status_code == 401
+
+
+@pytest.mark.api
+@pytest.mark.security
+def test_OH_SEC_002_unauthenticated_request_to_employees_returns_401():
+    resp = requests.get(f"{_API_BASE}/pim/employees")
+    assert resp.status_code == 401
+
+
+@pytest.mark.api
+@pytest.mark.security
+def test_OH_SEC_003_sql_injection_in_search_does_not_return_500(orangehrm_client):
+    resp = orangehrm_client.get("/pim/employees", params={"nameOrId": "' OR '1'='1"})
+    assert resp.status_code != 500, "SQL injection caused a server error"
+    assert "sql" not in resp.text.lower()
+    assert "syntax error" not in resp.text.lower()
+
+
+@pytest.mark.api
+@pytest.mark.security
+def test_OH_SEC_004_api_response_content_type_is_json(orangehrm_client):
+    resp = orangehrm_client.get("/pim/employees")
+    assert resp.status_code == 200
+    ct = resp.headers.get("Content-Type", "")
+    assert "application/json" in ct, f"Expected JSON content-type, got: {ct}"
+
+
+@pytest.mark.api
+@pytest.mark.security
+def test_OH_SEC_005_x_content_type_options_header_present(orangehrm_client):
+    resp = orangehrm_client.get("/pim/employees")
+    assert resp.status_code == 200
+    header = resp.headers.get("X-Content-Type-Options", "")
+    assert header.lower() == "nosniff", f"X-Content-Type-Options missing or wrong: {header!r}"
+
+
+@pytest.mark.api
+@pytest.mark.security
+def test_OH_SEC_006_delete_employee_without_auth_returns_401():
+    # Employee ID 1 is unlikely to exist on the public demo; endpoint still requires auth
+    resp = requests.delete(f"{_API_BASE}/pim/employees/1")
+    assert resp.status_code == 401
+
+
+@pytest.mark.api
+@pytest.mark.security
+def test_OH_SEC_007_arbitrary_origin_not_reflected_in_cors(orangehrm_client):
+    resp = orangehrm_client.get(
+        "/pim/employees",
+        headers={"Origin": "https://evil.example.com"},
+    )
+    acao = resp.headers.get("Access-Control-Allow-Origin", "")
+    assert acao != "https://evil.example.com", "Arbitrary origin reflected in CORS header"
