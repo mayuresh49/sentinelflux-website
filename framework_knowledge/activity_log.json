@@ -126,6 +126,91 @@
       },
       "requires_human": true,
       "approval_id": null
+    },
+    {
+      "id": "8c974243-ebe3-499d-b44f-ac6a292076fb",
+      "timestamp": "2026-05-13T06:47:17.754439+00:00",
+      "event_type": "pipeline_run",
+      "agent": "pipeline",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "pending",
+      "summary": "Pipeline started \u2014 booking / api",
+      "output": {},
+      "requires_human": false,
+      "approval_id": null
+    },
+    {
+      "id": "5d562014-2218-4edc-a58c-9f5ea6f88f82",
+      "timestamp": "2026-05-13T06:47:17.890154+00:00",
+      "event_type": "pipeline_run",
+      "agent": "pipeline",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "error",
+      "summary": "Pipeline failed \u2014 booking",
+      "output": {
+        "returncode": 1,
+        "log": "entinelflux-framework/ai/pipeline/orchestrator.py\", line 258, in <module>\n    main()\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/pipeline/orchestrator.py\", line 249, in main\n    orchestrator.run(\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/pipeline/orchestrator.py\", line 62, in run\n    out_doc = self._generate_doc(feature_name, domain, doc_path, output_base=output_base)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/pipeline/orchestrator.py\", line 85, in _generate_doc\n    result = agent.run(feature_name=feature_name, output_path=out_path)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/agents/doc_gen_agent.py\", line 39, in run\n    content = skill.generate_api_test_document(\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/skills/test_case_doc_kb.py\", line 136, in generate_api_test_document\n    return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/clients/mistral_client.py\", line 31, in generate\n    return self._generate_local(prompt, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/clients/mistral_client.py\", line 60, in _generate_local\n    response.raise_for_status()\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/.venv/lib/python3.11/site-packages/requests/models.py\", line 1028, in raise_for_status\n    raise HTTPError(http_error_msg, response=self)\nrequests.exceptions.HTTPError: 404 Client Error: Not Found for url: http://localhost:11434/api/generate"
+      },
+      "requires_human": false,
+      "approval_id": null
+    },
+    {
+      "id": "f67311d3-8c12-464c-9359-ad1b6896bcac",
+      "timestamp": "2026-05-13T07:02:52.522430+00:00",
+      "event_type": "approval_action",
+      "agent": "quarantine_manager",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "success",
+      "summary": "Quarantined: tests/api/test_booking.py::test_create_booking",
+      "output": {},
+      "requires_human": false,
+      "approval_id": null
+    },
+    {
+      "id": "6533a455-b8b1-41b1-af4a-51c2fed6f824",
+      "timestamp": "2026-05-13T07:03:07.010763+00:00",
+      "event_type": "approval_action",
+      "agent": "quarantine_manager",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "skipped",
+      "summary": "Quarantine rejected: tests/api/test_booking.py::test_get_booking",
+      "output": {},
+      "requires_human": false,
+      "approval_id": null
+    },
+    {
+      "id": "a572eb7d-db50-40f0-99da-9c00826260d3",
+      "timestamp": "2026-05-13T14:41:18.715413+00:00",
+      "event_type": "approval_action",
+      "agent": "human",
+      "product": "orangehrm",
+      "domain": "web",
+      "status": "success",
+      "summary": "Manually quarantined: OH_WEB_008",
+      "output": {},
+      "requires_human": false,
+      "approval_id": null
+    },
+    {
+      "id": "665f4384-d7c9-478a-ad07-532f11d96547",
+      "timestamp": "2026-05-13T14:59:33.374120+00:00",
+      "event_type": "pipeline_run",
+      "agent": "pipeline",
+      "product": "orangehrm",
+      "domain": "web",
+      "status": "success",
+      "summary": "Generated doc + script for recruitment (OH-WEB-031 to 035 automated, 036-057 documented)",
+      "output": {
+        "feature": "recruitment",
+        "doc": "examples/orangehrm/docs/test_cases/web/recruitment.md",
+        "script": "examples/orangehrm/tests/web/test_recruitment.py"
+      },
+      "requires_human": false,
+      "approval_id": null
     }
   ]
 }

@@ -18,6 +18,8 @@ from pathlib import Path
 
 import yaml
 
+from utils.activity_log import ActivityLog
+
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
 _log = logging.getLogger(__name__)
@@ -30,6 +32,7 @@ class TestPipelineOrchestrator:
         self.ai_client = ai_client
         self._script_client = ai_client  # can be overridden to use a different model
         self.kb_loader = kb_loader or KnowledgeBaseLoader()
+        self._alog = ActivityLog()
 
     def run(
         self,
@@ -52,34 +55,66 @@ class TestPipelineOrchestrator:
         Returns dict with keys 'doc' and 'script' (script may be None when skipped).
         """
         _log.info("Pipeline start — feature=%s domain=%s", feature_name, domain)
+        product = str(output_base).split("examples/")[-1].split("/")[0] if output_base and "examples/" in str(output_base) else None
 
-        if increment_file:
-            self._load_increment(increment_file)
+        try:
+            if increment_file:
+                self._load_increment(increment_file)
 
-        if skip_doc and doc_path and doc_path.exists():
-            _log.info("Skipping doc generation — using existing: %s", doc_path)
-            test_case_doc = doc_path.read_text(encoding="utf-8")
-            out_doc = doc_path
-        else:
-            out_doc = self._generate_doc(
-                feature_name, domain, doc_path,
-                output_base=output_base, tc_prefix=tc_prefix, tc_start=tc_start,
+            if skip_doc and doc_path and doc_path.exists():
+                _log.info("Skipping doc generation — using existing: %s", doc_path)
+                test_case_doc = doc_path.read_text(encoding="utf-8")
+                out_doc = doc_path
+            else:
+                out_doc = self._generate_doc(
+                    feature_name, domain, doc_path,
+                    output_base=output_base, tc_prefix=tc_prefix, tc_start=tc_start,
+                )
+                test_case_doc = out_doc.read_text(encoding="utf-8")
+
+            if skip_script:
+                _log.info("Skipping script generation (--skip-script)")
+                self._alog.append(
+                    event_type="pipeline_run",
+                    agent="pipeline",
+                    product=product,
+                    domain=domain,
+                    status="success",
+                    summary=f"Doc generated for {feature_name} (script skipped — hand-written exists)",
+                    output={"feature": feature_name, "doc": str(out_doc), "script": None},
+                )
+                return {"doc": out_doc, "script": None}
+
+            out_script = self._generate_script(
+                test_case_doc, feature_name, domain, output_base=output_base, tc_prefix=tc_prefix,
             )
-            test_case_doc = out_doc.read_text(encoding="utf-8")
 
-        if skip_script:
-            _log.info("Skipping script generation (--skip-script)")
-            return {"doc": out_doc, "script": None}
+            if increment_file:
+                self._log_increment(increment_file, feature_name, domain, out_doc, out_script)
 
-        out_script = self._generate_script(
-            test_case_doc, feature_name, domain, output_base=output_base, tc_prefix=tc_prefix,
-        )
+            _log.info("Pipeline complete — doc=%s script=%s", out_doc, out_script)
+            self._alog.append(
+                event_type="pipeline_run",
+                agent="pipeline",
+                product=product,
+                domain=domain,
+                status="success",
+                summary=f"Generated doc + script for {feature_name}",
+                output={"feature": feature_name, "doc": str(out_doc), "script": str(out_script)},
+            )
+            return {"doc": out_doc, "script": out_script}
 
-        if increment_file:
-            self._log_increment(increment_file, feature_name, domain, out_doc, out_script)
-
-        _log.info("Pipeline complete — doc=%s script=%s", out_doc, out_script)
-        return {"doc": out_doc, "script": out_script}
+        except Exception as exc:
+            _log.error("Pipeline failed — feature=%s: %s", feature_name, exc)
+            self._alog.append(
+                event_type="pipeline_run",
+                agent="pipeline",
+                product=product,
+                domain=domain,
+                status="error",
+                summary=f"Pipeline failed for {feature_name}: {exc}",
+            )
+            raise
 
     # --- steps ---
 
