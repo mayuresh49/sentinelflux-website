@@ -85,7 +85,7 @@
             <div class="flex items-center gap-2 flex-wrap">
               <span class="text-sm font-medium text-slate-700">{{ e.agent | replace('_', ' ') | title }}</span>
               {% if e.product %}<span class="text-xs bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded font-medium">{{ e.product }}</span>{% endif %}
-              {% if e.requires_human %}<span class="text-xs bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-medium">needs review</span>{% endif %}
+              {% if e.requires_human and e.approval_id in pending_ids %}<span class="text-xs bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-medium">needs review</span>{% endif %}
             </div>
             <p class="text-xs text-slate-500 mt-0.5 truncate">{{ e.summary }}</p>
           </div>

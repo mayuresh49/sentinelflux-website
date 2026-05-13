@@ -47,12 +47,15 @@ async def home(request: Request, product: str | None = None):
     all_entries = _alog.all()
     scoped = [e for e in all_entries if e.get("product") == product] if product else all_entries
     pending = _am.pending()
+    pending_ids = {p["id"] for p in pending}
+    recent = [e for e in reversed(scoped) if e.get("agent") != "human"][:10]
     return templates.TemplateResponse(request, "index.html", context=_ctx(
         total_activities=len(scoped),
         pending_approvals=len(pending),
-        requires_human_count=sum(1 for e in scoped if e.get("requires_human")),
+        requires_human_count=len(pending),
         agent_count=9,
-        recent=list(reversed(scoped))[:10],
+        recent=recent,
+        pending_ids=pending_ids,
         pending_items=pending[:3],
         queued_gaps=_queued_gaps(),
     ))
