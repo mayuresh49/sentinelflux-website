@@ -6,7 +6,7 @@ ADMIN_PASS = "admin123"
 
 
 @pytest.mark.web
-def test_valid_admin_login_redirects_to_dashboard(page):
+def test_OH_WEB_001_valid_admin_login_redirects_to_dashboard(page):
     login_page = LoginPage(page)
     login_page.navigate_to_login()
     login_page.login(ADMIN_USER, ADMIN_PASS)
@@ -14,7 +14,7 @@ def test_valid_admin_login_redirects_to_dashboard(page):
 
 
 @pytest.mark.web
-def test_wrong_password_shows_error(page):
+def test_OH_WEB_002_wrong_password_shows_error(page):
     login_page = LoginPage(page)
     login_page.navigate_to_login()
     login_page.login(ADMIN_USER, "wrongpassword")
@@ -23,7 +23,7 @@ def test_wrong_password_shows_error(page):
 
 
 @pytest.mark.web
-def test_wrong_username_shows_error(page):
+def test_OH_WEB_003_wrong_username_shows_error(page):
     login_page = LoginPage(page)
     login_page.navigate_to_login()
     login_page.login("nonexistentuser", ADMIN_PASS)
@@ -32,7 +32,7 @@ def test_wrong_username_shows_error(page):
 
 
 @pytest.mark.web
-def test_empty_username_shows_error(page):
+def test_OH_WEB_004_empty_username_shows_error(page):
     login_page = LoginPage(page)
     login_page.navigate_to_login()
     login_page.login("", ADMIN_PASS)
@@ -40,7 +40,7 @@ def test_empty_username_shows_error(page):
 
 
 @pytest.mark.web
-def test_empty_password_shows_error(page):
+def test_OH_WEB_005_empty_password_shows_error(page):
     login_page = LoginPage(page)
     login_page.navigate_to_login()
     login_page.login(ADMIN_USER, "")
@@ -48,7 +48,7 @@ def test_empty_password_shows_error(page):
 
 
 @pytest.mark.web
-def test_both_fields_empty_shows_error(page):
+def test_OH_WEB_006_both_fields_empty_shows_error(page):
     login_page = LoginPage(page)
     login_page.navigate_to_login()
     login_page.login("", "")
@@ -61,7 +61,7 @@ def test_both_fields_empty_shows_error(page):
            "cannot be verified on the public demo; passes on a fresh OrangeHRM instance",
     strict=False,
 )
-def test_username_is_case_sensitive(page):
+def test_OH_WEB_007_username_is_case_sensitive(page):
     login_page = LoginPage(page)
     login_page.navigate_to_login()
     login_page.login("admin", ADMIN_PASS)
@@ -70,7 +70,7 @@ def test_username_is_case_sensitive(page):
 
 
 @pytest.mark.web
-def test_sql_injection_in_username_does_not_crash(page):
+def test_OH_WEB_008_sql_injection_in_username_does_not_crash(page):
     login_page = LoginPage(page)
     login_page.navigate_to_login()
     login_page.login("' OR '1'='1", ADMIN_PASS)

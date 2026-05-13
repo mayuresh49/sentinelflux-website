@@ -125,6 +125,8 @@ Feature: {feature_name}
 - Output ONLY valid Python code. No markdown, no explanations, no code fences.
 - Follow the conventions above exactly (fixtures, imports, markers, assertion style).
 - One pytest function per test case. Name: test_{{action}}_{{expected_outcome}}.
+- If a test case has an ID in the document (format PRODUCT-LAYER-NNN, e.g. RB-API-001), use it as a prefix in the function name: test_{{ID_underscored}}_{{description}} (hyphens → underscores). Example: "RB-API-001" → test_RB_API_001_create_booking.
+- SKIP any test case with status `not_automatable` — do not generate a pytest function for it.
 - Use parametrize only when test data sets share identical steps.
 - Do not add comments unless a business rule is non-obvious.
 - Do not import anything not in the conventions or standard library.
@@ -157,13 +159,19 @@ Document must cover:
 - Security-relevant cases (auth, access control) if applicable
 - Integration scenarios with dependent modules
 
-Format each test case as:
-### TC-NNN: <title>
+Begin the document with a Test Case Index table:
+| ID | Scenario | Type | Status | Script |
+|---|---|---|---|---|
+| {ID_PREFIX}-NNN | ... | positive/negative/edge | not_automated | — |
+
+For each test case, use:
+### {ID_PREFIX}-NNN — <title>
 **Pre-conditions:** ...
 **Test Data:** ...
 **Steps:** numbered list
 **Expected Result:** ...
 **Category:** positive | negative | edge | security
+**Status:** not_automated (human sets to `automated` when script exists, or `not_automatable` to exclude from script generation)
 
 Output full markdown documentation.
 """)

@@ -20,7 +20,7 @@ def logged_in_page(page, session_authed_page):
 
 
 @pytest.mark.web
-def test_employee_list_loads_on_navigation(logged_in_page):
+def test_OH_WEB_009_employee_list_loads_on_navigation(logged_in_page):
     pim = PIMEmployeePage(logged_in_page)
     pim.navigate_to_list()
     assert pim.is_on_list_page()
@@ -28,7 +28,7 @@ def test_employee_list_loads_on_navigation(logged_in_page):
 
 
 @pytest.mark.web
-def test_add_employee_with_required_fields_only(logged_in_page):
+def test_OH_WEB_010_add_employee_with_required_fields_only(logged_in_page):
     pim = PIMEmployeePage(logged_in_page)
     pim.navigate_to_add()
     pim.fill_firstname("Test")
@@ -38,7 +38,7 @@ def test_add_employee_with_required_fields_only(logged_in_page):
 
 
 @pytest.mark.web
-def test_add_employee_with_all_fields(logged_in_page):
+def test_OH_WEB_011_add_employee_with_all_fields(logged_in_page):
     pim = PIMEmployeePage(logged_in_page)
     pim.navigate_to_add()
     pim.fill_firstname("John")
@@ -50,7 +50,7 @@ def test_add_employee_with_all_fields(logged_in_page):
 
 
 @pytest.mark.web
-def test_save_without_firstname_shows_validation_error(logged_in_page):
+def test_OH_WEB_012_save_without_firstname_shows_validation_error(logged_in_page):
     pim = PIMEmployeePage(logged_in_page)
     pim.navigate_to_add()
     pim.fill_lastname("Doe")
@@ -59,7 +59,7 @@ def test_save_without_firstname_shows_validation_error(logged_in_page):
 
 
 @pytest.mark.web
-def test_save_without_lastname_shows_validation_error(logged_in_page):
+def test_OH_WEB_013_save_without_lastname_shows_validation_error(logged_in_page):
     pim = PIMEmployeePage(logged_in_page)
     pim.navigate_to_add()
     pim.fill_firstname("John")
@@ -68,7 +68,7 @@ def test_save_without_lastname_shows_validation_error(logged_in_page):
 
 
 @pytest.mark.web
-def test_firstname_exceeding_30_chars_shows_validation_error(logged_in_page):
+def test_OH_WEB_014_firstname_exceeding_30_chars_shows_validation_error(logged_in_page):
     pim = PIMEmployeePage(logged_in_page)
     pim.navigate_to_add()
     pim.fill_firstname("A" * 31)
@@ -78,7 +78,7 @@ def test_firstname_exceeding_30_chars_shows_validation_error(logged_in_page):
 
 
 @pytest.mark.web
-def test_cancel_returns_to_list_without_saving(logged_in_page):
+def test_OH_WEB_015_cancel_returns_to_list_without_saving(logged_in_page):
     pim = PIMEmployeePage(logged_in_page)
     pim.navigate_to_add()
     pim.fill_firstname("ShouldNotSave")
@@ -88,7 +88,7 @@ def test_cancel_returns_to_list_without_saving(logged_in_page):
 
 
 @pytest.mark.web
-def test_search_by_name_filters_results(logged_in_page):
+def test_OH_WEB_016_search_by_name_filters_results(logged_in_page):
     pim = PIMEmployeePage(logged_in_page)
     pim.navigate_to_list()
     pim.search_by_name("Admin")
@@ -97,7 +97,7 @@ def test_search_by_name_filters_results(logged_in_page):
 
 @pytest.mark.web
 @pytest.mark.xfail(reason="OrangeHRM demo has shared data; nonexistent name search may still return results", strict=False)
-def test_search_with_nonexistent_name_shows_no_records(logged_in_page):
+def test_OH_WEB_017_search_with_nonexistent_name_shows_no_records(logged_in_page):
     pim = PIMEmployeePage(logged_in_page)
     pim.navigate_to_list()
     pim.search_by_name("ZZZnonexistentXXX")
@@ -109,7 +109,7 @@ def test_search_with_nonexistent_name_shows_no_records(logged_in_page):
     ("Alice", "Smith"),
     ("Bob", "Jones"),
 ])
-def test_add_employee_parametrized(logged_in_page, firstname, lastname):
+def test_OH_WEB_018_add_employee_parametrized(logged_in_page, firstname, lastname):
     pim = PIMEmployeePage(logged_in_page)
     pim.navigate_to_add()
     pim.fill_firstname(firstname)

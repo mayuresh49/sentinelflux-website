@@ -1,77 +1,110 @@
-```markdown
-# Login Page Test Case Document
+# Test Case Document — Login Page
 
-## PAGE DETAILS
+**Product:** OrangeHRM  
+**Layer:** Web  
+**Module:** Login (`/web/index.php/auth/login`)
 
-Page: Login Page (/web/index.php/auth/login)
-Description: Application entry point - username/password authentication
+---
 
-Fields (these are the ONLY fields on this form):
+## Test Case Index
+
+| ID | Scenario | Type | Status | Script |
+|---|---|---|---|---|
+| OH-WEB-001 | Admin user logs in with valid credentials and lands on dashboard | positive | automated | test_login.py |
+| OH-WEB-002 | Wrong password shows Invalid credentials error | negative | automated | test_login.py |
+| OH-WEB-003 | Wrong username shows Invalid credentials error | negative | automated | test_login.py |
+| OH-WEB-004 | Empty username shows validation error | negative | automated | test_login.py |
+| OH-WEB-005 | Empty password shows validation error | negative | automated | test_login.py |
+| OH-WEB-006 | Both fields empty shows validation error | negative | automated | test_login.py |
+| OH-WEB-007 | Username is case-sensitive (Admin != admin) | edge | automated | test_login.py |
+| OH-WEB-008 | SQL injection in username shows error, not 500 | negative | automated | test_login.py |
+| OH-WEB-009 | ESS user logs in and sees limited navigation menu | positive | not_automated | — |
+| OH-WEB-010 | Browser back button after login does not expose session | edge | not_automatable | — |
+| OH-WEB-011 | Session expires after inactivity timeout | edge | not_automatable | — |
+| OH-WEB-012 | Account locks after 5 consecutive failed login attempts | edge | not_automatable | — |
+
+> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+
+---
+
+## Page Details
+- **URL:** `/web/index.php/auth/login`
+- **Fields:**
   - Username (required)
   - Password (required)
-  - Login (optional)
+  - Login button
   - Error message (optional)
+- **Credentials (demo):** Admin / admin123
 
-## DEFINED TEST SCENARIOS
+---
 
-1. [positive] Admin user logs in with valid credentials and lands on dashboard
-2. [positive] ESS user logs in and sees limited navigation menu
-3. [negative] Wrong password shows 'Invalid credentials' error
-4. [negative] Empty username shows validation error
-5. [negative] Empty password shows validation error
-6. [negative] Both fields empty shows validation error
-7. [negative] SQL injection in username shows error, not 500
-8. [edge_cases] Username is case-sensitive (Admin != admin)
-9. [edge_cases] Browser back button after login does not expose session
-10. [edge_cases] Session expires after inactivity
+## Business Rules and Validations
 
-## BUSINESS RULES AND VALIDATIONS
+- Username is case-sensitive
+- Account locks after 5 consecutive failed login attempts (if configured)
+- Session expires after configured inactivity timeout
+- Password: min 8 chars, uppercase, lowercase, number, special char
+- Admin cannot delete their own account
 
-Authentication:
-  - Username is case-sensitive
-  - Account locks after 5 consecutive failed login attempts (if configured)
-  - Session expires after configured inactivity timeout
-  - Password must meet complexity: min 8 chars, uppercase, lowercase, number, special char
-  - Admin cannot delete their own account
+## Field Validation Rules
 
-## FIELD VALIDATION RULES
+- `username`: required, string, min 5 / max 40 chars, alphanumeric + underscores, unique
+- `password`: required, min 8 chars, must include uppercase, lowercase, number, special character
 
-username: {'required': True, 'type': 'string', 'min_length': 5, 'max_length': 40, 'unique': True, 'pattern': 'alphanumeric and underscores only'}
-password: {'required': True, 'min_length': 8, 'rules': ['At least one uppercase letter', 'At least one lowercase letter', 'At least one number', 'At least one special character']}
+---
 
-## NEGATIVE SCENARIOS FOR MANDATORY FIELDS
+## Detailed Test Cases
 
-1. Test case title: Empty username
-   Pre-conditions: User is on the login page
-   Test data: Leave username field empty
-   Step-by-step actions: Fill in only the password field, leaving the username field blank; click "Login" button
-   Expected results: Error message displays, informing that the username field is required
+### OH-WEB-001 — Valid Admin Login
+**Pre-conditions:** OrangeHRM demo is accessible  
+**Test Data:** Username=Admin, Password=admin123  
+**Steps:**
+1. Navigate to login page
+2. Enter valid credentials
+3. Click Login  
+**Expected:** Redirected to dashboard; dashboard elements visible
 
-2. Test case title: Empty password
-   Pre-conditions: User is on the login page
-   Test data: Leave password field empty
-   Step-by-step actions: Fill in only the username field, leaving the password field blank; click "Login" button
-   Expected results: Error message displays, informing that the password field is required
+### OH-WEB-002 — Wrong Password
+**Test Data:** Username=Admin, Password=wrongpassword  
+**Steps:** Enter wrong password, click Login  
+**Expected:** Error message displayed; stays on login page
 
-3. Test case title: Both fields empty
-   Pre-conditions: User is on the login page
-   Test data: Leave both fields empty
-   Step-by-step actions: Click "Login" button
-   Expected results: Error message displays, informing that either the username or password field is required
+### OH-WEB-003 — Wrong Username
+**Test Data:** Username=nonexistentuser, Password=admin123  
+**Steps:** Enter non-existent username, click Login  
+**Expected:** Error message displayed; stays on login page
 
-## INPUT RESTRICTION CHECKS
+### OH-WEB-004 — Empty Username
+**Steps:** Leave username blank, fill password, click Login  
+**Expected:** Validation error shown for username field
 
-1. SQL injection test case title: SQL injection in username
-   Pre-conditions: User is on the login page
-   Test data: Input a malicious string with SQL syntax (e.g., `admin'--`) into the username field
-   Step-by-step actions: Fill in the password and click "Login" button
-   Expected results: Error message or an application error is displayed, but not a 500 internal server error
+### OH-WEB-005 — Empty Password
+**Steps:** Fill username, leave password blank, click Login  
+**Expected:** Validation error shown for password field
 
-## NOTES ON OPTIONAL FIELDS AND EDGE CASES
+### OH-WEB-006 — Both Fields Empty
+**Steps:** Click Login without entering anything  
+**Expected:** Validation error displayed
 
-1. Login field (optional): This field may be used to auto-login the user if a session cookie exists. It's not necessary for manual login.
-2. Error message field (optional): Displays error messages related to failed login attempts or validation issues.
-3. Username case-sensitivity (edge case): Ensure that username "Admin" and "admin" are treated as separate users.
-4. Browser back button after login (edge case): After successful login, the user should be redirected to the dashboard, not be able to access the previous page by clicking the browser's back button.
-5. Session expiration (edge case): The session should expire after a configured inactivity timeout.
-```
+### OH-WEB-007 — Case-Sensitive Username
+**Steps:** Enter "admin" (lowercase) with valid password  
+**Expected:** Error displayed; login fails  
+**Note:** xfail on public demo — demo has separate lowercase "admin" account
+
+### OH-WEB-008 — SQL Injection in Username
+**Test Data:** Username=`' OR '1'='1`, Password=admin123  
+**Steps:** Enter injection string, click Login  
+**Expected:** Error displayed; no 500 or unhandled exception
+
+### OH-WEB-009 — ESS User Limited Menu (not_automated)
+**Pre-conditions:** ESS user account exists  
+**Expected:** After login, navigation shows only ESS-relevant links
+
+### OH-WEB-010 — Back Button Does Not Expose Session (not_automatable)
+**Note:** Requires browser-level session verification. Complex to automate reliably across all browsers; recommended as manual exploratory test.
+
+### OH-WEB-011 — Session Expiry (not_automatable)
+**Note:** Requires waiting for the configured inactivity timeout (typically 30+ minutes). Not suitable for automated regression runs; verify manually or with time-mocking.
+
+### OH-WEB-012 — Account Lock After 5 Failures (not_automatable)
+**Note:** Demo site may not have account lockout configured; this destructive test can lock out the shared demo account. Run only on isolated environments.

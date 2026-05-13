@@ -19,14 +19,14 @@ def logged_in_page(page, session_authed_page):
 
 
 @pytest.mark.web
-def test_leave_list_loads_on_navigation(logged_in_page):
+def test_OH_WEB_026_leave_list_loads_on_navigation(logged_in_page):
     leave = LeavePage(logged_in_page)
     leave.navigate_to_list()
     assert leave.is_on_list_page()
 
 
 @pytest.mark.web
-def test_leave_list_shows_record_count(logged_in_page):
+def test_OH_WEB_027_leave_list_shows_record_count(logged_in_page):
     leave = LeavePage(logged_in_page)
     leave.navigate_to_list()
     leave.click_search()
@@ -34,7 +34,7 @@ def test_leave_list_shows_record_count(logged_in_page):
 
 
 @pytest.mark.web
-def test_filter_by_pending_status_shows_results(logged_in_page):
+def test_OH_WEB_028_filter_by_pending_status_shows_results(logged_in_page):
     leave = LeavePage(logged_in_page)
     leave.navigate_to_list()
     leave.select_status("Pending Approval")
@@ -44,7 +44,7 @@ def test_filter_by_pending_status_shows_results(logged_in_page):
 
 
 @pytest.mark.web
-def test_search_with_future_date_range_shows_no_records(logged_in_page):
+def test_OH_WEB_029_search_with_future_date_range_shows_no_records(logged_in_page):
     leave = LeavePage(logged_in_page)
     leave.navigate_to_list()
     leave.fill_date_from("2099-01-01")
@@ -55,7 +55,7 @@ def test_search_with_future_date_range_shows_no_records(logged_in_page):
 
 @pytest.mark.web
 @pytest.mark.xfail(reason="OrangeHRM demo site does not enforce date-range order; returns records regardless", strict=False)
-def test_date_to_before_date_from_shows_empty_or_error(logged_in_page):
+def test_OH_WEB_030_date_to_before_date_from_shows_empty_or_error(logged_in_page):
     leave = LeavePage(logged_in_page)
     leave.navigate_to_list()
     leave.fill_date_from("2024-06-30")

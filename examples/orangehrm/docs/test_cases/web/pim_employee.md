@@ -1,105 +1,105 @@
-```markdown
-# Test Case Document - PIM Employee List Page
+# Test Case Document — PIM Employee List Page
+
+**Product:** OrangeHRM  
+**Layer:** Web  
+**Module:** PIM — Employee List (`/web/index.php/pim/viewEmployeeList`)
+
+---
+
+## Test Case Index
+
+| ID | Scenario | Type | Status | Script |
+|---|---|---|---|---|
+| OH-WEB-009 | Employee list loads with record count on navigation | positive | automated | test_pim_employee.py |
+| OH-WEB-010 | Add employee with required fields only (first + last name) | positive | automated | test_pim_employee.py |
+| OH-WEB-011 | Add employee with all four fields (including middle name and ID) | positive | automated | test_pim_employee.py |
+| OH-WEB-012 | Save add employee form without firstname shows validation error | negative | automated | test_pim_employee.py |
+| OH-WEB-013 | Save add employee form without lastname shows validation error | negative | automated | test_pim_employee.py |
+| OH-WEB-014 | Firstname exceeding 30 chars shows validation error | negative | automated | test_pim_employee.py |
+| OH-WEB-015 | Cancel on add employee form returns to list without saving | positive | automated | test_pim_employee.py |
+| OH-WEB-016 | Search by name "Admin" filters results | positive | automated | test_pim_employee.py |
+| OH-WEB-017 | Search with non-existent name shows No Records Found | negative | automated | test_pim_employee.py |
+| OH-WEB-018 | Add employee with parametrized names (Alice/Smith, Bob/Jones) | positive | automated | test_pim_employee.py |
+| OH-WEB-019 | Search by Employee ID filters to exact match | positive | not_automated | — |
+| OH-WEB-020 | Record count updates after search | positive | not_automated | — |
+| OH-WEB-021 | Search is case-insensitive | edge | not_automated | — |
+| OH-WEB-022 | Partial name search returns all matching employees | edge | not_automated | — |
+| OH-WEB-023 | Duplicate Employee ID shows validation error | negative | not_automatable | — |
+
+> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+
+---
 
 ## Page Details
-- Page: PIM - Employee List (/web/index.php/pim/viewEmployeeList)
-- Description: List of all employees with search and filter functionality
-- Fields (explicit list from KB):
-  - Employee Name (optional)
-  - Employee Id (optional)
-  - Search (optional)
-  - Add (optional)
-  - Employee table (optional)
-  - Record count (optional)
-  - Row checkbox (optional)
 
-## Test Scenarios
-### Positive Tests
-1. **[positive]** Employee list loads with all employees on page load
-2. **[positive]** Search by employee name filters results correctly
-3. **[positive]** Search by employee ID filters to exact match
-4. **[positive]** Clicking Add navigates to add employee form
-5. **[positive]** Record count updates after search
-6. **[positive]** 'No Records Found' is displayed when searching with a non-existent name
-7. **[positive]** Special characters are handled gracefully during searches
-8. **[edge_cases]** Search is case-insensitive
-9. **[edge_cases]** Partial name search returns all matching employees
+### List Page
+- **URL:** `/web/index.php/pim/viewEmployeeList`
+- **Fields:** Employee Name (filter), Employee Id (filter), Search button, Add button, Employee table, Record count, Row checkbox
 
-### Negative Tests
-10. **[negative]** Search with non-existent employee ID does not filter the results
+### Add Employee Form
+- **URL:** `/web/index.php/pim/addEmployee`
+- **Fields:**
+  - First Name (required, max 30 chars)
+  - Middle Name (optional)
+  - Last Name (required)
+  - Employee ID (optional, auto-generated if blank)
 
-## Test Case - Employee List Loads Correctly
+---
 
-### Pre-conditions
-- The user is authenticated and has appropriate permissions to access the PIM - Employee List page.
+## Business Rules
+- First Name and Last Name are required
+- First Name max 30 characters
+- Employee ID must be unique if specified
+- All four Add Employee fields are the ONLY fields on that form
 
-### Step-by-step actions
-1. Navigate to /web/index.php/pim/viewEmployeeList
-2. Observe the employee list displayed on the page.
+---
 
-### Expected results
-- The employee list should load with all employees present in the system.
+## Detailed Test Cases
 
-## Test Case - Search by Employee Name
+### OH-WEB-009 — Employee List Loads
+**Pre-conditions:** Authenticated as Admin  
+**Steps:** Navigate to Employee List  
+**Expected:** Page loads; "Records Found" text visible
 
-### Pre-conditions
-- The user is authenticated and has appropriate permissions to access the PIM - Employee List page.
-- Multiple employees with different names are present in the system.
+### OH-WEB-010 — Add Employee Required Fields Only
+**Steps:** Navigate to Add, fill First Name="Test", Last Name="User", save  
+**Expected:** Success toast or profile page shown
 
-### Step-by-step actions
-1. In the search bar, enter a valid employee name.
-2. Press Enter or click 'Search'.
-3. Observe the updated employee list displayed on the page.
+### OH-WEB-011 — Add Employee All Fields
+**Test Data:** First="John", Middle="Robert", Last="Doe", ID=EMP-{random}  
+**Steps:** Fill all four fields, save  
+**Expected:** Success toast or profile page shown
 
-### Expected results
-- The updated employee list should only contain employees with the entered name.
+### OH-WEB-012 — Save Without Firstname
+**Steps:** Fill Last Name only, click Save  
+**Expected:** Validation error for First Name field
 
-## Test Case - Search by Employee ID
+### OH-WEB-013 — Save Without Lastname
+**Steps:** Fill First Name only, click Save  
+**Expected:** Validation error for Last Name field
 
-### Pre-conditions
-- The user is authenticated and has appropriate permissions to access the PIM - Employee List page.
-- Multiple employees with different IDs are present in the system.
+### OH-WEB-014 — Firstname Exceeding 30 Characters
+**Test Data:** First Name = 31 × "A"  
+**Steps:** Fill oversized name, fill Last Name, click Save  
+**Expected:** Validation error shown
 
-### Step-by-step actions
-1. In the search bar, enter a valid employee ID.
-2. Press Enter or click 'Search'.
-3. Observe the updated employee list displayed on the page.
+### OH-WEB-015 — Cancel Returns To List
+**Steps:** Navigate to Add, fill name, click Cancel  
+**Expected:** Returned to Employee List; employee was not saved
 
-### Expected results
-- The updated employee list should only contain the employee with the exact entered ID.
-```
+### OH-WEB-016 — Search By Name
+**Steps:** Navigate to list, search "Admin"  
+**Expected:** "Records Found" text visible (filtered results)
 
-```markdown
-# Test Case Document - PIM Add Employee Form
+### OH-WEB-017 — Search Non-Existent Name
+**Steps:** Search "ZZZnonexistentXXX"  
+**Expected:** No Records Found  
+**Note:** xfail on demo — shared data may produce false hits
 
-## Page Details
-- Page: PIM - Add Employee (/web/index.php/pim/addEmployee)
-- Description: Form to create a new employee record
-- Fields (explicit list from KB):
-  - First Name (required), max_length=30
-  - Middle Name (optional), max_length=30
-  - Last Name (required), max_length=30
-  - Employee Id (optional)
-  - Create Login Details (optional)
-  - Save (optional)
-  - Cancel (optional)
+### OH-WEB-018 — Add Employee Parametrized
+**Test Data:** [("Alice", "Smith"), ("Bob", "Jones")]  
+**Steps:** Add each employee, save  
+**Expected:** Success for each data set
 
-## Test Scenarios
-### Positive Tests
-1. **[positive]** Save with first name and last name creates employee and redirects to profile
-2. **[positive]** Save with all fields populates employee record correctly
-3. **[positive]** Enable Create Login Details shows username/password fields
-4. **[positive]** Cancel navigates back to employee list without saving
-5. **[positive]** Auto-generated employee ID is unique
-6. **[edge_cases]** First name with only spaces shows validation error
-7. **[edge_cases]** Employee ID with special characters is rejected
-8. **[edge_cases]** First name with accented characters is accepted
-
-### Negative Tests
-9. **[negative]** Save without first name shows required field error
-10. **[negative]** Save without last name shows required field error
-11. **[negative]** First name exceeding 30 characters shows validation error
-12. **[negative]** Duplicate employee ID shows error
-```
-
-This markdown document provides test case descriptions for the PIM - Employee List and PIM - Add Employee pages, following the strict rules as specified.
+### OH-WEB-023 — Duplicate Employee ID (not_automatable)
+**Note:** Requires knowing a pre-existing Employee ID on the demo system, which changes between test runs. Recommend manual verification.

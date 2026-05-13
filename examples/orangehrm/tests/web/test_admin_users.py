@@ -19,21 +19,21 @@ def logged_in_page(page, session_authed_page):
 
 
 @pytest.mark.web
-def test_user_list_loads_on_navigation(logged_in_page):
+def test_OH_WEB_019_user_list_loads_on_navigation(logged_in_page):
     admin = AdminUsersPage(logged_in_page)
     admin.navigate_to_list()
     assert admin.is_on_list_page()
 
 
 @pytest.mark.web
-def test_user_list_shows_record_count(logged_in_page):
+def test_OH_WEB_020_user_list_shows_record_count(logged_in_page):
     admin = AdminUsersPage(logged_in_page)
     admin.navigate_to_list()
     assert "Record" in admin.get_record_count_text()
 
 
 @pytest.mark.web
-def test_search_by_admin_username_filters_results(logged_in_page):
+def test_OH_WEB_021_search_by_admin_username_filters_results(logged_in_page):
     admin = AdminUsersPage(logged_in_page)
     admin.navigate_to_list()
     admin.search_by_username("Admin")
@@ -41,7 +41,7 @@ def test_search_by_admin_username_filters_results(logged_in_page):
 
 
 @pytest.mark.web
-def test_search_with_nonexistent_username_shows_no_records(logged_in_page):
+def test_OH_WEB_022_search_with_nonexistent_username_shows_no_records(logged_in_page):
     admin = AdminUsersPage(logged_in_page)
     admin.navigate_to_list()
     admin.search_by_username("ZZZnonexistentXXX999")
@@ -49,7 +49,7 @@ def test_search_with_nonexistent_username_shows_no_records(logged_in_page):
 
 
 @pytest.mark.web
-def test_cancel_returns_to_list(logged_in_page):
+def test_OH_WEB_023_cancel_returns_to_list(logged_in_page):
     admin = AdminUsersPage(logged_in_page)
     admin.navigate_to_add()
     admin.cancel()
@@ -58,7 +58,7 @@ def test_cancel_returns_to_list(logged_in_page):
 
 @pytest.mark.web
 @pytest.mark.xfail(strict=False, reason="Demo site add-user form requires employee lookup which may time out")
-def test_save_without_username_shows_validation_error(logged_in_page):
+def test_OH_WEB_024_save_without_username_shows_validation_error(logged_in_page):
     admin = AdminUsersPage(logged_in_page)
     admin.navigate_to_add()
     admin.select_user_role("Admin")
@@ -72,7 +72,7 @@ def test_save_without_username_shows_validation_error(logged_in_page):
 
 
 @pytest.mark.web
-def test_save_without_password_shows_validation_error(logged_in_page):
+def test_OH_WEB_025_save_without_password_shows_validation_error(logged_in_page):
     admin = AdminUsersPage(logged_in_page)
     admin.navigate_to_add()
     admin.select_user_role("Admin")
