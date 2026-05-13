@@ -1,35 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Knowledge Base{% endblock %}
 
-{% set increment_template %}feature: "feature_name"
-domain: "api"  # api | web | mobile | security
+{% set increment_template %}feature: feature_name
+domain: api  # api | web | mobile | security
 description: |
   Describe what changed or what new capability needs testing.
 
 # For API features
 endpoints:
-  - name: "Endpoint Name"
-    path: "/path"
+  - name: Endpoint Name
+    path: /path
     method: GET
-    description: "What this endpoint does"
+    description: What this endpoint does
     auth_required: true
 
 # Test scenarios to generate
 scenarios:
-  - name: "Happy path"
+  - name: Happy path
     type: happy_path
-    description: "Main success flow"
-  - name: "Error case"
+    description: Main success flow
+  - name: Error case
     type: error
-    description: "Main failure scenario"
-  - name: "Edge case"
+    description: Main failure scenario
+  - name: Edge case
     type: edge_case
-    description: "Boundary or unusual input"
+    description: Boundary or unusual input
 
 # For web features
 # ui_changes:
-#   - component: "Form name"
-#     action: "What changed"
+#   - component: Form name
+#     action: What changed
 {% endset %}
 
 {% block content %}
