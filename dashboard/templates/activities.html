@@ -44,8 +44,8 @@
         <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Needs Review</label>
         <select name="requires_human" class="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
           <option value="">All</option>
-          <option value="true">Yes</option>
-          <option value="false">No</option>
+          <option value="true" {{ 'selected' if request.query_params.get('requires_human') == 'true' }}>Yes</option>
+          <option value="false" {{ 'selected' if request.query_params.get('requires_human') == 'false' }}>No</option>
         </select>
       </div>
       <div id="loading" class="htmx-indicator flex items-center gap-2 text-sm text-indigo-600 pb-2">
