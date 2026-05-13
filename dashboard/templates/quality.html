@@ -185,7 +185,11 @@
         <div class="flex flex-col gap-1">
           <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Test ID / function name</label>
           <input type="text" name="test_id" required placeholder="test_booking_create"
+                 list="sf-test-datalist" oninput="sfQuarAutoFill(this)"
                  class="text-sm border border-slate-200 rounded-lg px-3 py-2 w-60 focus:outline-none focus:ring-2 focus:ring-indigo-300 font-mono bg-white">
+          <datalist id="sf-test-datalist">
+            {% for t in all_tests %}<option value="{{ t.name }}">{{ t.product }} / {{ t.domain }}</option>{% endfor %}
+          </datalist>
         </div>
         <div class="flex flex-col gap-1">
           <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Product</label>
@@ -250,4 +254,21 @@
 })();
 </script>
 {% endif %}
+<script>
+(function() {
+  const sfTests = {{ all_tests | tojson }};
+  const filterProduct = {{ filter_product | tojson }};
+  window.sfQuarAutoFill = function(input) {
+    const val = input.value;
+    const exact = sfTests.filter(t => t.name === val);
+    if (!exact.length) return;
+    const form = input.closest('form');
+    const match = (filterProduct && exact.find(m => m.product === filterProduct)) || exact[0];
+    const prodSel = form.querySelector('[name="product"]');
+    const domInput = form.querySelector('[name="domain"]');
+    if (prodSel) prodSel.value = match.product;
+    if (domInput) domInput.value = match.domain;
+  };
+})();
+</script>
 {% endblock %}

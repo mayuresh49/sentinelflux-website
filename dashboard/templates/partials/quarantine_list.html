@@ -28,8 +28,8 @@
       <form hx-post="/ui/quarantine/remove"
             hx-target="#quarantine-list"
             hx-swap="innerHTML"
-            class="shrink-0"
-            onsubmit="return confirm('Remove {{ q.test_id | replace("'", "\\'") }} from quarantine?')">
+            hx-confirm="Remove this test from quarantine?"
+            class="shrink-0">
         <input type="hidden" name="test_id" value="{{ q.test_id }}">
         <input type="hidden" name="filter_product" value="{{ filter_product }}">
         <button type="submit"

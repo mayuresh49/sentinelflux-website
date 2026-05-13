@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -108,6 +109,21 @@ def compute_metrics(product: str | None = None) -> dict:
         "all_products": all_prods,
         "filter_product": product or "",
     }
+
+
+def _all_test_functions() -> list[dict]:
+    results = []
+    for py in _EXAMPLES_DIR.rglob("test_*.py"):
+        parts = py.relative_to(_EXAMPLES_DIR).parts
+        if len(parts) < 4 or parts[1] != "tests":
+            continue
+        p, d = parts[0], parts[2]
+        try:
+            for fn in re.findall(r"^def (test_\w+)", py.read_text(encoding="utf-8"), re.MULTILINE):
+                results.append({"name": fn, "product": p, "domain": d})
+        except OSError:
+            pass
+    return sorted(results, key=lambda x: (x["product"], x["domain"], x["name"]))
 
 
 @router.get("/")
