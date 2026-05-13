@@ -21,6 +21,27 @@ _QUARANTINE_PATH = _ROOT_DIR / "framework_knowledge" / "quarantine.yaml"
 _alog = ActivityLog()
 
 
+_ACTION_VERBS = frozenset({
+    "create", "get", "update", "delete", "patch", "list", "fetch",
+    "add", "remove", "edit", "search", "validate", "verify", "check",
+    "put", "post", "read", "write", "set", "reset", "refresh", "load",
+})
+
+
+def derive_feature(suggested_test_name: str) -> str:
+    """Derive a KB feature name from a suggested test function name.
+
+    test_create_booking → booking
+    test_patch_booking  → booking
+    test_login          → login
+    """
+    name = suggested_test_name.removeprefix("test_")
+    parts = name.split("_")
+    while parts and parts[0] in _ACTION_VERBS:
+        parts = parts[1:]
+    return "_".join(parts) or name
+
+
 def dispatch(item: dict, decision: str) -> str:
     """
     Execute the follow-up action for a resolved approval.

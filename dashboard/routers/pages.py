@@ -6,8 +6,11 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+from collections import defaultdict
+
 from utils.activity_log import ActivityLog
 from utils.approval_manager import ApprovalManager
+from dashboard.routers.approval_dispatch import derive_feature
 
 router = APIRouter(tags=["pages"])
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
@@ -18,6 +21,24 @@ _am = ApprovalManager()
 
 def _ctx(**kwargs) -> dict:
     return {"pending_count": len(_am.pending()), **kwargs}
+
+
+def _queued_gaps() -> list[dict]:
+    """Return coverage gaps queued for generation, grouped by product+domain."""
+    entries = [
+        e for e in _alog.filter(event_type="approval_action", agent="human")
+        if e.get("status") == "pending"
+    ]
+    by_context: dict[tuple, set] = defaultdict(set)
+    for e in entries:
+        for test_name in e.get("output", {}).get("gaps", []):
+            feature = derive_feature(test_name)
+            if feature:
+                by_context[(e.get("product"), e.get("domain"))].add(feature)
+    return [
+        {"product": p, "domain": d, "features": sorted(feats)}
+        for (p, d), feats in by_context.items()
+    ]
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -31,6 +52,7 @@ async def home(request: Request):
         agent_count=9,
         recent=list(reversed(all_entries))[:10],
         pending_items=pending[:3],
+        queued_gaps=_queued_gaps(),
     ))
 
 
@@ -120,4 +142,5 @@ async def kb_page(request: Request):
         kb_files=kb_files,
         increments=increments,
         recent_jobs=recent_jobs,
+        queued_gaps=_queued_gaps(),
     ))

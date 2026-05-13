@@ -100,40 +100,70 @@
       {% endif %}
     </div>
 
-    <!-- Pending approvals quick list -->
+    <!-- Pending work -->
     <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-        <h2 class="font-semibold text-slate-800">Pending Approvals</h2>
-        <a href="/approvals" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Manage</a>
+      <div class="px-5 py-4 border-b border-slate-100">
+        <h2 class="font-semibold text-slate-800">Pending Work</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Approvals waiting + gaps queued</p>
       </div>
+
+      {% set type_colors = {
+        "quarantine": "bg-orange-100 text-orange-700",
+        "unquarantine": "bg-emerald-100 text-emerald-700",
+        "locator_heal": "bg-blue-100 text-blue-700",
+        "script_review": "bg-purple-100 text-purple-700",
+        "coverage_gap": "bg-cyan-100 text-cyan-700",
+        "regression_review": "bg-red-100 text-red-700",
+      } %}
+
       {% if pending_items %}
+      <div class="px-5 pt-3 pb-1">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Approvals</p>
+      </div>
       <div class="divide-y divide-slate-50">
         {% for item in pending_items %}
-        {% set type_colors = {
-          "quarantine": "bg-orange-100 text-orange-700",
-          "unquarantine": "bg-emerald-100 text-emerald-700",
-          "locator_heal": "bg-blue-100 text-blue-700",
-          "script_review": "bg-purple-100 text-purple-700",
-          "coverage_gap": "bg-cyan-100 text-cyan-700",
-          "regression_review": "bg-red-100 text-red-700",
-        } %}
-        <div class="px-5 py-3">
-          <div class="flex items-start gap-2">
-            <span class="text-xs px-1.5 py-0.5 rounded font-medium {{ type_colors.get(item.type, 'bg-slate-100 text-slate-600') }} shrink-0">{{ item.type | replace('_',' ') }}</span>
+        <div class="px-5 py-2.5 flex items-start gap-2">
+          <span class="text-xs px-1.5 py-0.5 rounded font-medium {{ type_colors.get(item.type, 'bg-slate-100 text-slate-600') }} shrink-0 mt-0.5">{{ item.type | replace('_',' ') }}</span>
+          <div class="min-w-0">
+            <p class="text-xs text-slate-700 truncate">{{ item.title }}</p>
+            <p class="text-xs text-slate-400">{{ item.proposed_date }}</p>
           </div>
-          <p class="text-sm text-slate-700 mt-1 truncate">{{ item.title }}</p>
-          <p class="text-xs text-slate-400 mt-0.5">{{ item.proposed_date }}</p>
         </div>
         {% endfor %}
-        {% if pending_count > pending_items | length %}
-        <div class="px-5 py-3">
-          <a href="/approvals" class="text-xs text-indigo-600 hover:text-indigo-800">+ {{ pending_count - pending_items | length }} more</a>
+        <div class="px-5 py-2.5">
+          <a href="/approvals" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
+            {% if pending_count > pending_items | length %}+ {{ pending_count - (pending_items | length) }} more · {% endif %}Manage all →
+          </a>
         </div>
-        {% endif %}
       </div>
-      {% else %}
+      {% endif %}
+
+      {% if queued_gaps %}
+      <div class="px-5 pt-3 pb-1 {{ 'border-t border-slate-50' if pending_items else '' }}">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Coverage Gaps — trigger pipeline</p>
+      </div>
+      <div class="px-5 pb-4 space-y-3">
+        {% for group in queued_gaps %}
+        <div>
+          <p class="text-xs text-slate-500 mb-1.5">{{ group.product }} / {{ group.domain }}</p>
+          <div class="flex flex-wrap gap-1.5">
+            {% for feature in group.features %}
+            <a href="/kb#pipeline"
+               onclick="sessionStorage.setItem('kb_prefill', JSON.stringify({product:'{{ group.product }}',domain:'{{ group.domain }}',feature:'{{ feature }}'}))"
+               class="inline-flex items-center gap-1 px-2 py-1 bg-cyan-50 border border-cyan-200 hover:bg-cyan-100 rounded text-xs font-medium text-cyan-700 transition-colors">
+              {{ feature }}
+              <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if not pending_items and not queued_gaps %}
       <div class="px-5 py-12 text-center">
-        <p class="text-sm text-slate-400">No pending approvals.</p>
+        <p class="text-sm text-slate-400">All clear — no pending work.</p>
       </div>
       {% endif %}
     </div>
