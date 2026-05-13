@@ -93,6 +93,39 @@ modules:
       - "ESS user cannot access user management (403)"
       - "Disabled user login attempt shows error"
 
+  - name: "Recruitment"
+    description: "End-to-end hiring pipeline — job vacancies, candidate tracking, interview scheduling"
+    status: active
+    sub_modules:
+      - "Job Vacancies — create and manage open positions"
+      - "Candidates — track applicants through hiring stages"
+      - "Interview Scheduling — schedule and record interviews"
+    business_rules:
+      - "Only Admin role can create, edit, or delete job vacancies"
+      - "Vacancy Name is required and must be unique (max 100 chars)"
+      - "Job Title must reference an existing job title configured in Admin"
+      - "Hiring Manager must be an existing active employee"
+      - "No. of Positions must be a positive integer if provided"
+      - "Candidate First Name and Last Name are required (max 30 chars each)"
+      - "Candidate Email is required and must be a valid email format"
+      - "Candidate resume upload: PDF/DOC/DOCX only, max 2MB"
+      - "Date of Application defaults to today and is required"
+      - "Interview Title is required (max 100 chars)"
+      - "At least one Interviewer must be assigned to a scheduled interview"
+      - "Interview Date is required"
+      - "Candidate status transitions: Application Initiated → Shortlisted → Interview Scheduled → Interview Passed/Failed → Job Offered → Hired/Offer Declined/Rejected"
+    test_scenarios:
+      - "Admin creates a vacancy with required fields only"
+      - "Admin creates a vacancy with all optional fields"
+      - "Vacancy with duplicate name is rejected"
+      - "Admin adds a candidate manually with required fields"
+      - "Admin adds a candidate with resume (valid PDF)"
+      - "Candidate with invalid email is rejected"
+      - "Admin schedules an interview for a shortlisted candidate"
+      - "Interview without an interviewer is rejected"
+      - "Candidate status updates after interview outcome is recorded"
+      - "ESS user cannot create or edit vacancies (access denied)"
+
 personas:
   - name: "System Admin"
     role: "Admin"
