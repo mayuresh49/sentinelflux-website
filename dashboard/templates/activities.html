@@ -33,13 +33,7 @@
           {% for d in domains %}<option value="{{ d }}" {{ 'selected' if request.query_params.get('domain') == d }}>{{ d }}</option>{% endfor %}
         </select>
       </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Product</label>
-        <select name="product" class="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
-          <option value="">All products</option>
-          {% for p in products %}<option value="{{ p }}" {{ 'selected' if request.query_params.get('product') == p }}>{{ p }}</option>{% endfor %}
-        </select>
-      </div>
+      <input type="hidden" name="product" value="{{ request.query_params.get('product', '') }}">
       <div class="flex flex-col gap-1">
         <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Needs Review</label>
         <select name="requires_human" class="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">

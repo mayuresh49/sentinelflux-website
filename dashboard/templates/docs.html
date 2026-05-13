@@ -21,18 +21,11 @@
         <input type="text" placeholder="Search..." id="doc-search"
                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
                x-on:input="filterDocs($event.target.value)">
-        <div class="flex gap-2">
-          <select id="doc-product-filter" class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
-                  x-on:change="filterDocs()">
-            <option value="">All products</option>
-            {% for p in products %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
-          </select>
-          <select id="doc-domain-filter" class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
-                  x-on:change="filterDocs()">
-            <option value="">All domains</option>
-            {% for d in domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
-          </select>
-        </div>
+        <select id="doc-domain-filter" class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
+                x-on:change="filterDocs()">
+          <option value="">All domains</option>
+          {% for d in domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+        </select>
       </div>
       <!-- List -->
       <div class="flex-1 overflow-y-auto divide-y divide-slate-50" id="doc-list">
@@ -83,24 +76,14 @@
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const p = new URLSearchParams(location.search).get('product');
-  if (p) {
-    const sel = document.getElementById('doc-product-filter');
-    if (sel) { sel.value = p; filterDocs(); }
-  }
-});
-
 function filterDocs(searchVal) {
   const search = (searchVal ?? document.getElementById('doc-search').value).toLowerCase();
-  const product = document.getElementById('doc-product-filter').value;
   const domain = document.getElementById('doc-domain-filter').value;
   let visible = 0;
   document.querySelectorAll('#doc-list button[data-feature]').forEach(btn => {
     const matchSearch = !search || btn.dataset.feature.includes(search) || btn.dataset.product.includes(search) || btn.dataset.domain.includes(search);
-    const matchProduct = !product || btn.dataset.product === product;
     const matchDomain = !domain || btn.dataset.domain === domain;
-    const show = matchSearch && matchProduct && matchDomain;
+    const show = matchSearch && matchDomain;
     btn.style.display = show ? '' : 'none';
     if (show) visible++;
   });

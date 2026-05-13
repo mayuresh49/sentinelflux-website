@@ -36,7 +36,7 @@ scenarios:
 <div class="max-w-full space-y-5"
      x-data="{
        tab: 'files',
-       selectedProduct: '{{ products[0] if products else '' }}',
+       selectedProduct: '{{ selected_product }}',
        selectedFile: null,
        showIncrementForm: false,
        incrementFilename: '',

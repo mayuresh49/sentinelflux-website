@@ -20,18 +20,11 @@
         <input type="text" placeholder="Search scripts..." id="script-search"
                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
                x-on:input="filterScripts($event.target.value)">
-        <div class="flex gap-2">
-          <select id="script-product-filter" class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
-                  x-on:change="filterScripts()">
-            <option value="">All products</option>
-            {% for p in products %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
-          </select>
-          <select id="script-domain-filter" class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
-                  x-on:change="filterScripts()">
-            <option value="">All domains</option>
-            {% for d in domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
-          </select>
-        </div>
+        <select id="script-domain-filter" class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
+                x-on:change="filterScripts()">
+          <option value="">All domains</option>
+          {% for d in domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+        </select>
       </div>
       <div class="flex-1 overflow-y-auto divide-y divide-slate-50" id="script-list">
         {% for s in scripts %}
@@ -81,24 +74,14 @@
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const p = new URLSearchParams(location.search).get('product');
-  if (p) {
-    const sel = document.getElementById('script-product-filter');
-    if (sel) { sel.value = p; filterScripts(); }
-  }
-});
-
 function filterScripts(searchVal) {
   const search = (searchVal ?? document.getElementById('script-search').value).toLowerCase();
-  const product = document.getElementById('script-product-filter').value;
   const domain = document.getElementById('script-domain-filter').value;
   let visible = 0;
   document.querySelectorAll('#script-list button[data-feature]').forEach(btn => {
     const matchSearch = !search || btn.dataset.feature.includes(search) || btn.dataset.product.includes(search) || btn.dataset.domain.includes(search);
-    const matchProduct = !product || btn.dataset.product === product;
     const matchDomain = !domain || btn.dataset.domain === domain;
-    const show = matchSearch && matchProduct && matchDomain;
+    const show = matchSearch && matchDomain;
     btn.style.display = show ? '' : 'none';
     if (show) visible++;
   });

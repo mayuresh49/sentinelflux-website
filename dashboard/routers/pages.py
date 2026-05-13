@@ -90,10 +90,15 @@ async def activities(
 
 
 @router.get("/approvals", response_class=HTMLResponse)
-async def approvals(request: Request):
+async def approvals(request: Request, product: str | None = None):
+    pending = _am.pending()
+    resolved = list(reversed(_am.resolved()))[:50]
+    if product:
+        pending = [p for p in pending if p.get("product") == product]
+        resolved = [r for r in resolved if r.get("product") == product]
     return templates.TemplateResponse(request, "approvals.html", context=_ctx(
-        pending=_am.pending(),
-        resolved=list(reversed(_am.resolved()))[:50],
+        pending=pending,
+        resolved=resolved,
     ))
 
 
@@ -154,11 +159,12 @@ async def quality_page(request: Request, product: str | None = None):
 
 
 @router.get("/kb", response_class=HTMLResponse)
-async def kb_page(request: Request):
+async def kb_page(request: Request, product: str | None = None):
     from dashboard.routers.kb import _list_products, _kb_files, _load_increments_log, _INCREMENTS_DIR, _TEXT_SUFFIXES
     from dashboard.routers.pipeline import _load_jobs
     products = _list_products()
     kb_files = {p: _kb_files(p) for p in products}
+    selected_product = product if product and product in products else (products[0] if products else "")
     log = _load_increments_log()
     increment_files: list[str] = []
     if _INCREMENTS_DIR.exists():
@@ -174,4 +180,5 @@ async def kb_page(request: Request):
         increments=increments,
         recent_jobs=recent_jobs,
         queued_gaps=_queued_gaps(),
+        selected_product=selected_product,
     ))
