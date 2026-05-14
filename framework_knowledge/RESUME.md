@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-14  
+Last updated: 2026-05-15  
 Framework version: 0.1.0
 
 ---
@@ -33,7 +33,15 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ---
 
-## What Was Just Done (2026-05-14)
+## What Was Just Done (2026-05-15)
+
+- **Per-product Run Config** (`/config` → Run Config tab): CRUD for environment profiles (name, base URL, API URL), browser profiles (chromium/firefox/webkit, headless), device profiles (platform, appium URL, capabilities JSON), credentials (username + password env var ref), and saved defaults per product. Data stored in `framework_knowledge/config.yaml` under each product's `run_config` key.
+- **Run trigger with config**: Trigger panel and schedule form now load the product's run config profiles on product selection (Alpine.js fetch to `GET /api/config/run-config/{product}`); browser shown only for web/all, device only for mobile/all; defaults pre-selected.
+- **Env injection into pytest**: `_execute_run` resolves the chosen profiles and injects `SF_ENV`, `SF_BASE_URL`, `SF_API_URL`, `SF_BROWSER`, `SF_HEADLESS`, `SF_APPIUM_URL`, `SF_DEVICE_PLATFORM`, `SF_DEVICE_CAPABILITIES` into the subprocess environment.
+- **Run history snapshot**: Each run record stores `run_config_snapshot`; shown as monospace pills in run history cards. Reruns inherit the original config.
+- **Debt D-01–D-06 resolved** (prior session): file locking (FileLock), 90-day run_history cap, `utils/paths.py` centralisation, config_router split into subpackage, unit tests for core utils, OpenAI/Anthropic wired to AI client.
+
+## Previous: Dashboard Build (2026-05-14)
 
 - **Dashboard**: Full monitoring UI at `/` — stat cards, pipeline execution flowchart showing live agent status
 - **Agents page** (`/agents`): Registry of all 9 agents with last run status, config overrides, input/output docs
@@ -41,9 +49,9 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 - **Approvals page** (`/approvals`): Human-in-the-loop queue for quarantine/regression/locator actions
 - **Quality page** (`/quality`): Pass rates, quarantine stats, coverage metrics per product
 - **KB page** (`/kb`): Browse/edit KB YAML files, trigger AI pipeline, view jobs
-- **Runs page** (`/runs`): Trigger suite runs by product/domain, view history with pass-rate bars and failure category pills (Product Bug / Env Issue / Script/Data), schedule recurring runs, on-demand failure analysis via ResultAnalyzerAgent
+- **Runs page** (`/runs`): Trigger suite runs by product/domain/env/browser/device, view history with pass-rate bars, failure category pills, and config snapshot badges (env/browser/device used); schedule recurring runs with config; on-demand failure analysis via ResultAnalyzerAgent
 - **Auth**: Login/session, user-product access control
-- **Config page** (`/config`): Manage env configs, users, assignments, labels, priorities
+- **Config page** (`/config`): Manage env configs, users, assignments, labels, priorities, and per-product Run Config (environments, browsers, devices, credentials, defaults)
 - **AI Chat widget** (global): LLM-backed assistant, pluggable provider (Ollama/OpenAI/Anthropic/Gemini)
 
 ---
@@ -59,11 +67,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## Next Immediate Actions
 
-1. **File locking** — `ActivityLog`, `ApprovalManager`, `RunManager`, `PipelineJobs` all write JSON/YAML without locks. Concurrent xdist runs + dashboard triggers will corrupt data. Add `filelock.FileLock` to each writer.
-2. **`run_history.yaml` cap** — grows unbounded; FlakyDetector reads the whole file. Add a rolling 90-day window trim.
-3. **Test `sentinelflux generate` end-to-end** — `./run_pipeline.sh restfulbooker booking api` against running Qwen
-4. **Run web tests** — `make restfulbooker-web` and `make orangehrm-web`
-5. **v0.1.0 tag + PyPI publish** when ready
+1. **Wire SF_* env vars into conftest/config loader** — tests need to read `SF_BASE_URL`, `SF_BROWSER`, etc. instead of hardcoded values for the run config injection to take effect end-to-end.
+2. **Test `sentinelflux generate` end-to-end** — `./run_pipeline.sh restfulbooker booking api` against running Qwen
+3. **Run web tests** — `make restfulbooker-web` and `make orangehrm-web`
+4. **v0.1.0 tag + PyPI publish** when ready
 
 Framework-level feature backlog: `framework_knowledge/progress/backlog.yaml`
 
@@ -107,12 +114,15 @@ conftest.py                     Generic fixtures — NO product references
 examples/orangehrm/             OrangeHRM example (web + API + KB)
 examples/restfulbooker/         Restful Booker example (API + KB)
 framework_knowledge/            Tracking system (activity log, approvals, runs, quarantine, KB log)
-dashboard/app.py                FastAPI app entry point — registers all 16 routers
+dashboard/app.py                FastAPI app entry point — registers all routers
 dashboard/routers/pages.py      All UI page routes (/, /runs, /agents, /activities, /kb, etc.)
-dashboard/routers/runs.py       Test run API + trigger + schedule endpoints
+dashboard/routers/runs.py       Test run API + trigger + schedule endpoints; env injection
 dashboard/routers/pipeline.py   AI pipeline job trigger + job history
-dashboard/routers/config_router.py  Environment/user/assignment config (908 lines — large)
+dashboard/routers/config/       Config subpackage: _helpers, _meta, _users, _products, _assignments, _run_config
+dashboard/routers/config/_run_config.py  Per-product run config CRUD (envs, browsers, devices, credentials, defaults)
+dashboard/routers/config_router.py  Thin re-export shim for backward compat
 dashboard/templates/            Jinja2 templates (one per page + partials/ subdir)
+dashboard/templates/partials/config_run_config.html  Run config UI partial (4 sections + defaults)
 ```
 
 ---
