@@ -119,9 +119,9 @@ class TestRunManager:
         # Patch the module-level path constants so RunManager writes to tmp_path
         runs_path = tmp_path / "test_runs.json"
         schedules_path = tmp_path / "test_schedules.json"
-        with patch("utils.run_manager._RUNS_PATH", runs_path), \
-             patch("utils.run_manager._SCHEDULES_PATH", schedules_path), \
-             patch("utils.run_manager._RUNS_DIR", tmp_path / "runs"):
+        with patch("core.run_manager._RUNS_PATH", runs_path), \
+             patch("core.run_manager._SCHEDULES_PATH", schedules_path), \
+             patch("core.run_manager._RUNS_DIR", tmp_path / "runs"):
             rm = RunManager()
         # Expose patched paths on the instance for test helpers
         rm._runs_path = runs_path
@@ -132,9 +132,9 @@ class TestRunManager:
         from unittest.mock import patch
         runs_path = tmp_path / "test_runs.json"
         schedules_path = tmp_path / "test_schedules.json"
-        with patch("utils.run_manager._RUNS_PATH", runs_path), \
-             patch("utils.run_manager._SCHEDULES_PATH", schedules_path), \
-             patch("utils.run_manager._RUNS_DIR", tmp_path / "runs"):
+        with patch("core.run_manager._RUNS_PATH", runs_path), \
+             patch("core.run_manager._SCHEDULES_PATH", schedules_path), \
+             patch("core.run_manager._RUNS_DIR", tmp_path / "runs"):
             rm = RunManager()
             run = rm.create_run(product="acme", domain="api")
             assert run["status"] == "queued"
@@ -146,9 +146,9 @@ class TestRunManager:
         runs_path = tmp_path / "test_runs.json"
         schedules_path = tmp_path / "test_schedules.json"
         from unittest.mock import patch
-        with patch("utils.run_manager._RUNS_PATH", runs_path), \
-             patch("utils.run_manager._SCHEDULES_PATH", schedules_path), \
-             patch("utils.run_manager._RUNS_DIR", tmp_path / "runs"):
+        with patch("core.run_manager._RUNS_PATH", runs_path), \
+             patch("core.run_manager._SCHEDULES_PATH", schedules_path), \
+             patch("core.run_manager._RUNS_DIR", tmp_path / "runs"):
             rm = RunManager()
             run = rm.create_run(product="acme", domain="web")
             updated = rm.patch_run(run["id"], status="completed", passed=10)
@@ -159,9 +159,9 @@ class TestRunManager:
         runs_path = tmp_path / "test_runs.json"
         schedules_path = tmp_path / "test_schedules.json"
         from unittest.mock import patch
-        with patch("utils.run_manager._RUNS_PATH", runs_path), \
-             patch("utils.run_manager._SCHEDULES_PATH", schedules_path), \
-             patch("utils.run_manager._RUNS_DIR", tmp_path / "runs"):
+        with patch("core.run_manager._RUNS_PATH", runs_path), \
+             patch("core.run_manager._SCHEDULES_PATH", schedules_path), \
+             patch("core.run_manager._RUNS_DIR", tmp_path / "runs"):
             rm = RunManager()
             sched = rm.create_schedule("nightly", "acme", "api", hour=2, minute=0, days=["mon"])
             assert len(rm.all_schedules()) == 1
@@ -173,9 +173,9 @@ class TestRunManager:
         runs_path = tmp_path / "test_runs.json"
         schedules_path = tmp_path / "test_schedules.json"
         from unittest.mock import patch
-        with patch("utils.run_manager._RUNS_PATH", runs_path), \
-             patch("utils.run_manager._SCHEDULES_PATH", schedules_path), \
-             patch("utils.run_manager._RUNS_DIR", tmp_path / "runs"):
+        with patch("core.run_manager._RUNS_PATH", runs_path), \
+             patch("core.run_manager._SCHEDULES_PATH", schedules_path), \
+             patch("core.run_manager._RUNS_DIR", tmp_path / "runs"):
             rm = RunManager()
             for _ in range(_MAX_RUNS + 3):
                 rm.create_run(product="p", domain="api")
