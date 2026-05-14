@@ -1,0 +1,505 @@
+{% extends "base.html" %}
+{% block title %}Runs{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto space-y-5" x-data="runsPage()">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Test Runs</h1>
+      <p class="text-sm text-slate-500 mt-0.5">Trigger, schedule, and review suite results</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button @click="showTrigger = !showTrigger"
+              class="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Run Now
+      </button>
+      <button @click="showSchedule = !showSchedule"
+              class="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Schedule
+      </button>
+    </div>
+  </div>
+
+  <!-- Trigger panel -->
+  <div x-show="showTrigger" x-cloak
+       x-transition:enter="transition ease-out duration-150"
+       x-transition:enter-start="opacity-0 -translate-y-1"
+       x-transition:enter-end="opacity-100 translate-y-0"
+       class="bg-white rounded-xl border border-indigo-200 shadow-sm p-5">
+    <h2 class="text-sm font-semibold text-slate-800 mb-4">Trigger a Run</h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div class="md:col-span-1">
+        <label class="block text-xs font-medium text-slate-600 mb-1">Product</label>
+        <select x-model="trigger.product"
+                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <option value="">— select —</option>
+          {% for p in all_products %}
+          <option value="{{ p }}">{{ p }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-600 mb-1">Domain</label>
+        <select x-model="trigger.domain"
+                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <option value="all">All</option>
+          <option value="api">API</option>
+          <option value="web">Web</option>
+          <option value="mobile">Mobile</option>
+          <option value="security">Security</option>
+        </select>
+      </div>
+      <div class="md:col-span-2">
+        <label class="block text-xs font-medium text-slate-600 mb-1">Extra pytest args <span class="text-slate-400 font-normal">(optional)</span></label>
+        <input type="text" x-model="trigger.extra_args" placeholder="-k test_login --tb=long"
+               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-300">
+      </div>
+    </div>
+    <div class="flex items-center gap-3 mt-4">
+      <button @click="submitTrigger()"
+              :disabled="!trigger.product || triggerLoading"
+              class="px-4 py-2 bg-indigo-600 disabled:bg-slate-200 disabled:text-slate-400 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2">
+        <svg x-show="triggerLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+        </svg>
+        <span x-text="triggerLoading ? 'Queuing…' : 'Run Now'"></span>
+      </button>
+      <span x-show="triggerMsg" x-text="triggerMsg" class="text-xs text-emerald-600 font-medium"></span>
+      <span x-show="triggerErr" x-text="triggerErr" class="text-xs text-red-600 font-medium"></span>
+    </div>
+  </div>
+
+  <!-- Schedule panel -->
+  <div x-show="showSchedule" x-cloak
+       x-transition:enter="transition ease-out duration-150"
+       x-transition:enter-start="opacity-0 -translate-y-1"
+       x-transition:enter-end="opacity-100 translate-y-0"
+       class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+    <h2 class="text-sm font-semibold text-slate-800">Scheduled Runs</h2>
+
+    {% if schedules %}
+    <div class="divide-y divide-slate-50">
+      {% for s in schedules %}
+      <div class="py-2.5 flex items-center gap-3 flex-wrap">
+        <span class="w-2 h-2 rounded-full shrink-0 {{ 'bg-emerald-500' if s.enabled else 'bg-slate-300' }}"></span>
+        <div class="flex-1 min-w-[180px]">
+          <p class="text-sm font-medium text-slate-800">{{ s.name }}</p>
+          <p class="text-xs text-slate-500">{{ s.product }} / {{ s.domain }} · {{ '%02d:%02d' % (s.hour, s.minute) }} on {{ s.days | join(', ') }}</p>
+          {% if s.last_run_at %}
+          <p class="text-[10px] text-slate-400">Last run: {{ s.last_run_at[5:16].replace('T',' ') }}</p>
+          {% endif %}
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button @click="toggleSchedule('{{ s.id }}')"
+                  class="text-xs px-2 py-1 rounded {{ 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' if s.enabled else 'bg-slate-100 text-slate-500 hover:bg-slate-200' }} transition-colors">
+            {{ 'Enabled' if s.enabled else 'Disabled' }}
+          </button>
+          <button @click="runScheduleNow('{{ s.id }}')"
+                  class="text-xs px-2 py-1 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded transition-colors">
+            Run now
+          </button>
+          <button @click="deleteSchedule('{{ s.id }}')"
+                  class="text-xs px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded transition-colors">
+            Delete
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-slate-400">No schedules yet.</p>
+    {% endif %}
+
+    <!-- New schedule form -->
+    <div class="border-t border-slate-100 pt-4" x-data="{ open: false }">
+      <button @click="open = !open" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1">
+        <svg class="w-3.5 h-3.5 transition-transform" :class="open ? 'rotate-45' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+        Add schedule
+      </button>
+      <div x-show="open" x-cloak class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="md:col-span-2">
+          <label class="block text-xs font-medium text-slate-600 mb-1">Name</label>
+          <input type="text" x-model="newSched.name" placeholder="Nightly API Suite"
+                 class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Product</label>
+          <select x-model="newSched.product"
+                  class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option value="">— select —</option>
+            {% for p in all_products %}
+            <option value="{{ p }}">{{ p }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Domain</label>
+          <select x-model="newSched.domain"
+                  class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option value="all">All</option>
+            <option value="api">API</option>
+            <option value="web">Web</option>
+            <option value="mobile">Mobile</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Time (HH:MM)</label>
+          <input type="time" x-model="newSched.time"
+                 class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+        </div>
+        <div class="md:col-span-3">
+          <label class="block text-xs font-medium text-slate-600 mb-1">Days</label>
+          <div class="flex gap-1.5 flex-wrap">
+            {% for day in ['mon','tue','wed','thu','fri','sat','sun'] %}
+            <label class="flex items-center gap-1 text-xs text-slate-600 cursor-pointer">
+              <input type="checkbox" :value="'{{ day }}'" x-model="newSched.days" class="rounded text-indigo-600">
+              {{ day }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="md:col-span-4 flex items-center gap-3 mt-1">
+          <button @click="createSchedule()"
+                  :disabled="!newSched.name || !newSched.product"
+                  class="px-3 py-1.5 bg-indigo-600 disabled:bg-slate-200 disabled:text-slate-400 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors">
+            Save Schedule
+          </button>
+          <span x-show="schedMsg" x-text="schedMsg" class="text-xs text-emerald-600 font-medium"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters + history header -->
+  <div class="flex items-center gap-3 flex-wrap">
+    <h2 class="text-sm font-semibold text-slate-700 mr-1">Run History</h2>
+    <select onchange="applyRunFilter('product', this.value)"
+            class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200">
+      <option value="">All products</option>
+      {% for p in all_products %}
+      <option value="{{ p }}" {{ 'selected' if filter_product == p else '' }}>{{ p }}</option>
+      {% endfor %}
+    </select>
+    <select onchange="applyRunFilter('domain', this.value)"
+            class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200">
+      <option value="">All domains</option>
+      <option value="api" {{ 'selected' if filter_domain == 'api' else '' }}>API</option>
+      <option value="web" {{ 'selected' if filter_domain == 'web' else '' }}>Web</option>
+      <option value="mobile" {{ 'selected' if filter_domain == 'mobile' else '' }}>Mobile</option>
+    </select>
+    <select onchange="applyRunFilter('status', this.value)"
+            class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200">
+      <option value="">All statuses</option>
+      <option value="running" {{ 'selected' if filter_status == 'running' else '' }}>Running</option>
+      <option value="completed" {{ 'selected' if filter_status == 'completed' else '' }}>Completed</option>
+      <option value="failed" {{ 'selected' if filter_status == 'failed' else '' }}>Failed</option>
+    </select>
+    {% if any_running %}
+    <span class="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-full flex items-center gap-1">
+      <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse inline-block"></span>
+      Run in progress · auto-refreshing
+    </span>
+    {% endif %}
+  </div>
+
+  <!-- Run list -->
+  {% if runs %}
+  <div class="space-y-3">
+    {% for run in runs %}
+    {% set pass_pct = ((run.passed / run.total * 100) | round(1)) if run.total > 0 else 0 %}
+    {% set status_colors = {
+      "completed": "bg-emerald-100 text-emerald-700",
+      "running":   "bg-amber-100 text-amber-700",
+      "queued":    "bg-slate-100 text-slate-500",
+      "failed":    "bg-red-100 text-red-700",
+      "aborted":   "bg-slate-100 text-slate-500",
+    } %}
+    {% set dot_colors = {
+      "completed": "bg-emerald-500",
+      "running":   "bg-amber-500",
+      "queued":    "bg-slate-300",
+      "failed":    "bg-red-500",
+      "aborted":   "bg-slate-300",
+    } %}
+
+    <!-- Failure category totals -->
+    {% set cats = run.failure_categories %}
+    {% set n_product_bug = (cats.get('assertion', 0)) %}
+    {% set n_env = (cats.get('env', 0) + cats.get('infra', 0)) %}
+    {% set n_script = (cats.get('locator', 0) + cats.get('flaky', 0)) %}
+
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden"
+         x-data="{ open: false }">
+
+      <!-- Main row -->
+      <div class="p-4">
+        <div class="flex items-start gap-3">
+          <!-- Status dot + ID -->
+          <span class="w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 {{ dot_colors.get(run.status, 'bg-slate-300') }}
+            {% if run.status == 'running' %}animate-pulse{% endif %}"></span>
+
+          <div class="flex-1 min-w-0 space-y-2">
+            <!-- Top line: product / domain / trigger / time -->
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-semibold text-slate-800">{{ run.product }}</span>
+              <span class="text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">{{ run.domain }}</span>
+              <span class="text-xs {{ status_colors.get(run.status, 'bg-slate-100 text-slate-500') }} px-1.5 py-0.5 rounded font-medium">{{ run.status }}</span>
+              <span class="text-xs text-slate-400">via {{ run.trigger }}</span>
+              <span class="text-xs text-slate-400 ml-auto">{{ run.triggered_at[5:16].replace('T',' ') }}</span>
+            </div>
+
+            {% if run.status in ('completed', 'failed') %}
+            <!-- Stats row -->
+            <div class="flex items-center gap-4 text-xs text-slate-600 flex-wrap">
+              <span class="font-semibold text-slate-800">{{ run.total }} tests</span>
+              <span class="text-emerald-600 font-medium">{{ run.passed }} passed</span>
+              {% if run.failed > 0 %}<span class="text-red-600 font-medium">{{ run.failed }} failed</span>{% endif %}
+              {% if run.skipped > 0 %}<span class="text-slate-400">{{ run.skipped }} skipped</span>{% endif %}
+              <span class="text-slate-400">{{ run.duration }}s</span>
+              {% if run.total > 0 %}
+              <span class="font-semibold {{ 'text-emerald-600' if pass_pct == 100 else ('text-amber-600' if pass_pct >= 70 else 'text-red-600') }}">
+                {{ pass_pct }}%
+              </span>
+              {% endif %}
+            </div>
+
+            <!-- Pass bar -->
+            {% if run.total > 0 %}
+            <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden w-full max-w-md">
+              <div class="h-full rounded-full transition-all
+                {{ 'bg-emerald-500' if pass_pct == 100 else ('bg-amber-500' if pass_pct >= 70 else 'bg-red-500') }}"
+                   style="width: {{ pass_pct }}%"></div>
+            </div>
+            {% endif %}
+
+            <!-- Failure categories -->
+            {% if run.failed > 0 %}
+            <div class="flex items-center gap-2 flex-wrap">
+              {% if n_product_bug > 0 %}
+              <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-red-50 text-red-600 border border-red-200 rounded font-medium">
+                <span class="w-1 h-1 rounded-full bg-red-500 inline-block"></span>
+                Product Bug: {{ n_product_bug }}
+              </span>
+              {% endif %}
+              {% if n_env > 0 %}
+              <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded font-medium">
+                <span class="w-1 h-1 rounded-full bg-amber-500 inline-block"></span>
+                Env Issue: {{ n_env }}
+              </span>
+              {% endif %}
+              {% if n_script > 0 %}
+              <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded font-medium">
+                <span class="w-1 h-1 rounded-full bg-orange-400 inline-block"></span>
+                Script/Data: {{ n_script }}
+              </span>
+              {% endif %}
+              {% if not run.analyzed and run.failed > 0 %}
+              <span class="text-[10px] text-slate-400 italic">Not analyzed</span>
+              {% endif %}
+            </div>
+            {% endif %}
+            {% endif %}
+
+            {% if run.status == 'running' %}
+            <p class="text-xs text-amber-600 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse inline-block"></span>
+              In progress…
+            </p>
+            {% endif %}
+          </div>
+
+          <!-- Actions -->
+          <div class="shrink-0 flex flex-col items-end gap-1.5 ml-2">
+            <div class="flex items-center gap-1.5">
+              {% if run.status in ('completed', 'failed') %}
+              <button @click="rerun('{{ run.id }}')"
+                      class="text-xs px-2 py-1 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded transition-colors">
+                Re-run
+              </button>
+              {% if run.failed > 0 and not run.analyzed %}
+              <button @click="analyze('{{ run.id }}')"
+                      class="text-xs px-2 py-1 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 rounded transition-colors">
+                Analyze
+              </button>
+              {% endif %}
+              {% endif %}
+              {% if run.failed > 0 or run.failures %}
+              <button @click="open = !open"
+                      class="text-xs px-2 py-1 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded transition-colors flex items-center gap-1">
+                Failures
+                <svg class="w-3 h-3 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              {% endif %}
+            </div>
+            <span class="text-[10px] text-slate-400 font-mono">{{ run.id }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expanded: failures list -->
+      {% if run.failures %}
+      <div x-show="open" x-cloak class="border-t border-slate-50 divide-y divide-slate-50">
+        {% set cat_labels = {
+          "assertion":  ("Product Bug",  "bg-red-50 text-red-700 border-red-200"),
+          "infra":      ("Env Issue",    "bg-amber-50 text-amber-700 border-amber-200"),
+          "env":        ("Env Issue",    "bg-amber-50 text-amber-700 border-amber-200"),
+          "locator":    ("Script/Data",  "bg-orange-50 text-orange-700 border-orange-200"),
+          "flaky":      ("Script/Data",  "bg-orange-50 text-orange-700 border-orange-200"),
+          "unanalyzed": ("Unanalyzed",   "bg-slate-50 text-slate-500 border-slate-200"),
+          "unknown":    ("Unknown",      "bg-slate-50 text-slate-500 border-slate-200"),
+        } %}
+        {% for f in run.failures %}
+        {% set label, badge_cls = cat_labels.get(f.category, ("Unknown", "bg-slate-50 text-slate-500 border-slate-200")) %}
+        <div class="px-5 py-3 space-y-1">
+          <div class="flex items-start gap-2 flex-wrap">
+            <span class="inline-flex items-center text-[10px] px-1.5 py-0.5 border rounded font-medium {{ badge_cls }}">
+              {{ label }}
+            </span>
+            {% if f.confidence > 0 %}
+            <span class="text-[10px] text-slate-400">{{ (f.confidence * 100) | round(0) | int }}% confidence</span>
+            {% endif %}
+            <code class="text-[10px] text-slate-500 font-mono ml-auto truncate max-w-[400px]" title="{{ f.test_id }}">{{ f.test_id }}</code>
+          </div>
+          {% if f.summary %}
+          <p class="text-xs text-slate-700 leading-relaxed">{{ f.summary | truncate(200) }}</p>
+          {% endif %}
+          {% if f.suggestion %}
+          <p class="text-[10px] text-indigo-600">→ {{ f.suggestion }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-6 py-16 text-center">
+    <p class="text-slate-400 text-sm">No runs yet. Click <strong>Run Now</strong> to trigger your first suite.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function runsPage() {
+  return {
+    showTrigger: {{ 'true' if not runs else 'false' }},
+    showSchedule: false,
+    trigger: { product: '', domain: 'all', extra_args: '' },
+    triggerLoading: false,
+    triggerMsg: '',
+    triggerErr: '',
+    newSched: { name: '', product: '', domain: 'all', time: '02:00', days: ['mon','tue','wed','thu','fri'] },
+    schedMsg: '',
+
+    async submitTrigger() {
+      if (!this.trigger.product) return;
+      this.triggerLoading = true;
+      this.triggerMsg = '';
+      this.triggerErr = '';
+      try {
+        const r = await fetch('/api/runs/trigger', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(this.trigger),
+        });
+        if (!r.ok) throw new Error(await r.text());
+        const d = await r.json();
+        this.triggerMsg = `Run ${d.run_id} queued — page will refresh.`;
+        this.showTrigger = false;
+        setTimeout(() => location.reload(), 1800);
+      } catch (e) {
+        this.triggerErr = e.message || 'Failed to trigger run.';
+      } finally {
+        this.triggerLoading = false;
+      }
+    },
+
+    async rerun(runId) {
+      const r = await fetch(`/api/runs/${runId}/rerun`, { method: 'POST' });
+      if (r.ok) { setTimeout(() => location.reload(), 800); }
+    },
+
+    async analyze(runId) {
+      const btn = event.target;
+      btn.textContent = 'Analyzing…';
+      btn.disabled = true;
+      const r = await fetch(`/api/runs/${runId}/analyze`, { method: 'POST' });
+      if (r.ok) {
+        btn.textContent = 'Queued';
+        setTimeout(() => location.reload(), 3000);
+      } else {
+        btn.textContent = 'Failed';
+        btn.disabled = false;
+      }
+    },
+
+    async toggleSchedule(schedId) {
+      await fetch(`/api/runs/schedules/${schedId}/toggle`, { method: 'POST' });
+      location.reload();
+    },
+
+    async runScheduleNow(schedId) {
+      const r = await fetch(`/api/runs/schedules/${schedId}/run-now`, { method: 'POST' });
+      if (r.ok) { setTimeout(() => location.reload(), 800); }
+    },
+
+    async deleteSchedule(schedId) {
+      if (!confirm('Delete this schedule?')) return;
+      await fetch(`/api/runs/schedules/${schedId}`, { method: 'DELETE' });
+      location.reload();
+    },
+
+    async createSchedule() {
+      const [h, m] = (this.newSched.time || '02:00').split(':').map(Number);
+      const r = await fetch('/api/runs/schedules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: this.newSched.name,
+          product: this.newSched.product,
+          domain: this.newSched.domain,
+          hour: h, minute: m,
+          days: this.newSched.days,
+        }),
+      });
+      if (r.ok) {
+        this.schedMsg = 'Saved.';
+        setTimeout(() => location.reload(), 800);
+      }
+    },
+  };
+}
+
+function applyRunFilter(key, val) {
+  const u = new URL(location.href);
+  if (val) u.searchParams.set(key, val);
+  else u.searchParams.delete(key);
+  location.href = u.toString();
+}
+
+// Auto-refresh if any run is in progress
+{% if any_running %}
+setTimeout(() => location.reload(), 5000);
+{% endif %}
+</script>
+{% endblock %}

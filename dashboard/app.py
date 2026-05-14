@@ -30,7 +30,7 @@ from dashboard.routers import activities, approvals, docs, scripts, agents
 from dashboard.routers import pages, partials
 from dashboard.routers import kb as kb_router, pipeline as pipeline_router
 from dashboard.routers import chat as chat_router, quality as quality_router
-from dashboard.routers import config_router
+from dashboard.routers import config_router, runs as runs_router
 from dashboard.routers import auth as auth_router
 
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -76,6 +76,26 @@ app.include_router(kb_router.router, prefix="/api")
 app.include_router(pipeline_router.router, prefix="/api")
 app.include_router(chat_router.router, prefix="/api")
 app.include_router(quality_router.router, prefix="/api")
+app.include_router(runs_router.router, prefix="/api")
+
+
+@app.on_event("startup")
+async def _start_schedule_checker():
+    import asyncio
+    asyncio.create_task(_schedule_loop())
+
+
+async def _schedule_loop():
+    import asyncio
+    from datetime import datetime, timezone
+    from utils.run_manager import RunManager
+    rm = RunManager()
+    while True:
+        await asyncio.sleep(60)
+        now = datetime.now(timezone.utc)
+        for sched in rm.all_schedules():
+            if RunManager.is_due(sched, now):
+                runs_router.fire_scheduled_run(sched["id"])
 
 
 @app.get("/api/health", tags=["health"])
