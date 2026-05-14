@@ -28,15 +28,21 @@ cd products/orangehrm && python3 -m pytest --collect-only -q
 ## Project structure
 
 ```
-ai/               AI test generation pipeline
+ai/               AI engine — agents, clients, skills, pipeline, KB loader
+  context/        AI/Claude orientation docs + ADRs + backlog
+core/             Framework services (run manager, approvals, activity log, AI factory)
+dashboard/        FastAPI web dashboard
+data/             Runtime app state (run history, pipeline jobs, approvals)
+products/         Per-product test suites with KB, tests, pages, and docs
+  orangehrm/      OrangeHRM — web UI + API suites
+  restfulbooker/  Restful Booker — API suites
+utils/            Test helpers (assertions, step, wait, locator manager)
 api/              Generic REST + GraphQL clients
-pages/            Base page objects
-utils/            Shared utilities (step tracking, AI registry, locator manager)
-sentinelflux/     CLI (typer) + project scaffold templates
+pages/            Framework-level page base classes
+sentinelflux/     CLI (init, run, generate, doctor)
 config/           Generic environment profiles
-products/         Self-contained example projects
-  orangehrm/      OrangeHRM demo — web UI + API suites
-tests/            Generic framework-level tests
+scripts/          Shell scripts (run_pipeline, setup_ai_generator, start-local)
+tests/            Framework-level tests (unit, api, web, mobile)
 .github/          CI/CD workflows, issue templates
 ```
 

@@ -38,12 +38,12 @@ sentinelflux doctor
 
 # Generate a test case doc from your knowledge base
 sentinelflux generate \
-    --kb-dir ai/knowledge_base/my-product \
+    --kb-dir products/my-product/ai/knowledge_base \
     --output docs/test_cases/web/login.md
 
 # Generate doc + pytest script in one step
 sentinelflux generate \
-    --kb-dir ai/knowledge_base/my-product \
+    --kb-dir products/my-product/ai/knowledge_base \
     --output docs/test_cases/api/booking.md \
     --script
 ```
@@ -69,11 +69,11 @@ pytest tests/api/ -m api --env staging
 
 ```bash
 # One-time setup — installs deps, checks Ollama, pulls model
-./setup_ai_generator.sh
+scripts/setup_ai_generator.sh
 
 # Generate doc + script for a product
-./run_pipeline.sh orangehrm login web
-./run_pipeline.sh restfulbooker booking api
+scripts/run_pipeline.sh orangehrm login web
+scripts/run_pipeline.sh restfulbooker booking api
 ```
 
 ---
@@ -149,7 +149,7 @@ Open trace files at [trace.playwright.dev](https://trace.playwright.dev).
 
 ### Knowledge Base
 
-Drop feature YAML files in `ai/knowledge_base/<product>/`. Three template files:
+Drop feature YAML files in `products/<product>/ai/knowledge_base/`. Three template files:
 
 - `application.yaml` — app metadata, base URLs, auth type
 - `api_specs.yaml` — REST endpoints and GraphQL queries
@@ -165,18 +165,18 @@ sentinelflux init my-project   # scaffolds the full structure
 ```bash
 # Web test case doc
 sentinelflux generate \
-    --kb-dir ai/knowledge_base/orangehrm \
+    --kb-dir products/orangehrm/ai/knowledge_base \
     --output products/orangehrm/docs/test_cases/web/login.md
 
 # API test case doc
 sentinelflux generate \
     --endpoint /booking --method POST \
-    --kb-dir ai/knowledge_base/restfulbooker \
+    --kb-dir products/restfulbooker/ai/knowledge_base \
     --output products/restfulbooker/docs/test_cases/api/booking_create.md
 
 # Doc + script in one step
 sentinelflux generate \
-    --kb-dir ai/knowledge_base/restfulbooker \
+    --kb-dir products/restfulbooker/ai/knowledge_base \
     --output products/restfulbooker/docs/test_cases/api/booking.md \
     --script
 ```
@@ -184,7 +184,7 @@ sentinelflux generate \
 Use local Ollama/Qwen instead of Mistral cloud:
 
 ```bash
-./run_pipeline.sh restfulbooker booking api qwen2.5-coder:14b-instruct-q4_K_M
+scripts/run_pipeline.sh restfulbooker booking api qwen2.5-coder:14b-instruct-q4_K_M
 ```
 
 ---
@@ -193,18 +193,22 @@ Use local Ollama/Qwen instead of Mistral cloud:
 
 ```
 ai/                   KB loader, AI clients, test generation skills and pipeline
-  knowledge_base/     Per-product KB directories (orangehrm/, restfulbooker/)
+  context/            AI/Claude orientation docs (RESUME, architecture, backlog)
+  knowledge_base/     KB loader code + per-product YAML drop-zone
   pipeline/           End-to-end orchestrator (KB → doc → script)
   skills/             AI skills (doc gen, script gen, self-healing)
+core/                 Framework services (run manager, approvals, activity log, AI factory)
 api/                  REST and GraphQL clients
 config/               Environment YAML profiles (env_qa.yaml, env_staging.yaml)
-products/             Working example projects
-  orangehrm/          OrangeHRM web + API tests
-  restfulbooker/      Restful Booker API tests
-pages/                Page Object Models (web)
+data/                 Runtime app state (run history, pipeline jobs, approvals)
+products/             Per-product test suites
+  orangehrm/          OrangeHRM web + API tests + KB
+  restfulbooker/      Restful Booker API tests + KB
+scripts/              Shell scripts (run_pipeline, setup_ai_generator, start-local)
+pages/                Framework-level page base classes
 sentinelflux/         CLI (init, run, generate, doctor)
-tests/                Framework-level test stubs
-utils/                Logger, locator manager, AI factory, constants
+tests/                Framework-level tests (unit, api, web, mobile)
+utils/                Test helpers (assertions, step, wait, locator manager)
 ```
 
 ---

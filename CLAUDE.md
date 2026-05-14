@@ -57,15 +57,26 @@ Run independent agents **in parallel** (single message, multiple Agent blocks).
 ## Project Structure
 
 ```
-ai/               AI-powered test generation (Mistral, KB)
-api/              API test layer
-pages/            Page Object Models (web)
-tests/            Test suites (api/, web/, integration/)
-locators/         Element locators
-utils/            Shared utilities
-config/           Environment configs
-docs/             Guides and generated test case docs
-schemas/          JSON schemas for validation
+ai/               AI engine — agents, clients, skills, pipeline, KB loader
+  context/        AI/Claude orientation docs (RESUME, architecture, ADRs, backlog)
+  knowledge_base/ KB loader code + increments drop-zone
+core/             Framework services (activity log, run manager, approvals, AI factory)
+dashboard/        FastAPI web dashboard (routers, templates, static)
+data/             Runtime state written by the app (gitignored sensitive files)
+products/         Per-product test suites (orangehrm/, restfulbooker/)
+  <product>/
+    ai/knowledge_base/  Product-specific KB YAMLs
+    tests/              Pytest suites
+    pages/              Page object models
+    docs/test_cases/    AI-generated test case docs
+utils/            Test helpers (assertions, step, wait, locator manager, logger)
+api/              Generic REST + GraphQL clients
+pages/            Framework-level page base classes
+tests/            Framework-level tests (unit/, api/, web/, mobile/)
+config/           Environment profiles (env_qa.yaml, env_staging.yaml)
+scripts/          Shell scripts and ops files (run_pipeline, start-local, Caddyfile)
+sentinelflux/     pip-installable CLI (init, run, generate, doctor)
+docs/             Public-facing user documentation (mkdocs)
 ```
 
 ---
@@ -89,7 +100,7 @@ Use `claude-sonnet-4-6` as default; `claude-haiku-4-5-20251001` for high-volume,
 - `ai/knowledge_base/increments/` — drop feature YAMLs here for AI pipeline
 - `ai/clients/mistral_client.py` — LLM client
 - `utils/constants.py` — all magic numbers
-- `utils/ai_factory.py` — AI client creation (use this, never instantiate directly)
+- `core/ai_factory.py` — AI client creation (use this, never instantiate directly)
 - `conftest.py` — pytest fixtures
 - `pytest.ini` — test configuration (RP key via RP_API_KEY env var)
 
