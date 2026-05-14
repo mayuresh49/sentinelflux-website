@@ -415,7 +415,7 @@ def _product_test_count(product: str) -> int:
     return count
 
 
-def _render_products(request: Request, cfg: dict) -> HTMLResponse:
+def _render_products(request: Request, cfg: dict, flash: str = "") -> HTMLResponse:
     enriched = []
     for p in cfg.get("products", []):
         tc = _product_test_count(p["name"])
@@ -423,6 +423,7 @@ def _render_products(request: Request, cfg: dict) -> HTMLResponse:
     return templates.TemplateResponse(request, "partials/config_products.html", context={
         "request": request,
         "products": enriched,
+        "flash": flash,
     })
 
 
@@ -534,18 +535,20 @@ async def products_delete(request: Request, name: str = Form(...)):
     name = name.strip()
     cfg = _load_config()
     _purge_product_data(name, cfg)
-    return _render_products(request, cfg)
+    return _render_products(request, cfg, flash=f"'{name}' and all associated data have been permanently deleted.")
 
 
 @router.post("/ui/config/products/set-active", response_class=HTMLResponse)
 async def products_set_active(request: Request, name: str = Form(...), active: str = Form("true")):
     cfg = _load_config()
+    is_active = active.lower() not in {"false", "0", "no"}
     for p in cfg.get("products", []):
         if p["name"] == name:
-            p["active"] = active.lower() not in {"false", "0", "no"}
+            p["active"] = is_active
             break
     _save_config(cfg)
-    return _render_products(request, cfg)
+    flash = f"'{name}' is now {'active' if is_active else 'inactive'}."
+    return _render_products(request, cfg, flash=flash)
 
 
 # ---------- test type distribution ----------
