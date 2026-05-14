@@ -10,7 +10,7 @@ class AdminPage(BasePage):
 
     @step_method("Navigate to admin panel")
     def navigate(self):
-        self.page.goto(f"{self._base_url}/admin", wait_until="networkidle")
+        self.page.goto(f"{self._base_url}/admin", wait_until="domcontentloaded")
 
     @step_method("Enter admin username")
     def enter_username(self, username: str):
@@ -22,22 +22,29 @@ class AdminPage(BasePage):
 
     @step_method("Click login button")
     def click_login(self):
-        self.page.get_by_role("button", name="Login").click()
+        self.page.locator("#doLogin").click()
 
     def login(self, username: str, password: str):
         self.navigate()
         self.enter_username(username)
         self.enter_password(password)
         self.click_login()
-        self.page.wait_for_load_state("networkidle")
+        # Next.js navigates to /admin/rooms on success; wait up to 8s for that
+        try:
+            self.page.wait_for_url("**/admin/rooms**", timeout=8000)
+            # wait for nav to hydrate — Rooms link appears after JS settles
+            self.page.locator("a[href='/admin/rooms']").wait_for(state="visible", timeout=5000)
+        except Exception:
+            self.page.wait_for_timeout(2000)
 
     @step_method("Verify admin panel is visible")
     def is_admin_panel_visible(self) -> bool:
-        return self.page.get_by_role("link", name="Logout").is_visible()
+        # Logout is now a <button>, not a link
+        return self.page.get_by_role("button", name="Logout").is_visible()
 
     @step_method("Click Rooms menu")
     def click_rooms(self):
-        self.page.locator("a[href='#/admin/rooms']").click()
+        self.page.locator("a[href='/admin/rooms']").click()
 
     @step_method("Click Reports menu")
     def click_report(self):
@@ -49,4 +56,9 @@ class AdminPage(BasePage):
 
     @step_method("Logout")
     def logout(self):
-        self.page.get_by_role("link", name="Logout").click()
+        self.page.get_by_role("button", name="Logout").click()
+        # Site redirects to home page after logout
+        try:
+            self.page.wait_for_url(lambda url: "/admin" not in url, timeout=5000)
+        except Exception:
+            pass

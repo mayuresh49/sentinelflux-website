@@ -36,7 +36,7 @@ def test_RB_WEB_004_booking_form_submit_with_valid_data(page, rb_web_base):
     home.submit_booking()
     confirmed = home.is_booking_confirmed()
     has_error = home.has_validation_error()
-    assert confirmed or has_error, "Expected either a confirmation or a validation error"
+    assert confirmed or has_error, "Expected either a booking confirmation or a validation error"
 
 
 @pytest.mark.web
