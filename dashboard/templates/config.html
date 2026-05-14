@@ -37,6 +37,9 @@
               :class="tab==='users' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
               class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">Users</button>
       {% endif %}
+      <button @click="tab='runconfig'"
+              :class="tab==='runconfig' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
+              class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">Run Config</button>
     </div>
 
     <!-- ── PRODUCTS ── -->
@@ -247,6 +250,37 @@
       </div>
     </div>
 
+
+    <!-- ── RUN CONFIG ── -->
+    <div x-show="tab==='runconfig'" x-cloak class="mt-4"
+         x-data="{ rcProduct: '{{ all_products[0] if all_products else '' }}' }">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100">
+          <h2 class="font-semibold text-slate-800">Run Configuration</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Per-product environment, browser, device, and credential profiles used when triggering runs</p>
+        </div>
+        <div class="px-5 py-4">
+          {% if all_products %}
+          <div class="flex items-center gap-3 mb-5">
+            <label class="text-xs font-medium text-slate-600 shrink-0">Product</label>
+            <select x-model="rcProduct"
+                    @change="htmx.ajax('GET', '/ui/config/run-config/' + rcProduct, '#run-config-content')"
+                    class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              {% for p in all_products %}
+              <option value="{{ p }}">{{ p }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div id="run-config-content"
+               hx-get="/ui/config/run-config/{{ all_products[0] }}"
+               hx-trigger="load">
+          </div>
+          {% else %}
+          <p class="text-sm text-slate-400">No products configured yet. Add a product first.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
 
   </div>
 </div>

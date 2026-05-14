@@ -1,15 +1,15 @@
 processed:
-- increment: Timesheets.yaml
-  processed_date: '2026-05-14'
+- domain: api
   feature: Timesheets
-  domain: api
   generated_doc: examples/orangehrm/docs/test_cases/api/Timesheets.md
   generated_script: examples/orangehrm/tests/api/test_Timesheets.py
-  status: generated_pending_review
-- increment: Timesheets.yaml
+  increment: Timesheets.yaml
   processed_date: '2026-05-14'
+  status: generated_pending_review
+- domain: web
   feature: Timesheets
-  domain: web
   generated_doc: examples/orangehrm/docs/test_cases/web/Timesheets.md
   generated_script: examples/orangehrm/tests/web/test_Timesheets.py
+  increment: Timesheets.yaml
+  processed_date: '2026-05-14'
   status: generated_pending_review

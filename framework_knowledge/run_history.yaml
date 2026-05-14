@@ -1,12 +1,97 @@
-# SentinelFlux Run History
-# Managed by QuarantineManager.record_run() — do not edit manually.
-# Read by FlakyDetectorAgent to identify flaky test candidates.
-#
-# Structure:
-#   tests:
-#     <test_nodeid>:
-#       - status: passed | failed
-#         date: "YYYY-MM-DD"
-#         duration: 0.45   # seconds
-
-tests: {}
+tests:
+  tests/unit/test_utils.py::TestActivityLog::test_append_and_all:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  tests/unit/test_utils.py::TestActivityLog::test_append_returns_id:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/unit/test_utils.py::TestActivityLog::test_filter_by_agent:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  tests/unit/test_utils.py::TestActivityLog::test_filter_by_product:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  tests/unit/test_utils.py::TestActivityLog::test_max_entries_trim:
+  - status: passed
+    date: '2026-05-14'
+    duration: 2.677
+  tests/unit/test_utils.py::TestActivityLog::test_empty_path_returns_empty:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/unit/test_utils.py::TestActivityLog::test_get_by_id:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/unit/test_utils.py::TestActivityLog::test_requires_human_filter:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  tests/unit/test_utils.py::TestApprovalManager::test_submit_and_pending:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  tests/unit/test_utils.py::TestApprovalManager::test_resolve_approve:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.002
+  tests/unit/test_utils.py::TestApprovalManager::test_resolve_not_found:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/unit/test_utils.py::TestApprovalManager::test_pending_type_filter:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.002
+  tests/unit/test_utils.py::TestApprovalManager::test_get:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  tests/unit/test_utils.py::TestApprovalManager::test_empty_path_returns_empty:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/unit/test_utils.py::TestRunManager::test_create_and_get_run:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  tests/unit/test_utils.py::TestRunManager::test_patch_run:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  tests/unit/test_utils.py::TestRunManager::test_create_and_delete_schedule:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  tests/unit/test_utils.py::TestRunManager::test_max_runs_cap:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.197
+  tests/unit/test_utils.py::TestRunManagerIsDue::test_due_when_conditions_match:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/unit/test_utils.py::TestRunManagerIsDue::test_not_due_wrong_day:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/unit/test_utils.py::TestRunManagerIsDue::test_not_due_wrong_hour:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/unit/test_utils.py::TestRunManagerIsDue::test_not_due_already_ran_today:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/unit/test_utils.py::TestRunManagerIsDue::test_not_due_when_disabled:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/unit/test_utils.py::TestRunManagerIsDue::test_due_ran_yesterday:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0

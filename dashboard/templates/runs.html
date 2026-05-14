@@ -39,7 +39,7 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
       <div class="md:col-span-1">
         <label class="block text-xs font-medium text-slate-600 mb-1">Product</label>
-        <select x-model="trigger.product"
+        <select x-model="trigger.product" @change="loadRunConfig(trigger.product, 'trigger')"
                 class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
           <option value="">— select —</option>
           {% for p in all_products %}
@@ -62,6 +62,40 @@
         <label class="block text-xs font-medium text-slate-600 mb-1">Extra pytest args <span class="text-slate-400 font-normal">(optional)</span></label>
         <input type="text" x-model="trigger.extra_args" placeholder="-k test_login --tb=long"
                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-300">
+      </div>
+    </div>
+    <!-- Run config row: shown when product has config profiles -->
+    <div x-show="triggerRunConfig.environments.length || triggerRunConfig.browsers.length || triggerRunConfig.devices.length"
+         class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 pt-3 border-t border-slate-100">
+      <div x-show="triggerRunConfig.environments.length">
+        <label class="block text-xs font-medium text-slate-600 mb-1">Environment</label>
+        <select x-model="trigger.environment"
+                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <option value="">— default —</option>
+          <template x-for="e in triggerRunConfig.environments" :key="e.name">
+            <option :value="e.name" x-text="e.name"></option>
+          </template>
+        </select>
+      </div>
+      <div x-show="triggerRunConfig.browsers.length && (trigger.domain === 'web' || trigger.domain === 'all')">
+        <label class="block text-xs font-medium text-slate-600 mb-1">Browser</label>
+        <select x-model="trigger.browser"
+                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <option value="">— default —</option>
+          <template x-for="b in triggerRunConfig.browsers" :key="b.name">
+            <option :value="b.name" x-text="b.name + ' (' + b.browser + (b.headless ? ', headless' : '') + ')'"></option>
+          </template>
+        </select>
+      </div>
+      <div x-show="triggerRunConfig.devices.length && (trigger.domain === 'mobile' || trigger.domain === 'all')">
+        <label class="block text-xs font-medium text-slate-600 mb-1">Device</label>
+        <select x-model="trigger.device"
+                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <option value="">— default —</option>
+          <template x-for="d in triggerRunConfig.devices" :key="d.name">
+            <option :value="d.name" x-text="d.name + ' (' + d.platform + ')'"></option>
+          </template>
+        </select>
       </div>
     </div>
     <div class="flex items-center gap-3 mt-4">
@@ -94,7 +128,7 @@
         <span class="w-2 h-2 rounded-full shrink-0 {{ 'bg-emerald-500' if s.enabled else 'bg-slate-300' }}"></span>
         <div class="flex-1 min-w-[180px]">
           <p class="text-sm font-medium text-slate-800">{{ s.name }}</p>
-          <p class="text-xs text-slate-500">{{ s.product }} / {{ s.domain }} · {{ '%02d:%02d' % (s.hour, s.minute) }} on {{ s.days | join(', ') }}</p>
+          <p class="text-xs text-slate-500">{{ s.product }} / {{ s.domain }} · {{ '%02d:%02d' % (s.hour, s.minute) }} on {{ s.days | join(', ') }}{% if s.get('environment') %} · env: {{ s.environment }}{% endif %}{% if s.get('browser') %} · {{ s.browser }}{% endif %}{% if s.get('device') %} · {{ s.device }}{% endif %}</p>
           {% if s.last_run_at %}
           <p class="text-[10px] text-slate-400">Last run: {{ s.last_run_at[5:16].replace('T',' ') }}</p>
           {% endif %}
@@ -136,7 +170,7 @@
         </div>
         <div>
           <label class="block text-xs font-medium text-slate-600 mb-1">Product</label>
-          <select x-model="newSched.product"
+          <select x-model="newSched.product" @change="loadRunConfig(newSched.product, 'sched')"
                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
             <option value="">— select —</option>
             {% for p in all_products %}
@@ -154,6 +188,43 @@
             <option value="mobile">Mobile</option>
           </select>
         </div>
+        <!-- Run config fields for schedule -->
+        <template x-if="schedRunConfig.environments.length">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Environment</label>
+            <select x-model="newSched.environment"
+                    class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              <option value="">— default —</option>
+              <template x-for="e in schedRunConfig.environments" :key="e.name">
+                <option :value="e.name" x-text="e.name"></option>
+              </template>
+            </select>
+          </div>
+        </template>
+        <template x-if="schedRunConfig.browsers.length">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Browser</label>
+            <select x-model="newSched.browser"
+                    class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              <option value="">— default —</option>
+              <template x-for="b in schedRunConfig.browsers" :key="b.name">
+                <option :value="b.name" x-text="b.name"></option>
+              </template>
+            </select>
+          </div>
+        </template>
+        <template x-if="schedRunConfig.devices.length">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Device</label>
+            <select x-model="newSched.device"
+                    class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              <option value="">— default —</option>
+              <template x-for="d in schedRunConfig.devices" :key="d.name">
+                <option :value="d.name" x-text="d.name"></option>
+              </template>
+            </select>
+          </div>
+        </template>
         <div>
           <label class="block text-xs font-medium text-slate-600 mb-1">Time (HH:MM)</label>
           <input type="time" x-model="newSched.time"
@@ -250,6 +321,10 @@
               <span class="text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">{{ run.domain }}</span>
               <span class="text-xs {{ status_colors.get(run.status, 'bg-slate-100 text-slate-500') }} px-1.5 py-0.5 rounded font-medium">{{ run.status }}</span>
               <span class="text-xs text-slate-400">via {{ run.trigger }}</span>
+              {% set snap = run.get('run_config_snapshot', {}) %}
+              {% if snap.get('environment') %}<span class="text-[10px] font-mono bg-indigo-50 text-indigo-600 border border-indigo-100 px-1.5 py-0.5 rounded">env:{{ snap.environment }}</span>{% endif %}
+              {% if snap.get('browser') %}<span class="text-[10px] font-mono bg-slate-50 text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded">{{ snap.browser }}</span>{% endif %}
+              {% if snap.get('device') %}<span class="text-[10px] font-mono bg-slate-50 text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded">{{ snap.device }}</span>{% endif %}
               <span class="text-xs text-slate-400 ml-auto">{{ run.triggered_at[5:16].replace('T',' ') }}</span>
             </div>
 
@@ -397,12 +472,43 @@ function runsPage() {
   return {
     showTrigger: {{ 'true' if not runs else 'false' }},
     showSchedule: false,
-    trigger: { product: '{{ filter_product }}', domain: 'all', extra_args: '' },
+    trigger: { product: '{{ filter_product }}', domain: 'all', extra_args: '', environment: '', browser: '', device: '' },
+    triggerRunConfig: { environments: [], browsers: [], devices: [] },
     triggerLoading: false,
     triggerMsg: '',
     triggerErr: '',
-    newSched: { name: '', product: '', domain: 'all', time: '02:00', days: ['mon','tue','wed','thu','fri'] },
+    newSched: { name: '', product: '', domain: 'all', time: '02:00', days: ['mon','tue','wed','thu','fri'], environment: '', browser: '', device: '' },
+    schedRunConfig: { environments: [], browsers: [], devices: [] },
     schedMsg: '',
+
+    async init() {
+      if (this.trigger.product) await this.loadRunConfig(this.trigger.product, 'trigger');
+    },
+
+    async loadRunConfig(product, target) {
+      if (!product) {
+        if (target === 'trigger') this.triggerRunConfig = { environments: [], browsers: [], devices: [] };
+        else this.schedRunConfig = { environments: [], browsers: [], devices: [] };
+        return;
+      }
+      try {
+        const r = await fetch(`/api/config/run-config/${product}`);
+        if (!r.ok) return;
+        const rc = await r.json();
+        const defaults = rc.defaults || {};
+        if (target === 'trigger') {
+          this.triggerRunConfig = rc;
+          if (!this.trigger.environment) this.trigger.environment = defaults.environment || '';
+          if (!this.trigger.browser) this.trigger.browser = defaults.browser || '';
+          if (!this.trigger.device) this.trigger.device = defaults.device || '';
+        } else {
+          this.schedRunConfig = rc;
+          if (!this.newSched.environment) this.newSched.environment = defaults.environment || '';
+          if (!this.newSched.browser) this.newSched.browser = defaults.browser || '';
+          if (!this.newSched.device) this.newSched.device = defaults.device || '';
+        }
+      } catch(e) {}
+    },
 
     async submitTrigger() {
       if (!this.trigger.product) return;
@@ -473,6 +579,9 @@ function runsPage() {
           domain: this.newSched.domain,
           hour: h, minute: m,
           days: this.newSched.days,
+          environment: this.newSched.environment || '',
+          browser: this.newSched.browser || '',
+          device: this.newSched.device || '',
         }),
       });
       if (r.ok) {
