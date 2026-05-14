@@ -216,7 +216,7 @@
           <form hx-get="/ui/config/assignments"
                 hx-target="#assignments-list"
                 hx-swap="innerHTML"
-                hx-trigger="change, input from:input[name='search'] delay:400ms, input from:input[name='filter_owner'] delay:400ms"
+                hx-trigger="change, input from:input[name='search'] delay:400ms"
                 class="px-5 py-3 space-y-2.5">
             <input type="hidden" name="product" value="{{ filter_product }}">
             <!-- Row 1: title + search + priority + owner + jira -->
@@ -231,8 +231,13 @@
                 <option value="{{ pri.name }}">{{ pri.name }}</option>
                 {% endfor %}
               </select>
-              <input type="text" name="filter_owner" placeholder="Owner…"
-                     class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-28">
+              <select name="filter_owner"
+                      class="text-sm border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                <option value="">All owners</option>
+                {% for u in cfg.get('users', []) %}
+                <option value="{{ u.name }}" {{ 'selected' if filter_owner == u.name else '' }}>{{ u.name }}</option>
+                {% endfor %}
+              </select>
               <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer whitespace-nowrap">
                 <input type="checkbox" name="filter_jira_exists" value="1"
                        class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
@@ -253,6 +258,26 @@
             </div>
             {% endif %}
           </form>
+        </div>
+        <!-- Bulk CSV upload -->
+        <div class="px-5 py-2.5 border-b border-slate-100 flex items-center gap-3 flex-wrap">
+          <form hx-post="/ui/config/assignments/bulk-upload"
+                hx-target="#assignments-list"
+                hx-swap="innerHTML"
+                hx-encoding="multipart/form-data"
+                class="flex items-center gap-2">
+            <span class="text-xs font-medium text-slate-500 shrink-0">Bulk upload:</span>
+            <input type="file" name="file" accept=".csv"
+                   class="text-xs text-slate-600 file:mr-2 file:text-xs file:font-medium file:bg-slate-100 file:text-slate-600 file:border-0 file:rounded file:px-2 file:py-1 file:cursor-pointer hover:file:bg-slate-200">
+            <button type="submit"
+                    class="bg-slate-700 hover:bg-slate-800 text-white text-xs font-medium rounded-lg px-3 py-1.5 transition-colors shrink-0">
+              Import CSV
+            </button>
+          </form>
+          <a href="/ui/config/assignments/csv-template"
+             class="text-xs text-indigo-600 hover:text-indigo-800 font-medium shrink-0">
+            Download template
+          </a>
         </div>
         <div id="assignments-list">
           {% include "partials/config_assignments.html" %}

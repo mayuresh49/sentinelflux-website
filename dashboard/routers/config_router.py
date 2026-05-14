@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import List, Optional
 
 import yaml
-from fastapi import APIRouter, Form, Query, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, File, Form, Query, Request, UploadFile
+from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 
 router = APIRouter(tags=["config"])
@@ -19,10 +19,31 @@ _EXAMPLES_DIR = _FK_DIR.parent / "examples"
 
 # ---------- data helpers ----------
 
+_DEFAULT_GENERATION_CATEGORIES = {
+    "functional": True,
+    "negative": True,
+    "edge": True,
+    "security": True,
+    "accessibility": False,
+}
+
+
 def _load_config() -> dict:
     if _CONFIG_PATH.exists():
-        return yaml.safe_load(_CONFIG_PATH.read_text(encoding="utf-8")) or {}
-    return {"labels": [], "priorities": [], "custom_fields": [], "test_type_distribution": {"sanity": 30, "regression": 70}}
+        cfg = yaml.safe_load(_CONFIG_PATH.read_text(encoding="utf-8")) or {}
+        cats = cfg.setdefault("generation_categories", {})
+        for k, v in _DEFAULT_GENERATION_CATEGORIES.items():
+            cats.setdefault(k, v)
+        cfg.setdefault("users", [])
+        return cfg
+    return {
+        "labels": [],
+        "priorities": [],
+        "custom_fields": [],
+        "test_type_distribution": {"sanity": 30, "regression": 70},
+        "generation_categories": dict(_DEFAULT_GENERATION_CATEGORIES),
+        "users": [],
+    }
 
 
 def _save_config(cfg: dict) -> None:
@@ -115,6 +136,30 @@ def get_test_type_for_index(index: int, total: int, cfg: dict | None = None) -> 
     return "sanity" if index < sanity_count else "regression"
 
 
+def get_generation_categories_instruction(cfg: dict | None = None) -> str:
+    """Return a prompt rule that tells the AI which test categories to generate."""
+    if cfg is None:
+        cfg = _load_config()
+    cats = cfg.get("generation_categories", _DEFAULT_GENERATION_CATEGORIES)
+
+    _LABELS = {
+        "functional": "positive / happy-path functional tests",
+        "negative": "negative tests (invalid input, missing fields, error paths)",
+        "edge": "edge cases (boundary values, optional fields, limits)",
+        "security": "security tests (auth, access control, injection, sensitive data)",
+        "accessibility": "accessibility tests (ARIA, keyboard navigation, screen-reader compatibility)",
+    }
+
+    enabled = [_LABELS[k] for k in _LABELS if cats.get(k, False)]
+    disabled = [_LABELS[k] for k in _LABELS if not cats.get(k, False)]
+
+    lines = ["- Test categories to generate (STRICTLY follow this — do not add categories not listed here):"]
+    lines.append(f"  INCLUDE: {', '.join(enabled) if enabled else 'none'}")
+    if disabled:
+        lines.append(f"  EXCLUDE (do not generate): {', '.join(disabled)}")
+    return "\n".join(lines)
+
+
 def get_generation_type_instruction(cfg: dict | None = None) -> str:
     """Return the prompt rule block for script gen re: sanity/regression markers.
 
@@ -163,6 +208,7 @@ async def config_page(request: Request, product: Optional[str] = None):
         "labels": cfg.get("labels", []),
         "priorities": cfg.get("priorities", []),
         "custom_fields": cfg.get("custom_fields", []),
+        "users": cfg.get("users", []),
         "filter_product": product or "",
         "tests": tests,
         "assignments": assignments,
@@ -251,6 +297,34 @@ async def fields_delete(request: Request, name: str = Form(...)):
     return _render_fields(request, cfg)
 
 
+# ---------- users ----------
+
+def _render_users(request: Request, cfg: dict) -> HTMLResponse:
+    return templates.TemplateResponse(request, "partials/config_users.html", context={
+        "request": request,
+        "users": cfg.get("users", []),
+    })
+
+
+@router.post("/ui/config/users/add", response_class=HTMLResponse)
+async def users_add(request: Request, name: str = Form(...), email: str = Form("")):
+    cfg = _load_config()
+    name = name.strip()
+    email = email.strip().lower()
+    if name and not any(u["name"] == name for u in cfg.get("users", [])):
+        cfg.setdefault("users", []).append({"name": name, "email": email})
+        _save_config(cfg)
+    return _render_users(request, cfg)
+
+
+@router.post("/ui/config/users/delete", response_class=HTMLResponse)
+async def users_delete(request: Request, name: str = Form(...)):
+    cfg = _load_config()
+    cfg["users"] = [u for u in cfg.get("users", []) if u["name"] != name]
+    _save_config(cfg)
+    return _render_users(request, cfg)
+
+
 # ---------- test type distribution ----------
 
 @router.post("/ui/config/test-types/save", response_class=HTMLResponse)
@@ -263,6 +337,26 @@ async def test_types_save(request: Request, sanity: int = Form(...)):
     return templates.TemplateResponse(request, "partials/config_test_types.html", context={
         "request": request,
         "dist": cfg["test_type_distribution"],
+        "saved": True,
+    })
+
+
+@router.post("/ui/config/generation-categories/save", response_class=HTMLResponse)
+async def generation_categories_save(request: Request):
+    form = await request.form()
+    cfg = _load_config()
+    cats = {
+        "functional": True,  # always on
+        "negative": form.get("negative") == "on",
+        "edge": form.get("edge") == "on",
+        "security": form.get("security") == "on",
+        "accessibility": form.get("accessibility") == "on",
+    }
+    cfg["generation_categories"] = cats
+    _save_config(cfg)
+    return templates.TemplateResponse(request, "partials/config_generation_categories.html", context={
+        "request": request,
+        "cats": cats,
         "saved": True,
     })
 
@@ -287,8 +381,8 @@ def _apply_assignment_filters(
     if filter_priority:
         tests = [t for t in tests if assignments.get(t["name"], {}).get("priority") == filter_priority]
     if filter_owner:
-        tests = [t for t in tests if filter_owner.lower() in
-                 assignments.get(t["name"], {}).get("custom_fields", {}).get("owner", "").lower()]
+        tests = [t for t in tests if
+                 assignments.get(t["name"], {}).get("custom_fields", {}).get("owner", "") == filter_owner]
     if filter_jira_exists == "1":
         tests = [t for t in tests if assignments.get(t["name"], {}).get("custom_fields", {}).get("jira_ticket", "")]
     return tests
@@ -296,7 +390,7 @@ def _apply_assignment_filters(
 
 def _assignments_ctx(request, tests, assignments, cfg, product, search,
                      filter_labels, filter_priority, filter_owner, filter_jira_exists,
-                     saved_test=""):
+                     saved_test="", bulk_result=None):
     return templates.TemplateResponse(request, "partials/config_assignments.html", context={
         "request": request,
         "tests": tests,
@@ -304,6 +398,7 @@ def _assignments_ctx(request, tests, assignments, cfg, product, search,
         "labels": cfg.get("labels", []),
         "priorities": cfg.get("priorities", []),
         "custom_fields": cfg.get("custom_fields", []),
+        "users": cfg.get("users", []),
         "filter_product": product,
         "search": search,
         "filter_labels": filter_labels or [],
@@ -311,6 +406,7 @@ def _assignments_ctx(request, tests, assignments, cfg, product, search,
         "filter_owner": filter_owner,
         "filter_jira_exists": filter_jira_exists,
         "saved_test": saved_test,
+        "bulk_result": bulk_result,
     })
 
 
@@ -333,6 +429,67 @@ async def assignments_partial(
                                       filter_priority, filter_owner, filter_jira_exists)
     return _assignments_ctx(request, tests, assignments, cfg, product, search,
                             filter_labels, filter_priority, filter_owner, filter_jira_exists)
+
+
+@router.get("/ui/config/assignments/csv-template")
+async def assignments_csv_template():
+    content = "test_name,labels,priority,owner,jira_ticket\n"
+    content += 'test_example_function,"sanity,regression",P1,Jane Smith,PROJ-123\n'
+    return Response(
+        content=content,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=assignments_template.csv"},
+    )
+
+
+@router.post("/ui/config/assignments/bulk-upload", response_class=HTMLResponse)
+async def assignments_bulk_upload(request: Request, file: UploadFile = File(...)):
+    import csv, io
+
+    content = (await file.read()).decode("utf-8", errors="replace")
+    reader = csv.DictReader(io.StringIO(content))
+
+    known_tests = {t["name"] for t in _all_tests()}
+    assignments = _load_assignments()
+    cfg = _load_config()
+
+    updated = 0
+    skipped: list[str] = []
+
+    for row in reader:
+        test_name = (row.get("test_name") or "").strip()
+        if not test_name or test_name not in known_tests:
+            if test_name:
+                skipped.append(test_name)
+            continue
+
+        existing = assignments.get(test_name, {"labels": [], "priority": "", "custom_fields": {}})
+
+        raw_labels = (row.get("labels") or "").strip()
+        if raw_labels:
+            new_labels = [l.strip() for l in raw_labels.split(",") if l.strip()]
+            existing["labels"] = list(dict.fromkeys(existing.get("labels", []) + new_labels))
+
+        priority = (row.get("priority") or "").strip()
+        if priority:
+            existing["priority"] = priority
+
+        cf = existing.get("custom_fields", {})
+        for field_name in ("owner", "jira_ticket"):
+            val = (row.get(field_name) or "").strip()
+            if val:
+                cf[field_name] = val
+        existing["custom_fields"] = cf
+
+        assignments[test_name] = existing
+        updated += 1
+
+    _save_assignments(assignments)
+
+    tests = _all_tests()
+    bulk_result = {"updated": updated, "skipped": len(skipped), "skipped_names": skipped[:10]}
+    return _assignments_ctx(request, tests, assignments, cfg, "", "", [], "", "", "",
+                            bulk_result=bulk_result)
 
 
 @router.post("/ui/config/assignments/save", response_class=HTMLResponse)
