@@ -1,3 +1,5 @@
+# ── Completed ────────────────────────────────────────────────────────────────
+
 - id: P2-01
   phase: 2
   title: "TestScriptGenSkill — generate pytest code from test case doc"
@@ -18,10 +20,91 @@
   file: ai/knowledge_base/kb_loader.py
   priority: high
   status: done
+
+# ── Active backlog ────────────────────────────────────────────────────────────
+
+# --- Technical Debt (blocking at scale) ---
+
+- id: D-01
+  phase: debt
+  title: "File locking on all JSON/YAML data writers"
+  files:
+    - utils/activity_log.py
+    - utils/approval_manager.py
+    - utils/run_manager.py
+    - dashboard/routers/pipeline.py
+  priority: high
+  status: todo
   notes: >
-    Add load_increments() method that reads all YAMLs from increments/ dir.
-    Merge into base context. Track which increments have been processed in
-    framework_knowledge/kb_increments_log.yaml.
+    All writers do read-modify-write without locks. Concurrent pytest-xdist runs
+    + dashboard triggers will corrupt framework_knowledge/ files.
+    Use filelock.FileLock wrapping each _save() / _write() call.
+    Add filelock to requirements.txt.
+
+- id: D-02
+  phase: debt
+  title: "Cap run_history.yaml with rolling 90-day window"
+  file: ai/agents/quarantine_manager.py
+  priority: high
+  status: todo
+  notes: >
+    run_history.yaml grows unbounded. FlakyDetectorAgent reads the whole file.
+    With 100+ tests × 30 runs/day this gets slow in weeks.
+    Add trim logic in QuarantineManager.record_run() — drop entries older than 90 days.
+
+- id: D-03
+  phase: debt
+  title: "Centralize ROOT_DIR into utils/paths.py"
+  files: "11 files each computing Path(__file__).resolve().parent.parent[.parent]"
+  priority: medium
+  status: todo
+  notes: >
+    ROOT_DIR, _ROOT_DIR, _ROOT, PROJECT_ROOT, BASE_DIR — all computing the same
+    root path independently with inconsistent naming and depth.
+    Create utils/paths.py with ROOT = Path(__file__).resolve().parent.parent
+    and import it everywhere. Prevents silent wrong-directory bugs.
+
+- id: D-04
+  phase: debt
+  title: "Split config_router.py into sub-modules"
+  file: dashboard/routers/config_router.py
+  priority: medium
+  status: todo
+  notes: >
+    908 lines handling env configs, users, assignments, labels, priorities,
+    products, generation categories. Extract into dashboard/routers/config/
+    subpackage: users.py, env.py, assignments.py, labels.py.
+    Register each sub-router in app.py under /api/config prefix.
+
+- id: D-05
+  phase: debt
+  title: "Unit tests for core framework utilities"
+  files:
+    - utils/activity_log.py
+    - utils/approval_manager.py
+    - utils/run_manager.py
+    - ai/knowledge_base/kb_loader.py
+  priority: medium
+  status: todo
+  notes: >
+    Zero unit tests for any of these. All are pure-logic classes safe to test
+    with a tmp_path fixture. Cost ~2 hours; saves hours per future refactor.
+    Add to tests/unit/ (new dir). Use pytest tmp_path for file isolation.
+
+- id: D-06
+  phase: debt
+  title: "Wire non-Mistral providers to agent analysis in runs router"
+  file: dashboard/routers/runs.py (_build_ai_client)
+  priority: medium
+  status: todo
+  notes: >
+    _build_ai_client() only handles Ollama provider from chat_config.json.
+    If user configures OpenAI/Anthropic/Gemini in the chat widget, failure
+    analysis on the Runs page silently does nothing.
+    Extend _build_ai_client() to support openai and anthropic providers
+    using the same clients as the chat router.
+
+# --- Feature backlog ---
 
 - id: P3-01
   phase: 3
@@ -59,6 +142,8 @@
   priority: medium
   status: todo
 
+# --- Cleanup ---
+
 - id: P5-01
   phase: 5
   title: "KB increments log tracker"
@@ -69,13 +154,13 @@
 
 - id: P5-02
   phase: 5
-  title: "Consolidate dead api/schemas/ directory"
+  title: "Delete dead api/schemas/ directory"
   file: api/schemas/
   priority: low
   status: todo
   notes: >
     api/schemas/ is dead code. RestClient uses schemas/rest_schemas/.
-    Verify no references exist, then delete api/schemas/ to avoid confusion.
+    Verify no references exist (grep -r "api/schemas"), then delete.
 
 - id: P5-03
   phase: 5

@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-08  
+Last updated: 2026-05-14  
 Framework version: 0.1.0
 
 ---
@@ -23,6 +23,9 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 | Mobile | Scaffolded | Appium dep present, zero implementation |
 | Security | Scaffolded | Marker only, nothing implemented |
 | AI/KB Pipeline | Working | KB → doc → script (Mistral + Ollama/Qwen). `ai/pipeline/orchestrator.py` |
+| AI Agents (post-suite) | Working | ResultAnalyzer, FlakyDetector, RegressionGuard, CoverageGap, LocatorHealer, QuarantineManager via `ai/agents/sentinel_orchestrator.py` |
+| Dashboard | Working | FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind. 16 pages/routers. Start: `uvicorn dashboard.app:app --reload` |
+| Runs | Working | Trigger/schedule pytest runs from dashboard, parse JSON reports, auto-analyze failures. `/runs` page |
 | CLI | Working | `sentinelflux init/run/generate/doctor` via typer |
 | Examples | Working | OrangeHRM (web+api), Restful Booker (13 API tests passing) |
 | Docs site | Built | mkdocs-material, `mkdocs serve` to preview |
@@ -30,44 +33,37 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ---
 
-## What Was Just Done (Sprints 1–4 + cleanup — 2026-05-08)
+## What Was Just Done (2026-05-14)
 
-**Productization sprints:**
+- **Dashboard**: Full monitoring UI at `/` — stat cards, pipeline execution flowchart showing live agent status
+- **Agents page** (`/agents`): Registry of all 9 agents with last run status, config overrides, input/output docs
+- **Activities page** (`/activities`): Filterable event log from `activity_log.json`
+- **Approvals page** (`/approvals`): Human-in-the-loop queue for quarantine/regression/locator actions
+- **Quality page** (`/quality`): Pass rates, quarantine stats, coverage metrics per product
+- **KB page** (`/kb`): Browse/edit KB YAML files, trigger AI pipeline, view jobs
+- **Runs page** (`/runs`): Trigger suite runs by product/domain, view history with pass-rate bars and failure category pills (Product Bug / Env Issue / Script/Data), schedule recurring runs, on-demand failure analysis via ResultAnalyzerAgent
+- **Auth**: Login/session, user-product access control
+- **Config page** (`/config`): Manage env configs, users, assignments, labels, priorities
+- **AI Chat widget** (global): LLM-backed assistant, pluggable provider (Ollama/OpenAI/Anthropic/Gemini)
+
+---
+
+## Previous Sprints (1–4, 2026-05-08)
+
 - Sprint 1: Apache 2.0 license, `pyproject.toml`, CLI (`init/run/generate`), OrangeHRM moved to `examples/`, GitHub Actions CI
 - Sprint 2: mkdocs docs site, `sentinelflux doctor`, PyPI publish workflow, CONTRIBUTING.md, issue templates
-- Sprint 3: Restful Booker second example (22 tests, 13/13 API passing), `sentinelflux init` smoke-tested, doc fixes
-- Sprint 4: Product KB separation — per-product `ai/knowledge_base/<product>/` dirs, `--kb-dir` CLI flag, `RestClient data_dir` param
-
-**Cleanup (items 6–9):**
-- `Makefile` — per-product targets (`orangehrm-web/api`, `restfulbooker-web/api`, `framework-tests`)
-- `run_pipeline.sh` — passes `--output-base examples/$PROJECT` to orchestrator; correct output path echo
-- `ai/pipeline/orchestrator.py` — added `--output-base` CLI flag + `output_base` param to route doc/script output to example dirs
-- `setup_ai_generator.sh` — full rewrite: installs `sentinelflux[ai]`, checks Ollama, pulls model, shows quick start
-- `docs/test_cases/form_test_cases.md` — deleted (stale generic file)
-
-**README + CI (2026-05-08):**
-- README rewritten as product landing page with CLI-first quick start, examples table, self-healing docs
-- CI: added `restfulbooker` collection smoke check, removed `|| true` on root collect
+- Sprint 3: Restful Booker second example (22 tests, 13/13 API passing), `sentinelflux init` smoke-tested
+- Sprint 4: Product KB separation — per-product `ai/knowledge_base/<product>/` dirs, `--kb-dir` CLI flag
 
 ---
 
 ## Next Immediate Actions
 
-These require user action (run/verify locally or publish):
-
-1. **Test `sentinelflux generate` end-to-end** — user has Qwen running at localhost:11434  
-   `./run_pipeline.sh restfulbooker booking api`
-
-2. **Run web tests** — `make restfulbooker-web` and `make orangehrm-web` against live demo sites
-
-3. **`sentinelflux doctor` output check** — run and verify all checks pass
-
-4. **TestPyPI smoke test** — `python -m build && twine upload --repository testpypi dist/*`
-
-5. **GitHub Pages deploy** — `mkdocs gh-deploy`
-
-6. **v0.1.0 tag + PyPI publish** — `git tag v0.1.0 && git push --tags`  
-   Publish workflow in `.github/workflows/publish.yml` triggers on tag push.
+1. **File locking** — `ActivityLog`, `ApprovalManager`, `RunManager`, `PipelineJobs` all write JSON/YAML without locks. Concurrent xdist runs + dashboard triggers will corrupt data. Add `filelock.FileLock` to each writer.
+2. **`run_history.yaml` cap** — grows unbounded; FlakyDetector reads the whole file. Add a rolling 90-day window trim.
+3. **Test `sentinelflux generate` end-to-end** — `./run_pipeline.sh restfulbooker booking api` against running Qwen
+4. **Run web tests** — `make restfulbooker-web` and `make orangehrm-web`
+5. **v0.1.0 tag + PyPI publish** when ready
 
 Framework-level feature backlog: `framework_knowledge/progress/backlog.yaml`
 
@@ -89,23 +85,44 @@ Framework-level feature backlog: `framework_knowledge/progress/backlog.yaml`
 ## Where Things Live
 
 ```
-ai/knowledge_base/<product>/   Per-product KB (application, api_specs, ui_pages, product_knowledge)
-ai/knowledge_base/increments/  Feature drop YAMLs
-ai/knowledge_base/kb_loader.py Loads base + increments, formats context for prompts
-ai/clients/mistral_client.py   LLM client (cloud + local Ollama)
-ai/skills/                     AI-powered skills (doc gen, script gen, self-healing)
-ai/pipeline/orchestrator.py    End-to-end KB → doc → script (supports --output-base)
-api/rest_client.py             REST API test client (supports data_dir param)
-api/graphql_client.py          GraphQL test client
-pages/base_page.py             Base POM with self-healing locators
-sentinelflux/                  CLI commands (init, run, generate, doctor)
-utils/constants.py             All magic numbers
-utils/ai_factory.py            AI client instantiation (do not duplicate in conftest)
-conftest.py                    Generic fixtures — NO product references
-examples/orangehrm/            OrangeHRM example (web + API)
-examples/restfulbooker/        Restful Booker example (API)
-framework_knowledge/           This tracking system
+ai/knowledge_base/<product>/    Per-product KB (application, api_specs, ui_pages, product_knowledge)
+ai/knowledge_base/increments/   Feature drop YAMLs
+ai/knowledge_base/kb_loader.py  Loads base + increments, formats context for prompts
+ai/clients/mistral_client.py    LLM client (cloud + local Ollama)
+ai/agents/                      9 agents: ResultAnalyzer, FlakyDetector, RegressionGuard,
+                                  CoverageGap, LocatorHealer, QuarantineManager, DocGen,
+                                  ScriptGen, SentinelOrchestrator
+ai/agents/sentinel_orchestrator.py  Post-suite monitoring pipeline (chains all agents)
+ai/pipeline/orchestrator.py     End-to-end KB → doc → script (supports --output-base)
+api/rest_client.py              REST API test client (supports data_dir param)
+api/graphql_client.py           GraphQL test client
+pages/base_page.py              Base POM with self-healing locators
+sentinelflux/                   CLI commands (init, run, generate, doctor)
+utils/constants.py              All magic numbers
+utils/ai_factory.py             AI client instantiation (do not duplicate in conftest)
+utils/activity_log.py           Append-only event store → framework_knowledge/activity_log.json
+utils/approval_manager.py       Human-in-the-loop approvals → framework_knowledge/pending_approvals.yaml
+utils/run_manager.py            Test run records + schedules → framework_knowledge/test_runs.json
+conftest.py                     Generic fixtures — NO product references
+examples/orangehrm/             OrangeHRM example (web + API + KB)
+examples/restfulbooker/         Restful Booker example (API + KB)
+framework_knowledge/            Tracking system (activity log, approvals, runs, quarantine, KB log)
+dashboard/app.py                FastAPI app entry point — registers all 16 routers
+dashboard/routers/pages.py      All UI page routes (/, /runs, /agents, /activities, /kb, etc.)
+dashboard/routers/runs.py       Test run API + trigger + schedule endpoints
+dashboard/routers/pipeline.py   AI pipeline job trigger + job history
+dashboard/routers/config_router.py  Environment/user/assignment config (908 lines — large)
+dashboard/templates/            Jinja2 templates (one per page + partials/ subdir)
 ```
+
+---
+
+## Dashboard — How to Add a Page
+
+1. Add route handler to `dashboard/routers/pages.py` (see existing pattern — use `_ctx()` + `_require_auth`)
+2. Create `dashboard/templates/<page>.html` extending `base.html`
+3. Add nav entry in `base.html` nav_items list (href, label, svg path)
+4. Register any new JSON API router in `dashboard/app.py` under `/api` prefix
 
 ---
 
@@ -118,6 +135,7 @@ framework_knowledge/           This tracking system
 - Locator files: `locators/{platform}/{page_name}.json` with `primary` + `alternatives`
 - Config per env: `config/env_{qa|staging|prod}.yaml`
 - All timeouts/magic numbers: define in `utils/constants.py`, import everywhere
+- Failure categories in ResultAnalyzerAgent: `assertion`=Product Bug, `env`+`infra`=Env Issue, `locator`+`flaky`=Script/Data
 
 ---
 
@@ -130,6 +148,9 @@ framework_knowledge/           This tracking system
 - Do not add magic numbers inline — add to `utils/constants.py`
 - Do not put product-specific imports in root `conftest.py`
 - Do not put `booking_client.py` inside `api/` subdir in examples — namespace collision under pytest
+- Do not write to `framework_knowledge/` files without checking for concurrent access — no file locking exists yet
+
+---
 
 ## AI Doc Generation — Anti-Hallucination Rules
 
