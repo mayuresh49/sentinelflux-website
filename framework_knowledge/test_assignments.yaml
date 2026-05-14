@@ -1,0 +1,3 @@
+# Maps test function name -> label/priority/custom field assignments
+# Managed via dashboard Config > Test Assignments
+assignments: {}

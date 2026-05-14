@@ -90,13 +90,13 @@ Knowledge Base Context:
 
 API Context:
 {api_context}
-
+{source_context}
 STRICT RULES — violating these will produce incorrect documentation:
-1. ONLY document request fields, response codes, and behaviors listed in the KB/API context above.
-2. Do NOT invent request fields, error codes, or behaviors from training data knowledge.
-3. Use exact endpoint paths, methods, and field names from the KB context.
-4. Base expected responses only on documented response codes in the KB.
-5. Begin the document with an explicit "Endpoint Scope" section listing only KB-documented fields and codes.
+1. If Source Context is provided above, treat it as the authoritative specification. Use exact endpoint paths, methods, parameters, schemas, and status codes from it.
+2. If no Source Context, rely solely on KB/API Context — do NOT invent fields or codes from training data.
+3. Do NOT invent request fields, error codes, or behaviors not present in any provided context.
+4. Begin the document with an explicit "Endpoint Scope" section listing only context-documented fields and codes.
+5. When Source Context is an OpenAPI spec, generate one test case per documented response code.
 {tc_id_instruction}
 The document should include:
 - Endpoint Scope (method, path, request fields, response codes from KB only)
@@ -131,7 +131,7 @@ Feature: {feature_name}
 - Use parametrize only when test data sets share identical steps.
 - Do not add comments unless a business rule is non-obvious.
 - Do not import anything not in the conventions or standard library.
-
+{test_type_instruction}
 Output the complete Python file content starting with imports.
 """)
 

@@ -2,6 +2,7 @@ import pytest
 
 
 @pytest.mark.api
+@pytest.mark.sanity
 def test_RB_API_020_authenticate_valid_credentials(booking_client):
     token = booking_client.authenticate()
     assert token is not None
@@ -10,6 +11,7 @@ def test_RB_API_020_authenticate_valid_credentials(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_021_authenticate_invalid_credentials(rb_api_base):
     from booking_client import BookingClient
     client = BookingClient(rb_api_base, "wrong_user", "wrong_pass")
@@ -21,6 +23,7 @@ def test_RB_API_021_authenticate_invalid_credentials(rb_api_base):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_022_delete_without_auth_is_rejected(booking_client, rb_api_base):
     from booking_client import BookingClient
     create_resp = booking_client.create_booking({

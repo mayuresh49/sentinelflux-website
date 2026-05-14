@@ -3,6 +3,7 @@ from pages.web.admin_page import AdminPage
 
 
 @pytest.mark.web
+@pytest.mark.sanity
 def test_RB_WEB_006_admin_login_valid(page, rb_web_base, rb_web_credentials):
     admin = AdminPage(page, rb_web_base)
     admin.login(rb_web_credentials["username"], rb_web_credentials["password"])
@@ -10,6 +11,7 @@ def test_RB_WEB_006_admin_login_valid(page, rb_web_base, rb_web_credentials):
 
 
 @pytest.mark.web
+@pytest.mark.regression
 def test_RB_WEB_007_admin_login_invalid(page, rb_web_base):
     admin = AdminPage(page, rb_web_base)
     admin.login("wronguser", "wrongpassword")
@@ -18,6 +20,7 @@ def test_RB_WEB_007_admin_login_invalid(page, rb_web_base):
 
 
 @pytest.mark.web
+@pytest.mark.regression
 def test_RB_WEB_008_admin_panel_shows_rooms_menu(page, rb_web_base, rb_web_credentials):
     admin = AdminPage(page, rb_web_base)
     admin.login(rb_web_credentials["username"], rb_web_credentials["password"])
@@ -25,6 +28,7 @@ def test_RB_WEB_008_admin_panel_shows_rooms_menu(page, rb_web_base, rb_web_crede
 
 
 @pytest.mark.web
+@pytest.mark.regression
 def test_RB_WEB_009_admin_logout(page, rb_web_base, rb_web_credentials):
     admin = AdminPage(page, rb_web_base)
     admin.login(rb_web_credentials["username"], rb_web_credentials["password"])

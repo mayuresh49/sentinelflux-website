@@ -32,10 +32,15 @@ class ScriptGenAgent(BaseAgent):
         output_path: Path | None = None,
     ) -> dict:
         from ai.skills.test_script_gen import TestScriptGenSkill
+        from dashboard.routers.config_router import get_generation_type_instruction
 
         skill = TestScriptGenSkill(self.client, self.kb)
         tc_prefix = self.ctx.get("tc_prefix", "")
-        code = skill.generate_script(test_case_doc, self.ctx.domain, feature_name, tc_prefix=tc_prefix)
+        type_instruction = get_generation_type_instruction()
+        code = skill.generate_script(
+            test_case_doc, self.ctx.domain, feature_name,
+            tc_prefix=tc_prefix, test_type_instruction=type_instruction,
+        )
 
         out = output_path or self._default_output(feature_name)
         out.parent.mkdir(parents=True, exist_ok=True)

@@ -11,6 +11,7 @@ VALID_BOOKING = {
 
 
 @pytest.mark.api
+@pytest.mark.sanity
 def test_RB_API_001_get_all_bookings(booking_client):
     resp = booking_client.get_booking_ids()
     assert resp.status_code == 200
@@ -21,6 +22,7 @@ def test_RB_API_001_get_all_bookings(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.sanity
 def test_RB_API_002_create_booking_returns_id(booking_client):
     resp = booking_client.create_booking(VALID_BOOKING)
     assert resp.status_code == 200
@@ -32,6 +34,7 @@ def test_RB_API_002_create_booking_returns_id(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.sanity
 def test_RB_API_003_get_booking_by_id(booking_client):
     create_resp = booking_client.create_booking(VALID_BOOKING)
     booking_id = create_resp.json()["bookingid"]
@@ -48,6 +51,7 @@ def test_RB_API_003_get_booking_by_id(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_004_update_booking(booking_client):
     create_resp = booking_client.create_booking(VALID_BOOKING)
     booking_id = create_resp.json()["bookingid"]
@@ -61,6 +65,7 @@ def test_RB_API_004_update_booking(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_005_partial_update_booking(booking_client):
     create_resp = booking_client.create_booking(VALID_BOOKING)
     booking_id = create_resp.json()["bookingid"]
@@ -71,6 +76,7 @@ def test_RB_API_005_partial_update_booking(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_006_delete_booking(booking_client):
     create_resp = booking_client.create_booking(VALID_BOOKING)
     booking_id = create_resp.json()["bookingid"]
@@ -83,12 +89,14 @@ def test_RB_API_006_delete_booking(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_007_get_nonexistent_booking_returns_404(booking_client):
     resp = booking_client.get_booking(999999999)
     assert resp.status_code == 404
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_008_filter_bookings_by_name(booking_client):
     booking_client.create_booking({**VALID_BOOKING, "firstname": "FilterTest"})
     resp = booking_client.get_booking_ids(params={"firstname": "FilterTest"})
@@ -97,6 +105,7 @@ def test_RB_API_008_filter_bookings_by_name(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_009_create_booking_missing_required_field(booking_client):
     incomplete = {k: v for k, v in VALID_BOOKING.items() if k != "firstname"}
     resp = booking_client.create_booking(incomplete)
@@ -104,6 +113,7 @@ def test_RB_API_009_create_booking_missing_required_field(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_010_create_booking_without_optional_field(booking_client):
     minimal = {k: v for k, v in VALID_BOOKING.items() if k != "additionalneeds"}
     resp = booking_client.create_booking(minimal)

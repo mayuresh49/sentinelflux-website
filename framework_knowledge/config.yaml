@@ -1,0 +1,26 @@
+custom_fields:
+- name: owner
+  type: text
+- name: jira_ticket
+  type: text
+labels:
+- color: emerald
+  name: sanity
+- color: indigo
+  name: regression
+- color: amber
+  name: smoke
+- color: red
+  name: critical
+priorities:
+- color: red
+  name: P0
+- color: orange
+  name: P1
+- color: amber
+  name: P2
+- color: slate
+  name: P3
+test_type_distribution:
+  regression: 70
+  sanity: 30

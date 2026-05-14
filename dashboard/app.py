@@ -27,6 +27,7 @@ from dashboard.routers import activities, approvals, docs, scripts, agents
 from dashboard.routers import pages, partials
 from dashboard.routers import kb as kb_router, pipeline as pipeline_router
 from dashboard.routers import chat as chat_router, quality as quality_router
+from dashboard.routers import config_router
 
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
 
@@ -52,6 +53,7 @@ app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 # HTML UI pages and HTMX partials
 app.include_router(pages.router)
 app.include_router(partials.router)
+app.include_router(config_router.router)
 
 # JSON API
 app.include_router(activities.router, prefix="/api")

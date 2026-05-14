@@ -7,6 +7,7 @@ _XSS = "<script>window.__xss_fired=true</script>"
 
 @pytest.mark.web
 @pytest.mark.security
+@pytest.mark.regression
 def test_RB_SEC_006_xss_in_contact_form_does_not_execute(page, rb_web_base):
     dialog_fired = []
     page.on("dialog", lambda d: (dialog_fired.append(d.message), d.dismiss()))
@@ -34,16 +35,18 @@ def test_RB_SEC_006_xss_in_contact_form_does_not_execute(page, rb_web_base):
 
 @pytest.mark.web
 @pytest.mark.security
+@pytest.mark.sanity
 def test_RB_SEC_007_admin_panel_requires_login(page, rb_web_base):
-    page.goto(f"{rb_web_base}/#/admin", wait_until="networkidle")
-    # Either a login dialog/form appears or the page shows restricted content
-    login_modal = page.locator("input[type='password'], [class*='login'], [id*='login']")
-    assert login_modal.count() > 0, \
-        "Admin panel accessible without credentials — no login prompt found"
+    page.goto(f"{rb_web_base}/admin", wait_until="networkidle")
+    # Admin page exposes a login form with #username / #password before granting access
+    login_form = page.locator("#username, #password, input[name='username']")
+    assert login_form.count() > 0, \
+        "Admin panel accessible without credentials — no login form found"
 
 
 @pytest.mark.web
 @pytest.mark.security
+@pytest.mark.regression
 def test_RB_SEC_008_xss_in_booking_firstname_does_not_execute(page, rb_web_base):
     dialog_fired = []
     page.on("dialog", lambda d: (dialog_fired.append(d.message), d.dismiss()))
@@ -68,6 +71,7 @@ def test_RB_SEC_008_xss_in_booking_firstname_does_not_execute(page, rb_web_base)
 
 @pytest.mark.web
 @pytest.mark.security
+@pytest.mark.regression
 def test_RB_SEC_009_home_page_does_not_expose_server_version(page, rb_web_base):
     home = HomePage(page, rb_web_base)
     home.navigate()

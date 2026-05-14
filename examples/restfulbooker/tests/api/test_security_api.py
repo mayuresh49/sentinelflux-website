@@ -4,6 +4,7 @@ import pytest
 
 @pytest.mark.api
 @pytest.mark.security
+@pytest.mark.sanity
 def test_RB_SEC_001_delete_booking_without_auth_returns_403(booking_client, rb_api_base):
     # Create a booking first, then attempt to delete it without credentials
     create_resp = booking_client.create_booking({
@@ -22,6 +23,7 @@ def test_RB_SEC_001_delete_booking_without_auth_returns_403(booking_client, rb_a
 
 @pytest.mark.api
 @pytest.mark.security
+@pytest.mark.regression
 def test_RB_SEC_002_update_booking_without_auth_returns_403(booking_client, rb_api_base):
     create_resp = booking_client.create_booking({
         "firstname": "SecTest",
@@ -48,6 +50,7 @@ def test_RB_SEC_002_update_booking_without_auth_returns_403(booking_client, rb_a
 
 @pytest.mark.api
 @pytest.mark.security
+@pytest.mark.regression
 def test_RB_SEC_003_sql_injection_in_search_does_not_cause_500(rb_api_base):
     resp = requests.get(
         f"{rb_api_base}/booking",
@@ -59,6 +62,7 @@ def test_RB_SEC_003_sql_injection_in_search_does_not_cause_500(rb_api_base):
 
 @pytest.mark.api
 @pytest.mark.security
+@pytest.mark.regression
 def test_RB_SEC_004_api_response_content_type_is_json(rb_api_base):
     resp = requests.get(f"{rb_api_base}/booking")
     assert resp.status_code == 200
@@ -69,6 +73,7 @@ def test_RB_SEC_004_api_response_content_type_is_json(rb_api_base):
 
 @pytest.mark.api
 @pytest.mark.security
+@pytest.mark.regression
 def test_RB_SEC_005_nonexistent_booking_id_returns_404(rb_api_base):
     resp = requests.get(f"{rb_api_base}/booking/999999999")
     assert resp.status_code == 404, \

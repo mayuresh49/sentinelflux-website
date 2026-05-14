@@ -11,6 +11,7 @@ VALID_BOOKING = {
 
 
 @pytest.mark.api
+@pytest.mark.sanity
 def test_RB_API_011_create_booking_returns_ok(booking_client):
     response = booking_client.create_booking(VALID_BOOKING)
     assert response.status_code == 200
@@ -20,6 +21,7 @@ def test_RB_API_011_create_booking_returns_ok(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.sanity
 def test_RB_API_012_get_booking_returns_details(booking_client):
     created = booking_client.create_booking(VALID_BOOKING)
     booking_id = created.json()["bookingid"]
@@ -35,6 +37,7 @@ def test_RB_API_012_get_booking_returns_details(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.sanity
 def test_RB_API_013_update_booking_returns_updated(booking_client):
     created = booking_client.create_booking(VALID_BOOKING)
     booking_id = created.json()["bookingid"]
@@ -47,6 +50,7 @@ def test_RB_API_013_update_booking_returns_updated(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_014_delete_booking_returns_created(booking_client):
     created = booking_client.create_booking(VALID_BOOKING)
     booking_id = created.json()["bookingid"]
@@ -55,6 +59,7 @@ def test_RB_API_014_delete_booking_returns_created(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_015_get_booking_ids_returns_list(booking_client):
     response = booking_client.get_booking_ids()
     assert response.status_code == 200
@@ -65,12 +70,14 @@ def test_RB_API_015_get_booking_ids_returns_list(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_016_get_nonexistent_booking_returns_not_found(booking_client):
     response = booking_client.get_booking(9999999)
     assert response.status_code == 404
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_017_partial_update_booking_returns_ok(booking_client):
     created = booking_client.create_booking(VALID_BOOKING)
     booking_id = created.json()["bookingid"]
@@ -80,6 +87,7 @@ def test_RB_API_017_partial_update_booking_returns_ok(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_018_create_booking_with_min_names_returns_ok(booking_client):
     payload = {**VALID_BOOKING, "firstname": "A", "lastname": "B"}
     response = booking_client.create_booking(payload)
@@ -88,6 +96,7 @@ def test_RB_API_018_create_booking_with_min_names_returns_ok(booking_client):
 
 
 @pytest.mark.api
+@pytest.mark.regression
 def test_RB_API_019_filter_bookings_by_name_returns_subset(booking_client):
     booking_client.create_booking({**VALID_BOOKING, "firstname": "UniqueFilterTest"})
     response = booking_client.get_booking_ids(params={"firstname": "UniqueFilterTest"})

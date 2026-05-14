@@ -1,0 +1,47 @@
+{% set sanity_pct = dist.sanity if dist else 30 %}
+{% set regression_pct = dist.regression if dist else 70 %}
+
+{% if saved %}
+<div class="mb-4 text-sm text-emerald-600 font-medium">Distribution saved.</div>
+{% endif %}
+
+<form hx-post="/ui/config/test-types/save" hx-target="#test-types-panel" hx-swap="innerHTML"
+      x-data="{ sanity: {{ sanity_pct }} }" class="space-y-6 max-w-lg">
+
+  <div class="space-y-3">
+    <div class="flex items-center justify-between">
+      <label class="text-sm font-medium text-slate-700">Sanity</label>
+      <span class="text-sm font-semibold text-emerald-700" x-text="sanity + '%'"></span>
+    </div>
+    <input type="range" name="sanity" min="0" max="100" step="5"
+           x-model.number="sanity"
+           class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+    <div class="flex justify-between text-xs text-slate-400">
+      <span>0%</span><span>50%</span><span>100%</span>
+    </div>
+  </div>
+
+  <!-- Visual bar -->
+  <div class="rounded-lg overflow-hidden h-8 flex text-xs font-semibold">
+    <div class="bg-emerald-500 flex items-center justify-center text-white transition-all"
+         :style="'width:' + sanity + '%'" x-show="sanity > 0">
+      <span x-text="'Sanity ' + sanity + '%'"></span>
+    </div>
+    <div class="bg-indigo-500 flex items-center justify-center text-white transition-all flex-1"
+         x-show="sanity < 100">
+      <span x-text="'Regression ' + (100 - sanity) + '%'"></span>
+    </div>
+  </div>
+
+  <div class="text-xs text-slate-500 space-y-1.5 bg-slate-50 rounded-lg p-3 border border-slate-100">
+    <p class="font-medium text-slate-600">How this works</p>
+    <p>The generator is instructed to produce tests <span class="font-medium">in order of importance</span> — critical happy-paths and core business flows first, edge cases and error paths last.</p>
+    <p>The first <span class="font-medium text-emerald-600" x-text="sanity + '%'"></span> of that ordered list are labeled <span class="font-medium text-emerald-600">sanity</span>. The remaining <span class="font-medium text-indigo-600" x-text="(100 - sanity) + '%'"></span> are labeled <span class="font-medium text-indigo-600">regression</span>.</p>
+    <p class="text-slate-400">Result: sanity = your most important scenarios, regression = broader coverage.</p>
+  </div>
+
+  <button type="submit"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-5 py-2 transition-colors">
+    Save Distribution
+  </button>
+</form>
