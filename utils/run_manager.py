@@ -7,7 +7,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-_ROOT = Path(__file__).resolve().parent.parent
+from filelock import FileLock
+from utils.paths import ROOT as _ROOT
+
 _RUNS_PATH = _ROOT / "framework_knowledge" / "test_runs.json"
 _SCHEDULES_PATH = _ROOT / "framework_knowledge" / "test_schedules.json"
 _RUNS_DIR = _ROOT / "framework_knowledge" / "runs"
@@ -31,6 +33,7 @@ class RunManager:
         domain: str,
         trigger: str = "manual",
         schedule_id: str | None = None,
+        run_config_snapshot: dict | None = None,
     ) -> dict:
         run_id = f"run_{uuid.uuid4().hex[:8]}"
         report_path = str(_RUNS_DIR / f"{run_id}_report.json")
@@ -53,6 +56,7 @@ class RunManager:
             "analyzed": False,
             "failure_categories": {},
             "failures": [],
+            "run_config_snapshot": run_config_snapshot or {},
         }
         runs = self.all_runs()
         runs.append(run)
@@ -86,6 +90,9 @@ class RunManager:
         hour: int,
         minute: int,
         days: list[str],
+        environment: str = "",
+        browser: str = "",
+        device: str = "",
     ) -> dict:
         sched: dict[str, Any] = {
             "id": f"sched_{uuid.uuid4().hex[:8]}",
@@ -99,6 +106,9 @@ class RunManager:
             "created_at": datetime.now(timezone.utc).isoformat(),
             "last_run_id": None,
             "last_run_at": None,
+            "environment": environment,
+            "browser": browser,
+            "device": device,
         }
         schedules = self.all_schedules()
         schedules.append(sched)
@@ -155,4 +165,5 @@ class RunManager:
     @staticmethod
     def _save(path: Path, key: str, items: list) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps({key: items}, indent=2), encoding="utf-8")
+        with FileLock(str(path) + ".lock"):
+            path.write_text(json.dumps({key: items}, indent=2), encoding="utf-8")

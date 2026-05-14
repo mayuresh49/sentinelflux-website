@@ -2,20 +2,21 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import yaml
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 
 from utils.run_manager import RunManager
+from utils.paths import ROOT as _ROOT
 
 router = APIRouter(prefix="/runs", tags=["runs"])
-
-_ROOT = Path(__file__).resolve().parent.parent.parent
 _ARTIFACTS_DIR = _ROOT / "reports" / "artifacts"
 _rm = RunManager()
 
@@ -26,6 +27,9 @@ class TriggerRunBody(BaseModel):
     product: str
     domain: str = "all"       # all | api | web | mobile | security
     extra_args: str = ""       # appended verbatim to pytest command
+    environment: str = ""     # name of environment profile; "" = use product default
+    browser: str = ""         # name of browser profile; "" = use product default
+    device: str = ""          # name of device profile; "" = use product default
 
 class CreateScheduleBody(BaseModel):
     name: str
@@ -34,14 +38,20 @@ class CreateScheduleBody(BaseModel):
     hour: int = 2
     minute: int = 0
     days: list[str] = ["mon", "tue", "wed", "thu", "fri"]
+    environment: str = ""
+    browser: str = ""
+    device: str = ""
 
 
 # ── trigger & history ─────────────────────────────────────────────────────────
 
 @router.post("/trigger")
 def trigger_run(body: TriggerRunBody, background_tasks: BackgroundTasks):
-    run = _rm.create_run(product=body.product, domain=body.domain, trigger="manual")
-    background_tasks.add_task(_execute_run, run["id"], body.product, body.domain, body.extra_args)
+    snapshot = _build_run_config_snapshot(body.product, body.environment, body.browser, body.device)
+    run = _rm.create_run(product=body.product, domain=body.domain, trigger="manual",
+                         run_config_snapshot=snapshot)
+    background_tasks.add_task(_execute_run, run["id"], body.product, body.domain, body.extra_args,
+                               body.environment, body.browser, body.device)
     return {"run_id": run["id"], "status": "queued"}
 
 
@@ -85,10 +95,13 @@ def rerun(run_id: str, background_tasks: BackgroundTasks):
     run = _rm.get_run(run_id)
     if not run:
         raise HTTPException(404, "Run not found")
+    snap = run.get("run_config_snapshot", {})
     new_run = _rm.create_run(
-        product=run["product"], domain=run["domain"], trigger="manual"
+        product=run["product"], domain=run["domain"], trigger="manual",
+        run_config_snapshot=snap,
     )
-    background_tasks.add_task(_execute_run, new_run["id"], run["product"], run["domain"], "")
+    background_tasks.add_task(_execute_run, new_run["id"], run["product"], run["domain"], "",
+                               snap.get("environment", ""), snap.get("browser", ""), snap.get("device", ""))
     return {"run_id": new_run["id"], "status": "queued"}
 
 
@@ -108,6 +121,9 @@ def create_schedule(body: CreateScheduleBody):
         hour=body.hour,
         minute=body.minute,
         days=body.days,
+        environment=body.environment,
+        browser=body.browser,
+        device=body.device,
     )
     return sched
 
@@ -133,20 +149,29 @@ def schedule_run_now(sched_id: str, background_tasks: BackgroundTasks):
     sched = _rm.get_schedule(sched_id)
     if not sched:
         raise HTTPException(404, "Schedule not found")
+    env = sched.get("environment", "")
+    browser = sched.get("browser", "")
+    device = sched.get("device", "")
+    snapshot = _build_run_config_snapshot(sched["product"], env, browser, device)
     run = _rm.create_run(
         product=sched["product"], domain=sched["domain"],
         trigger="schedule", schedule_id=sched_id,
+        run_config_snapshot=snapshot,
     )
-    background_tasks.add_task(_execute_run, run["id"], sched["product"], sched["domain"], "")
+    background_tasks.add_task(_execute_run, run["id"], sched["product"], sched["domain"], "",
+                               env, browser, device)
     return {"run_id": run["id"], "status": "queued"}
 
 
 # ── background tasks ──────────────────────────────────────────────────────────
 
-def _execute_run(run_id: str, product: str, domain: str, extra_args: str) -> None:
+def _execute_run(run_id: str, product: str, domain: str, extra_args: str,
+                 environment: str = "", browser: str = "", device: str = "") -> None:
     _rm.patch_run(run_id, status="running")
     report_path = Path(_rm.get_run(run_id)["report_path"])
     report_path.parent.mkdir(parents=True, exist_ok=True)
+
+    env_overrides = _build_env_overrides(product, environment, browser, device)
 
     test_path = _resolve_test_path(product, domain)
     if not test_path:
@@ -170,7 +195,8 @@ def _execute_run(run_id: str, product: str, domain: str, extra_args: str) -> Non
 
     try:
         result = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=600, cwd=str(_ROOT)
+            cmd, capture_output=True, text=True, timeout=600, cwd=str(_ROOT),
+            env={**os.environ, **env_overrides},
         )
         stats = _parse_report(report_path)
         ok = result.returncode in (0, 1)  # 0=all pass, 1=some fail — both are valid runs
@@ -263,7 +289,7 @@ def _resolve_test_path(product: str, domain: str) -> Path | None:
 def _build_ai_client():
     """Build an AI client from the dashboard chat config, or return None."""
     try:
-        cfg_path = Path(__file__).resolve().parent.parent / "chat_config.json"
+        cfg_path = _ROOT / "dashboard" / "chat_config.json"
         if not cfg_path.exists():
             return None
         cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
@@ -272,10 +298,83 @@ def _build_ai_client():
         if provider == "ollama":
             from ai.clients.mistral_client import MistralClient
             return MistralClient(model=model, base_url=cfg.get("base_url", "http://localhost:11434"))
-        # Other providers not yet wired to the AI client layer
+        if provider == "openai":
+            import os
+            api_key = os.environ.get("OPENAI_API_KEY", "")
+            if not api_key:
+                return None
+            from ai.clients.openai_client import OpenAIClient
+            return OpenAIClient(api_key=api_key, model=model or "gpt-4o-mini")
+        if provider == "anthropic":
+            import os
+            api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+            if not api_key:
+                return None
+            from ai.clients.anthropic_client import AnthropicClient
+            return AnthropicClient(api_key=api_key, model=model or "claude-haiku-4-5-20251001")
         return None
     except Exception:
         return None
+
+
+# ── run config resolution ─────────────────────────────────────────────────────
+
+def _load_product_run_config(product: str) -> dict:
+    try:
+        cfg_path = _ROOT / "framework_knowledge" / "config.yaml"
+        if not cfg_path.exists():
+            return {}
+        cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+        p = next((p for p in cfg.get("products", []) if p["name"] == product), None)
+        return (p or {}).get("run_config", {})
+    except Exception:
+        return {}
+
+
+def _build_run_config_snapshot(product: str, environment: str, browser: str, device: str) -> dict:
+    rc = _load_product_run_config(product)
+    defaults = rc.get("defaults", {})
+    env_name = environment or defaults.get("environment", "")
+    browser_name = browser or defaults.get("browser", "")
+    device_name = device or defaults.get("device", "")
+
+    env_profile = next((e for e in rc.get("environments", []) if e.get("name") == env_name), {})
+    browser_profile = next((b for b in rc.get("browsers", []) if b.get("name") == browser_name), {})
+    device_profile = next((d for d in rc.get("devices", []) if d.get("name") == device_name), {})
+
+    return {
+        "environment": env_name,
+        "browser": browser_name,
+        "device": device_name,
+        "base_url": env_profile.get("base_url", ""),
+        "api_url": env_profile.get("api_url", ""),
+        "browser_type": browser_profile.get("browser", ""),
+        "headless": browser_profile.get("headless", True),
+        "appium_url": device_profile.get("appium_url", ""),
+        "device_platform": device_profile.get("platform", ""),
+        "device_capabilities": device_profile.get("capabilities", {}),
+    }
+
+
+def _build_env_overrides(product: str, environment: str, browser: str, device: str) -> dict[str, str]:
+    snap = _build_run_config_snapshot(product, environment, browser, device)
+    overrides: dict[str, str] = {}
+    if snap.get("environment"):
+        overrides["SF_ENV"] = snap["environment"]
+    if snap.get("base_url"):
+        overrides["SF_BASE_URL"] = snap["base_url"]
+    if snap.get("api_url"):
+        overrides["SF_API_URL"] = snap["api_url"]
+    if snap.get("browser_type"):
+        overrides["SF_BROWSER"] = snap["browser_type"]
+    overrides["SF_HEADLESS"] = "1" if snap.get("headless", True) else "0"
+    if snap.get("appium_url"):
+        overrides["SF_APPIUM_URL"] = snap["appium_url"]
+    if snap.get("device_platform"):
+        overrides["SF_DEVICE_PLATFORM"] = snap["device_platform"]
+    if snap.get("device_capabilities"):
+        overrides["SF_DEVICE_CAPABILITIES"] = json.dumps(snap["device_capabilities"])
+    return overrides
 
 
 # ── public helper for schedule checker ───────────────────────────────────────
@@ -285,14 +384,19 @@ def fire_scheduled_run(sched_id: str) -> str | None:
     sched = _rm.get_schedule(sched_id)
     if not sched:
         return None
+    env = sched.get("environment", "")
+    browser = sched.get("browser", "")
+    device = sched.get("device", "")
+    snapshot = _build_run_config_snapshot(sched["product"], env, browser, device)
     run = _rm.create_run(
         product=sched["product"], domain=sched["domain"],
         trigger="schedule", schedule_id=sched_id,
+        run_config_snapshot=snapshot,
     )
     import threading
     t = threading.Thread(
         target=_execute_run,
-        args=(run["id"], sched["product"], sched["domain"], ""),
+        args=(run["id"], sched["product"], sched["domain"], "", env, browser, device),
         daemon=True,
     )
     t.start()

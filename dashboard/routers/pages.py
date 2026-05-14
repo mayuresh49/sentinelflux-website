@@ -220,7 +220,8 @@ async def agents_page(request: Request, current_user: dict = Depends(_require_au
     import yaml
     from dashboard.routers.agents import _AGENT_REGISTRY
     from dashboard.agent_meta import AGENT_META
-    config_path = Path(__file__).resolve().parent.parent.parent / "framework_knowledge" / "agent_config.yaml"
+    from utils.paths import ROOT as _ROOT
+    config_path = _ROOT / "framework_knowledge" / "agent_config.yaml"
     agent_config: dict = {}
     if config_path.exists():
         data = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}

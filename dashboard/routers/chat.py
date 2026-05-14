@@ -15,7 +15,7 @@ from pydantic import BaseModel
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
-_FRAMEWORK_ROOT = Path(__file__).resolve().parent.parent.parent
+from utils.paths import ROOT as _FRAMEWORK_ROOT
 
 # ── tool schemas ───────────────────────────────────────────────────────────────
 
@@ -210,8 +210,8 @@ def _parse_embedded_tool_calls(content: str):
             return [{"name": o["name"], "args": o.get("arguments") or o.get("args") or {}} for o in obj]
     return None
 
-_CONFIG_FILE = Path(__file__).resolve().parent.parent / "chat_config.json"
-_APPROVAL_FILE = Path(__file__).resolve().parent.parent.parent / "framework_knowledge" / "pending_approvals.yaml"
+_CONFIG_FILE = _FRAMEWORK_ROOT / "dashboard" / "chat_config.json"
+_APPROVAL_FILE = _FRAMEWORK_ROOT / "framework_knowledge" / "pending_approvals.yaml"
 
 _SYSTEM_PROMPT = (
     "You are the SentinelFlux assistant. Answer the user's question directly using tools.\n\n"

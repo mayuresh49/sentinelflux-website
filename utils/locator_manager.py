@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 
 _log = logging.getLogger(__name__)
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+from utils.paths import ROOT as ROOT_DIR
 
 
 class LocatorManager:

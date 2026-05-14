@@ -20,9 +20,10 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from filelock import FileLock
+from utils.paths import ROOT as _ROOT_DIR
 
 _log = logging.getLogger("sentinelflux.approval_manager")
-_ROOT_DIR = Path(__file__).resolve().parent.parent
 _APPROVALS_PATH = _ROOT_DIR / "framework_knowledge" / "pending_approvals.yaml"
 
 APPROVAL_TYPES = frozenset({
@@ -112,5 +113,6 @@ class ApprovalManager:
 
     def _save(self, data: dict):
         self._path.parent.mkdir(parents=True, exist_ok=True)
-        with self._path.open("w", encoding="utf-8") as f:
-            yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+        with FileLock(str(self._path) + ".lock"):
+            with self._path.open("w", encoding="utf-8") as f:
+                yaml.dump(data, f, default_flow_style=False, sort_keys=False)

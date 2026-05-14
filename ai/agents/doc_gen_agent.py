@@ -4,8 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from ai.agents.base_agent import BaseAgent, AgentContext
-
-_ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+from utils.paths import ROOT as _ROOT_DIR
 
 
 class DocGenAgent(BaseAgent):

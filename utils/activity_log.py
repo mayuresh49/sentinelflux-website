@@ -16,8 +16,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from filelock import FileLock
+from utils.paths import ROOT as _ROOT_DIR
+
 _log = logging.getLogger("sentinelflux.activity_log")
-_ROOT_DIR = Path(__file__).resolve().parent.parent
 _LOG_PATH = _ROOT_DIR / "framework_knowledge" / "activity_log.json"
 
 MAX_ENTRIES = 1000
@@ -103,5 +105,6 @@ class ActivityLog:
 
     def _save(self, data: dict):
         self._path.parent.mkdir(parents=True, exist_ok=True)
-        with self._path.open("w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
+        with FileLock(str(self._path) + ".lock"):
+            with self._path.open("w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)

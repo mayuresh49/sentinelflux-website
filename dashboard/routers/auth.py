@@ -21,7 +21,8 @@ def _verify_password(password: str, hashed: str) -> bool:
     except Exception:
         return False
 
-_FK_DIR = Path(__file__).resolve().parent.parent.parent / "framework_knowledge"
+from utils.paths import ROOT as _ROOT
+_FK_DIR = _ROOT / "framework_knowledge"
 _CONFIG_PATH = _FK_DIR / "config.yaml"
 
 

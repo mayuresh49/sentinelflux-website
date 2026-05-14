@@ -14,16 +14,18 @@ in your pipeline without a human gate.
 from __future__ import annotations
 
 import logging
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
 import yaml
+from filelock import FileLock
+from utils.paths import ROOT as _ROOT_DIR
 
 _log = logging.getLogger("sentinelflux.agents.quarantine_manager")
 
-_ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 _QUARANTINE_PATH = _ROOT_DIR / "framework_knowledge" / "quarantine.yaml"
 _HISTORY_PATH = _ROOT_DIR / "framework_knowledge" / "run_history.yaml"
+_HISTORY_WINDOW_DAYS = 90
 
 
 class QuarantineManager:
@@ -130,6 +132,8 @@ class QuarantineManager:
         if meta:
             entry.update(meta)
         history.setdefault("tests", {}).setdefault(test_id, []).append(entry)
+        cutoff = str(date.today() - timedelta(days=_HISTORY_WINDOW_DAYS))
+        history["tests"][test_id] = [e for e in history["tests"][test_id] if e.get("date", "") >= cutoff]
         self._save_history(history)
 
     def record_run_bulk(self, results: list[dict]):
@@ -142,6 +146,11 @@ class QuarantineManager:
             if "meta" in r:
                 entry.update(r["meta"])
             tests.setdefault(r["test_id"], []).append(entry)
+        cutoff = str(date.today() - timedelta(days=_HISTORY_WINDOW_DAYS))
+        for tid in list(tests.keys()):
+            tests[tid] = [e for e in tests[tid] if e.get("date", "") >= cutoff]
+            if not tests[tid]:
+                del tests[tid]
         self._save_history(history)
 
     # ── read side ──────────────────────────────────────────────────────────
@@ -164,8 +173,9 @@ class QuarantineManager:
 
     def _save_quarantine(self, data: dict):
         self._qpath.parent.mkdir(parents=True, exist_ok=True)
-        with self._qpath.open("w", encoding="utf-8") as f:
-            yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+        with FileLock(str(self._qpath) + ".lock"):
+            with self._qpath.open("w", encoding="utf-8") as f:
+                yaml.dump(data, f, default_flow_style=False, sort_keys=False)
 
     def _load_history(self) -> dict:
         if not self._hpath.exists():
@@ -175,8 +185,9 @@ class QuarantineManager:
 
     def _save_history(self, data: dict):
         self._hpath.parent.mkdir(parents=True, exist_ok=True)
-        with self._hpath.open("w", encoding="utf-8") as f:
-            yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+        with FileLock(str(self._hpath) + ".lock"):
+            with self._hpath.open("w", encoding="utf-8") as f:
+                yaml.dump(data, f, default_flow_style=False, sort_keys=False)
 
     @staticmethod
     def _is_quarantined(data: dict, test_id: str) -> bool:

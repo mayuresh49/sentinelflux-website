@@ -18,6 +18,8 @@ rich>=13.0
 # AI pipeline + self-healing
 mistralai>=1.0.0
 httpx>=0.27.0
+openai>=1.0.0
+anthropic>=0.25.0
 
 # Mobile (optional — comment out if not needed)
 appium-python-client>=2.11.0
@@ -33,3 +35,4 @@ markdown>=3.6
 
 # Dev tools
 ruff>=0.4
+filelock>=3.0

@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 # Add project root to path for local imports
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+from utils.paths import ROOT as PROJECT_ROOT
 os.sys.path.insert(0, str(PROJECT_ROOT))
 
 async def main():

@@ -9,9 +9,9 @@ import yaml
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
-router = APIRouter(prefix="/kb", tags=["knowledge-base"])
+from utils.paths import ROOT as _ROOT_DIR
 
-_ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+router = APIRouter(prefix="/kb", tags=["knowledge-base"])
 _KB_DIR = _ROOT_DIR / "ai" / "knowledge_base"
 _INCREMENTS_DIR = _KB_DIR / "increments"
 _INCREMENTS_LOG = _ROOT_DIR / "framework_knowledge" / "kb_increments_log.yaml"

@@ -20,7 +20,8 @@ from dashboard.routers.kb import _list_products
 router = APIRouter(prefix="/ui", tags=["partials"])
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
 
-_ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+from utils.paths import ROOT as _ROOT_DIR
+
 _alog = ActivityLog()
 _am = ApprovalManager()
 

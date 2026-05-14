@@ -4,8 +4,9 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 
+from utils.paths import ROOT as _ROOT_DIR
+
 router = APIRouter(prefix="/docs", tags=["docs"])
-_ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 _EXAMPLES_DIR = _ROOT_DIR / "examples"
 
 

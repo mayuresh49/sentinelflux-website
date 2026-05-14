@@ -19,8 +19,7 @@ from pathlib import Path
 import yaml
 
 from utils.activity_log import ActivityLog
-
-ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+from utils.paths import ROOT as ROOT_DIR
 
 _log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")

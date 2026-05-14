@@ -24,8 +24,9 @@ from ai.agents.quarantine_manager import QuarantineManager, _HISTORY_PATH
 from utils.activity_log import ActivityLog
 from utils.approval_manager import ApprovalManager
 
+from utils.paths import ROOT as _ROOT_DIR
+
 _log = logging.getLogger("sentinelflux.sentinel_orchestrator")
-_ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class SentinelOrchestrator:

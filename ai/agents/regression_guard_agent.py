@@ -5,8 +5,7 @@ import json
 from pathlib import Path
 
 from ai.agents.base_agent import BaseAgent
-
-_ROOT_DIR = Path(__file__).resolve().parent.parent.parent
+from utils.paths import ROOT as _ROOT_DIR
 _DEFAULT_BASELINE = _ROOT_DIR / "framework_knowledge" / "baseline_report.json"
 
 

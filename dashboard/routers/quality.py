@@ -8,10 +8,9 @@ import yaml
 from fastapi import APIRouter
 
 from utils.activity_log import ActivityLog
+from utils.paths import ROOT as _ROOT_DIR
 
 router = APIRouter(prefix="/quality", tags=["quality"])
-
-_ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 _EXAMPLES_DIR = _ROOT_DIR / "examples"
 _KB_DIR = _ROOT_DIR / "ai" / "knowledge_base"
 _QUARANTINE_FILE = _ROOT_DIR / "framework_knowledge" / "quarantine.yaml"

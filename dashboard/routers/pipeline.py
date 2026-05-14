@@ -12,11 +12,12 @@ from typing import Any
 from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel
 
+from filelock import FileLock
 from utils.activity_log import ActivityLog
+from utils.paths import ROOT as _ROOT_DIR
 
 router = APIRouter(prefix="/pipeline", tags=["pipeline"])
 
-_ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 _JOBS_PATH = _ROOT_DIR / "framework_knowledge" / "pipeline_jobs.json"
 _alog = ActivityLog()
 _MAX_JOBS = 50
@@ -135,8 +136,9 @@ def _write_job(job: dict[str, Any]):
     if len(jobs) > _MAX_JOBS:
         jobs = jobs[-_MAX_JOBS:]
     _JOBS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with _JOBS_PATH.open("w", encoding="utf-8") as f:
-        json.dump({"jobs": jobs}, f, indent=2)
+    with FileLock(str(_JOBS_PATH) + ".lock"):
+        with _JOBS_PATH.open("w", encoding="utf-8") as f:
+            json.dump({"jobs": jobs}, f, indent=2)
 
 
 def _patch_job(job_id: str, status: str, output: str):
@@ -147,5 +149,6 @@ def _patch_job(job_id: str, status: str, output: str):
             j["output"] = output
             j["finished"] = datetime.now(timezone.utc).isoformat()
             break
-    with _JOBS_PATH.open("w", encoding="utf-8") as f:
-        json.dump({"jobs": jobs}, f, indent=2)
+    with FileLock(str(_JOBS_PATH) + ".lock"):
+        with _JOBS_PATH.open("w", encoding="utf-8") as f:
+            json.dump({"jobs": jobs}, f, indent=2)

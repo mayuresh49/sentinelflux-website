@@ -14,9 +14,9 @@ from pathlib import Path
 import yaml
 
 from utils.activity_log import ActivityLog
+from utils.paths import ROOT as _ROOT_DIR
 
 _log = logging.getLogger("sentinelflux.approval_dispatch")
-_ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 _QUARANTINE_PATH = _ROOT_DIR / "framework_knowledge" / "quarantine.yaml"
 _alog = ActivityLog()
 
