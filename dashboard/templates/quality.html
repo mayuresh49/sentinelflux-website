@@ -37,6 +37,7 @@
     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100 {{ 'ring-2 ring-amber-400' if s.doc_coverage < 50 else '' }}">
       <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Doc Coverage</p>
       <p class="text-3xl font-bold {{ 'text-amber-600' if s.doc_coverage < 50 else 'text-emerald-600' }} mt-1">{{ s.doc_coverage }}%</p>
+      <p class="text-xs text-slate-400 mt-0.5">{{ s.documented }} / {{ s.scripts }} scripts</p>
       <div class="mt-2 w-full bg-slate-100 rounded-full h-1.5">
         <div class="h-1.5 rounded-full {{ 'bg-emerald-500' if s.doc_coverage >= 70 else 'bg-amber-400' if s.doc_coverage >= 40 else 'bg-red-400' }}"
              style="width: {{ s.doc_coverage }}%"></div>
@@ -52,7 +53,10 @@
     <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-100">
       <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Pass Rate (7d)</p>
       {% if s.pass_rate is not none %}
-      <p class="text-3xl font-bold {{ 'text-emerald-600' if s.pass_rate >= 80 else 'text-amber-600' if s.pass_rate >= 60 else 'text-red-600' }} mt-1">{{ s.pass_rate }}%</p>
+      <div class="flex items-end justify-between gap-2 mt-1">
+        <p class="text-3xl font-bold {{ 'text-emerald-600' if s.pass_rate >= 80 else 'text-amber-600' if s.pass_rate >= 60 else 'text-red-600' }}">{{ s.pass_rate }}%</p>
+        <canvas id="passRateTrend" width="80" height="36" class="mb-1"></canvas>
+      </div>
       {% else %}
       <p class="text-3xl font-bold text-slate-400 mt-1">—</p>
       <p class="text-xs text-slate-400 mt-1">no recent runs</p>
@@ -118,7 +122,7 @@
                     <div class="h-1.5 rounded-full {{ 'bg-emerald-500' if row.doc_coverage >= 70 else 'bg-amber-400' if row.doc_coverage >= 40 else 'bg-red-400' }}"
                          style="width: {{ row.doc_coverage }}%"></div>
                   </div>
-                  <span class="text-xs text-slate-500 w-8 text-right">{{ row.doc_coverage }}%</span>
+                  <span class="text-xs text-slate-500 text-right whitespace-nowrap">{{ row.doc_coverage }}% <span class="text-slate-400">({{ row.scripts_with_docs }}/{{ row.scripts }})</span></span>
                 </div>
               </td>
               <td class="px-4 py-3 text-right">
@@ -225,6 +229,28 @@
 {% endblock %}
 
 {% block scripts %}
+{% if metrics.summary.pass_rate is not none %}
+<script>
+(function() {
+  const trend = {{ metrics.summary.pass_rate_trend | tojson }};
+  const rate  = {{ metrics.summary.pass_rate }};
+  const color = rate >= 80 ? 'rgba(16,185,129,0.8)' : rate >= 60 ? 'rgba(245,158,11,0.8)' : 'rgba(239,68,68,0.8)';
+  const filled = trend.map(v => v === null ? 0 : v);
+  new Chart(document.getElementById('passRateTrend'), {
+    type: 'line',
+    data: {
+      labels: trend.map((_, i) => i),
+      datasets: [{ data: filled, borderColor: color, borderWidth: 1.5, pointRadius: 0, tension: 0.3, fill: false }],
+    },
+    options: {
+      responsive: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: { x: { display: false }, y: { display: false, min: 0, max: 100 } },
+    },
+  });
+})();
+</script>
+{% endif %}
 {% if metrics.per_product %}
 <script>
 (function() {

@@ -27,11 +27,16 @@
 
     <!-- Tab bar -->
     <div class="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit flex-wrap">
-      {% for t, label in [('products','Products'),('labels','Test type'),('priorities','Priorities'),('fields','Custom Fields'),('users','Users'),('testtypes','Distribution'),('gencategories','Generation')] %}
+      {% for t, label in [('products','Products'),('labels','Test type'),('priorities','Priorities'),('fields','Custom Fields'),('testtypes','Distribution'),('gencategories','Generation')] %}
       <button @click="tab='{{ t }}'"
               :class="tab==='{{ t }}' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
               class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">{{ label }}</button>
       {% endfor %}
+      {% if current_user and current_user.get('admin') %}
+      <button @click="tab='users'"
+              :class="tab==='users' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
+              class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">Users</button>
+      {% endif %}
     </div>
 
     <!-- ── PRODUCTS ── -->

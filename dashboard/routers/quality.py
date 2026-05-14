@@ -66,6 +66,26 @@ def _parse_ts(ts: str) -> datetime:
         return datetime.min.replace(tzinfo=timezone.utc)
 
 
+def _daily_pass_rate(all_entries: list, days: int = 7) -> list:
+    now = datetime.now(timezone.utc)
+    trend = []
+    for d in range(days - 1, -1, -1):
+        day_start = (now - timedelta(days=d)).replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = day_start + timedelta(days=1)
+        day_entries = [
+            e for e in all_entries
+            if day_start <= _parse_ts(e.get("timestamp", "")) < day_end
+            and e.get("status") in ("success", "failure", "error")
+            and e.get("agent") != "human"
+        ]
+        if not day_entries:
+            trend.append(None)
+        else:
+            success = sum(1 for e in day_entries if e.get("status") == "success")
+            trend.append(round(success / len(day_entries) * 100))
+    return trend
+
+
 def compute_metrics(product: str | None = None) -> dict:
     all_prods = _all_products()
     scope = [product] if (product and product in all_prods) else all_prods
@@ -99,6 +119,7 @@ def compute_metrics(product: str | None = None) -> dict:
             "quarantined": len(p_quarantined),
             "pass_rate": round(runs_success / runs_total * 100) if runs_total else None,
             "flaky": flaky,
+            "scripts_with_docs": len(documented),
         })
 
     total_scripts = sum(r["scripts"] for r in per_product)
@@ -119,9 +140,11 @@ def compute_metrics(product: str | None = None) -> dict:
             "scripts": total_scripts,
             "scripts_by_domain": total_scripts_by_domain,
             "docs": total_docs,
+            "documented": total_documented,
             "doc_coverage": round(total_documented / total_scripts * 100) if total_scripts else 0,
             "quarantined": len(quarantined),
             "pass_rate": avg_pass,
+            "pass_rate_trend": _daily_pass_rate(all_entries),
             "flaky": sum(r["flaky"] for r in per_product),
         },
         "per_product": per_product,

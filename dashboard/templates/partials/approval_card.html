@@ -37,8 +37,28 @@
       <svg class="w-3 h-3 transition-transform" :class="open ? 'rotate-90' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
       <span x-text="open ? 'Hide details' : 'Show details'"></span>
     </button>
-    <div x-show="open" x-cloak class="mt-2">
-      <pre class="text-xs text-slate-600 bg-slate-50 rounded-lg p-3 border border-slate-100 overflow-auto max-h-40 font-mono">{{ item.details | tojson(indent=2) }}</pre>
+    <div x-show="open" x-cloak class="mt-2 text-xs text-slate-600 bg-slate-50 rounded-lg p-3 border border-slate-100 space-y-1">
+      {% set d = item.details %}
+      {% if item.type == "quarantine" %}
+        <p><span class="font-medium text-slate-500">Test:</span> <code class="font-mono">{{ d.get("test_id", "—") }}</code></p>
+        <p><span class="font-medium text-slate-500">Reason:</span> {{ d.get("reason", "—") }}</p>
+      {% elif item.type == "unquarantine" %}
+        <p><span class="font-medium text-slate-500">Test:</span> <code class="font-mono">{{ d.get("test_id", "—") }}</code></p>
+      {% elif item.type == "locator_heal" %}
+        <p><span class="font-medium text-slate-500">Element:</span> {{ d.get("locator_key", d.get("element", "—")) }}</p>
+        {% if d.get("current_selector") or d.get("proposed_selector") %}
+        <p><span class="font-medium text-slate-500">Before:</span> <code class="font-mono text-red-600">{{ d.get("current_selector", "—") }}</code></p>
+        <p><span class="font-medium text-slate-500">After:</span> <code class="font-mono text-emerald-600">{{ d.get("proposed_selector", "—") }}</code></p>
+        {% endif %}
+      {% elif item.type == "coverage_gap" %}
+        <p><span class="font-medium text-slate-500">Feature:</span> {{ d.get("feature", "—") }}</p>
+        <p><span class="font-medium text-slate-500">Domain:</span> {{ d.get("domain", item.domain or "—") }}</p>
+        <p class="text-slate-400">Will generate: test documentation + test scripts</p>
+      {% elif item.type in ("regression_review", "script_review", "chat_suggestion") %}
+        <p>{{ d.get("summary") or d.get("description") or d.get("message") or "No summary available." }}</p>
+      {% else %}
+        <pre class="overflow-auto max-h-32 font-mono">{{ d | tojson(indent=2) }}</pre>
+      {% endif %}
     </div>
   </div>
   {% endif %}

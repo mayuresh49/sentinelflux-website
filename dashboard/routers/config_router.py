@@ -4,10 +4,16 @@ from pathlib import Path
 from typing import List, Optional
 
 import yaml
-from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 from dashboard.routers.auth import require_user, user_products
+
+
+def _require_admin(current_user: dict = Depends(require_user)) -> dict:
+    if not current_user.get("admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
 
 router = APIRouter(tags=["config"], dependencies=[Depends(require_user)])
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
@@ -341,7 +347,7 @@ def _render_users(request: Request, cfg: dict) -> HTMLResponse:
 
 
 @router.post("/ui/config/users/add", response_class=HTMLResponse)
-async def users_add(request: Request, name: str = Form(...), email: str = Form("")):
+async def users_add(request: Request, name: str = Form(...), email: str = Form(""), _: dict = Depends(_require_admin)):
     cfg = _load_config()
     name = name.strip()
     email = email.strip().lower()
@@ -355,7 +361,7 @@ async def users_add(request: Request, name: str = Form(...), email: str = Form("
 
 
 @router.post("/ui/config/users/delete", response_class=HTMLResponse)
-async def users_delete(request: Request, name: str = Form(...)):
+async def users_delete(request: Request, name: str = Form(...), _: dict = Depends(_require_admin)):
     cfg = _load_config()
     cfg["users"] = [u for u in cfg.get("users", []) if u["name"] != name]
     _save_config(cfg)
@@ -363,7 +369,7 @@ async def users_delete(request: Request, name: str = Form(...)):
 
 
 @router.post("/ui/config/users/set-password", response_class=HTMLResponse)
-async def users_set_password(request: Request, name: str = Form(...), password: str = Form(...)):
+async def users_set_password(request: Request, name: str = Form(...), password: str = Form(...), _: dict = Depends(_require_admin)):
     import bcrypt as _bcrypt
     cfg = _load_config()
     for u in cfg.get("users", []):
@@ -375,7 +381,7 @@ async def users_set_password(request: Request, name: str = Form(...), password: 
 
 
 @router.post("/ui/config/users/set-admin", response_class=HTMLResponse)
-async def users_set_admin(request: Request, name: str = Form(...), admin: str = Form(default="")):
+async def users_set_admin(request: Request, name: str = Form(...), admin: str = Form(default=""), _: dict = Depends(_require_admin)):
     cfg = _load_config()
     for u in cfg.get("users", []):
         if u["name"] == name:
@@ -386,7 +392,7 @@ async def users_set_admin(request: Request, name: str = Form(...), admin: str = 
 
 
 @router.post("/ui/config/users/set-products", response_class=HTMLResponse)
-async def users_set_products(request: Request):
+async def users_set_products(request: Request, _: dict = Depends(_require_admin)):
     form = await request.form()
     name = form.get("name", "")
     products = form.getlist("products")

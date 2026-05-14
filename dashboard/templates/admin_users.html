@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+  <div>
+    <h1 class="text-2xl font-bold text-slate-900">User Management</h1>
+    <p class="text-sm text-slate-500 mt-0.5">Manage user accounts, roles, and product access</p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"
+       hx-target="this" hx-swap="outerHTML">
+    <div class="px-5 py-4 border-b border-slate-100">
+      <h2 class="font-semibold text-slate-800 text-sm">Users</h2>
+    </div>
+    <div id="admin-users-panel">
+      {% include "partials/config_users.html" %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

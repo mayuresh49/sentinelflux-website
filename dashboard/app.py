@@ -36,6 +36,12 @@ from dashboard.routers import auth as auth_router
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
 # Use a stable secret from env so sessions survive restarts; fall back to a generated one.
 _SESSION_SECRET = os.environ.get("SF_SESSION_SECRET") or secrets.token_hex(32)
+_ALLOWED_ORIGINS = [
+    o.strip() for o in os.environ.get(
+        "SF_ALLOWED_ORIGINS",
+        "http://sentinelflux.in,https://sentinelflux.in,http://localhost:8765,http://127.0.0.1:8765"
+    ).split(",") if o.strip()
+]
 
 app = FastAPI(
     title="SentinelFlux Dashboard",
@@ -50,7 +56,7 @@ app = FastAPI(
 app.add_middleware(SessionMiddleware, secret_key=_SESSION_SECRET, https_only=False)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_ALLOWED_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )

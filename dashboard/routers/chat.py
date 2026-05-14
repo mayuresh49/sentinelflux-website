@@ -101,10 +101,9 @@ _TOOLS = [
     },
 ]
 
-_BLOCKED_COMMANDS = {
-    "rm", "rmdir", "del", "format", "mkfs", "dd", "shred",
-    "kill", "killall", "pkill", "shutdown", "reboot", "halt",
-    "chmod", "chown", "sudo", "su", "passwd", "mv", "truncate", "wipe",
+_ALLOWED_COMMANDS = {
+    "ls", "find", "grep", "cat", "head", "tail", "wc", "echo",
+    "git", "pytest", "python",
 }
 
 _TOOL_NAMES = {"list_directory", "read_file", "list_tests", "run_shell"}
@@ -160,8 +159,8 @@ def _tool_list_tests(path: str = "") -> str:
 
 def _tool_run_shell(command: str) -> str:
     first = command.strip().split()[0].lstrip("./") if command.strip() else ""
-    if first.lower() in _BLOCKED_COMMANDS:
-        return f"Blocked: '{first}' is a destructive command and is not permitted."
+    if first.lower() not in _ALLOWED_COMMANDS:
+        return f"Not permitted: '{first}' is not in the allowed command list (ls, find, grep, cat, head, tail, wc, echo, git, pytest, python)."
     try:
         result = subprocess.run(
             command, shell=True, capture_output=True, text=True,

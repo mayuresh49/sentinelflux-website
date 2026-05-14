@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -319,3 +319,51 @@ async def kb_page(request: Request, product: str | None = None,
         queued_gaps=_queued_gaps(),
         selected_product=selected_product,
     ))
+
+
+@router.get("/admin/users", response_class=HTMLResponse)
+async def admin_users_page(request: Request, current_user: dict = Depends(_require_auth)):
+    if not current_user.get("admin"):
+        raise HTTPException(status_code=403, headers={"Location": "/"})
+    from dashboard.routers.config_router import _load_config
+    cfg = _load_config()
+    return templates.TemplateResponse(request, "admin_users.html", context=_ctx(
+        request, current_user,
+        users=cfg.get("users", []),
+        all_products=[p["name"] for p in cfg.get("products", []) if p.get("active", True)],
+    ))
+
+
+@router.get("/profile/password", response_class=HTMLResponse)
+async def change_password_page(request: Request, current_user: dict = Depends(_require_auth)):
+    return templates.TemplateResponse(request, "change_password.html", context=_ctx(
+        request, current_user, saved=False, error="",
+    ))
+
+
+@router.post("/profile/password", response_class=HTMLResponse)
+async def change_password_submit(
+    request: Request,
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    current_user: dict = Depends(_require_auth),
+):
+    import bcrypt as _bcrypt
+    from dashboard.routers.config_router import _load_config, _save_config
+    cfg = _load_config()
+    user_entry = next((u for u in cfg.get("users", []) if u["email"] == current_user["email"]), None)
+    ctx = _ctx(request, current_user, saved=False, error="")
+    if not user_entry:
+        ctx["error"] = "User account not found."
+        return templates.TemplateResponse(request, "change_password.html", context=ctx)
+    stored_hash = user_entry.get("password_hash", "")
+    if not stored_hash or not _bcrypt.checkpw(current_password.encode(), stored_hash.encode()):
+        ctx["error"] = "Current password is incorrect."
+        return templates.TemplateResponse(request, "change_password.html", context=ctx)
+    if len(new_password.strip()) < 8:
+        ctx["error"] = "New password must be at least 8 characters."
+        return templates.TemplateResponse(request, "change_password.html", context=ctx)
+    user_entry["password_hash"] = _bcrypt.hashpw(new_password.strip().encode(), _bcrypt.gensalt()).decode()
+    _save_config(cfg)
+    ctx["saved"] = True
+    return templates.TemplateResponse(request, "change_password.html", context=ctx)
