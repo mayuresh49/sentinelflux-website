@@ -36,7 +36,7 @@ class RunManager:
         run_config_snapshot: dict | None = None,
     ) -> dict:
         run_id = f"run_{uuid.uuid4().hex[:8]}"
-        report_path = str(_RUNS_DIR / f"{run_id}_report.json")
+        report_path = str((_RUNS_DIR / f"{run_id}_report.json").relative_to(_ROOT))
         run: dict[str, Any] = {
             "id": run_id,
             "triggered_at": datetime.now(timezone.utc).isoformat(),

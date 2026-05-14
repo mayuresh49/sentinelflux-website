@@ -6,7 +6,7 @@ This guide explains how to generate API test documentation using the SentinelFlu
 
 1. Ensure the repository root is the working directory:
    ```bash
-   cd /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework
+   cd /path/to/sentinelflux-framework
    ```
 2. Activate the Python environment and install dependencies:
    ```bash

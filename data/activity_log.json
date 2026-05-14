@@ -135,7 +135,7 @@
       "product": "restfulbooker",
       "domain": "api",
       "status": "pending",
-      "summary": "Pipeline started — booking / api",
+      "summary": "Pipeline started \u2014 booking / api",
       "output": {},
       "requires_human": false,
       "approval_id": null
@@ -148,10 +148,10 @@
       "product": "restfulbooker",
       "domain": "api",
       "status": "error",
-      "summary": "Pipeline failed — booking",
+      "summary": "Pipeline failed \u2014 booking",
       "output": {
         "returncode": 1,
-        "log": "entinelflux-framework/ai/pipeline/orchestrator.py\", line 258, in <module>\n    main()\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/pipeline/orchestrator.py\", line 249, in main\n    orchestrator.run(\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/pipeline/orchestrator.py\", line 62, in run\n    out_doc = self._generate_doc(feature_name, domain, doc_path, output_base=output_base)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/pipeline/orchestrator.py\", line 85, in _generate_doc\n    result = agent.run(feature_name=feature_name, output_path=out_path)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/agents/doc_gen_agent.py\", line 39, in run\n    content = skill.generate_api_test_document(\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/skills/test_case_doc_kb.py\", line 136, in generate_api_test_document\n    return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/clients/mistral_client.py\", line 31, in generate\n    return self._generate_local(prompt, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/ai/clients/mistral_client.py\", line 60, in _generate_local\n    response.raise_for_status()\n  File \"/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/.venv/lib/python3.11/site-packages/requests/models.py\", line 1028, in raise_for_status\n    raise HTTPError(http_error_msg, response=self)\nrequests.exceptions.HTTPError: 404 Client Error: Not Found for url: http://localhost:11434/api/generate"
+        "log": "entinelflux-framework/ai/pipeline/orchestrator.py\", line 258, in <module>\n    main()\n  File \"ai/pipeline/orchestrator.py\", line 249, in main\n    orchestrator.run(\n  File \"ai/pipeline/orchestrator.py\", line 62, in run\n    out_doc = self._generate_doc(feature_name, domain, doc_path, output_base=output_base)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"ai/pipeline/orchestrator.py\", line 85, in _generate_doc\n    result = agent.run(feature_name=feature_name, output_path=out_path)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"ai/agents/doc_gen_agent.py\", line 39, in run\n    content = skill.generate_api_test_document(\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"ai/skills/test_case_doc_kb.py\", line 136, in generate_api_test_document\n    return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"ai/clients/mistral_client.py\", line 31, in generate\n    return self._generate_local(prompt, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"ai/clients/mistral_client.py\", line 60, in _generate_local\n    response.raise_for_status()\n  File \".venv/lib/python3.11/site-packages/requests/models.py\", line 1028, in raise_for_status\n    raise HTTPError(http_error_msg, response=self)\nrequests.exceptions.HTTPError: 404 Client Error: Not Found for url: http://localhost:11434/api/generate"
       },
       "requires_human": false,
       "approval_id": null
@@ -220,10 +220,10 @@
       "product": "restfulbooker",
       "domain": "api",
       "status": "success",
-      "summary": "Doc generated for booking (script skipped — hand-written exists)",
+      "summary": "Doc generated for booking (script skipped \u2014 hand-written exists)",
       "output": {
         "feature": "booking",
-        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/restfulbooker/docs/test_cases/api/booking.md",
+        "doc": "products/restfulbooker/docs/test_cases/api/booking.md",
         "script": null
       },
       "requires_human": false,
@@ -237,10 +237,10 @@
       "product": "restfulbooker",
       "domain": "api",
       "status": "success",
-      "summary": "Doc generated for booking (script skipped — hand-written exists)",
+      "summary": "Doc generated for booking (script skipped \u2014 hand-written exists)",
       "output": {
         "feature": "booking",
-        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/restfulbooker/docs/test_cases/api/booking.md",
+        "doc": "products/restfulbooker/docs/test_cases/api/booking.md",
         "script": null
       },
       "requires_human": false,
@@ -254,10 +254,10 @@
       "product": "restfulbooker",
       "domain": "api",
       "status": "success",
-      "summary": "Doc generated for booking (script skipped — hand-written exists)",
+      "summary": "Doc generated for booking (script skipped \u2014 hand-written exists)",
       "output": {
         "feature": "booking",
-        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/restfulbooker/docs/test_cases/api/booking.md",
+        "doc": "products/restfulbooker/docs/test_cases/api/booking.md",
         "script": null
       },
       "requires_human": false,
@@ -271,7 +271,7 @@
       "product": "orangehrm",
       "domain": "api",
       "status": "pending",
-      "summary": "Pipeline started — Timesheets / api",
+      "summary": "Pipeline started \u2014 Timesheets / api",
       "output": {},
       "requires_human": false,
       "approval_id": null
@@ -287,8 +287,8 @@
       "summary": "Generated doc + script for Timesheets",
       "output": {
         "feature": "Timesheets",
-        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/docs/test_cases/api/Timesheets.md",
-        "script": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/tests/api/test_Timesheets.py"
+        "doc": "products/orangehrm/docs/test_cases/api/Timesheets.md",
+        "script": "products/orangehrm/tests/api/test_Timesheets.py"
       },
       "requires_human": false,
       "approval_id": null
@@ -301,10 +301,10 @@
       "product": "orangehrm",
       "domain": "api",
       "status": "success",
-      "summary": "Pipeline completed — Timesheets",
+      "summary": "Pipeline completed \u2014 Timesheets",
       "output": {
         "returncode": 0,
-        "log": "INFO Pipeline start — feature=Timesheets domain=api\nINFO Loaded increment: Timesheets.yaml\nINFO Doc written: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/docs/test_cases/api/Timesheets.md\nINFO Script written: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/tests/api/test_Timesheets.py\nINFO Increment log updated: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/framework_knowledge/kb_increments_log.yaml\nINFO Pipeline complete — doc=/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/docs/test_cases/api/Timesheets.md script=/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/tests/api/test_Timesheets.py"
+        "log": "INFO Pipeline start \u2014 feature=Timesheets domain=api\nINFO Loaded increment: Timesheets.yaml\nINFO Doc written: products/orangehrm/docs/test_cases/api/Timesheets.md\nINFO Script written: products/orangehrm/tests/api/test_Timesheets.py\nINFO Increment log updated: framework_knowledge/kb_increments_log.yaml\nINFO Pipeline complete \u2014 doc=products/orangehrm/docs/test_cases/api/Timesheets.md script=products/orangehrm/tests/api/test_Timesheets.py"
       },
       "requires_human": false,
       "approval_id": null
@@ -317,7 +317,7 @@
       "product": "orangehrm",
       "domain": "web",
       "status": "pending",
-      "summary": "Pipeline started — Timesheets / web",
+      "summary": "Pipeline started \u2014 Timesheets / web",
       "output": {},
       "requires_human": false,
       "approval_id": null
@@ -333,8 +333,8 @@
       "summary": "Generated doc + script for Timesheets",
       "output": {
         "feature": "Timesheets",
-        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/docs/test_cases/web/Timesheets.md",
-        "script": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/tests/web/test_Timesheets.py"
+        "doc": "products/orangehrm/docs/test_cases/web/Timesheets.md",
+        "script": "products/orangehrm/tests/web/test_Timesheets.py"
       },
       "requires_human": false,
       "approval_id": null
@@ -347,10 +347,10 @@
       "product": "orangehrm",
       "domain": "web",
       "status": "success",
-      "summary": "Pipeline completed — Timesheets",
+      "summary": "Pipeline completed \u2014 Timesheets",
       "output": {
         "returncode": 0,
-        "log": "INFO Pipeline start — feature=Timesheets domain=web\nINFO Loaded increment: Timesheets.yaml\nINFO Doc written: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/docs/test_cases/web/Timesheets.md\nINFO Script written: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/tests/web/test_Timesheets.py\nINFO Increment log updated: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/framework_knowledge/kb_increments_log.yaml\nINFO Pipeline complete — doc=/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/docs/test_cases/web/Timesheets.md script=/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/tests/web/test_Timesheets.py"
+        "log": "INFO Pipeline start \u2014 feature=Timesheets domain=web\nINFO Loaded increment: Timesheets.yaml\nINFO Doc written: products/orangehrm/docs/test_cases/web/Timesheets.md\nINFO Script written: products/orangehrm/tests/web/test_Timesheets.py\nINFO Increment log updated: framework_knowledge/kb_increments_log.yaml\nINFO Pipeline complete \u2014 doc=products/orangehrm/docs/test_cases/web/Timesheets.md script=products/orangehrm/tests/web/test_Timesheets.py"
       },
       "requires_human": false,
       "approval_id": null

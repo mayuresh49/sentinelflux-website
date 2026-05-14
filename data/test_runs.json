@@ -15,7 +15,7 @@
       "skipped": 0,
       "errors": 0,
       "duration": 0.0,
-      "report_path": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/data/runs/run_c8871450_report.json",
+      "report_path": "data/runs/run_c8871450_report.json",
       "analyzed": false,
       "failure_categories": {},
       "failures": []
@@ -35,7 +35,7 @@
       "skipped": 0,
       "errors": 0,
       "duration": 0.0,
-      "report_path": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/data/runs/run_28daf199_report.json",
+      "report_path": "data/runs/run_28daf199_report.json",
       "analyzed": false,
       "failure_categories": {},
       "failures": []
@@ -55,7 +55,7 @@
       "skipped": 0,
       "errors": 0,
       "duration": 0.0,
-      "report_path": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/data/runs/run_d06c6f88_report.json",
+      "report_path": "data/runs/run_d06c6f88_report.json",
       "analyzed": false,
       "failure_categories": {},
       "failures": []

@@ -82,7 +82,7 @@ class TestPipelineOrchestrator:
                     domain=domain,
                     status="success",
                     summary=f"Doc generated for {feature_name} (script skipped — hand-written exists)",
-                    output={"feature": feature_name, "doc": str(out_doc), "script": None},
+                    output={"feature": feature_name, "doc": str(out_doc.relative_to(ROOT_DIR)), "script": None},
                 )
                 return {"doc": out_doc, "script": None}
 
@@ -101,7 +101,7 @@ class TestPipelineOrchestrator:
                 domain=domain,
                 status="success",
                 summary=f"Generated doc + script for {feature_name}",
-                output={"feature": feature_name, "doc": str(out_doc), "script": str(out_script)},
+                output={"feature": feature_name, "doc": str(out_doc.relative_to(ROOT_DIR)), "script": str(out_script.relative_to(ROOT_DIR))},
             )
             return {"doc": out_doc, "script": out_script}
 

@@ -38,7 +38,7 @@ This document explains the AI skills layer in the SentinelFlux framework, includ
 Use the repository root as the working directory:
 
 ```bash
-cd /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework
+cd /path/to/sentinelflux-framework
 python3 -m ai.generate_test_case_doc --config config/env_qa.yaml --output docs/test_cases/generated_test_case_doc.md
 python3 -m ai.generate_api_test_doc --endpoint /booking --method POST --output docs/test_cases/api/booking_create_tests.md
 ```
