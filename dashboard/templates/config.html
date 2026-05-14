@@ -165,17 +165,46 @@
     <!-- ── TEST ASSIGNMENTS ── -->
     <div x-show="tab==='assignments'" x-cloak class="mt-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-4 flex-wrap">
-          <h2 class="font-semibold text-slate-800 shrink-0">Test Assignments</h2>
-          <form hx-get="/ui/config/assignments"
-                hx-target="#assignments-list"
-                hx-swap="innerHTML"
-                hx-trigger="input from:input[name='search'] delay:400ms"
-                class="flex items-center gap-2 ml-auto">
-            <input type="hidden" name="product" value="{{ filter_product }}">
-            <input type="text" name="search" placeholder="Search test name…"
-                   class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-52">
-          </form>
+        <div class="border-b border-slate-100">
+          <div class="px-5 py-4 flex items-center gap-4 flex-wrap">
+            <h2 class="font-semibold text-slate-800 shrink-0">Test Assignments</h2>
+            <form id="asgn-filter-form"
+                  hx-get="/ui/config/assignments"
+                  hx-target="#assignments-list"
+                  hx-swap="innerHTML"
+                  hx-trigger="change, input from:input[name='search'] delay:400ms, input from:input[name='filter_owner'] delay:400ms"
+                  class="flex items-center gap-2 ml-auto flex-wrap">
+              <input type="hidden" name="product" value="{{ filter_product }}">
+              <input type="text" name="search" placeholder="Search test name…"
+                     class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-44">
+              <select name="filter_priority"
+                      class="text-sm border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                <option value="">All priorities</option>
+                {% for pri in priorities %}
+                <option value="{{ pri.name }}">{{ pri.name }}</option>
+                {% endfor %}
+              </select>
+              <input type="text" name="filter_owner" placeholder="Owner…"
+                     class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-28">
+              <label class="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer whitespace-nowrap">
+                <input type="checkbox" name="filter_jira_exists" value="1"
+                       class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
+                Has Jira
+              </label>
+            </form>
+          </div>
+          {% if labels %}
+          <div class="px-5 pb-3 flex items-center gap-2 flex-wrap">
+            <span class="text-xs font-medium text-slate-400 shrink-0">Labels:</span>
+            {% for lbl in labels %}
+            <label class="flex items-center gap-1 cursor-pointer" form="asgn-filter-form">
+              <input type="checkbox" name="filter_labels" value="{{ lbl.name }}" form="asgn-filter-form"
+                     class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
+              <span class="text-xs px-1.5 py-0.5 rounded-full font-medium {{ color_map.get(lbl.color, 'bg-slate-100 text-slate-500') }}">{{ lbl.name }}</span>
+            </label>
+            {% endfor %}
+          </div>
+          {% endif %}
         </div>
         <div id="assignments-list">
           {% include "partials/config_assignments.html" %}

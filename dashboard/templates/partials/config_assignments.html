@@ -47,6 +47,10 @@
         <input type="hidden" name="test_name" value="{{ t.name }}">
         <input type="hidden" name="filter_product" value="{{ filter_product }}">
         <input type="hidden" name="search" value="{{ search }}">
+        <input type="hidden" name="filter_priority" value="{{ filter_priority }}">
+        <input type="hidden" name="filter_owner" value="{{ filter_owner }}">
+        <input type="hidden" name="filter_jira_exists" value="{{ filter_jira_exists }}">
+        {% for fl in filter_labels %}<input type="hidden" name="filter_labels" value="{{ fl }}">{% endfor %}
 
         <div class="flex gap-6 flex-wrap">
           <!-- Labels -->

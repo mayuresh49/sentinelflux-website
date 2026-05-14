@@ -108,24 +108,34 @@ async def approvals(request: Request, product: str | None = None):
 @router.get("/docs", response_class=HTMLResponse)
 async def docs_page(request: Request, product: str | None = None):
     from dashboard.routers.docs import _find_docs
+    from dashboard.routers.config_router import assignments_summary_by_feature, _load_config
     all_docs = _find_docs()
     products = sorted(set(d["product"] for d in all_docs))
     domains = sorted(set(d["domain"] for d in all_docs))
     docs = _find_docs(product=product or None)
+    cfg = _load_config()
     return templates.TemplateResponse(request, "docs.html", context=_ctx(
         docs=docs, products=products, domains=domains,
+        assignments_summary=assignments_summary_by_feature(),
+        cfg_labels=cfg.get("labels", []),
+        cfg_priorities=cfg.get("priorities", []),
     ))
 
 
 @router.get("/scripts", response_class=HTMLResponse)
 async def scripts_page(request: Request, product: str | None = None):
     from dashboard.routers.scripts import _find_scripts
+    from dashboard.routers.config_router import assignments_summary_by_feature, _load_config
     all_scripts = _find_scripts()
     products = sorted(set(s["product"] for s in all_scripts))
     domains = sorted(set(s["domain"] for s in all_scripts))
     scripts = _find_scripts(product=product or None)
+    cfg = _load_config()
     return templates.TemplateResponse(request, "scripts.html", context=_ctx(
         scripts=scripts, products=products, domains=domains,
+        assignments_summary=assignments_summary_by_feature(),
+        cfg_labels=cfg.get("labels", []),
+        cfg_priorities=cfg.get("priorities", []),
     ))
 
 
