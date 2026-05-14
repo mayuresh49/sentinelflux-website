@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import bcrypt as _bcrypt
@@ -61,10 +61,10 @@ def user_products(user: dict, all_products: list[str]) -> list[str]:
 
 
 @router.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request, next: str = "/"):
+async def login_page(request: Request, next_url: str = Query(default="/", alias="next")):
     if get_session_user(request):
-        return RedirectResponse(next, status_code=302)
-    return templates.TemplateResponse(request, "login.html", {"error": None, "next": next})
+        return RedirectResponse(next_url, status_code=302)
+    return templates.TemplateResponse(request, "login.html", {"error": None, "next": next_url})
 
 
 @router.post("/login", response_class=HTMLResponse)
@@ -72,26 +72,26 @@ async def login_submit(
     request: Request,
     email: str = Form(...),
     password: str = Form(...),
-    next: str = Form(default="/"),
+    next_url: str = Form(default="/", alias="next"),
 ):
     users = _load_users()
-    user = next((u for u in users if u.get("email", "").lower() == email.strip().lower()), None)
+    matched = next((u for u in users if u.get("email", "").lower() == email.strip().lower()), None)
 
-    if not user:
+    if not matched:
         return templates.TemplateResponse(request, "login.html",
-                                          {"error": "Invalid email or password.", "next": next})
+                                          {"error": "Invalid email or password.", "next": next_url})
 
-    pw_hash = user.get("password_hash", "")
+    pw_hash = matched.get("password_hash", "")
     if not pw_hash:
         return templates.TemplateResponse(request, "login.html",
-                                          {"error": "Account has no password set. Ask an admin to set one.", "next": next})
+                                          {"error": "Account has no password set. Ask an admin to set one.", "next": next_url})
 
     if not _verify_password(password, pw_hash):
         return templates.TemplateResponse(request, "login.html",
-                                          {"error": "Invalid email or password.", "next": next})
+                                          {"error": "Invalid email or password.", "next": next_url})
 
-    request.session["user_email"] = user["email"]
-    return RedirectResponse(next if next.startswith("/") else "/", status_code=302)
+    request.session["user_email"] = matched["email"]
+    return RedirectResponse(next_url if next_url.startswith("/") else "/", status_code=302)
 
 
 @router.get("/logout")
