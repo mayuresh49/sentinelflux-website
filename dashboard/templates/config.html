@@ -27,7 +27,7 @@
 
     <!-- Tab bar -->
     <div class="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit flex-wrap">
-      {% for t, label in [('labels','Test type'),('priorities','Priorities'),('fields','Custom Fields'),('testtypes','Distribution'),('assignments','Test Assignments')] %}
+      {% for t, label in [('labels','Test type'),('priorities','Priorities'),('fields','Custom Fields'),('users','Users'),('testtypes','Distribution'),('gencategories','Generation'),('assignments','Test Assignments')] %}
       <button @click="tab='{{ t }}'"
               :class="tab==='{{ t }}' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
               class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">{{ label }}</button>
@@ -148,6 +148,38 @@
       </div>
     </div>
 
+    <!-- ── USERS ── -->
+    <div x-show="tab==='users'" x-cloak class="mt-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100">
+          <h2 class="font-semibold text-slate-800">Users</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Team members available as test owners — credentials added once auth is live</p>
+        </div>
+        <div id="users-list">
+          {% include "partials/config_users.html" %}
+        </div>
+        <div class="px-5 py-4 border-t border-slate-50 bg-slate-50/40">
+          <form hx-post="/ui/config/users/add" hx-target="#users-list" hx-swap="innerHTML"
+                class="flex items-end gap-3 flex-wrap">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Name</label>
+              <input type="text" name="name" required placeholder="e.g. Jane Smith"
+                     class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-44">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Email</label>
+              <input type="email" name="email" placeholder="jane@example.com"
+                     class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-52">
+            </div>
+            <button type="submit"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-1.5 transition-colors">
+              Add User
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
     <!-- ── TEST TYPES ── -->
     <div x-show="tab==='testtypes'" x-cloak class="mt-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
@@ -158,6 +190,20 @@
         <div id="test-types-panel" class="px-5 py-5">
           {% set dist = cfg.get('test_type_distribution', {'sanity': 30, 'regression': 70}) %}
           {% include "partials/config_test_types.html" %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GENERATION CATEGORIES ── -->
+    <div x-show="tab==='gencategories'" x-cloak class="mt-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100">
+          <h2 class="font-semibold text-slate-800">Test Generation Categories</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Control which categories the AI generates. Disabled categories are excluded from test case docs and scripts.</p>
+        </div>
+        <div id="generation-categories-panel" class="px-5 py-5">
+          {% set cats = cfg.get('generation_categories', {}) %}
+          {% include "partials/config_generation_categories.html" %}
         </div>
       </div>
     </div>

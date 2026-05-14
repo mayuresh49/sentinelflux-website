@@ -110,15 +110,77 @@ scenarios:
   <!-- ── TAB 2: Increments ───────────────────────────────────────────── -->
   <div x-show="tab === 'increments'" x-cloak class="space-y-4">
 
-    <!-- Toolbar -->
-    <div class="flex items-center justify-between">
-      <p class="text-sm text-slate-500">Drop a feature YAML here to queue for test generation. Processed increments are tracked in <code class="bg-slate-100 px-1 rounded">kb_increments_log.yaml</code>.</p>
-      <button @click="showIncrementForm = !showIncrementForm"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors">
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        New Increment
-      </button>
-    </div>
+    <!-- DOCX upload section — self-contained Alpine scope so button and panel share state -->
+    <div x-data="{ showDocxUpload: false, docxUploading: false, docxResult: null, docxError: null }"
+         @docx-loading.window="docxUploading = true; docxError = null; docxResult = null"
+         @docx-result.window="docxResult = $event.detail; docxUploading = false"
+         @docx-error.window="docxError = $event.detail; docxUploading = false"
+         class="space-y-4">
+
+      <!-- Toolbar -->
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-slate-500">Drop a feature YAML here to queue for test generation. Processed increments are tracked in <code class="bg-slate-100 px-1 rounded">kb_increments_log.yaml</code>.</p>
+        <div class="flex gap-2">
+          <button @click="showDocxUpload = !showDocxUpload"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white text-xs font-medium rounded-lg transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            Upload .docx
+          </button>
+          <button @click="showIncrementForm = !showIncrementForm"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            New Increment
+          </button>
+        </div>
+      </div>
+
+      <!-- DOCX upload panel — same scope as button above -->
+      <div x-show="showDocxUpload" x-cloak
+           class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+        <h3 class="font-semibold text-slate-800 text-sm">Convert .docx → KB Increment YAML</h3>
+        <p class="text-xs text-slate-500">Upload an API spec document, feature description, or any Word doc. The system extracts the text and uses an LLM to produce a KB YAML increment ready for test generation.</p>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1 col-span-2">
+            <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Word Document (.docx)</label>
+            <input id="docx-file-input" type="file" accept=".docx"
+                   class="text-sm border border-slate-200 rounded-lg px-3 py-2 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Output filename <span class="text-slate-400 font-normal">(optional)</span></label>
+            <input id="docx-output-name" type="text" placeholder="auto-derived from filename"
+                   class="text-sm font-mono border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          </div>
+          <div class="flex flex-col gap-1">
+            <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">LLM model</label>
+            <input id="docx-model" type="text" value="mistral:7b-instruct-v0.3-q4_K_M"
+                   class="text-sm font-mono border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button @click="uploadDocx()"
+                  :disabled="docxUploading"
+                  class="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-700 hover:bg-slate-800 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors">
+            <span x-show="!docxUploading">Convert &amp; Save</span>
+            <span x-show="docxUploading">Converting…</span>
+          </button>
+          <button @click="showDocxUpload = false; docxResult = null; docxError = null"
+                  class="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
+            Cancel
+          </button>
+        </div>
+        <div x-show="docxError" class="text-xs text-red-600 bg-red-50 rounded px-3 py-2" x-text="docxError"></div>
+        <div x-show="docxResult" class="space-y-2">
+          <p class="text-xs font-medium text-emerald-700">Saved as <span class="font-mono" x-text="docxResult?.filename"></span> — review and edit before running the pipeline.</p>
+          <textarea x-model="docxResult.yaml" rows="12"
+                    class="w-full font-mono text-xs border border-slate-200 rounded-lg p-3 resize-y focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-slate-50"></textarea>
+          <button @click="saveEditedDocxYaml(docxResult.filename, docxResult.yaml)"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 border border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors">
+            Save edits
+          </button>
+        </div>
+      </div>
+
+    </div><!-- end DOCX scope -->
 
     <!-- New increment form -->
     <div x-show="showIncrementForm" x-cloak
@@ -259,6 +321,11 @@ scenarios:
           </button>
           <div x-show="open" x-cloak class="mt-3 space-y-2 pl-4 border-l-2 border-slate-100">
             <div class="flex flex-col gap-1">
+              <label class="text-xs text-slate-500">API Source <span class="text-slate-400">(OpenAPI spec path/URL, service code file)</span></label>
+              <input id="pipeline-source" type="text" placeholder="e.g. openapi.yaml  or  https://api.example.com/openapi.json  or  src/routes.py"
+                     class="text-xs font-mono border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none">
+            </div>
+            <div class="flex flex-col gap-1">
               <label class="text-xs text-slate-500">Ollama URL</label>
               <input id="pipeline-local-url" type="text" value="http://localhost:11434"
                      class="text-xs font-mono border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none">
@@ -361,6 +428,7 @@ async function triggerPipeline() {
   const feature = document.getElementById('pipeline-feature').value;
   const domain = document.getElementById('pipeline-domain').value;
   const increment_file = document.getElementById('pipeline-increment').value;
+  const source = document.getElementById('pipeline-source')?.value || '';
   const local_url = document.getElementById('pipeline-local-url')?.value || 'http://localhost:11434';
   const doc_model = document.getElementById('pipeline-doc-model')?.value || 'mistral:7b-instruct-v0.3-q4_K_M';
   const script_model = document.getElementById('pipeline-script-model')?.value || 'qwen2.5-coder:14b-instruct-q4_K_M';
@@ -371,7 +439,7 @@ async function triggerPipeline() {
   const res = await fetch('/ui/pipeline/trigger', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ product, feature, domain, increment_file, local_url, doc_model, script_model, skip_script }),
+    body: JSON.stringify({ product, feature, domain, increment_file, source, local_url, doc_model, script_model, skip_script }),
   });
   if (res.ok) {
     const html = await res.text();
@@ -379,6 +447,41 @@ async function triggerPipeline() {
     list.innerHTML = html + list.innerHTML;
     // Clear placeholder if present
     list.querySelectorAll('.text-center').forEach(el => el.closest('.bg-white')?.remove());
+  }
+}
+
+async function uploadDocx() {
+  const fileInput = document.getElementById('docx-file-input');
+  if (!fileInput || !fileInput.files.length) { alert('Select a .docx file first'); return; }
+
+  window.dispatchEvent(new CustomEvent('docx-loading'));
+
+  const form = new FormData();
+  form.append('file', fileInput.files[0]);
+  form.append('output_filename', document.getElementById('docx-output-name')?.value || '');
+  form.append('model', document.getElementById('docx-model')?.value || 'mistral:7b-instruct-v0.3-q4_K_M');
+
+  try {
+    const res = await fetch('/api/kb/upload-docx', { method: 'POST', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || JSON.stringify(data));
+    window.dispatchEvent(new CustomEvent('docx-result', { detail: data }));
+  } catch (err) {
+    window.dispatchEvent(new CustomEvent('docx-error', { detail: String(err) }));
+  }
+}
+
+async function saveEditedDocxYaml(filename, yaml) {
+  const res = await fetch('/api/kb/increments', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ filename, content: yaml }),
+  });
+  if (res.ok) {
+    window.location.reload();
+  } else {
+    const err = await res.json();
+    alert('Save failed: ' + (err.detail || JSON.stringify(err)));
   }
 }
 </script>

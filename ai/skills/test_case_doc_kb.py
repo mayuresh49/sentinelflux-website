@@ -9,6 +9,7 @@ from ai.prompts.prompt_templates import (
     FEATURE_DOC_PROMPT,
 )
 from ai.knowledge_base.kb_loader import KnowledgeBaseLoader
+from dashboard.routers.config_router import get_generation_categories_instruction
 
 
 def _build_tc_id_instruction(tc_prefix: str, tc_start: int) -> str:
@@ -143,6 +144,7 @@ class TestCaseDocumentationSkill:
         feature_name: str = None,
         tc_prefix: str = "",
         tc_start: int = 1,
+        source_context: str = "",
     ) -> str:
         if api_type == "rest":
             api_context = self._build_api_context(feature_name)
@@ -150,6 +152,7 @@ class TestCaseDocumentationSkill:
             api_context = self.kb_loader.get_graphql_api_context()
 
         tc_id_instruction = _build_tc_id_instruction(tc_prefix, tc_start) if tc_prefix else ""
+        formatted_source = f"\nSource Context (authoritative specification):\n{source_context}\n" if source_context else ""
         prompt = API_TEST_CASE_DOC_PROMPT.format(
             endpoint=endpoint,
             method=method,
@@ -157,6 +160,8 @@ class TestCaseDocumentationSkill:
             api_context=api_context,
             kb_context=self.kb_loader.get_feature_context(feature_name),
             tc_id_instruction=tc_id_instruction,
+            source_context=formatted_source,
+            categories_instruction=get_generation_categories_instruction(),
         )
         return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()
 
@@ -207,5 +212,6 @@ class TestCaseDocumentationSkill:
             feature_context=feature_context + "\n" + increments_context,
             kb_context=kb_context,
             ID_PREFIX=tc_prefix or "TC",
+            categories_instruction=get_generation_categories_instruction(),
         )
         return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()

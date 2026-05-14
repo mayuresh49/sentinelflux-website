@@ -45,6 +45,7 @@ class TestPipelineOrchestrator:
         output_base: Path = None,
         tc_prefix: str = "",
         tc_start: int = 1,
+        source: str = "",
     ) -> dict[str, Path]:
         """
         Full pipeline: generate doc then script for a feature + domain.
@@ -69,6 +70,7 @@ class TestPipelineOrchestrator:
                 out_doc = self._generate_doc(
                     feature_name, domain, doc_path,
                     output_base=output_base, tc_prefix=tc_prefix, tc_start=tc_start,
+                    source=source,
                 )
                 test_case_doc = out_doc.read_text(encoding="utf-8")
 
@@ -126,12 +128,13 @@ class TestPipelineOrchestrator:
         output_base: Path = None,
         tc_prefix: str = "",
         tc_start: int = 1,
+        source: str = "",
     ) -> Path:
         from ai.agents import DocGenAgent, AgentContext
 
         base = output_base if output_base else ROOT_DIR
         ctx = AgentContext(domain=domain, output_base=base).extend(
-            tc_prefix=tc_prefix, tc_start=tc_start,
+            tc_prefix=tc_prefix, tc_start=tc_start, source=source,
         )
         agent = DocGenAgent(ai_client=self.ai_client, kb_loader=self.kb_loader, context=ctx)
         result = agent.run(feature_name=feature_name, output_path=out_path)
@@ -248,6 +251,9 @@ def _parse_args(argv=None):
                         help="Test case ID prefix (e.g. OH-WEB). Injected into doc and script.")
     parser.add_argument("--tc-start", type=int, default=1,
                         help="Starting TC number for ID sequence (default: 1).")
+    parser.add_argument("--source", default="",
+                        help="API source for richer test generation: path to OpenAPI spec, "
+                             "service code file, or a URL. Auto-detected by extension/content.")
 
     return parser.parse_args(argv)
 
@@ -287,6 +293,7 @@ def main(argv=None):
     output_base = Path(args.output_base).resolve() if args.output_base else None
     tc_prefix = args.tc_prefix or ""
     tc_start = args.tc_start
+    source = args.source or ""
 
     if args.doc:
         doc_path = Path(args.doc)
@@ -300,6 +307,7 @@ def main(argv=None):
             output_base=output_base,
             tc_prefix=tc_prefix,
             tc_start=tc_start,
+            source=source,
         )
     elif args.increment:
         stem = Path(args.increment).stem
@@ -313,6 +321,7 @@ def main(argv=None):
             output_base=output_base,
             tc_prefix=tc_prefix,
             tc_start=tc_start,
+            source=source,
         )
     else:
         orchestrator.run(
@@ -322,6 +331,7 @@ def main(argv=None):
             output_base=output_base,
             tc_prefix=tc_prefix,
             tc_start=tc_start,
+            source=source,
         )
 
 

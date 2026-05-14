@@ -89,11 +89,20 @@
         <div class="flex gap-4 flex-wrap">
           {% for f in custom_fields %}
           <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">{{ f.name }}</label>
+            <label class="block text-xs font-medium text-slate-600 mb-1">{{ f.name | replace('_',' ') | title }}</label>
             {% if f.type == 'bool' %}
             <input type="checkbox" name="cf_{{ f.name }}"
                    {{ 'checked' if asgn.get('custom_fields', {}).get(f.name) else '' }}
                    class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
+            {% elif f.name == 'owner' and users %}
+            <input type="text" name="cf_{{ f.name }}"
+                   value="{{ asgn.get('custom_fields', {}).get(f.name, '') }}"
+                   list="sf-users-datalist-{{ loop.index }}"
+                   autocomplete="off"
+                   class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-44">
+            <datalist id="sf-users-datalist-{{ loop.index }}">
+              {% for u in users %}<option value="{{ u.name }}">{{ u.email }}</option>{% endfor %}
+            </datalist>
             {% else %}
             <input type="text" name="cf_{{ f.name }}"
                    value="{{ asgn.get('custom_fields', {}).get(f.name, '') }}"

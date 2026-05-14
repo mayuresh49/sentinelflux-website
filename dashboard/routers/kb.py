@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import html
+import tempfile
 from pathlib import Path
 
 import yaml
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/kb", tags=["knowledge-base"])
@@ -107,3 +108,54 @@ def create_increment(body: IncrementBody):
     path = _INCREMENTS_DIR / body.filename
     path.write_text(body.content, encoding="utf-8")
     return {"status": "created", "filename": body.filename}
+
+
+@router.post("/upload-docx")
+async def upload_docx(
+    file: UploadFile = File(...),
+    output_filename: str = Form(""),
+    local_url: str = Form("http://localhost:11434"),
+    model: str = Form("mistral:7b-instruct-v0.3-q4_K_M"),
+):
+    """Accept a .docx upload, extract text, convert to KB YAML via LLM, save to increments/."""
+    if not (file.filename or "").lower().endswith(".docx"):
+        raise HTTPException(400, "Only .docx files are supported")
+
+    raw = await file.read()
+    if len(raw) > 20 * 1024 * 1024:
+        raise HTTPException(413, "File too large (max 20 MB)")
+
+    # Write to a temp file so python-docx can open it
+    with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as tmp:
+        tmp.write(raw)
+        tmp_path = Path(tmp.name)
+
+    try:
+        from ai.skills.docx_converter import DocxConverter
+        from utils.ai_factory import create_ai_client
+
+        ai_client = create_ai_client({
+            "enabled": True,
+            "mode": "mistral",
+            "local": True,
+            "local_url": local_url,
+            "model": model,
+        })
+        converter = DocxConverter(ai_client=ai_client)
+        yaml_content = converter.convert_file(tmp_path)
+    except Exception as exc:
+        raise HTTPException(500, f"Conversion failed: {exc}") from exc
+    finally:
+        tmp_path.unlink(missing_ok=True)
+
+    # Derive output filename from upload name if not supplied
+    stem = Path(file.filename).stem.lower().replace(" ", "_").replace("-", "_")
+    filename = output_filename.strip() or f"{stem}.yaml"
+    if not filename.endswith((".yaml", ".yml")):
+        filename += ".yaml"
+
+    _INCREMENTS_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = _INCREMENTS_DIR / filename
+    out_path.write_text(yaml_content, encoding="utf-8")
+
+    return {"status": "converted", "filename": filename, "yaml": yaml_content}

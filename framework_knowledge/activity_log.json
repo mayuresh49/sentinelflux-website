@@ -211,6 +211,57 @@
       },
       "requires_human": false,
       "approval_id": null
+    },
+    {
+      "id": "f35b26fb-fe17-4778-9d7e-a687a0cbea35",
+      "timestamp": "2026-05-14T02:44:49.776516+00:00",
+      "event_type": "pipeline_run",
+      "agent": "pipeline",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "success",
+      "summary": "Doc generated for booking (script skipped \u2014 hand-written exists)",
+      "output": {
+        "feature": "booking",
+        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/restfulbooker/docs/test_cases/api/booking.md",
+        "script": null
+      },
+      "requires_human": false,
+      "approval_id": null
+    },
+    {
+      "id": "11833133-fb9c-4551-97e5-118ae34f35f1",
+      "timestamp": "2026-05-14T02:50:30.902312+00:00",
+      "event_type": "pipeline_run",
+      "agent": "pipeline",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "success",
+      "summary": "Doc generated for booking (script skipped \u2014 hand-written exists)",
+      "output": {
+        "feature": "booking",
+        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/restfulbooker/docs/test_cases/api/booking.md",
+        "script": null
+      },
+      "requires_human": false,
+      "approval_id": null
+    },
+    {
+      "id": "edac1c0f-e1c1-432a-a7f6-06e5364bd5ac",
+      "timestamp": "2026-05-14T03:08:43.125426+00:00",
+      "event_type": "pipeline_run",
+      "agent": "pipeline",
+      "product": "restfulbooker",
+      "domain": "api",
+      "status": "success",
+      "summary": "Doc generated for booking (script skipped \u2014 hand-written exists)",
+      "output": {
+        "feature": "booking",
+        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/restfulbooker/docs/test_cases/api/booking.md",
+        "script": null
+      },
+      "requires_human": false,
+      "approval_id": null
     }
   ]
 }

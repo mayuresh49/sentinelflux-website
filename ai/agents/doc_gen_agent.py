@@ -33,11 +33,21 @@ class DocGenAgent(BaseAgent):
         output_path: Path | None = None,
     ) -> dict:
         from ai.skills.test_case_doc_kb import TestCaseDocumentationSkill
+        from ai.skills.api_source_parser import ApiSourceParser
 
         skill = TestCaseDocumentationSkill(self.client, self.kb)
         domain = self.ctx.domain
         tc_prefix = self.ctx.get("tc_prefix", "")
         tc_start = self.ctx.get("tc_start", 1)
+
+        source_context = ""
+        source = self.ctx.get("source", "")
+        if source:
+            try:
+                source_context = ApiSourceParser().parse(source)
+                self._log.info("Source context loaded from: %s", source)
+            except Exception as exc:
+                self._log.warning("Could not parse source '%s': %s", source, exc)
 
         if domain == "api":
             content = skill.generate_api_test_document(
@@ -48,6 +58,7 @@ class DocGenAgent(BaseAgent):
                 feature_name=feature_name,
                 tc_prefix=tc_prefix,
                 tc_start=tc_start,
+                source_context=source_context,
             )
         else:
             content = skill.generate_document(

@@ -98,7 +98,10 @@ STRICT RULES — violating these will produce incorrect documentation:
 4. Begin the document with an explicit "Endpoint Scope" section listing only context-documented fields and codes.
 5. When Source Context is an OpenAPI spec, generate one test case per documented response code.
 {tc_id_instruction}
-The document should include:
+{categories_instruction}
+
+Generate test cases only for the enabled categories above. Do not include excluded categories.
+Required sections (for enabled categories only):
 - Endpoint Scope (method, path, request fields, response codes from KB only)
 - Positive test cases (valid request → expected 2xx)
 - Negative test cases (invalid/missing fields → documented error codes)
@@ -132,6 +135,7 @@ Feature: {feature_name}
 - Do not add comments unless a business rule is non-obvious.
 - Do not import anything not in the conventions or standard library.
 {test_type_instruction}
+{categories_instruction}
 Output the complete Python file content starting with imports.
 """)
 
@@ -152,7 +156,10 @@ STRICT RULES — violating these will produce incorrect documentation:
 5. Base expected results only on documented business rules, not assumptions or generic HRMS patterns.
 6. Begin the document with an explicit "Fields in Scope" section listing only KB-documented fields.
 
-Document must cover:
+{categories_instruction}
+
+Document must cover only the enabled categories above. Do not generate test cases for excluded categories.
+Remaining required sections (for enabled categories only):
 - Fields in Scope (explicit list from KB only — no invented fields)
 - All positive (happy path) scenarios
 - Negative scenarios (invalid input, missing fields, boundary violations) for KB-documented rules only

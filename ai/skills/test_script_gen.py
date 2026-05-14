@@ -234,6 +234,7 @@ class TestScriptGenSkill:
         feature_name: str,
         tc_prefix: str = "",
         test_type_instruction: str = "",
+        categories_instruction: str = "",
     ) -> str:
         """Generate a runnable pytest file from a test case markdown document."""
         _fallback = "web" if domain == "a11y" else "api"
@@ -249,6 +250,7 @@ class TestScriptGenSkill:
             conventions=conventions,
             tc_prefix_hint=tc_prefix_hint,
             test_type_instruction=test_type_instruction,
+            categories_instruction=categories_instruction,
         )
         code = self.ai_client.generate(prompt, max_tokens=3000, temperature=0.1).strip()
         return _clean_code_output(code)

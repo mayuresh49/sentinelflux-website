@@ -24,3 +24,9 @@ priorities:
 test_type_distribution:
   regression: 70
   sanity: 30
+generation_categories:
+  functional: true
+  negative: true
+  edge: true
+  security: true
+  accessibility: false

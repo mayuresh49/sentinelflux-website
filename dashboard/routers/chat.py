@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import subprocess
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -13,20 +15,222 @@ from pydantic import BaseModel
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
+_FRAMEWORK_ROOT = Path(__file__).resolve().parent.parent.parent
+
+# ── tool schemas ───────────────────────────────────────────────────────────────
+
+_TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "list_directory",
+            "description": "List files and sub-directories inside the SentinelFlux framework at a given path.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": (
+                            "Path relative to the framework root (e.g. 'tests/api'). "
+                            "Defaults to the framework root."
+                        ),
+                    }
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_file",
+            "description": "Read the text contents of a file inside the SentinelFlux framework.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": "Path relative to the framework root (e.g. 'tests/api/test_login.py').",
+                    },
+                    "max_lines": {
+                        "type": "integer",
+                        "description": "Maximum number of lines to return. Default 200.",
+                    },
+                },
+                "required": ["path"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_tests",
+            "description": (
+                "Find all test script files (test_*.py / *_test.py) by scanning the filesystem. "
+                "Optionally filter by a sub-path (e.g. 'tests/api' or 'examples/restfulbooker'). "
+                "Use this to answer questions like 'what test scripts exist for product X'."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": "Sub-path to scan (relative to framework root). Defaults to all.",
+                    }
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "run_shell",
+            "description": (
+                "Run a safe, read-only shell command inside the framework root and return its output. "
+                "Destructive commands (rm, kill, sudo, mv, chmod, etc.) are blocked."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "command": {"type": "string", "description": "The shell command to run."}
+                },
+                "required": ["command"],
+            },
+        },
+    },
+]
+
+_BLOCKED_COMMANDS = {
+    "rm", "rmdir", "del", "format", "mkfs", "dd", "shred",
+    "kill", "killall", "pkill", "shutdown", "reboot", "halt",
+    "chmod", "chown", "sudo", "su", "passwd", "mv", "truncate", "wipe",
+}
+
+_TOOL_NAMES = {"list_directory", "read_file", "list_tests", "run_shell"}
+
+
+# ── tool implementations ───────────────────────────────────────────────────────
+
+def _tool_list_directory(path: str = "") -> str:
+    target = (_FRAMEWORK_ROOT / path).resolve() if path else _FRAMEWORK_ROOT.resolve()
+    if not str(target).startswith(str(_FRAMEWORK_ROOT)):
+        return "Error: path is outside the framework root."
+    try:
+        entries = sorted(os.listdir(target))
+        lines = [e + ("/" if (target / e).is_dir() else "") for e in entries if not e.startswith("__pycache__")]
+        return "\n".join(lines) or "(empty)"
+    except Exception as exc:
+        return f"Error: {exc}"
+
+
+def _tool_read_file(path: str, max_lines: int = 200) -> str:
+    target = (_FRAMEWORK_ROOT / path).resolve()
+    if not str(target).startswith(str(_FRAMEWORK_ROOT)):
+        return "Error: path is outside the framework root."
+    try:
+        lines = []
+        with open(target, "r", errors="replace") as f:
+            for i, line in enumerate(f):
+                if i >= max_lines:
+                    lines.append(f"... (truncated after {max_lines} lines)")
+                    break
+                lines.append(line.rstrip())
+        return "\n".join(lines)
+    except Exception as exc:
+        return f"Error: {exc}"
+
+
+def _tool_list_tests(path: str = "") -> str:
+    root = (_FRAMEWORK_ROOT / path).resolve() if path else _FRAMEWORK_ROOT.resolve()
+    if not str(root).startswith(str(_FRAMEWORK_ROOT)):
+        return "Error: path is outside the framework root."
+    matches = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        # skip hidden dirs and caches
+        dirnames[:] = [d for d in dirnames if not d.startswith((".","__pycache__"))]
+        for fname in sorted(filenames):
+            if fname.startswith("test_") or fname.endswith("_test.py"):
+                rel = os.path.relpath(os.path.join(dirpath, fname), _FRAMEWORK_ROOT)
+                matches.append(rel)
+    if not matches:
+        return f"No test files found under '{path or '.'}'"
+    return "\n".join(matches)
+
+
+def _tool_run_shell(command: str) -> str:
+    first = command.strip().split()[0].lstrip("./") if command.strip() else ""
+    if first.lower() in _BLOCKED_COMMANDS:
+        return f"Blocked: '{first}' is a destructive command and is not permitted."
+    try:
+        result = subprocess.run(
+            command, shell=True, capture_output=True, text=True,
+            timeout=15, cwd=str(_FRAMEWORK_ROOT),
+        )
+        output = (result.stdout + result.stderr)[:4000]
+        return output or "(no output)"
+    except subprocess.TimeoutExpired:
+        return "Error: command timed out."
+    except Exception as exc:
+        return f"Error: {exc}"
+
+
+_TOOL_REGISTRY = {
+    "list_directory": _tool_list_directory,
+    "read_file": _tool_read_file,
+    "list_tests": _tool_list_tests,
+    "run_shell": _tool_run_shell,
+}
+
+
+def _dispatch_tool(name: str, args: dict) -> str:
+    fn = _TOOL_REGISTRY.get(name)
+    if fn is None:
+        return f"Unknown tool: {name}"
+    try:
+        return fn(**args)
+    except Exception as exc:
+        return f"Tool error: {exc}"
+
+
+def _parse_embedded_tool_calls(content: str):
+    """Fallback: some Qwen builds emit tool calls as raw JSON in content."""
+    if not content:
+        return None
+    candidates = [content.strip()]
+    for m in re.finditer(r"```(?:json)?\s*([\s\S]*?)```", content):
+        candidates.append(m.group(1).strip())
+    for candidate in candidates:
+        try:
+            obj = json.loads(candidate)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        if isinstance(obj, dict) and obj.get("name") in _TOOL_NAMES:
+            return [{"name": obj["name"], "args": obj.get("arguments") or obj.get("args") or {}}]
+        if isinstance(obj, list) and obj and isinstance(obj[0], dict) and obj[0].get("name") in _TOOL_NAMES:
+            return [{"name": o["name"], "args": o.get("arguments") or o.get("args") or {}} for o in obj]
+    return None
+
 _CONFIG_FILE = Path(__file__).resolve().parent.parent / "chat_config.json"
 _APPROVAL_FILE = Path(__file__).resolve().parent.parent.parent / "framework_knowledge" / "pending_approvals.yaml"
 
 _SYSTEM_PROMPT = (
-    "You are an AI assistant for the SentinelFlux test automation framework. "
-    "You help QA engineers review and update test scripts, test documentation, "
-    "Knowledge Base files, and agent configurations. "
-    "When you want to suggest a concrete file change, end your response with a "
-    "JSON block like:\n"
-    "```json\n"
-    '{\"action\": \"edit_file\", \"file\": \"<relative path>\", '
+    "You are the SentinelFlux assistant. Answer the user's question directly using tools.\n\n"
+    "RULES — follow all of them:\n"
+    "1. Call a tool first. Never answer from memory when a tool can get the real data.\n"
+    "2. Return the data. For 'what tests exist', list the files. For 'show me a file', show its contents. "
+    "Do not explain what the user could do — just give them the answer.\n"
+    "3. Never suggest fixes, renames, restructuring, or improvements unless the user's message "
+    "contains words like 'fix', 'edit', 'change', 'update', 'rename', 'create', or 'modify'.\n"
+    "4. If tool output contains errors or warnings, quote them verbatim and stop. Do not propose solutions.\n"
+    "5. ONLY append a JSON action block when the user has explicitly asked you to edit or create a file. "
+    "If the user asked a question or asked you to list something, do NOT include any JSON block.\n"
+    "   Format (only when requested):\n"
+    "   ```json\n"
+    '   {\"action\": \"edit_file\", \"file\": \"<relative path>\", '
     '\"description\": \"<what to change>\", \"content\": \"<new content>\"}\n'
-    "```\n"
-    "This will be queued for human review before being applied. Keep responses concise and actionable."
+    "   ```\n"
+    "Keep responses short. One sentence of context at most, then the data."
 )
 
 
@@ -59,12 +263,51 @@ class ConfigUpdate(BaseModel):
 
 async def _call_ollama(cfg: dict, messages: list[dict]) -> str:
     async with httpx.AsyncClient(timeout=120) as client:
-        r = await client.post(
-            f"{cfg['base_url'].rstrip('/')}/api/chat",
-            json={"model": cfg["model"], "messages": messages, "stream": False},
-        )
-        r.raise_for_status()
-        return r.json()["message"]["content"]
+        while True:
+            r = await client.post(
+                f"{cfg['base_url'].rstrip('/')}/api/chat",
+                json={"model": cfg["model"], "messages": messages, "tools": _TOOLS, "stream": False},
+            )
+            r.raise_for_status()
+            msg = r.json()["message"]
+            content = msg.get("content") or ""
+            structured_calls = msg.get("tool_calls") or []
+
+            # normalise: prefer structured tool_calls, fall back to embedded JSON
+            tool_calls = []
+            if structured_calls:
+                for tc in structured_calls:
+                    fn = tc.get("function", {})
+                    args = fn.get("arguments") or {}
+                    if isinstance(args, str):
+                        try:
+                            args = json.loads(args)
+                        except json.JSONDecodeError:
+                            args = {}
+                    tool_calls.append({"name": fn.get("name", ""), "args": args})
+            else:
+                parsed = _parse_embedded_tool_calls(content)
+                if parsed:
+                    tool_calls = parsed
+                    content = ""
+
+            if not tool_calls:
+                return content
+
+            # append assistant turn with tool calls
+            messages.append({
+                "role": "assistant",
+                "content": content,
+                "tool_calls": [
+                    {"function": {"name": tc["name"], "arguments": tc["args"]}}
+                    for tc in tool_calls
+                ],
+            })
+
+            # execute tools and feed results back
+            for tc in tool_calls:
+                result = _dispatch_tool(tc["name"], tc["args"])
+                messages.append({"role": "tool", "content": result})
 
 
 async def _call_openai_compat(cfg: dict, messages: list[dict]) -> str:
@@ -178,5 +421,6 @@ async def send_message(body: ChatRequest):
         raise HTTPException(status_code=502, detail=f"LLM unreachable: {e}")
 
     action = _extract_action(reply)
-    queued_id = _queue_action(action, body.context) if action else None
-    return {"reply": reply, "queued_action_id": queued_id}
+    _WRITE_ACTIONS = {"edit_file", "create_file", "write_file", "delete_file"}
+    queued_id = _queue_action(action, body.context) if action and action.get("action") in _WRITE_ACTIONS else None
+    return {"reply": reply or "", "queued_action_id": queued_id}

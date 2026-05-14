@@ -31,6 +31,7 @@ class TriggerBody(BaseModel):
     doc_model: str = "mistral:7b-instruct-v0.3-q4_K_M"
     script_model: str = "qwen2.5-coder:14b-instruct-q4_K_M"
     skip_script: bool = False
+    source: str = ""                  # optional — OpenAPI spec path/URL, service code path
 
 
 @router.post("/trigger")
@@ -86,6 +87,8 @@ def _run(job_id: str, body: TriggerBody):
     ]
     if body.skip_script:
         cmd.append("--skip-script")
+    if body.source:
+        cmd.extend(["--source", body.source])
 
     _alog.append(
         event_type="pipeline_run", agent="pipeline",
