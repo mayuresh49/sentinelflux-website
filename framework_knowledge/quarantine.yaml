@@ -1,9 +1,0 @@
-# SentinelFlux Quarantine Registry
-# Managed by QuarantineManager — do not edit manually during runs.
-# Use QuarantineManager.propose() + apply_pending() to change entries.
-#
-# quarantined tests are marked @pytest.mark.xfail(strict=False) at collection time.
-# pending_actions are proposals awaiting apply_pending() (human review gate).
-
-quarantined: []
-pending_actions: []

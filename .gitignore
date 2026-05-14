@@ -151,3 +151,7 @@ rp_reports/
 
 # Node modules (if any)
 node_modules/
+
+# SentinelFlux runtime state (dynamic, not version-controlled)
+framework_knowledge/pending_approvals.yaml
+framework_knowledge/quarantine.yaml

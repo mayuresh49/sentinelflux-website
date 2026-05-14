@@ -3,6 +3,12 @@ custom_fields:
   type: text
 - name: jira_ticket
   type: text
+generation_categories:
+  accessibility: false
+  edge: true
+  functional: true
+  negative: true
+  security: true
 labels:
 - color: emerald
   name: sanity
@@ -24,9 +30,6 @@ priorities:
 test_type_distribution:
   regression: 70
   sanity: 30
-generation_categories:
-  functional: true
-  negative: true
-  edge: true
-  security: true
-  accessibility: false
+users:
+- email: mayuresh49@gmail.com
+  name: Mayuresh Kulkarni
