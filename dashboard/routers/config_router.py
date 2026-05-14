@@ -4,17 +4,20 @@ from pathlib import Path
 from typing import List, Optional
 
 import yaml
-from fastapi import APIRouter, File, Form, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
+from dashboard.routers.auth import require_user, user_products
 
-router = APIRouter(tags=["config"])
+router = APIRouter(tags=["config"], dependencies=[Depends(require_user)])
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
 
 _FK_DIR = Path(__file__).resolve().parent.parent.parent / "framework_knowledge"
 _CONFIG_PATH = _FK_DIR / "config.yaml"
 _ASSIGNMENTS_PATH = _FK_DIR / "test_assignments.yaml"
 _EXAMPLES_DIR = _FK_DIR.parent / "examples"
+_KB_PRODUCTS_DIR = _FK_DIR.parent / "ai" / "knowledge_base"
+_SAFE_PRODUCT_RE = __import__("re").compile(r"^[a-zA-Z0-9_\-]+$")
 
 
 # ---------- data helpers ----------
@@ -35,20 +38,38 @@ def _load_config() -> dict:
         for k, v in _DEFAULT_GENERATION_CATEGORIES.items():
             cats.setdefault(k, v)
         cfg.setdefault("users", [])
-        # backfill new user fields on existing entries
         for u in cfg["users"]:
             u.setdefault("products", [])
             u.setdefault("admin", False)
             u.setdefault("password_hash", "")
+        _backfill_products(cfg)
         return cfg
-    return {
+    cfg = {
         "labels": [],
         "priorities": [],
         "custom_fields": [],
         "test_type_distribution": {"sanity": 30, "regression": 70},
         "generation_categories": dict(_DEFAULT_GENERATION_CATEGORIES),
         "users": [],
+        "products": [],
     }
+    _backfill_products(cfg)
+    return cfg
+
+
+def _backfill_products(cfg: dict) -> None:
+    cfg.setdefault("products", [])
+    if not _KB_PRODUCTS_DIR.exists():
+        return
+    known = {p["name"] for p in cfg["products"]}
+    skip = {"__pycache__", "increments"}
+    for d in sorted(_KB_PRODUCTS_DIR.iterdir()):
+        if d.is_dir() and d.name not in skip and d.name not in known:
+            cfg["products"].append({
+                "name": d.name,
+                "display_name": d.name.replace("_", " ").title(),
+                "active": True,
+            })
 
 
 def _save_config(cfg: dict) -> None:
@@ -188,27 +209,34 @@ def get_generation_type_instruction(cfg: dict | None = None) -> str:
 # ---------- page route ----------
 
 def _config_page_ctx(request: Request, cfg: dict, product: str = "") -> dict:
-    from dashboard.routers.kb import _list_products
     return {
         "request": request,
         "pending_count": 0,
-        "all_products": _list_products(),
+        "all_products": [p["name"] for p in cfg.get("products", []) if p.get("active", True)],
         "cfg": cfg,
         "filter_product": product,
     }
 
 
 @router.get("/config", response_class=HTMLResponse)
-async def config_page(request: Request, product: Optional[str] = None):
+async def config_page(request: Request, product: Optional[str] = None,
+                      current_user: dict = Depends(require_user)):
     cfg = _load_config()
     assignments = _load_assignments()
     tests = _all_tests()
-    from dashboard.routers.kb import _list_products
     from utils.approval_manager import ApprovalManager
     _am = ApprovalManager()
+    all_prods = [p["name"] for p in cfg.get("products", []) if p.get("active", True)]
+    visible_products = user_products(current_user, all_prods)
+    enriched_products = []
+    for _p in cfg.get("products", []):
+        _tc = _product_test_count(_p["name"])
+        enriched_products.append({**_p, "has_tests": _tc > 0, "test_count": _tc})
     return templates.TemplateResponse(request, "config.html", context={
         "pending_count": len(_am.pending()),
-        "all_products": _list_products(),
+        "all_products": visible_products,
+        "current_user": current_user,
+        "products": enriched_products,
         "cfg": cfg,
         "labels": cfg.get("labels", []),
         "priorities": cfg.get("priorities", []),
@@ -305,11 +333,10 @@ async def fields_delete(request: Request, name: str = Form(...)):
 # ---------- users ----------
 
 def _render_users(request: Request, cfg: dict) -> HTMLResponse:
-    from dashboard.routers.kb import _list_products
     return templates.TemplateResponse(request, "partials/config_users.html", context={
         "request": request,
         "users": cfg.get("users", []),
-        "all_products": _list_products(),
+        "all_products": [p["name"] for p in cfg.get("products", []) if p.get("active", True)],
     })
 
 
@@ -370,6 +397,155 @@ async def users_set_products(request: Request):
             break
     _save_config(cfg)
     return _render_users(request, cfg)
+
+
+# ---------- products ----------
+
+def _product_test_count(product: str) -> int:
+    import re as _re
+    tests_dir = _EXAMPLES_DIR / product / "tests"
+    if not tests_dir.exists():
+        return 0
+    count = 0
+    for py in tests_dir.rglob("test_*.py"):
+        try:
+            count += len(_re.findall(r"^def (test_\w+)", py.read_text(encoding="utf-8"), _re.MULTILINE))
+        except OSError:
+            pass
+    return count
+
+
+def _render_products(request: Request, cfg: dict) -> HTMLResponse:
+    enriched = []
+    for p in cfg.get("products", []):
+        tc = _product_test_count(p["name"])
+        enriched.append({**p, "has_tests": tc > 0, "test_count": tc})
+    return templates.TemplateResponse(request, "partials/config_products.html", context={
+        "request": request,
+        "products": enriched,
+    })
+
+
+@router.post("/ui/config/products/add", response_class=HTMLResponse)
+async def products_add(request: Request, name: str = Form(...), display_name: str = Form("")):
+    name = name.strip().lower().replace(" ", "_")
+    cfg = _load_config()
+    if name and _SAFE_PRODUCT_RE.match(name) and not any(p["name"] == name for p in cfg.get("products", [])):
+        cfg.setdefault("products", []).append({
+            "name": name,
+            "display_name": display_name.strip() or name.replace("_", " ").title(),
+            "active": True,
+        })
+        _save_config(cfg)
+        (_KB_PRODUCTS_DIR / name).mkdir(parents=True, exist_ok=True)
+        (_EXAMPLES_DIR / name / "tests").mkdir(parents=True, exist_ok=True)
+        (_EXAMPLES_DIR / name / "pages").mkdir(parents=True, exist_ok=True)
+    return _render_products(request, cfg)
+
+
+def _purge_product_data(name: str, cfg: dict) -> None:
+    """Remove all data associated with a product across every data store."""
+    import shutil, json, re as _re
+
+    # 1. Test assignments — remove entries for tests that belong to this product
+    if _ASSIGNMENTS_PATH.exists():
+        raw = yaml.safe_load(_ASSIGNMENTS_PATH.read_text(encoding="utf-8")) or {}
+        assignments = raw.get("assignments", {})
+        tests_dir = _EXAMPLES_DIR / name / "tests"
+        product_fns: set[str] = set()
+        if tests_dir.exists():
+            for py in tests_dir.rglob("test_*.py"):
+                try:
+                    product_fns.update(_re.findall(r"^def (test_\w+)", py.read_text(encoding="utf-8"), _re.MULTILINE))
+                except OSError:
+                    pass
+        pruned = {k: v for k, v in assignments.items() if k not in product_fns}
+        if pruned != assignments:
+            _ASSIGNMENTS_PATH.write_text(
+                "# Maps test function name -> label/priority/custom field assignments\n"
+                "# Managed via dashboard Config > Test Assignments\n"
+                + yaml.dump({"assignments": pruned}, default_flow_style=False, allow_unicode=True),
+                encoding="utf-8",
+            )
+
+    # 2. Pipeline jobs — drop jobs for this product
+    jobs_path = _FK_DIR / "pipeline_jobs.json"
+    if jobs_path.exists():
+        data = json.loads(jobs_path.read_text(encoding="utf-8"))
+        data["jobs"] = [j for j in data.get("jobs", []) if j.get("product") != name]
+        jobs_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    # 3. Activity log — drop entries for this product
+    alog_path = _FK_DIR / "activity_log.json"
+    if alog_path.exists():
+        data = json.loads(alog_path.read_text(encoding="utf-8"))
+        data["entries"] = [e for e in data.get("entries", []) if e.get("product") != name]
+        alog_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    # 4. KB increments log — drop entries whose paths are under examples/<name>/
+    kb_log_path = _FK_DIR / "kb_increments_log.yaml"
+    if kb_log_path.exists():
+        raw = yaml.safe_load(kb_log_path.read_text(encoding="utf-8")) or {}
+        prefix = f"examples/{name}/"
+        raw["processed"] = [
+            e for e in raw.get("processed", [])
+            if not (str(e.get("generated_doc", "")).startswith(prefix)
+                    or str(e.get("generated_script", "")).startswith(prefix))
+        ]
+        kb_log_path.write_text(yaml.dump(raw, default_flow_style=False, allow_unicode=True), encoding="utf-8")
+
+    # 5. Pending approvals — drop pending_actions and resolved entries for this product
+    approvals_path = _FK_DIR / "pending_approvals.yaml"
+    if approvals_path.exists():
+        raw = yaml.safe_load(approvals_path.read_text(encoding="utf-8")) or {}
+        for key in ("pending_actions", "resolved", "pending"):
+            raw[key] = [e for e in raw.get(key, []) if e.get("product") != name]
+        approvals_path.write_text(yaml.dump(raw, default_flow_style=False, allow_unicode=True), encoding="utf-8")
+
+    # 6. Run history — drop test nodeids that live under examples/<name>/
+    run_history_path = _FK_DIR / "run_history.yaml"
+    if run_history_path.exists():
+        raw = yaml.safe_load(run_history_path.read_text(encoding="utf-8")) or {}
+        prefix = f"examples/{name}/"
+        raw["tests"] = {k: v for k, v in raw.get("tests", {}).items() if not k.startswith(prefix)}
+        run_history_path.write_text(
+            "# SentinelFlux Run History\n"
+            "# Managed by QuarantineManager.record_run() — do not edit manually.\n"
+            + yaml.dump({"tests": raw["tests"]}, default_flow_style=False, allow_unicode=True),
+            encoding="utf-8",
+        )
+
+    # 7. Unassign product from all users
+    for u in cfg.get("users", []):
+        u["products"] = [p for p in u.get("products", []) if p != name]
+
+    # 8. Remove from products list in config
+    cfg["products"] = [p for p in cfg.get("products", []) if p["name"] != name]
+    _save_config(cfg)
+
+    # 9. Delete filesystem directories
+    for d in [_KB_PRODUCTS_DIR / name, _EXAMPLES_DIR / name]:
+        if d.exists():
+            shutil.rmtree(d)
+
+
+@router.post("/ui/config/products/delete", response_class=HTMLResponse)
+async def products_delete(request: Request, name: str = Form(...)):
+    name = name.strip()
+    cfg = _load_config()
+    _purge_product_data(name, cfg)
+    return _render_products(request, cfg)
+
+
+@router.post("/ui/config/products/set-active", response_class=HTMLResponse)
+async def products_set_active(request: Request, name: str = Form(...), active: str = Form("true")):
+    cfg = _load_config()
+    for p in cfg.get("products", []):
+        if p["name"] == name:
+            p["active"] = active.lower() not in {"false", "0", "no"}
+            break
+    _save_config(cfg)
+    return _render_products(request, cfg)
 
 
 # ---------- test type distribution ----------
