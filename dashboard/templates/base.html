@@ -74,9 +74,33 @@
       {% endfor %}
     </nav>
 
-    <div class="px-4 py-3 border-t border-slate-700/60 flex items-center justify-between">
-      <span class="text-slate-500 text-xs">v0.1.0</span>
-      <a href="/api/docs" target="_blank" class="text-slate-500 hover:text-slate-300 text-xs transition-colors">API</a>
+    <div class="px-4 py-3 border-t border-slate-700/60 space-y-2">
+      {% if current_user %}
+      <div class="flex items-center gap-2 min-w-0">
+        <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center shrink-0">
+          <span class="text-white text-xs font-bold">{{ current_user.name[0].upper() }}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-slate-200 text-xs font-medium truncate">{{ current_user.name }}</p>
+          <p class="text-slate-500 text-xs truncate">{{ current_user.email }}</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-slate-500 text-xs">v0.1.0</span>
+        <a href="/logout" class="text-slate-400 hover:text-red-400 text-xs transition-colors flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+          Sign out
+        </a>
+      </div>
+      {% else %}
+      <div class="flex items-center justify-between">
+        <span class="text-slate-500 text-xs">v0.1.0</span>
+        <a href="/api/docs" target="_blank" class="text-slate-500 hover:text-slate-300 text-xs transition-colors">API</a>
+      </div>
+      {% endif %}
     </div>
   </aside>
 

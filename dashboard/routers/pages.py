@@ -60,13 +60,18 @@ def _queued_gaps() -> list[dict]:
 
 
 @router.get("/", response_class=HTMLResponse)
-async def home(request: Request, product: str | None = None):
+async def home(request: Request, product: str | None = None,
+               current_user: dict = Depends(_require_auth)):
     all_entries = _alog.all()
+    visible = user_products(current_user, _list_products())
+    if product and product not in visible:
+        product = None
     scoped = [e for e in all_entries if e.get("product") == product] if product else all_entries
     pending = _am.pending()
     pending_ids = {p["id"] for p in pending}
     recent = [e for e in reversed(scoped) if e.get("agent") != "human"][:10]
     return templates.TemplateResponse(request, "index.html", context=_ctx(
+        request, current_user,
         total_activities=len(scoped),
         pending_approvals=len(pending),
         requires_human_count=len(pending),
@@ -85,11 +90,15 @@ async def activities(
     agent: str | None = None,
     domain: str | None = None,
     requires_human: str | None = None,
+    current_user: dict = Depends(_require_auth),
 ):
     all_entries = _alog.all()
+    visible = user_products(current_user, _list_products())
     agents = sorted(set(e.get("agent", "") for e in all_entries if e.get("agent")))
     domains = sorted(set(e.get("domain", "") for e in all_entries if e.get("domain")))
-    products = sorted(set(e.get("product") or "" for e in all_entries if e.get("product")))
+    products = [p for p in sorted(set(e.get("product") or "" for e in all_entries if e.get("product"))) if p in visible]
+    if product and product not in visible:
+        product = None
     rh: bool | None = None
     if requires_human == "true":
         rh = True
@@ -102,6 +111,7 @@ async def activities(
         requires_human=rh,
     )
     return templates.TemplateResponse(request, "activities.html", context=_ctx(
+        request, current_user,
         agents=agents,
         domains=domains,
         products=products,
@@ -110,50 +120,64 @@ async def activities(
 
 
 @router.get("/approvals", response_class=HTMLResponse)
-async def approvals(request: Request, product: str | None = None):
-    pending = _am.pending()
-    resolved = list(reversed(_am.resolved()))[:50]
-    if product:
+async def approvals(request: Request, product: str | None = None,
+                    current_user: dict = Depends(_require_auth)):
+    visible = user_products(current_user, _list_products())
+    pending = [p for p in _am.pending() if not p.get("product") or p.get("product") in visible]
+    resolved = [r for r in list(reversed(_am.resolved()))[:50] if not r.get("product") or r.get("product") in visible]
+    if product and product in visible:
         pending = [p for p in pending if p.get("product") == product]
         resolved = [r for r in resolved if r.get("product") == product]
     return templates.TemplateResponse(request, "approvals.html", context=_ctx(
+        request, current_user,
         pending=pending,
         resolved=resolved,
     ))
 
 
 @router.get("/docs", response_class=HTMLResponse)
-async def docs_page(request: Request, product: str | None = None):
+async def docs_page(request: Request, product: str | None = None,
+                    current_user: dict = Depends(_require_auth)):
     from dashboard.routers.docs import _find_docs
+    visible = user_products(current_user, _list_products())
+    if product and product not in visible:
+        product = None
     all_docs = _find_docs()
-    products = sorted(set(d["product"] for d in all_docs))
+    products = [p for p in sorted(set(d["product"] for d in all_docs)) if p in visible]
     domains = sorted(set(d["domain"] for d in all_docs))
     docs = _find_docs(product=product or None)
+    docs = [d for d in docs if d["product"] in visible]
     return templates.TemplateResponse(request, "docs.html", context=_ctx(
-        docs=docs, products=products, domains=domains,
+        request, current_user, docs=docs, products=products, domains=domains,
     ))
 
 
 @router.get("/scripts", response_class=HTMLResponse)
-async def scripts_page(request: Request, product: str | None = None):
+async def scripts_page(request: Request, product: str | None = None,
+                       current_user: dict = Depends(_require_auth)):
     from dashboard.routers.scripts import _find_scripts
+    visible = user_products(current_user, _list_products())
+    if product and product not in visible:
+        product = None
     all_scripts = _find_scripts()
-    products = sorted(set(s["product"] for s in all_scripts))
+    products = [p for p in sorted(set(s["product"] for s in all_scripts)) if p in visible]
     domains = sorted(set(s["domain"] for s in all_scripts))
-    scripts = _find_scripts(product=product or None)
+    scripts = [s for s in _find_scripts(product=product or None) if s["product"] in visible]
     return templates.TemplateResponse(request, "scripts.html", context=_ctx(
-        scripts=scripts, products=products, domains=domains,
+        request, current_user, scripts=scripts, products=products, domains=domains,
     ))
 
 
 @router.get("/assignments", response_class=HTMLResponse)
-async def assignments_page(request: Request):
+async def assignments_page(request: Request, current_user: dict = Depends(_require_auth)):
     from dashboard.routers.config_router import _load_config, _load_assignments, _all_tests
     cfg = _load_config()
+    visible = user_products(current_user, _list_products())
     assignments = _load_assignments()
-    tests = _all_tests()
+    tests = [t for t in _all_tests() if t["product"] in visible]
     products = sorted(set(t["product"] for t in tests))
     return templates.TemplateResponse(request, "assignments.html", context=_ctx(
+        request, current_user,
         cfg=cfg,
         labels=cfg.get("labels", []),
         priorities=cfg.get("priorities", []),
@@ -172,7 +196,7 @@ async def assignments_page(request: Request):
 
 
 @router.get("/agents", response_class=HTMLResponse)
-async def agents_page(request: Request):
+async def agents_page(request: Request, current_user: dict = Depends(_require_auth)):
     import yaml
     from dashboard.routers.agents import _AGENT_REGISTRY
     from dashboard.agent_meta import AGENT_META
@@ -190,15 +214,22 @@ async def agents_page(request: Request):
         {**a, "last_run": status_map.get(a["name"]), "meta": AGENT_META.get(a["name"], {}), "config": agent_config.get(a["name"], {})}
         for a in _AGENT_REGISTRY
     ]
-    return templates.TemplateResponse(request, "agents.html", context=_ctx(agents=agents_data))
+    return templates.TemplateResponse(request, "agents.html", context=_ctx(
+        request, current_user, agents=agents_data,
+    ))
 
 
 @router.get("/quality", response_class=HTMLResponse)
-async def quality_page(request: Request, product: str | None = None):
+async def quality_page(request: Request, product: str | None = None,
+                       current_user: dict = Depends(_require_auth)):
     from dashboard.routers.quality import compute_metrics, _all_test_functions
     from dashboard.routers.partials import _quarantine_groups
+    visible = user_products(current_user, _list_products())
+    if product and product not in visible:
+        product = None
     metrics = compute_metrics(product)
     return templates.TemplateResponse(request, "quality.html", context=_ctx(
+        request, current_user,
         metrics=metrics,
         filter_product=product or "",
         quarantine_groups=_quarantine_groups(product),
@@ -207,12 +238,16 @@ async def quality_page(request: Request, product: str | None = None):
 
 
 @router.get("/kb", response_class=HTMLResponse)
-async def kb_page(request: Request, product: str | None = None):
+async def kb_page(request: Request, product: str | None = None,
+                  current_user: dict = Depends(_require_auth)):
     from dashboard.routers.kb import _list_products, _kb_files, _load_increments_log, _INCREMENTS_DIR, _TEXT_SUFFIXES
     from dashboard.routers.pipeline import _load_jobs
-    products = _list_products()
-    kb_files = {p: _kb_files(p) for p in products}
-    selected_product = product if product and product in products else (products[0] if products else "")
+    all_prods = _list_products()
+    visible = user_products(current_user, all_prods)
+    if product and product not in visible:
+        product = None
+    kb_files = {p: _kb_files(p) for p in visible}
+    selected_product = product if product and product in visible else (visible[0] if visible else "")
     log = _load_increments_log()
     increment_files: list[str] = []
     if _INCREMENTS_DIR.exists():
@@ -223,7 +258,8 @@ async def kb_page(request: Request, product: str | None = None):
     increments = [{"filename": fn, "processed": fn in log, "log": log.get(fn)} for fn in increment_files]
     recent_jobs = list(reversed(_load_jobs()))[:20]
     return templates.TemplateResponse(request, "kb.html", context=_ctx(
-        products=products,
+        request, current_user,
+        products=visible,
         kb_files=kb_files,
         increments=increments,
         recent_jobs=recent_jobs,

@@ -35,6 +35,11 @@ def _load_config() -> dict:
         for k, v in _DEFAULT_GENERATION_CATEGORIES.items():
             cats.setdefault(k, v)
         cfg.setdefault("users", [])
+        # backfill new user fields on existing entries
+        for u in cfg["users"]:
+            u.setdefault("products", [])
+            u.setdefault("admin", False)
+            u.setdefault("password_hash", "")
         return cfg
     return {
         "labels": [],
@@ -300,9 +305,11 @@ async def fields_delete(request: Request, name: str = Form(...)):
 # ---------- users ----------
 
 def _render_users(request: Request, cfg: dict) -> HTMLResponse:
+    from dashboard.routers.kb import _list_products
     return templates.TemplateResponse(request, "partials/config_users.html", context={
         "request": request,
         "users": cfg.get("users", []),
+        "all_products": _list_products(),
     })
 
 
@@ -312,7 +319,10 @@ async def users_add(request: Request, name: str = Form(...), email: str = Form("
     name = name.strip()
     email = email.strip().lower()
     if name and not any(u["name"] == name for u in cfg.get("users", [])):
-        cfg.setdefault("users", []).append({"name": name, "email": email})
+        cfg.setdefault("users", []).append({
+            "name": name, "email": email,
+            "products": [], "admin": False, "password_hash": "",
+        })
         _save_config(cfg)
     return _render_users(request, cfg)
 
@@ -321,6 +331,44 @@ async def users_add(request: Request, name: str = Form(...), email: str = Form("
 async def users_delete(request: Request, name: str = Form(...)):
     cfg = _load_config()
     cfg["users"] = [u for u in cfg.get("users", []) if u["name"] != name]
+    _save_config(cfg)
+    return _render_users(request, cfg)
+
+
+@router.post("/ui/config/users/set-password", response_class=HTMLResponse)
+async def users_set_password(request: Request, name: str = Form(...), password: str = Form(...)):
+    from passlib.context import CryptContext
+    _pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    cfg = _load_config()
+    for u in cfg.get("users", []):
+        if u["name"] == name:
+            u["password_hash"] = _pwd_ctx.hash(password) if password.strip() else ""
+            break
+    _save_config(cfg)
+    return _render_users(request, cfg)
+
+
+@router.post("/ui/config/users/set-admin", response_class=HTMLResponse)
+async def users_set_admin(request: Request, name: str = Form(...), admin: str = Form(default="")):
+    cfg = _load_config()
+    for u in cfg.get("users", []):
+        if u["name"] == name:
+            u["admin"] = admin == "on"
+            break
+    _save_config(cfg)
+    return _render_users(request, cfg)
+
+
+@router.post("/ui/config/users/set-products", response_class=HTMLResponse)
+async def users_set_products(request: Request):
+    form = await request.form()
+    name = form.get("name", "")
+    products = form.getlist("products")
+    cfg = _load_config()
+    for u in cfg.get("users", []):
+        if u["name"] == name:
+            u["products"] = products
+            break
     _save_config(cfg)
     return _render_users(request, cfg)
 

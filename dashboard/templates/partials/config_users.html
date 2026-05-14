@@ -1,21 +1,104 @@
 {% if users %}
 <div class="divide-y divide-slate-50">
   {% for u in users %}
-  <div class="px-5 py-3 flex items-center gap-3">
-    <div class="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
-      <span class="text-xs font-semibold text-indigo-600">{{ u.name[0].upper() }}</span>
+  <div x-data="{ open: false }" class="px-5 py-3">
+
+    <!-- User row -->
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+        <span class="text-xs font-semibold text-indigo-600">{{ u.name[0].upper() }}</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2">
+          <p class="text-sm font-medium text-slate-700">{{ u.name }}</p>
+          {% if u.admin %}
+          <span class="text-xs bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-medium">admin</span>
+          {% endif %}
+          {% if u.password_hash %}
+          <span class="text-xs bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded">pw set</span>
+          {% else %}
+          <span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">no password</span>
+          {% endif %}
+        </div>
+        <p class="text-xs text-slate-400">{{ u.email or '—' }}</p>
+        {% if not u.admin %}
+        <p class="text-xs text-slate-400 mt-0.5">
+          Products: {% if u.products %}{{ u.products | join(', ') }}{% else %}<span class="italic">none assigned</span>{% endif %}
+        </p>
+        {% else %}
+        <p class="text-xs text-slate-400 mt-0.5 italic">All products (admin)</p>
+        {% endif %}
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button @click="open = !open"
+                class="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-2 py-0.5 rounded hover:bg-indigo-50 transition-colors">
+          <span x-text="open ? 'Close' : 'Edit'"></span>
+        </button>
+        <form hx-post="/ui/config/users/delete" hx-target="#users-list" hx-swap="innerHTML"
+              hx-confirm="Remove user '{{ u.name }}'?">
+          <input type="hidden" name="name" value="{{ u.name }}">
+          <button type="submit" class="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-0.5 rounded hover:bg-red-50 transition-colors">
+            Remove
+          </button>
+        </form>
+      </div>
     </div>
-    <div class="flex-1 min-w-0">
-      <p class="text-sm font-medium text-slate-700">{{ u.name }}</p>
-      <p class="text-xs text-slate-400">{{ u.email or '—' }}</p>
+
+    <!-- Expanded edit panel -->
+    <div x-show="open" x-cloak class="mt-3 pl-10 space-y-4">
+
+      <!-- Admin toggle -->
+      <form hx-post="/ui/config/users/set-admin" hx-target="#users-list" hx-swap="innerHTML"
+            class="flex items-center gap-3">
+        <input type="hidden" name="name" value="{{ u.name }}">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="admin" value="on"
+                 {{ 'checked' if u.admin else '' }}
+                 onchange="this.form.requestSubmit()"
+                 class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
+          <span class="text-sm text-slate-700">Admin — access to all products</span>
+        </label>
+      </form>
+
+      <!-- Product access (hidden when admin) -->
+      {% if not u.admin %}
+      <form hx-post="/ui/config/users/set-products" hx-target="#users-list" hx-swap="innerHTML"
+            class="space-y-2">
+        <input type="hidden" name="name" value="{{ u.name }}">
+        <p class="text-xs font-medium text-slate-600">Product access</p>
+        <div class="flex flex-wrap gap-3">
+          {% for product in all_products %}
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input type="checkbox" name="products" value="{{ product }}"
+                   {{ 'checked' if product in (u.products or []) else '' }}
+                   class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
+            <span class="text-sm text-slate-700">{{ product }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        <button type="submit"
+                class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-3 py-1 rounded transition-colors">
+          Save products
+        </button>
+      </form>
+      {% endif %}
+
+      <!-- Set password -->
+      <form hx-post="/ui/config/users/set-password" hx-target="#users-list" hx-swap="innerHTML"
+            class="space-y-2">
+        <input type="hidden" name="name" value="{{ u.name }}">
+        <p class="text-xs font-medium text-slate-600">{{ 'Change password' if u.password_hash else 'Set password' }}</p>
+        <div class="flex items-center gap-2">
+          <input type="password" name="password" placeholder="New password"
+                 class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-48">
+          <button type="submit"
+                  class="text-xs bg-slate-700 hover:bg-slate-800 text-white font-medium px-3 py-1.5 rounded transition-colors">
+            Set
+          </button>
+        </div>
+      </form>
+
     </div>
-    <form hx-post="/ui/config/users/delete" hx-target="#users-list" hx-swap="innerHTML"
-          hx-confirm="Remove user '{{ u.name }}'?">
-      <input type="hidden" name="name" value="{{ u.name }}">
-      <button type="submit" class="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-0.5 rounded hover:bg-red-50 transition-colors">
-        Remove
-      </button>
-    </form>
   </div>
   {% endfor %}
 </div>

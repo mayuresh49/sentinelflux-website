@@ -24,6 +24,7 @@ appium-python-client>=2.11.0
 
 # Dashboard (API + UI)
 passlib[bcrypt]>=1.7.4
+itsdangerous>=2.1.0
 fastapi>=0.111.0
 uvicorn[standard]>=0.29.0
 jinja2>=3.1.0
