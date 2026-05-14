@@ -110,6 +110,43 @@ def create_increment(body: IncrementBody):
     return {"status": "created", "filename": body.filename}
 
 
+_SAFE_NAME_RE = __import__("re").compile(r"^[a-zA-Z0-9_\-]+$")
+
+
+@router.post("/upload-file")
+async def upload_kb_file(
+    file: UploadFile = File(...),
+    product: str = Form(...),
+    filename: str = Form(""),
+):
+    """Upload a YAML/MD/TXT file into ai/knowledge_base/<product>/."""
+    product = product.strip()
+    if not product or not _SAFE_NAME_RE.match(product):
+        raise HTTPException(400, "Invalid product name (alphanumeric, _ and - only)")
+
+    suffix = Path(file.filename or "").suffix.lower()
+    if suffix not in _TEXT_SUFFIXES:
+        raise HTTPException(400, f"Unsupported file type '{suffix}'. Use {sorted(_TEXT_SUFFIXES)}")
+
+    raw = await file.read()
+    if len(raw) > 5 * 1024 * 1024:
+        raise HTTPException(413, "File too large (max 5 MB)")
+
+    out_filename = filename.strip() or Path(file.filename).name
+    if Path(out_filename).suffix.lower() not in _TEXT_SUFFIXES:
+        out_filename += suffix
+
+    product_dir = (_KB_DIR / product).resolve()
+    if not str(product_dir).startswith(str(_KB_DIR)):
+        raise HTTPException(400, "Invalid product path")
+
+    product_dir.mkdir(parents=True, exist_ok=True)
+    out_path = product_dir / out_filename
+    out_path.write_bytes(raw)
+
+    return {"status": "uploaded", "product": product, "filename": out_filename}
+
+
 @router.post("/upload-docx")
 async def upload_docx(
     file: UploadFile = File(...),

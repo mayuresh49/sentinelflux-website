@@ -1,11 +1,15 @@
-# Tracks which KB increment files have been processed through the AI pipeline
-# Format: increment filename → what was generated
-
-processed: []
-
-# Example entry once pipeline is running:
-# - increment: feature_001_booking_v2.yaml
-#   processed_date: 2026-05-10
-#   generated_doc: docs/test_cases/api/booking_v2.md
-#   generated_script: tests/api/test_booking_v2.py
-#   status: reviewed_and_committed
+processed:
+- increment: Timesheets.yaml
+  processed_date: '2026-05-14'
+  feature: Timesheets
+  domain: api
+  generated_doc: examples/orangehrm/docs/test_cases/api/Timesheets.md
+  generated_script: examples/orangehrm/tests/api/test_Timesheets.py
+  status: generated_pending_review
+- increment: Timesheets.yaml
+  processed_date: '2026-05-14'
+  feature: Timesheets
+  domain: web
+  generated_doc: examples/orangehrm/docs/test_cases/web/Timesheets.md
+  generated_script: examples/orangehrm/tests/web/test_Timesheets.py
+  status: generated_pending_review

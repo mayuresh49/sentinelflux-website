@@ -42,7 +42,13 @@ scenarios:
        incrementFilename: '',
        incrementContent: `{{ increment_template | replace('`', '\\`') }}`,
        showKbUpload: false,
-     }">
+       kbUploading: false,
+       kbUploadResult: null,
+       kbUploadError: null,
+     }"
+     @kb-upload-loading.window="kbUploading = true; kbUploadError = null; kbUploadResult = null"
+     @kb-upload-result.window="kbUploadResult = $event.detail; kbUploading = false"
+     @kb-upload-error.window="kbUploadError = $event.detail; kbUploading = false">
 
   <!-- Header -->
   <div class="flex items-center justify-between">
@@ -71,9 +77,14 @@ scenarios:
 
     <!-- Left: file list -->
     <div class="w-64 shrink-0 flex flex-col bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-      <!-- Current product label -->
-      <div class="px-3 py-2 border-b border-slate-100">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide" x-text="selectedProduct || 'No product'"></span>
+      <!-- Current product label + upload button -->
+      <div class="px-3 py-2 border-b border-slate-100 flex items-center justify-between gap-2">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide truncate" x-text="selectedProduct || 'No product'"></span>
+        <button @click="showKbUpload = !showKbUpload; kbUploadResult = null; kbUploadError = null"
+                :class="showKbUpload ? 'text-indigo-700 bg-indigo-50' : 'text-slate-400 hover:text-indigo-600'"
+                class="shrink-0 p-1 rounded transition-colors" title="Upload KB file">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        </button>
       </div>
       <!-- File list -->
       {% for p in products %}
@@ -92,19 +103,71 @@ scenarios:
       {% endfor %}
     </div>
 
-    <!-- Right: YAML editor -->
+    <!-- Right panel: upload form OR YAML editor -->
     <div class="flex-1 min-w-0 bg-white rounded-xl border border-slate-100 shadow-sm flex flex-col overflow-hidden">
-      <div class="px-4 py-2.5 border-b border-slate-100 flex items-center gap-3 shrink-0 bg-slate-50/50">
-        <span class="text-xs font-medium text-slate-500">YAML Editor</span>
-        <span id="kb-loading" class="htmx-indicator flex items-center gap-1 text-xs text-indigo-600">
-          <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>Loading…
-        </span>
-      </div>
-      <div id="kb-editor-panel" class="flex-1 overflow-auto">
-        <div class="h-full flex items-center justify-center">
-          <p class="text-slate-400 text-sm">Select a file from the list to view and edit.</p>
+
+      <!-- Upload form (active when showKbUpload) -->
+      <div x-show="showKbUpload" x-cloak class="flex flex-col h-full">
+        <div class="px-4 py-2.5 border-b border-slate-100 shrink-0 bg-slate-50/50 flex items-center justify-between">
+          <span class="text-xs font-medium text-slate-700 font-semibold">Upload KB File</span>
+          <button @click="showKbUpload = false; kbUploadResult = null; kbUploadError = null"
+                  class="text-slate-400 hover:text-slate-600 text-xs">✕ Close</button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-5 space-y-4">
+          <p class="text-xs text-slate-500">Upload a <code class="bg-slate-100 px-1 rounded">.yaml</code>, <code class="bg-slate-100 px-1 rounded">.yml</code>, <code class="bg-slate-100 px-1 rounded">.md</code>, or <code class="bg-slate-100 px-1 rounded">.txt</code> file into the KB for a product. Create a new product by typing a new name.</p>
+          <div class="space-y-3">
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">File</label>
+              <input id="kb-file-input" type="file" accept=".yaml,.yml,.md,.txt"
+                     class="text-sm border border-slate-200 rounded-lg px-3 py-2 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Product <span class="text-slate-400 font-normal">(existing or new)</span></label>
+              <input id="kb-upload-product" type="text" :value="selectedProduct"
+                     placeholder="e.g. orangehrm"
+                     class="text-sm font-mono border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Filename <span class="text-slate-400 font-normal">(optional — defaults to uploaded name)</span></label>
+              <input id="kb-upload-filename" type="text" placeholder="e.g. product_knowledge.yaml"
+                     class="text-sm font-mono border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button @click="uploadKbFile()"
+                    :disabled="kbUploading"
+                    class="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors">
+              <span x-show="!kbUploading">Upload</span>
+              <span x-show="kbUploading">Uploading…</span>
+            </button>
+            <button @click="showKbUpload = false; kbUploadResult = null; kbUploadError = null"
+                    class="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
+              Cancel
+            </button>
+          </div>
+          <div x-show="kbUploadError" class="text-xs text-red-600 bg-red-50 rounded px-3 py-2" x-text="kbUploadError"></div>
+          <div x-show="kbUploadResult" class="text-xs text-emerald-700 bg-emerald-50 rounded px-3 py-2">
+            Saved <span class="font-mono font-semibold" x-text="kbUploadResult?.product + '/' + kbUploadResult?.filename"></span> — refresh to see it in the file list.
+            <button @click="window.location.reload()" class="ml-2 underline text-emerald-800">Reload</button>
+          </div>
         </div>
       </div>
+
+      <!-- YAML editor (default) -->
+      <div x-show="!showKbUpload" class="flex flex-col h-full">
+        <div class="px-4 py-2.5 border-b border-slate-100 flex items-center gap-3 shrink-0 bg-slate-50/50">
+          <span class="text-xs font-medium text-slate-500">YAML Editor</span>
+          <span id="kb-loading" class="htmx-indicator flex items-center gap-1 text-xs text-indigo-600">
+            <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>Loading…
+          </span>
+        </div>
+        <div id="kb-editor-panel" class="flex-1 overflow-auto">
+          <div class="h-full flex items-center justify-center">
+            <p class="text-slate-400 text-sm">Select a file from the list to view and edit.</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -469,6 +532,29 @@ async function uploadDocx() {
     window.dispatchEvent(new CustomEvent('docx-result', { detail: data }));
   } catch (err) {
     window.dispatchEvent(new CustomEvent('docx-error', { detail: String(err) }));
+  }
+}
+
+async function uploadKbFile() {
+  const fileInput = document.getElementById('kb-file-input');
+  if (!fileInput || !fileInput.files.length) { alert('Select a file first'); return; }
+  const product = (document.getElementById('kb-upload-product')?.value || '').trim();
+  if (!product) { alert('Enter a product name'); return; }
+
+  window.dispatchEvent(new CustomEvent('kb-upload-loading'));
+
+  const form = new FormData();
+  form.append('file', fileInput.files[0]);
+  form.append('product', product);
+  form.append('filename', document.getElementById('kb-upload-filename')?.value || '');
+
+  try {
+    const res = await fetch('/api/kb/upload-file', { method: 'POST', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || JSON.stringify(data));
+    window.dispatchEvent(new CustomEvent('kb-upload-result', { detail: data }));
+  } catch (err) {
+    window.dispatchEvent(new CustomEvent('kb-upload-error', { detail: String(err) }));
   }
 }
 
