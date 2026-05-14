@@ -62,6 +62,7 @@ def _queued_gaps() -> list[dict]:
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request, product: str | None = None,
                current_user: dict = Depends(_require_auth)):
+    from dashboard.routers.agents import _AGENT_REGISTRY
     all_entries = _alog.all()
     visible = user_products(current_user, _list_products())
     if product and product not in visible:
@@ -70,6 +71,20 @@ async def home(request: Request, product: str | None = None,
     pending = _am.pending()
     pending_ids = {p["id"] for p in pending}
     recent = [e for e in reversed(scoped) if e.get("agent") != "human"][:10]
+    status_map: dict = {}
+    for e in reversed(all_entries):
+        name = e.get("agent", "")
+        if name and name not in status_map:
+            status_map[name] = e
+    agent_flow = [
+        {
+            "name": a["name"],
+            "requires_ai": a["requires_ai"],
+            "description": a["description"],
+            "status": status_map[a["name"]]["status"] if a["name"] in status_map else "never",
+        }
+        for a in _AGENT_REGISTRY
+    ]
     return templates.TemplateResponse(request, "index.html", context=_ctx(
         request, current_user,
         total_activities=len(scoped),
@@ -80,6 +95,7 @@ async def home(request: Request, product: str | None = None,
         pending_ids=pending_ids,
         pending_items=pending[:3],
         queued_gaps=_queued_gaps(),
+        agent_flow=agent_flow,
     ))
 
 
@@ -173,9 +189,13 @@ async def assignments_page(request: Request, current_user: dict = Depends(_requi
     from dashboard.routers.config_router import _load_config, _load_assignments, _all_tests
     cfg = _load_config()
     visible = user_products(current_user, _list_products())
+    filter_product = request.query_params.get("product", "")
+    if filter_product and filter_product not in visible:
+        filter_product = ""
     assignments = _load_assignments()
-    tests = [t for t in _all_tests() if t["product"] in visible]
-    products = sorted(set(t["product"] for t in tests))
+    all_tests = [t for t in _all_tests() if t["product"] in visible]
+    tests = [t for t in all_tests if t["product"] == filter_product] if filter_product else all_tests
+    products = sorted(set(t["product"] for t in all_tests))
     return templates.TemplateResponse(request, "assignments.html", context=_ctx(
         request, current_user,
         cfg=cfg,
@@ -187,7 +207,7 @@ async def assignments_page(request: Request, current_user: dict = Depends(_requi
         assignments=assignments,
         products=products,
         search="",
-        filter_product="",
+        filter_product=filter_product,
         filter_labels=[],
         filter_priority="",
         filter_owner="",
@@ -234,6 +254,39 @@ async def quality_page(request: Request, product: str | None = None,
         filter_product=product or "",
         quarantine_groups=_quarantine_groups(product),
         all_tests=_all_test_functions(),
+    ))
+
+
+@router.get("/runs", response_class=HTMLResponse)
+async def runs_page(
+    request: Request,
+    product: str | None = None,
+    domain: str | None = None,
+    status: str | None = None,
+    current_user: dict = Depends(_require_auth),
+):
+    from utils.run_manager import RunManager
+    rm = RunManager()
+    visible = user_products(current_user, _list_products())
+    if product and product not in visible:
+        product = None
+    runs = list(reversed(rm.all_runs()))
+    if product:
+        runs = [r for r in runs if r.get("product") == product]
+    if domain:
+        runs = [r for r in runs if r.get("domain") == domain]
+    if status:
+        runs = [r for r in runs if r.get("status") == status]
+    schedules = rm.all_schedules()
+    any_running = any(r.get("status") in ("running", "queued") for r in rm.all_runs())
+    return templates.TemplateResponse(request, "runs.html", context=_ctx(
+        request, current_user,
+        runs=runs[:100],
+        schedules=schedules,
+        any_running=any_running,
+        filter_product=product or "",
+        filter_domain=domain or "",
+        filter_status=status or "",
     ))
 
 

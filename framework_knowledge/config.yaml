@@ -27,6 +27,16 @@ priorities:
   name: P2
 - color: slate
   name: P3
+products:
+- active: true
+  display_name: Orangehrm
+  name: orangehrm
+- active: true
+  display_name: Restfulbooker
+  name: restfulbooker
+- active: true
+  display_name: workpay
+  name: workpay
 test_type_distribution:
   regression: 70
   sanity: 30
@@ -36,3 +46,9 @@ users:
   name: Mayuresh Kulkarni
   password_hash: $2b$12$zv9wirVO6oxerfYCzfPhGe30TeZMPt2RkrpMDx9U990beq.5y/TNq
   products: []
+- admin: false
+  email: ankitakulkarni250194@gmail.com
+  name: Ankita
+  password_hash: $2b$12$MrJ0JaE7MegPbwwsaiWpvuKuI92Z.WqcmUp.KQNUceBhOSGSOWn9W
+  products:
+  - orangehrm

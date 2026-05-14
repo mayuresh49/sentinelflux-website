@@ -1,0 +1,58 @@
+{% if products %}
+<div class="divide-y divide-slate-50">
+  {% for p in products %}
+  <div class="px-5 py-3 flex items-center gap-3">
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 flex-wrap">
+        <p class="text-sm font-medium text-slate-700">{{ p.name }}</p>
+        {% if p.get('display_name') and p.display_name != p.name %}
+        <span class="text-xs text-slate-400">{{ p.display_name }}</span>
+        {% endif %}
+        {% if p.get('active', True) %}
+        <span class="text-xs bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded font-medium">active</span>
+        {% else %}
+        <span class="text-xs bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium">inactive</span>
+        {% endif %}
+        {% if p.get('has_tests') %}
+        <span class="text-xs bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{{ p.test_count }} test{{ 's' if p.test_count != 1 else '' }}</span>
+        {% else %}
+        <span class="text-xs bg-slate-50 text-slate-400 px-1.5 py-0.5 rounded">no tests</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="flex items-center gap-2 shrink-0">
+      {% if p.get('active', True) %}
+      <form hx-post="/ui/config/products/set-active" hx-target="#products-list" hx-swap="innerHTML"
+            hx-confirm="Mark '{{ p.name }}' as inactive? It will be hidden from all filters, AI generation and KB uploads — files are preserved.">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="active" value="false">
+        <button type="submit"
+                class="text-xs text-amber-600 hover:text-amber-800 font-medium px-2 py-0.5 rounded hover:bg-amber-50 transition-colors">
+          Deactivate
+        </button>
+      </form>
+      {% else %}
+      <form hx-post="/ui/config/products/set-active" hx-target="#products-list" hx-swap="innerHTML">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="active" value="true">
+        <button type="submit"
+                class="text-xs text-emerald-600 hover:text-emerald-800 font-medium px-2 py-0.5 rounded hover:bg-emerald-50 transition-colors">
+          Activate
+        </button>
+      </form>
+      {% endif %}
+      <form hx-post="/ui/config/products/delete" hx-target="#products-list" hx-swap="innerHTML"
+            hx-confirm="HARD DELETE '{{ p.name }}'?\n\nThis permanently removes:\n• Knowledge base files\n• All test scripts{% if p.get('has_tests') %} ({{ p.test_count }} tests){% endif %}\n• All generated docs\n• Pipeline job history\n• Activity log entries\n• Test assignments\n• Product removed from all user access lists\n\nThis cannot be undone.">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <button type="submit"
+                class="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-0.5 rounded hover:bg-red-50 transition-colors">
+          Delete
+        </button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="px-5 py-8 text-center text-sm text-slate-400">No products defined yet. Add one below.</div>
+{% endif %}

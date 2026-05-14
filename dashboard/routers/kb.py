@@ -21,6 +21,16 @@ _TEXT_SUFFIXES = {".yaml", ".yml", ".md", ".txt"}
 
 
 def _list_products() -> list[str]:
+    """Return active products only. Falls back to KB dir scan if config has no products entry."""
+    config_path = _ROOT_DIR / "framework_knowledge" / "config.yaml"
+    if config_path.exists():
+        import yaml as _yaml
+        cfg = _yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        products = cfg.get("products", [])
+        if products:
+            return sorted(p["name"] for p in products if p.get("active", True))
+    if not _KB_DIR.exists():
+        return []
     return sorted(
         d.name for d in _KB_DIR.iterdir()
         if d.is_dir() and d.name not in {"__pycache__", "increments"}

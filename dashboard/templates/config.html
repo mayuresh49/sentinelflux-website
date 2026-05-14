@@ -23,15 +23,49 @@
     <p class="text-sm text-slate-500 mt-0.5">Test types, priorities, custom fields, and test type distribution</p>
   </div>
 
-  <div x-data="{ tab: 'labels' }">
+  <div x-data="{ tab: 'products' }">
 
     <!-- Tab bar -->
     <div class="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit flex-wrap">
-      {% for t, label in [('labels','Test type'),('priorities','Priorities'),('fields','Custom Fields'),('users','Users'),('testtypes','Distribution'),('gencategories','Generation')] %}
+      {% for t, label in [('products','Products'),('labels','Test type'),('priorities','Priorities'),('fields','Custom Fields'),('users','Users'),('testtypes','Distribution'),('gencategories','Generation')] %}
       <button @click="tab='{{ t }}'"
               :class="tab==='{{ t }}' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
               class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">{{ label }}</button>
       {% endfor %}
+    </div>
+
+    <!-- ── PRODUCTS ── -->
+    <div x-show="tab==='products'" x-cloak class="mt-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100">
+          <h2 class="font-semibold text-slate-800">Products</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Products with tests cannot be deleted — deactivate them instead to hide from AI pipelines while preserving data</p>
+        </div>
+        <div id="products-list">
+          {% include "partials/config_products.html" %}
+        </div>
+        <div class="px-5 py-4 border-t border-slate-50 bg-slate-50/40">
+          <form hx-post="/ui/config/products/add" hx-target="#products-list" hx-swap="innerHTML"
+                class="flex items-end gap-3 flex-wrap">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Name <span class="text-slate-400 font-normal">(slug)</span></label>
+              <input type="text" name="name" required placeholder="e.g. my_app"
+                     pattern="[a-zA-Z0-9_\-]+"
+                     title="Alphanumeric, underscore and hyphen only"
+                     class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-40">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Display Name <span class="text-slate-400 font-normal">(optional)</span></label>
+              <input type="text" name="display_name" placeholder="e.g. My Application"
+                     class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-48">
+            </div>
+            <button type="submit"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-1.5 transition-colors">
+              Add Product
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
 
     <!-- ── LABELS ── -->

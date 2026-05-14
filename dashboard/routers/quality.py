@@ -21,9 +21,8 @@ _alog = ActivityLog()
 
 
 def _all_products() -> list[str]:
-    if not _KB_DIR.exists():
-        return []
-    return sorted(d.name for d in _KB_DIR.iterdir() if d.is_dir() and d.name not in _SKIP_KB)
+    from dashboard.routers.kb import _list_products
+    return _list_products()
 
 
 def _script_features(product: str) -> set[str]:
