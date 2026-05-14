@@ -11,7 +11,7 @@ from fastapi.responses import HTMLResponse
 
 from dashboard.routers.config._helpers import (
     _load_config, _save_config, _save_assignments,
-    _DATA_DIR, _EXAMPLES_DIR, _KB_PRODUCTS_DIR, _ASSIGNMENTS_PATH, _SAFE_PRODUCT_RE,
+    _DATA_DIR, _PRODUCTS_DIR, _KB_PRODUCTS_DIR, _ASSIGNMENTS_PATH, _SAFE_PRODUCT_RE,
     templates,
 )
 
@@ -19,7 +19,7 @@ router = APIRouter()
 
 
 def _product_test_count(product: str) -> int:
-    tests_dir = _EXAMPLES_DIR / product / "tests"
+    tests_dir = _PRODUCTS_DIR / product / "tests"
     if not tests_dir.exists():
         return 0
     count = 0
@@ -45,7 +45,7 @@ def _purge_product_data(name: str, cfg: dict) -> None:
     if _ASSIGNMENTS_PATH.exists():
         raw = yaml.safe_load(_ASSIGNMENTS_PATH.read_text(encoding="utf-8")) or {}
         assignments = raw.get("assignments", {})
-        tests_dir = _EXAMPLES_DIR / name / "tests"
+        tests_dir = _PRODUCTS_DIR / name / "tests"
         product_fns: set[str] = set()
         if tests_dir.exists():
             for py in tests_dir.rglob("test_*.py"):
@@ -111,7 +111,7 @@ def _purge_product_data(name: str, cfg: dict) -> None:
     _save_config(cfg)
 
     # 8. Delete filesystem directories
-    for d in [_KB_PRODUCTS_DIR / name, _EXAMPLES_DIR / name]:
+    for d in [_KB_PRODUCTS_DIR / name, _PRODUCTS_DIR / name]:
         if d.exists():
             shutil.rmtree(d)
 
@@ -128,8 +128,8 @@ async def products_add(request: Request, name: str = Form(...), display_name: st
         })
         _save_config(cfg)
         (_KB_PRODUCTS_DIR / name).mkdir(parents=True, exist_ok=True)
-        (_EXAMPLES_DIR / name / "tests").mkdir(parents=True, exist_ok=True)
-        (_EXAMPLES_DIR / name / "pages").mkdir(parents=True, exist_ok=True)
+        (_PRODUCTS_DIR / name / "tests").mkdir(parents=True, exist_ok=True)
+        (_PRODUCTS_DIR / name / "pages").mkdir(parents=True, exist_ok=True)
     return _render_products(request, cfg)
 
 
