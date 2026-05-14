@@ -185,13 +185,6 @@
   <!-- Filters + history header -->
   <div class="flex items-center gap-3 flex-wrap">
     <h2 class="text-sm font-semibold text-slate-700 mr-1">Run History</h2>
-    <select onchange="applyRunFilter('product', this.value)"
-            class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200">
-      <option value="">All products</option>
-      {% for p in all_products %}
-      <option value="{{ p }}" {{ 'selected' if filter_product == p else '' }}>{{ p }}</option>
-      {% endfor %}
-    </select>
     <select onchange="applyRunFilter('domain', this.value)"
             class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200">
       <option value="">All domains</option>
@@ -404,7 +397,7 @@ function runsPage() {
   return {
     showTrigger: {{ 'true' if not runs else 'false' }},
     showSchedule: false,
-    trigger: { product: '', domain: 'all', extra_args: '' },
+    trigger: { product: '{{ filter_product }}', domain: 'all', extra_args: '' },
     triggerLoading: false,
     triggerMsg: '',
     triggerErr: '',
