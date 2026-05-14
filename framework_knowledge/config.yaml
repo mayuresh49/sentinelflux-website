@@ -31,5 +31,8 @@ test_type_distribution:
   regression: 70
   sanity: 30
 users:
-- email: mayuresh49@gmail.com
+- admin: true
+  email: mayuresh49@gmail.com
   name: Mayuresh Kulkarni
+  password_hash: $2b$12$zv9wirVO6oxerfYCzfPhGe30TeZMPt2RkrpMDx9U990beq.5y/TNq
+  products: []

@@ -337,12 +337,11 @@ async def users_delete(request: Request, name: str = Form(...)):
 
 @router.post("/ui/config/users/set-password", response_class=HTMLResponse)
 async def users_set_password(request: Request, name: str = Form(...), password: str = Form(...)):
-    from passlib.context import CryptContext
-    _pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    import bcrypt as _bcrypt
     cfg = _load_config()
     for u in cfg.get("users", []):
         if u["name"] == name:
-            u["password_hash"] = _pwd_ctx.hash(password) if password.strip() else ""
+            u["password_hash"] = _bcrypt.hashpw(password.strip().encode(), _bcrypt.gensalt()).decode() if password.strip() else ""
             break
     _save_config(cfg)
     return _render_users(request, cfg)

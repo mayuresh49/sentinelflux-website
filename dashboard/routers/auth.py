@@ -5,12 +5,21 @@ from pathlib import Path
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from passlib.context import CryptContext
+import bcrypt as _bcrypt
 
 router = APIRouter(tags=["auth"])
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
 
-_pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def _hash_password(password: str) -> str:
+    return _bcrypt.hashpw(password.encode(), _bcrypt.gensalt()).decode()
+
+
+def _verify_password(password: str, hashed: str) -> bool:
+    try:
+        return _bcrypt.checkpw(password.encode(), hashed.encode())
+    except Exception:
+        return False
 
 _FK_DIR = Path(__file__).resolve().parent.parent.parent / "framework_knowledge"
 _CONFIG_PATH = _FK_DIR / "config.yaml"
@@ -77,7 +86,7 @@ async def login_submit(
         return templates.TemplateResponse(request, "login.html",
                                           {"error": "Account has no password set. Ask an admin to set one.", "next": next})
 
-    if not _pwd_ctx.verify(password, pw_hash):
+    if not _verify_password(password, pw_hash):
         return templates.TemplateResponse(request, "login.html",
                                           {"error": "Invalid email or password.", "next": next})
 
