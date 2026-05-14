@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Body, HTTPException
 
-from utils.approval_manager import ApprovalManager
+from core.approval_manager import ApprovalManager
 
 router = APIRouter(prefix="/approvals", tags=["approvals"])
 _am = ApprovalManager()

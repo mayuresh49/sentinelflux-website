@@ -94,7 +94,7 @@ async def _start_schedule_checker():
 async def _schedule_loop():
     import asyncio
     from datetime import datetime, timezone
-    from utils.run_manager import RunManager
+    from core.run_manager import RunManager
     rm = RunManager()
     while True:
         await asyncio.sleep(60)

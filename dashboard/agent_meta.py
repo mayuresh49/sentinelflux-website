@@ -4,13 +4,13 @@ AGENT_META: dict = {
     "doc_gen": {
         "responsibility": "Reads the Knowledge Base (product YAML files + any increments) and generates a structured Markdown test case document covering all testable scenarios for a given feature and domain.",
         "inputs": ["KB YAML files", "Feature name", "Domain"],
-        "outputs": ["examples/<product>/docs/test_cases/<domain>/<feature>.md"],
+        "outputs": ["products/<product>/docs/test_cases/<domain>/<feature>.md"],
         "config_params": [],
     },
     "script_gen": {
         "responsibility": "Takes a test case Markdown document and generates a fully working pytest script with correct fixtures, markers, imports, and domain-specific patterns (rest_client for API, page for web, etc.).",
         "inputs": ["Test case Markdown document", "Domain"],
-        "outputs": ["examples/<product>/tests/<domain>/test_<feature>.py"],
+        "outputs": ["products/<product>/tests/<domain>/test_<feature>.py"],
         "config_params": [],
     },
     "result_analyzer": {
@@ -21,7 +21,7 @@ AGENT_META: dict = {
     },
     "flaky_detector": {
         "responsibility": "Reads run_history.yaml and identifies tests with high failure rates (quarantine candidates) or long consecutive pass streaks (unquarantine candidates). Pure rule-based — no AI or network required.",
-        "inputs": ["framework_knowledge/run_history.yaml"],
+        "inputs": ["data/run_history.yaml"],
         "outputs": ["quarantine_candidates list", "unquarantine_candidates list"],
         "config_params": [
             {"name": "window", "type": "int", "default": 10, "description": "Number of recent runs to analyse"},
@@ -31,7 +31,7 @@ AGENT_META: dict = {
     },
     "regression_guard": {
         "responsibility": "Compares the current pytest JSON report against a saved baseline report. Buckets changes into regressions (passed→failing), new_failures (not in baseline), fixed (failed→passing), and new_tests. No AI required.",
-        "inputs": ["Current pytest-json-report JSON", "framework_knowledge/baseline_report.json"],
+        "inputs": ["Current pytest-json-report JSON", "data/baseline_report.json"],
         "outputs": ["regressions list", "fixed list", "new_failures list", "new_tests list"],
         "config_params": [
             {"name": "save_as_baseline", "type": "bool", "default": False, "description": "Overwrite baseline with current run after comparison"},

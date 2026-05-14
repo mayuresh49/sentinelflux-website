@@ -2,7 +2,7 @@
 
 Full end-to-end test suite for [OrangeHRM](https://opensource-demo.orangehrmlive.com), demonstrating web UI and REST API testing with SentinelFlux.
 
-Located at: `examples/orangehrm/`
+Located at: `products/orangehrm/`
 
 ## What's covered
 
@@ -18,7 +18,7 @@ Located at: `examples/orangehrm/`
 ## Running
 
 ```bash
-cd examples/orangehrm
+cd products/orangehrm
 pip install sentinelflux[ai]
 playwright install chromium
 
@@ -34,8 +34,8 @@ python3 -m pytest tests/api/ -m api
 
 ## How it's structured
 
-The example uses **namespace packages** — no `__init__.py` in `pages/` directories. Python merges `examples/orangehrm/pages/web/` with the framework root `pages/` so both `LoginPage` (example) and `BasePage` (framework) are importable without path hacks.
+The example uses **namespace packages** — no `__init__.py` in `pages/` directories. Python merges `products/orangehrm/pages/web/` with the framework root `pages/` so both `LoginPage` (example) and `BasePage` (framework) are importable without path hacks.
 
-The `conftest.py` injects both `examples/orangehrm/` and the framework root onto `sys.path` at collection time.
+The `conftest.py` injects both `products/orangehrm/` and the framework root onto `sys.path` at collection time.
 
-See `examples/orangehrm/README.md` for full setup and configuration details.
+See `products/orangehrm/README.md` for full setup and configuration details.

@@ -22,8 +22,8 @@ def _verify_password(password: str, hashed: str) -> bool:
         return False
 
 from utils.paths import ROOT as _ROOT
-_FK_DIR = _ROOT / "framework_knowledge"
-_CONFIG_PATH = _FK_DIR / "config.yaml"
+_DATA_DIR = _ROOT / "data"
+_CONFIG_PATH = _DATA_DIR / "config.yaml"
 
 
 def _load_users() -> list[dict]:

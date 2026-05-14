@@ -27,7 +27,7 @@ async def config_page(request: Request, product: Optional[str] = None,
     cfg = _load_config()
     assignments = _load_assignments()
     tests = _all_tests()
-    from utils.approval_manager import ApprovalManager
+    from core.approval_manager import ApprovalManager
     _am = ApprovalManager()
     all_prods = [p["name"] for p in cfg.get("products", []) if p.get("active", True)]
     visible_products = user_products(current_user, all_prods)

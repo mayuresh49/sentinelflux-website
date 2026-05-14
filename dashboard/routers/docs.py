@@ -7,13 +7,13 @@ from fastapi import APIRouter, HTTPException
 from utils.paths import ROOT as _ROOT_DIR
 
 router = APIRouter(prefix="/docs", tags=["docs"])
-_EXAMPLES_DIR = _ROOT_DIR / "examples"
+_PRODUCTS_DIR = _ROOT_DIR / "products"
 
 
 def _find_docs(product: str | None = None, domain: str | None = None) -> list[dict]:
     results = []
-    for md in _EXAMPLES_DIR.rglob("*.md"):
-        parts = md.relative_to(_EXAMPLES_DIR).parts
+    for md in _PRODUCTS_DIR.rglob("*.md"):
+        parts = md.relative_to(_PRODUCTS_DIR).parts
         # Expected: <product>/docs/test_cases/<domain>/<feature>.md
         if len(parts) < 5 or parts[1] != "docs" or parts[2] != "test_cases":
             continue
@@ -39,7 +39,7 @@ def list_docs(product: str | None = None, domain: str | None = None):
 
 @router.get("/{product}/{domain}/{feature}")
 def get_doc(product: str, domain: str, feature: str):
-    path = _EXAMPLES_DIR / product / "docs" / "test_cases" / domain / f"{feature}.md"
+    path = _PRODUCTS_DIR / product / "docs" / "test_cases" / domain / f"{feature}.md"
     if not path.exists():
         raise HTTPException(status_code=404, detail="Doc not found")
     return {

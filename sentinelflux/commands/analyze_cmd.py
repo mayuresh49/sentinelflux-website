@@ -30,11 +30,11 @@ def run(
 
     Examples:
       sentinelflux analyze --domain api --product restfulbooker
-      sentinelflux analyze --domain web --product orangehrm --tests-dir examples/orangehrm
+      sentinelflux analyze --domain web --product orangehrm --tests-dir products/orangehrm
       sentinelflux analyze --report .sentinelflux_report.json --domain api
       sentinelflux analyze --domain api --apply-quarantine
     """
-    from utils.ai_factory import create_ai_client
+    from core.ai_factory import create_ai_client
     from ai.agents import AgentContext, ResultAnalyzerAgent, FlakyDetectorAgent
     from ai.agents.quarantine_manager import QuarantineManager, _HISTORY_PATH
 
@@ -96,7 +96,7 @@ def run(
         flaky_result["unquarantine_candidates"],
     )
     if proposed:
-        _console.print(f"\n[yellow]{proposed} quarantine action(s) proposed → framework_knowledge/quarantine.yaml[/]")
+        _console.print(f"\n[yellow]{proposed} quarantine action(s) proposed → data/quarantine.yaml[/]")
         if apply_quarantine:
             applied = qm.apply_pending()
             _console.print(f"[green]Applied: {len(applied['quarantined'])} quarantined, {len(applied['unquarantined'])} released[/]")
@@ -124,7 +124,7 @@ def _run_pytest(tests_dir: Path, domain: str, report_path: Path, env: str) -> bo
 
 def _resolve_tests_dir(domain: str, product: Optional[str]) -> Path:
     if product:
-        candidate = _ROOT_DIR / "examples" / product
+        candidate = _ROOT_DIR / "products" / product
         if candidate.exists():
             return candidate
     return _ROOT_DIR / "tests" / domain

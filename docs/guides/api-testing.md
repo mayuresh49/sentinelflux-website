@@ -20,7 +20,7 @@ def test_get_booking(rest_client):
 
 The `rest_client` fixture is session-scoped and reads `config.api.rest_base_url`.
 
-For example projects, it is common to write a dedicated API client class instead (see `examples/restfulbooker/booking_client.py` for a pattern using `requests.Session` directly with per-test request logging built in).
+For example projects, it is common to write a dedicated API client class instead (see `products/restfulbooker/booking_client.py` for a pattern using `requests.Session` directly with per-test request logging built in).
 
 ## GraphQL client
 

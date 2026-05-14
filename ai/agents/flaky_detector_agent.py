@@ -16,7 +16,7 @@ class FlakyDetectorAgent(BaseAgent):
     """
     Pure rule-based detection (no AI call needed).
 
-    Reads framework_knowledge/run_history.yaml and emits two lists:
+    Reads data/run_history.yaml and emits two lists:
       quarantine_candidates  — tests that fail too often
       unquarantine_candidates — tests that have stabilised
 

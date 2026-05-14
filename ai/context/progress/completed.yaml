@@ -10,14 +10,14 @@
     ai/pipeline/orchestrator.py: TestPipelineOrchestrator runs full KB → doc → script pipeline.
     CLI: python -m ai.pipeline.orchestrator --feature <name> --domain <api|web|mobile|security>.
     Supports --increment for feature drops, --doc to skip doc gen.
-    Updates framework_knowledge/kb_increments_log.yaml after each run.
+    Updates data/kb_increments_log.yaml after each run.
     ai/prompts/prompt_templates.py: Added TEST_SCRIPT_GEN_PROMPT and FEATURE_DOC_PROMPT.
 
 - id: P1-01
   date: 2026-05-06
-  title: "Phase 1 — Persistent tracking system (framework_knowledge/)"
+  title: "Phase 1 — Persistent tracking system (data/)"
   outcome: >
-    Created framework_knowledge/ with RESUME.md, architecture.md, conventions.md,
+    Created data/ with RESUME.md, architecture.md, conventions.md,
     progress/backlog.yaml, progress/completed.yaml, decisions/ADR-001, ADR-002.
     Any AI tool can now read RESUME.md and resume work without conversation context.
 

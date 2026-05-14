@@ -8,8 +8,8 @@ from fastapi.templating import Jinja2Templates
 
 from collections import defaultdict
 
-from utils.activity_log import ActivityLog
-from utils.approval_manager import ApprovalManager
+from core.activity_log import ActivityLog
+from core.approval_manager import ApprovalManager
 from dashboard.routers.approval_dispatch import derive_feature
 from dashboard.routers.kb import _list_products
 from dashboard.routers.auth import get_session_user, user_products
@@ -221,7 +221,7 @@ async def agents_page(request: Request, current_user: dict = Depends(_require_au
     from dashboard.routers.agents import _AGENT_REGISTRY
     from dashboard.agent_meta import AGENT_META
     from utils.paths import ROOT as _ROOT
-    config_path = _ROOT / "framework_knowledge" / "agent_config.yaml"
+    config_path = _ROOT / "ai" / "context" / "agent_config.yaml"
     agent_config: dict = {}
     if config_path.exists():
         data = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
@@ -266,7 +266,7 @@ async def runs_page(
     status: str | None = None,
     current_user: dict = Depends(_require_auth),
 ):
-    from utils.run_manager import RunManager
+    from core.run_manager import RunManager
     rm = RunManager()
     visible = user_products(current_user, _list_products())
     if product and product not in visible:

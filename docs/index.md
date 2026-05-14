@@ -24,4 +24,4 @@ sentinelflux run
 
 ## Example project
 
-See [`examples/orangehrm/`](examples/orangehrm.md) — 41 tests covering web UI and API for the OrangeHRM demo application.
+See [`products/orangehrm/`](products/orangehrm.md) — 41 tests covering web UI and API for the OrangeHRM demo application.

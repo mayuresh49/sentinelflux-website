@@ -15,7 +15,7 @@ import yaml
 import pytest
 from pytest_html import extras as html_extras
 from utils.logger import create_logger
-from utils.ai_factory import create_ai_client
+from core.ai_factory import create_ai_client
 from utils.step import reset as _reset_steps, snapshot as _snapshot_steps
 from api.rest_client import RestClient
 from api.graphql_client import GraphQLClient
@@ -328,7 +328,7 @@ def ai_config(config):
 @pytest.fixture(scope="session")
 def ai_client(ai_config):
     client = create_ai_client(ai_config)
-    from utils.ai_registry import set_ai_client
+    from core.ai_registry import set_ai_client
     set_ai_client(client)
     return client
 
@@ -350,7 +350,7 @@ def pytest_collection_modifyitems(config, items):
             return
         marker = pytest.mark.xfail(
             strict=False,
-            reason="quarantined: flaky — see framework_knowledge/quarantine.yaml",
+            reason="quarantined: flaky — see data/quarantine.yaml",
         )
         for item in items:
             if item.nodeid in quarantined:

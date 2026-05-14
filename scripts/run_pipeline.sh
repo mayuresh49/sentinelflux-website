@@ -4,7 +4,7 @@
 # Domains: api | web | mobile | security | a11y
 # source: path to OpenAPI spec (.yaml/.json), service code file (.py/.ts/etc), or URL
 # Example: ./run_pipeline.sh orangehrm login web
-#          ./run_pipeline.sh orangehrm booking api _ _ RB-API 1 examples/restfulbooker/openapi.yaml
+#          ./run_pipeline.sh orangehrm booking api _ _ RB-API 1 products/restfulbooker/openapi.yaml
 #          ./run_pipeline.sh orangehrm recruitment web qwen2.5-coder:14b-instruct-q4_K_M qwen2.5-coder:14b-instruct-q4_K_M OH-WEB 58
 #          ./run_pipeline.sh orangehrm security_api security _ _ OH-SEC 1
 
@@ -31,12 +31,12 @@ else
   PYTHON="$(command -v python3)"
 fi
 
-EXAMPLE_DIR="examples/$PROJECT"
+EXAMPLE_DIR="products/$PROJECT"
 KB_DIR="ai/knowledge_base/$PROJECT"
 
 if [ ! -d "$EXAMPLE_DIR" ]; then
   echo "ERROR: Example directory not found: $EXAMPLE_DIR"
-  echo "Available projects: $(ls examples/)"
+  echo "Available projects: $(ls products/)"
   exit 1
 fi
 

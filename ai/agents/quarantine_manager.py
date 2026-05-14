@@ -23,8 +23,8 @@ from utils.paths import ROOT as _ROOT_DIR
 
 _log = logging.getLogger("sentinelflux.agents.quarantine_manager")
 
-_QUARANTINE_PATH = _ROOT_DIR / "framework_knowledge" / "quarantine.yaml"
-_HISTORY_PATH = _ROOT_DIR / "framework_knowledge" / "run_history.yaml"
+_QUARANTINE_PATH = _ROOT_DIR / "data" / "quarantine.yaml"
+_HISTORY_PATH = _ROOT_DIR / "data" / "run_history.yaml"
 _HISTORY_WINDOW_DAYS = 90
 
 

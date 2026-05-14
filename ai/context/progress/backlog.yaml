@@ -37,7 +37,7 @@
   status: todo
   notes: >
     All writers do read-modify-write without locks. Concurrent pytest-xdist runs
-    + dashboard triggers will corrupt framework_knowledge/ files.
+    + dashboard triggers will corrupt data/ files.
     Use filelock.FileLock wrapping each _save() / _write() call.
     Add filelock to requirements.txt.
 
@@ -147,7 +147,7 @@
 - id: P5-01
   phase: 5
   title: "KB increments log tracker"
-  file: framework_knowledge/kb_increments_log.yaml
+  file: data/kb_increments_log.yaml
   priority: low
   status: todo
   notes: Tracks which increment files have been processed into docs + scripts.

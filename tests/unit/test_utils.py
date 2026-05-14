@@ -6,9 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from utils.activity_log import ActivityLog
-from utils.approval_manager import ApprovalManager
-from utils.run_manager import RunManager
+from core.activity_log import ActivityLog
+from core.approval_manager import ApprovalManager
+from core.run_manager import RunManager
 
 
 # ── ActivityLog ───────────────────────────────────────────────────────────────
@@ -43,7 +43,7 @@ class TestActivityLog:
         assert len(log.filter(product="orangehrm")) == 1
 
     def test_max_entries_trim(self, tmp_path):
-        from utils.activity_log import MAX_ENTRIES
+        from core.activity_log import MAX_ENTRIES
         log = ActivityLog(path=tmp_path / "activity_log.json")
         for i in range(MAX_ENTRIES + 5):
             log.append(event_type="e", agent="a", domain="d", status="s", summary=str(i))
@@ -169,7 +169,7 @@ class TestRunManager:
             assert len(rm.all_schedules()) == 0
 
     def test_max_runs_cap(self, tmp_path):
-        from utils.run_manager import _MAX_RUNS
+        from core.run_manager import _MAX_RUNS
         runs_path = tmp_path / "test_runs.json"
         schedules_path = tmp_path / "test_schedules.json"
         from unittest.mock import patch

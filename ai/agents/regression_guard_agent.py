@@ -6,7 +6,7 @@ from pathlib import Path
 
 from ai.agents.base_agent import BaseAgent
 from utils.paths import ROOT as _ROOT_DIR
-_DEFAULT_BASELINE = _ROOT_DIR / "framework_knowledge" / "baseline_report.json"
+_DEFAULT_BASELINE = _ROOT_DIR / "data" / "baseline_report.json"
 
 
 class RegressionGuardAgent(BaseAgent):

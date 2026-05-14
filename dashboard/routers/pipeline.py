@@ -13,12 +13,12 @@ from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel
 
 from filelock import FileLock
-from utils.activity_log import ActivityLog
+from core.activity_log import ActivityLog
 from utils.paths import ROOT as _ROOT_DIR
 
 router = APIRouter(prefix="/pipeline", tags=["pipeline"])
 
-_JOBS_PATH = _ROOT_DIR / "framework_knowledge" / "pipeline_jobs.json"
+_JOBS_PATH = _ROOT_DIR / "data" / "pipeline_jobs.json"
 _alog = ActivityLog()
 _MAX_JOBS = 50
 
@@ -80,7 +80,7 @@ def _run(job_id: str, body: TriggerBody):
         *mode_args,
         "--domain", body.domain,
         "--project", body.product,
-        "--output-base", str(_ROOT_DIR / "examples" / body.product),
+        "--output-base", str(_ROOT_DIR / "products" / body.product),
         "--local",
         "--local-url", body.local_url,
         "--doc-model", body.doc_model,

@@ -82,13 +82,13 @@ pytest tests/api/ -m api --env staging
 
 | Example | Tests | Notes |
 |---|---|---|
-| [`examples/orangehrm`](examples/orangehrm) | Web UI + API | OrangeHRM HR system demo |
-| [`examples/restfulbooker`](examples/restfulbooker) | API (13 tests) | Restful Booker hotel booking API |
+| [`products/orangehrm`](products/orangehrm) | Web UI + API | OrangeHRM HR system demo |
+| [`products/restfulbooker`](products/restfulbooker) | API (13 tests) | Restful Booker hotel booking API |
 
 Run an example:
 
 ```bash
-cd examples/restfulbooker
+cd products/restfulbooker
 pytest tests/api/ -m api
 ```
 
@@ -166,18 +166,18 @@ sentinelflux init my-project   # scaffolds the full structure
 # Web test case doc
 sentinelflux generate \
     --kb-dir ai/knowledge_base/orangehrm \
-    --output examples/orangehrm/docs/test_cases/web/login.md
+    --output products/orangehrm/docs/test_cases/web/login.md
 
 # API test case doc
 sentinelflux generate \
     --endpoint /booking --method POST \
     --kb-dir ai/knowledge_base/restfulbooker \
-    --output examples/restfulbooker/docs/test_cases/api/booking_create.md
+    --output products/restfulbooker/docs/test_cases/api/booking_create.md
 
 # Doc + script in one step
 sentinelflux generate \
     --kb-dir ai/knowledge_base/restfulbooker \
-    --output examples/restfulbooker/docs/test_cases/api/booking.md \
+    --output products/restfulbooker/docs/test_cases/api/booking.md \
     --script
 ```
 
@@ -198,7 +198,7 @@ ai/                   KB loader, AI clients, test generation skills and pipeline
   skills/             AI skills (doc gen, script gen, self-healing)
 api/                  REST and GraphQL clients
 config/               Environment YAML profiles (env_qa.yaml, env_staging.yaml)
-examples/             Working example projects
+products/             Working example projects
   orangehrm/          OrangeHRM web + API tests
   restfulbooker/      Restful Booker API tests
 pages/                Page Object Models (web)

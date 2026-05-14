@@ -18,6 +18,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Environment profiles: QA, Staging, template (`config/env_*.yaml`)
 - `sentinelflux` CLI: `init`, `run`, `generate` commands (typer)
 - Apache 2.0 license
-- OrangeHRM example: 41 tests across web UI and API suites (`examples/orangehrm/`)
+- OrangeHRM example: 41 tests across web UI and API suites (`products/orangehrm/`)
 - Jenkins CI/CD pipeline with parameterized suites, browser, environment, and RP toggle
 - GitHub Actions CI: lint (ruff) + package build check

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from utils.activity_log import ActivityLog
+from core.activity_log import ActivityLog
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 

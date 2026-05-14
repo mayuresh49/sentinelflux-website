@@ -10,9 +10,9 @@ from typing import Any
 from filelock import FileLock
 from utils.paths import ROOT as _ROOT
 
-_RUNS_PATH = _ROOT / "framework_knowledge" / "test_runs.json"
-_SCHEDULES_PATH = _ROOT / "framework_knowledge" / "test_schedules.json"
-_RUNS_DIR = _ROOT / "framework_knowledge" / "runs"
+_RUNS_PATH = _ROOT / "data" / "test_runs.json"
+_SCHEDULES_PATH = _ROOT / "data" / "test_schedules.json"
+_RUNS_DIR = _ROOT / "data" / "runs"
 _MAX_RUNS = 200
 
 _DAY_NAMES = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]

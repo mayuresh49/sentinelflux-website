@@ -12,5 +12,5 @@
 
 ## Checklist
 - [ ] `ruff check .` passes
-- [ ] `python -m pytest --collect-only` passes (root + examples/orangehrm)
+- [ ] `python -m pytest --collect-only` passes (root + products/orangehrm)
 - [ ] No new OrangeHRM-specific code added to root framework

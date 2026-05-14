@@ -45,7 +45,7 @@ jobs:
       - run: playwright install --with-deps chromium
       - name: Collect orangehrm example tests
         run: python -m pytest --collect-only -q
-        working-directory: examples/orangehrm
+        working-directory: products/orangehrm
       - name: Collect restfulbooker example tests
         run: python -m pytest --collect-only -q
-        working-directory: examples/restfulbooker
+        working-directory: products/restfulbooker

@@ -4,7 +4,7 @@ ActivityLog — append-only event store for all agent and pipeline runs.
 Written by SentinelOrchestrator (and individual agents if needed).
 Read by the FastAPI dashboard backend.
 
-File: framework_knowledge/activity_log.json
+File: data/activity_log.json
 Trims to MAX_ENTRIES on each write to prevent unbounded growth.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ from filelock import FileLock
 from utils.paths import ROOT as _ROOT_DIR
 
 _log = logging.getLogger("sentinelflux.activity_log")
-_LOG_PATH = _ROOT_DIR / "framework_knowledge" / "activity_log.json"
+_LOG_PATH = _ROOT_DIR / "data" / "activity_log.json"
 
 MAX_ENTRIES = 1000
 

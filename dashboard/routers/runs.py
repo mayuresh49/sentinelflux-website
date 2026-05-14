@@ -13,7 +13,7 @@ import yaml
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 
-from utils.run_manager import RunManager
+from core.run_manager import RunManager
 from utils.paths import ROOT as _ROOT
 
 router = APIRouter(prefix="/runs", tags=["runs"])
@@ -273,7 +273,7 @@ def _parse_report(report_path: Path) -> dict[str, Any]:
 
 
 def _resolve_test_path(product: str, domain: str) -> Path | None:
-    base = _ROOT / "examples" / product / "tests"
+    base = _ROOT / "products" / product / "tests"
     if base.exists():
         if domain and domain != "all":
             specific = base / domain
@@ -321,7 +321,7 @@ def _build_ai_client():
 
 def _load_product_run_config(product: str) -> dict:
     try:
-        cfg_path = _ROOT / "framework_knowledge" / "config.yaml"
+        cfg_path = _ROOT / "data" / "config.yaml"
         if not cfg_path.exists():
             return {}
         cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}

@@ -11,7 +11,7 @@ from fastapi.responses import HTMLResponse
 
 from dashboard.routers.config._helpers import (
     _load_config, _save_config, _save_assignments,
-    _FK_DIR, _EXAMPLES_DIR, _KB_PRODUCTS_DIR, _ASSIGNMENTS_PATH, _SAFE_PRODUCT_RE,
+    _DATA_DIR, _EXAMPLES_DIR, _KB_PRODUCTS_DIR, _ASSIGNMENTS_PATH, _SAFE_PRODUCT_RE,
     templates,
 )
 
@@ -58,24 +58,24 @@ def _purge_product_data(name: str, cfg: dict) -> None:
             _save_assignments(pruned)
 
     # 2. Pipeline jobs
-    jobs_path = _FK_DIR / "pipeline_jobs.json"
+    jobs_path = _DATA_DIR / "pipeline_jobs.json"
     if jobs_path.exists():
         data = json.loads(jobs_path.read_text(encoding="utf-8"))
         data["jobs"] = [j for j in data.get("jobs", []) if j.get("product") != name]
         jobs_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
     # 3. Activity log
-    alog_path = _FK_DIR / "activity_log.json"
+    alog_path = _DATA_DIR / "activity_log.json"
     if alog_path.exists():
         data = json.loads(alog_path.read_text(encoding="utf-8"))
         data["entries"] = [e for e in data.get("entries", []) if e.get("product") != name]
         alog_path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
     # 4. KB increments log
-    kb_log_path = _FK_DIR / "kb_increments_log.yaml"
+    kb_log_path = _DATA_DIR / "kb_increments_log.yaml"
     if kb_log_path.exists():
         raw = yaml.safe_load(kb_log_path.read_text(encoding="utf-8")) or {}
-        prefix = f"examples/{name}/"
+        prefix = f"products/{name}/"
         raw["processed"] = [
             e for e in raw.get("processed", [])
             if not (str(e.get("generated_doc", "")).startswith(prefix)
@@ -84,7 +84,7 @@ def _purge_product_data(name: str, cfg: dict) -> None:
         kb_log_path.write_text(yaml.dump(raw, default_flow_style=False, allow_unicode=True), encoding="utf-8")
 
     # 5. Pending approvals
-    approvals_path = _FK_DIR / "pending_approvals.yaml"
+    approvals_path = _DATA_DIR / "pending_approvals.yaml"
     if approvals_path.exists():
         raw = yaml.safe_load(approvals_path.read_text(encoding="utf-8")) or {}
         for key in ("pending_actions", "resolved", "pending"):
@@ -92,10 +92,10 @@ def _purge_product_data(name: str, cfg: dict) -> None:
         approvals_path.write_text(yaml.dump(raw, default_flow_style=False, allow_unicode=True), encoding="utf-8")
 
     # 6. Run history
-    run_history_path = _FK_DIR / "run_history.yaml"
+    run_history_path = _DATA_DIR / "run_history.yaml"
     if run_history_path.exists():
         raw = yaml.safe_load(run_history_path.read_text(encoding="utf-8")) or {}
-        prefix = f"examples/{name}/"
+        prefix = f"products/{name}/"
         raw["tests"] = {k: v for k, v in raw.get("tests", {}).items() if not k.startswith(prefix)}
         run_history_path.write_text(
             "# SentinelFlux Run History\n"

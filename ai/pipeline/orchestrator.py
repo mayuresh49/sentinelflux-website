@@ -18,7 +18,7 @@ from pathlib import Path
 
 import yaml
 
-from utils.activity_log import ActivityLog
+from core.activity_log import ActivityLog
 from utils.paths import ROOT as ROOT_DIR
 
 _log = logging.getLogger(__name__)
@@ -55,7 +55,7 @@ class TestPipelineOrchestrator:
         Returns dict with keys 'doc' and 'script' (script may be None when skipped).
         """
         _log.info("Pipeline start — feature=%s domain=%s", feature_name, domain)
-        product = str(output_base).split("examples/")[-1].split("/")[0] if output_base and "examples/" in str(output_base) else None
+        product = str(output_base).split("products/")[-1].split("/")[0] if output_base and "products/" in str(output_base) else None
 
         try:
             if increment_file:
@@ -171,7 +171,7 @@ class TestPipelineOrchestrator:
         doc_path: Path,
         script_path: Path,
     ):
-        log_path = ROOT_DIR / "framework_knowledge" / "kb_increments_log.yaml"
+        log_path = ROOT_DIR / "data" / "kb_increments_log.yaml"
         try:
             with log_path.open("r", encoding="utf-8") as f:
                 log_data = yaml.safe_load(f) or {}
@@ -198,7 +198,7 @@ class TestPipelineOrchestrator:
 def _build_client(model: str, args) -> object:
     """Build AI client from CLI args or env vars."""
     import os
-    from utils.ai_factory import create_ai_client
+    from core.ai_factory import create_ai_client
 
     ai_config = {
         "enabled": True,
@@ -231,8 +231,7 @@ def _parse_args(argv=None):
     parser.add_argument("--skip-script", action="store_true",
                         help="Generate doc only — do not overwrite existing test script")
     parser.add_argument("--project", default=None,
-                        help="KB project subdirectory under ai/knowledge_base/ (e.g. orangehrm). "
-                             "Defaults to ai/knowledge_base/ root.")
+                        help="Product name (e.g. orangehrm). Loads KB from products/<name>/ai/knowledge_base/.")
     parser.add_argument("--local", action="store_true", default=True, help="Use local Ollama (default)")
     parser.add_argument("--local-url", default="http://localhost:11434")
     parser.add_argument("--doc-model", default="mistral:7b-instruct-v0.3-q4_K_M",
@@ -245,7 +244,7 @@ def _parse_args(argv=None):
     parser.add_argument("--cloud", action="store_true", help="Use Mistral cloud API instead of local")
     parser.add_argument("--output-base", default=None,
                         help="Root directory for generated docs and scripts "
-                             "(e.g. examples/orangehrm). Defaults to framework root.")
+                             "(e.g. products/orangehrm). Defaults to framework root.")
     parser.add_argument("--tc-prefix", default="",
                         help="Test case ID prefix (e.g. OH-WEB). Injected into doc and script.")
     parser.add_argument("--tc-start", type=int, default=1,
@@ -276,7 +275,7 @@ def main(argv=None):
     # Resolve KB directory
     kb_dir = None
     if args.project:
-        kb_dir = ROOT_DIR / "ai" / "knowledge_base" / args.project
+        kb_dir = ROOT_DIR / "products" / args.project / "ai" / "knowledge_base"
         if not kb_dir.exists():
             _log.error("KB project directory not found: %s", kb_dir)
             sys.exit(1)

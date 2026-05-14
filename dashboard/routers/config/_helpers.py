@@ -14,10 +14,10 @@ from utils.paths import ROOT as _ROOT
 
 templates = Jinja2Templates(directory=str(_ROOT / "dashboard" / "templates"))
 
-_FK_DIR = _ROOT / "framework_knowledge"
-_CONFIG_PATH = _FK_DIR / "config.yaml"
-_ASSIGNMENTS_PATH = _FK_DIR / "test_assignments.yaml"
-_EXAMPLES_DIR = _ROOT / "examples"
+_DATA_DIR = _ROOT / "data"
+_CONFIG_PATH = _DATA_DIR / "config.yaml"
+_ASSIGNMENTS_PATH = _DATA_DIR / "test_assignments.yaml"
+_PRODUCTS_DIR = _ROOT / "products"
 _KB_PRODUCTS_DIR = _ROOT / "ai" / "knowledge_base"
 _SAFE_PRODUCT_RE = re.compile(r"^[a-zA-Z0-9_\-]+$")
 
@@ -101,8 +101,8 @@ def _save_assignments(assignments: dict) -> None:
 
 def _all_tests() -> list[dict]:
     results = []
-    for py in _EXAMPLES_DIR.rglob("test_*.py"):
-        parts = py.relative_to(_EXAMPLES_DIR).parts
+    for py in _PRODUCTS_DIR.rglob("test_*.py"):
+        parts = py.relative_to(_PRODUCTS_DIR).parts
         if len(parts) < 4 or parts[1] != "tests":
             continue
         p, d = parts[0], parts[2]
@@ -121,8 +121,8 @@ def assignments_summary_by_feature() -> dict:
     label_colors = {l["name"]: l["color"] for l in cfg.get("labels", [])}
     priority_colors = {p["name"]: p["color"] for p in cfg.get("priorities", [])}
     result = {}
-    for py in _EXAMPLES_DIR.rglob("test_*.py"):
-        parts = py.relative_to(_EXAMPLES_DIR).parts
+    for py in _PRODUCTS_DIR.rglob("test_*.py"):
+        parts = py.relative_to(_PRODUCTS_DIR).parts
         if len(parts) < 4 or parts[1] != "tests":
             continue
         product, domain = parts[0], parts[2]

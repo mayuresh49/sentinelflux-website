@@ -15,13 +15,13 @@ playwright install chromium
 python3 -m pytest --collect-only -q
 
 # OrangeHRM example suite
-cd examples/orangehrm && python3 -m pytest --collect-only -q
+cd products/orangehrm && python3 -m pytest --collect-only -q
 ```
 
 ## Code standards
 
 - Lint: `ruff check .` (must pass before PR)
-- No new OrangeHRM-specific code in the root framework — it belongs in `examples/`
+- No new OrangeHRM-specific code in the root framework — it belongs in `products/`
 - No premature abstractions — extract only when there are 3+ real duplications
 - One-line comments only, and only when the WHY is non-obvious
 
@@ -34,7 +34,7 @@ pages/            Base page objects
 utils/            Shared utilities (step tracking, AI registry, locator manager)
 sentinelflux/     CLI (typer) + project scaffold templates
 config/           Generic environment profiles
-examples/         Self-contained example projects
+products/         Self-contained example projects
   orangehrm/      OrangeHRM demo — web UI + API suites
 tests/            Generic framework-level tests
 .github/          CI/CD workflows, issue templates

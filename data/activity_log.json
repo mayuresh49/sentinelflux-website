@@ -206,8 +206,8 @@
       "summary": "Generated doc + script for recruitment (OH-WEB-031 to 035 automated, 036-057 documented)",
       "output": {
         "feature": "recruitment",
-        "doc": "examples/orangehrm/docs/test_cases/web/recruitment.md",
-        "script": "examples/orangehrm/tests/web/test_recruitment.py"
+        "doc": "products/orangehrm/docs/test_cases/web/recruitment.md",
+        "script": "products/orangehrm/tests/web/test_recruitment.py"
       },
       "requires_human": false,
       "approval_id": null
@@ -223,7 +223,7 @@
       "summary": "Doc generated for booking (script skipped — hand-written exists)",
       "output": {
         "feature": "booking",
-        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/restfulbooker/docs/test_cases/api/booking.md",
+        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/restfulbooker/docs/test_cases/api/booking.md",
         "script": null
       },
       "requires_human": false,
@@ -240,7 +240,7 @@
       "summary": "Doc generated for booking (script skipped — hand-written exists)",
       "output": {
         "feature": "booking",
-        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/restfulbooker/docs/test_cases/api/booking.md",
+        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/restfulbooker/docs/test_cases/api/booking.md",
         "script": null
       },
       "requires_human": false,
@@ -257,7 +257,7 @@
       "summary": "Doc generated for booking (script skipped — hand-written exists)",
       "output": {
         "feature": "booking",
-        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/restfulbooker/docs/test_cases/api/booking.md",
+        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/restfulbooker/docs/test_cases/api/booking.md",
         "script": null
       },
       "requires_human": false,
@@ -287,8 +287,8 @@
       "summary": "Generated doc + script for Timesheets",
       "output": {
         "feature": "Timesheets",
-        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/orangehrm/docs/test_cases/api/Timesheets.md",
-        "script": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/orangehrm/tests/api/test_Timesheets.py"
+        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/docs/test_cases/api/Timesheets.md",
+        "script": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/tests/api/test_Timesheets.py"
       },
       "requires_human": false,
       "approval_id": null
@@ -304,7 +304,7 @@
       "summary": "Pipeline completed — Timesheets",
       "output": {
         "returncode": 0,
-        "log": "INFO Pipeline start — feature=Timesheets domain=api\nINFO Loaded increment: Timesheets.yaml\nINFO Doc written: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/orangehrm/docs/test_cases/api/Timesheets.md\nINFO Script written: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/orangehrm/tests/api/test_Timesheets.py\nINFO Increment log updated: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/framework_knowledge/kb_increments_log.yaml\nINFO Pipeline complete — doc=/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/orangehrm/docs/test_cases/api/Timesheets.md script=/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/orangehrm/tests/api/test_Timesheets.py"
+        "log": "INFO Pipeline start — feature=Timesheets domain=api\nINFO Loaded increment: Timesheets.yaml\nINFO Doc written: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/docs/test_cases/api/Timesheets.md\nINFO Script written: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/tests/api/test_Timesheets.py\nINFO Increment log updated: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/framework_knowledge/kb_increments_log.yaml\nINFO Pipeline complete — doc=/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/docs/test_cases/api/Timesheets.md script=/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/tests/api/test_Timesheets.py"
       },
       "requires_human": false,
       "approval_id": null
@@ -333,8 +333,8 @@
       "summary": "Generated doc + script for Timesheets",
       "output": {
         "feature": "Timesheets",
-        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/orangehrm/docs/test_cases/web/Timesheets.md",
-        "script": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/orangehrm/tests/web/test_Timesheets.py"
+        "doc": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/docs/test_cases/web/Timesheets.md",
+        "script": "/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/tests/web/test_Timesheets.py"
       },
       "requires_human": false,
       "approval_id": null
@@ -350,7 +350,7 @@
       "summary": "Pipeline completed — Timesheets",
       "output": {
         "returncode": 0,
-        "log": "INFO Pipeline start — feature=Timesheets domain=web\nINFO Loaded increment: Timesheets.yaml\nINFO Doc written: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/orangehrm/docs/test_cases/web/Timesheets.md\nINFO Script written: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/orangehrm/tests/web/test_Timesheets.py\nINFO Increment log updated: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/framework_knowledge/kb_increments_log.yaml\nINFO Pipeline complete — doc=/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/orangehrm/docs/test_cases/web/Timesheets.md script=/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/examples/orangehrm/tests/web/test_Timesheets.py"
+        "log": "INFO Pipeline start — feature=Timesheets domain=web\nINFO Loaded increment: Timesheets.yaml\nINFO Doc written: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/docs/test_cases/web/Timesheets.md\nINFO Script written: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/tests/web/test_Timesheets.py\nINFO Increment log updated: /Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/framework_knowledge/kb_increments_log.yaml\nINFO Pipeline complete — doc=/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/docs/test_cases/web/Timesheets.md script=/Users/mayureshkulkarni/Documents/Work/sentinelflux-framework/products/orangehrm/tests/web/test_Timesheets.py"
       },
       "requires_human": false,
       "approval_id": null

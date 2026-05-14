@@ -52,7 +52,7 @@ nav:
     - Step Tracking: guides/step-tracking.md
     - Failure Artifacts: guides/failure-artifacts.md
   - Examples:
-    - OrangeHRM: examples/orangehrm.md
+    - OrangeHRM: products/orangehrm.md
   - Reference:
     - Configuration: reference/configuration.md
     - Environment Profiles: reference/environments.md

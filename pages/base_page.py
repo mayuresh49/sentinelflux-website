@@ -102,7 +102,7 @@ class BasePage:
         except TimeoutError:
             _log.warning("[Tier1] Playwright timeout for '%s' — escalating to AI JS healing", description)
 
-        from utils.ai_registry import get_ai_client
+        from core.ai_registry import get_ai_client
         ai_client = get_ai_client()
         if ai_client is None:
             raise RuntimeError(

@@ -35,7 +35,7 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-15)
 
-- **Per-product Run Config** (`/config` → Run Config tab): CRUD for environment profiles (name, base URL, API URL), browser profiles (chromium/firefox/webkit, headless), device profiles (platform, appium URL, capabilities JSON), credentials (username + password env var ref), and saved defaults per product. Data stored in `framework_knowledge/config.yaml` under each product's `run_config` key.
+- **Per-product Run Config** (`/config` → Run Config tab): CRUD for environment profiles (name, base URL, API URL), browser profiles (chromium/firefox/webkit, headless), device profiles (platform, appium URL, capabilities JSON), credentials (username + password env var ref), and saved defaults per product. Data stored in `data/config.yaml` under each product's `run_config` key.
 - **Run trigger with config**: Trigger panel and schedule form now load the product's run config profiles on product selection (Alpine.js fetch to `GET /api/config/run-config/{product}`); browser shown only for web/all, device only for mobile/all; defaults pre-selected.
 - **Env injection into pytest**: `_execute_run` resolves the chosen profiles and injects `SF_ENV`, `SF_BASE_URL`, `SF_API_URL`, `SF_BROWSER`, `SF_HEADLESS`, `SF_APPIUM_URL`, `SF_DEVICE_PLATFORM`, `SF_DEVICE_CAPABILITIES` into the subprocess environment.
 - **Run history snapshot**: Each run record stores `run_config_snapshot`; shown as monospace pills in run history cards. Reruns inherit the original config.
@@ -58,7 +58,7 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## Previous Sprints (1–4, 2026-05-08)
 
-- Sprint 1: Apache 2.0 license, `pyproject.toml`, CLI (`init/run/generate`), OrangeHRM moved to `examples/`, GitHub Actions CI
+- Sprint 1: Apache 2.0 license, `pyproject.toml`, CLI (`init/run/generate`), OrangeHRM moved to `products/`, GitHub Actions CI
 - Sprint 2: mkdocs docs site, `sentinelflux doctor`, PyPI publish workflow, CONTRIBUTING.md, issue templates
 - Sprint 3: Restful Booker second example (22 tests, 13/13 API passing), `sentinelflux init` smoke-tested
 - Sprint 4: Product KB separation — per-product `ai/knowledge_base/<product>/` dirs, `--kb-dir` CLI flag
@@ -72,7 +72,7 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 3. **Run web tests** — `make restfulbooker-web` and `make orangehrm-web`
 4. **v0.1.0 tag + PyPI publish** when ready
 
-Framework-level feature backlog: `framework_knowledge/progress/backlog.yaml`
+Framework-level feature backlog: `ai/context/progress/backlog.yaml`
 
 ---
 
@@ -80,12 +80,12 @@ Framework-level feature backlog: `framework_knowledge/progress/backlog.yaml`
 
 - AI client: Mistral (cloud) or Ollama (local). Abstracted behind `AIClient` base. See `ADR-002`.
 - KB structure: YAML files in `ai/knowledge_base/<product>/` (one dir per product). Increments in `ai/knowledge_base/increments/`.
-- Per-product output: `examples/<product>/docs/test_cases/` and `examples/<product>/tests/`. Pass `--output-base examples/<product>` to orchestrator.
+- Per-product output: `products/<product>/docs/test_cases/` and `products/<product>/tests/`. Pass `--output-base products/<product>` to orchestrator.
 - Schema location: `schemas/rest_schemas/` is canonical. `api/schemas/` is dead code — do not use.
 - All magic numbers: `utils/constants.py`
 - RP API key: env var `RP_API_KEY` only, never committed.
 - `BasePage.__init__(page, locale="en-US")` — NO base_url param; subclass stores URL as instance variable.
-- `booking_client.py` lives at `examples/restfulbooker/` root (not `api/` subdir) — avoids namespace package collision under pytest.
+- `booking_client.py` lives at `products/restfulbooker/` root (not `api/` subdir) — avoids namespace package collision under pytest.
 
 ---
 
@@ -107,13 +107,13 @@ pages/base_page.py              Base POM with self-healing locators
 sentinelflux/                   CLI commands (init, run, generate, doctor)
 utils/constants.py              All magic numbers
 utils/ai_factory.py             AI client instantiation (do not duplicate in conftest)
-utils/activity_log.py           Append-only event store → framework_knowledge/activity_log.json
-utils/approval_manager.py       Human-in-the-loop approvals → framework_knowledge/pending_approvals.yaml
-utils/run_manager.py            Test run records + schedules → framework_knowledge/test_runs.json
+utils/activity_log.py           Append-only event store → data/activity_log.json
+utils/approval_manager.py       Human-in-the-loop approvals → data/pending_approvals.yaml
+utils/run_manager.py            Test run records + schedules → data/test_runs.json
 conftest.py                     Generic fixtures — NO product references
-examples/orangehrm/             OrangeHRM example (web + API + KB)
-examples/restfulbooker/         Restful Booker example (API + KB)
-framework_knowledge/            Tracking system (activity log, approvals, runs, quarantine, KB log)
+products/orangehrm/             OrangeHRM example (web + API + KB)
+products/restfulbooker/         Restful Booker example (API + KB)
+data/            Runtime data (activity log, approvals, runs, quarantine, KB log)
 dashboard/app.py                FastAPI app entry point — registers all routers
 dashboard/routers/pages.py      All UI page routes (/, /runs, /agents, /activities, /kb, etc.)
 dashboard/routers/runs.py       Test run API + trigger + schedule endpoints; env injection
@@ -138,10 +138,10 @@ dashboard/templates/partials/config_run_config.html  Run config UI partial (4 se
 
 ## Conventions (quick ref)
 
-- Test files: `examples/<product>/tests/{domain}/test_{feature_name}.py`
+- Test files: `products/<product>/tests/{domain}/test_{feature_name}.py`
 - KB per product: `ai/knowledge_base/<product>/`
-- Generated docs: `examples/<product>/docs/test_cases/{domain}/{feature_name}.md`
-- Generated scripts: `examples/<product>/tests/{domain}/test_{feature_name}.py`
+- Generated docs: `products/<product>/docs/test_cases/{domain}/{feature_name}.md`
+- Generated scripts: `products/<product>/tests/{domain}/test_{feature_name}.py`
 - Locator files: `locators/{platform}/{page_name}.json` with `primary` + `alternatives`
 - Config per env: `config/env_{qa|staging|prod}.yaml`
 - All timeouts/magic numbers: define in `utils/constants.py`, import everywhere
@@ -158,7 +158,7 @@ dashboard/templates/partials/config_run_config.html  Run config UI partial (4 se
 - Do not add magic numbers inline — add to `utils/constants.py`
 - Do not put product-specific imports in root `conftest.py`
 - Do not put `booking_client.py` inside `api/` subdir in examples — namespace collision under pytest
-- Do not write to `framework_knowledge/` files without checking for concurrent access — no file locking exists yet
+- Do not write to `data/` files without checking for concurrent access — no file locking exists yet
 
 ---
 

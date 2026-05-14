@@ -5,23 +5,23 @@
 
 # ── OrangeHRM ──────────────────────────────────────────────────────────────
 orangehrm-web:
-	cd examples/orangehrm && python3 -m pytest tests/web/ -m web -n 4 --session-login
+	cd products/orangehrm && python3 -m pytest tests/web/ -m web -n 4 --session-login
 
 orangehrm-web-serial:
-	cd examples/orangehrm && python3 -m pytest tests/web/ -m web
+	cd products/orangehrm && python3 -m pytest tests/web/ -m web
 
 orangehrm-api:
-	cd examples/orangehrm && python3 -m pytest tests/api/ -m api
+	cd products/orangehrm && python3 -m pytest tests/api/ -m api
 
 # ── Restful Booker ──────────────────────────────────────────────────────────
 restfulbooker-web:
-	cd examples/restfulbooker && python3 -m pytest tests/web/ -m web -n 4
+	cd products/restfulbooker && python3 -m pytest tests/web/ -m web -n 4
 
 restfulbooker-web-serial:
-	cd examples/restfulbooker && python3 -m pytest tests/web/ -m web
+	cd products/restfulbooker && python3 -m pytest tests/web/ -m web
 
 restfulbooker-api:
-	cd examples/restfulbooker && python3 -m pytest tests/api/ -m api
+	cd products/restfulbooker && python3 -m pytest tests/api/ -m api
 
 # ── Framework unit/integration tests ───────────────────────────────────────
 framework-tests:

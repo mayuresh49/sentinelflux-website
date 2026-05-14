@@ -21,8 +21,8 @@ from typing import Any
 
 from ai.agents.base_agent import AgentContext
 from ai.agents.quarantine_manager import QuarantineManager, _HISTORY_PATH
-from utils.activity_log import ActivityLog
-from utils.approval_manager import ApprovalManager
+from core.activity_log import ActivityLog
+from core.approval_manager import ApprovalManager
 
 from utils.paths import ROOT as _ROOT_DIR
 
@@ -250,7 +250,7 @@ class SentinelOrchestrator:
             from ai.agents.coverage_gap_agent import CoverageGapAgent
             agent = CoverageGapAgent(ai_client=self.ai_client, kb_loader=self.kb_loader, context=ctx)
             scan_dir = tests_dir or (
-                _ROOT_DIR / "examples" / ctx.product if ctx.product
+                _ROOT_DIR / "products" / ctx.product if ctx.product
                 else _ROOT_DIR / "tests" / ctx.domain
             )
             result = agent.run(tests_dir=scan_dir)

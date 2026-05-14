@@ -22,14 +22,14 @@ Each product has its own KB directory under `ai/knowledge_base/<product>/`. Alwa
 # Web test case doc for Restful Booker
 sentinelflux generate \
     --kb-dir ai/knowledge_base/restfulbooker \
-    --output examples/restfulbooker/docs/test_cases/web/home_page.md
+    --output products/restfulbooker/docs/test_cases/web/home_page.md
 
 # API test case doc for OrangeHRM
 sentinelflux generate \
     --endpoint /api/v2/leave/leaveRequests \
     --method GET \
     --kb-dir ai/knowledge_base/orangehrm \
-    --output examples/orangehrm/docs/test_cases/api/leave_requests.md
+    --output products/orangehrm/docs/test_cases/api/leave_requests.md
 ```
 
 ## Generate doc + script in one step

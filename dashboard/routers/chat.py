@@ -67,7 +67,7 @@ _TOOLS = [
             "name": "list_tests",
             "description": (
                 "Find all test script files (test_*.py / *_test.py) by scanning the filesystem. "
-                "Optionally filter by a sub-path (e.g. 'tests/api' or 'examples/restfulbooker'). "
+                "Optionally filter by a sub-path (e.g. 'tests/api' or 'products/restfulbooker'). "
                 "Use this to answer questions like 'what test scripts exist for product X'."
             ),
             "parameters": {
@@ -211,7 +211,7 @@ def _parse_embedded_tool_calls(content: str):
     return None
 
 _CONFIG_FILE = _FRAMEWORK_ROOT / "dashboard" / "chat_config.json"
-_APPROVAL_FILE = _FRAMEWORK_ROOT / "framework_knowledge" / "pending_approvals.yaml"
+_APPROVAL_FILE = _FRAMEWORK_ROOT / "data" / "pending_approvals.yaml"
 
 _SYSTEM_PROMPT = (
     "You are the SentinelFlux assistant. Answer the user's question directly using tools.\n\n"

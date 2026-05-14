@@ -3,7 +3,7 @@ ApprovalManager — unified human-in-the-loop gate for all agent proposals.
 
 Extends the QuarantineManager.pending_actions pattern to all agent output types.
 
-File: framework_knowledge/pending_approvals.yaml
+File: data/pending_approvals.yaml
 
 Structure:
   pending:
@@ -24,7 +24,7 @@ from filelock import FileLock
 from utils.paths import ROOT as _ROOT_DIR
 
 _log = logging.getLogger("sentinelflux.approval_manager")
-_APPROVALS_PATH = _ROOT_DIR / "framework_knowledge" / "pending_approvals.yaml"
+_APPROVALS_PATH = _ROOT_DIR / "data" / "pending_approvals.yaml"
 
 APPROVAL_TYPES = frozenset({
     "quarantine",

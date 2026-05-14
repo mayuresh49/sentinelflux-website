@@ -14,7 +14,7 @@ from utils.paths import ROOT as _ROOT_DIR
 router = APIRouter(prefix="/kb", tags=["knowledge-base"])
 _KB_DIR = _ROOT_DIR / "ai" / "knowledge_base"
 _INCREMENTS_DIR = _KB_DIR / "increments"
-_INCREMENTS_LOG = _ROOT_DIR / "framework_knowledge" / "kb_increments_log.yaml"
+_INCREMENTS_LOG = _ROOT_DIR / "data" / "kb_increments_log.yaml"
 
 _SKIP_NAMES = {"__pycache__", "__init__.py", "auto_test_generator.py", "kb_loader.py"}
 _TEXT_SUFFIXES = {".yaml", ".yml", ".md", ".txt"}
@@ -22,7 +22,7 @@ _TEXT_SUFFIXES = {".yaml", ".yml", ".md", ".txt"}
 
 def _list_products() -> list[str]:
     """Return active products only. Falls back to KB dir scan if config has no products entry."""
-    config_path = _ROOT_DIR / "framework_knowledge" / "config.yaml"
+    config_path = _ROOT_DIR / "data" / "config.yaml"
     if config_path.exists():
         import yaml as _yaml
         cfg = _yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
@@ -179,7 +179,7 @@ async def upload_docx(
 
     try:
         from ai.skills.docx_converter import DocxConverter
-        from utils.ai_factory import create_ai_client
+        from core.ai_factory import create_ai_client
 
         ai_client = create_ai_client({
             "enabled": True,

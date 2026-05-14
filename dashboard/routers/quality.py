@@ -7,13 +7,13 @@ from pathlib import Path
 import yaml
 from fastapi import APIRouter
 
-from utils.activity_log import ActivityLog
+from core.activity_log import ActivityLog
 from utils.paths import ROOT as _ROOT_DIR
 
 router = APIRouter(prefix="/quality", tags=["quality"])
-_EXAMPLES_DIR = _ROOT_DIR / "examples"
+_PRODUCTS_DIR = _ROOT_DIR / "products"
 _KB_DIR = _ROOT_DIR / "ai" / "knowledge_base"
-_QUARANTINE_FILE = _ROOT_DIR / "framework_knowledge" / "quarantine.yaml"
+_QUARANTINE_FILE = _ROOT_DIR / "data" / "quarantine.yaml"
 _SKIP_KB = {"__pycache__", "increments"}
 
 _alog = ActivityLog()
@@ -25,14 +25,14 @@ def _all_products() -> list[str]:
 
 
 def _script_features(product: str) -> set[str]:
-    base = _EXAMPLES_DIR / product / "tests"
+    base = _PRODUCTS_DIR / product / "tests"
     if not base.exists():
         return set()
     return {py.stem.removeprefix("test_") for py in base.rglob("test_*.py")}
 
 
 def _scripts_by_domain(product: str) -> dict[str, int]:
-    base = _EXAMPLES_DIR / product / "tests"
+    base = _PRODUCTS_DIR / product / "tests"
     if not base.exists():
         return {}
     counts: dict[str, int] = {}
@@ -45,7 +45,7 @@ def _scripts_by_domain(product: str) -> dict[str, int]:
 
 
 def _doc_features(product: str) -> set[str]:
-    base = _EXAMPLES_DIR / product / "docs" / "test_cases"
+    base = _PRODUCTS_DIR / product / "docs" / "test_cases"
     if not base.exists():
         return set()
     return {md.stem for md in base.rglob("*.md") if md.stem != "README"}
@@ -154,8 +154,8 @@ def compute_metrics(product: str | None = None) -> dict:
 
 def _all_test_functions() -> list[dict]:
     results = []
-    for py in _EXAMPLES_DIR.rglob("test_*.py"):
-        parts = py.relative_to(_EXAMPLES_DIR).parts
+    for py in _PRODUCTS_DIR.rglob("test_*.py"):
+        parts = py.relative_to(_PRODUCTS_DIR).parts
         if len(parts) < 4 or parts[1] != "tests":
             continue
         p, d = parts[0], parts[2]

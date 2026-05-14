@@ -88,26 +88,26 @@ skip_step() {
 # ── Step definitions ──────────────────────────────────────────────────────────
 
 # 1. Restful Booker — API
-run_step "Restful Booker API" "examples/restfulbooker" \
+run_step "Restful Booker API" "products/restfulbooker" \
   "$PYTHON" -m pytest tests/api/ -m api -q --tb=short
 
 # 2. Restful Booker — Web
 if $SKIP_WEB; then
   skip_step "Restful Booker Web"
 else
-  run_step "Restful Booker Web" "examples/restfulbooker" \
+  run_step "Restful Booker Web" "products/restfulbooker" \
     "$PYTHON" -m pytest tests/web/ -m web -n 4 --tb=short
 fi
 
 # 3. OrangeHRM — API
-run_step "OrangeHRM API" "examples/orangehrm" \
+run_step "OrangeHRM API" "products/orangehrm" \
   "$PYTHON" -m pytest tests/api/ -m api -q --tb=short
 
 # 4. OrangeHRM — Web
 if $SKIP_WEB; then
   skip_step "OrangeHRM Web"
 else
-  run_step "OrangeHRM Web" "examples/orangehrm" \
+  run_step "OrangeHRM Web" "products/orangehrm" \
     "$PYTHON" -m pytest tests/web/ -m web -n 4 --tb=short
 fi
 

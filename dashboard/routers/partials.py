@@ -12,8 +12,8 @@ from fastapi import APIRouter, BackgroundTasks, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from utils.activity_log import ActivityLog
-from utils.approval_manager import ApprovalManager
+from core.activity_log import ActivityLog
+from core.approval_manager import ApprovalManager
 from dashboard.routers.approval_dispatch import dispatch as _dispatch, _load_quarantine, _save_quarantine
 from dashboard.routers.kb import _list_products
 
@@ -54,7 +54,7 @@ async def activities_partial(
 @router.get("/docs/content", response_class=HTMLResponse)
 async def doc_content(product: str, domain: str, feature: str):
     import markdown
-    path = _ROOT_DIR / "examples" / product / "docs" / "test_cases" / domain / f"{feature}.md"
+    path = _ROOT_DIR / "products" / product / "docs" / "test_cases" / domain / f"{feature}.md"
     if not path.exists():
         return HTMLResponse('<p class="text-red-500 text-sm">Document not found.</p>')
     content = markdown.markdown(
@@ -66,7 +66,7 @@ async def doc_content(product: str, domain: str, feature: str):
 
 @router.get("/scripts/content", response_class=HTMLResponse)
 async def script_content(product: str, domain: str, feature: str):
-    path = _ROOT_DIR / "examples" / product / "tests" / domain / f"test_{feature}.py"
+    path = _ROOT_DIR / "products" / product / "tests" / domain / f"test_{feature}.py"
     if not path.exists():
         return HTMLResponse('<p class="text-red-500 text-sm p-4">Script not found.</p>')
     code = html_lib.escape(path.read_text(encoding="utf-8"))
@@ -239,7 +239,7 @@ async def quarantine_remove(
 @router.post("/agents/{name}/config", response_class=HTMLResponse)
 async def save_agent_config(name: str, request: Request):
     from dashboard.agent_meta import AGENT_META
-    _CONFIG_PATH = _ROOT_DIR / "framework_knowledge" / "agent_config.yaml"
+    _CONFIG_PATH = _ROOT_DIR / "ai" / "context" / "agent_config.yaml"
     meta = AGENT_META.get(name, {})
     if not meta.get("config_params"):
         return HTMLResponse('<span class="text-slate-400 text-xs">No configurable params</span>')

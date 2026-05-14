@@ -7,13 +7,13 @@ from fastapi import APIRouter, HTTPException
 from utils.paths import ROOT as _ROOT_DIR
 
 router = APIRouter(prefix="/scripts", tags=["scripts"])
-_EXAMPLES_DIR = _ROOT_DIR / "examples"
+_PRODUCTS_DIR = _ROOT_DIR / "products"
 
 
 def _find_scripts(product: str | None = None, domain: str | None = None) -> list[dict]:
     results = []
-    for py in _EXAMPLES_DIR.rglob("test_*.py"):
-        parts = py.relative_to(_EXAMPLES_DIR).parts
+    for py in _PRODUCTS_DIR.rglob("test_*.py"):
+        parts = py.relative_to(_PRODUCTS_DIR).parts
         # Expected: <product>/tests/<domain>/test_<feature>.py
         if len(parts) < 4 or parts[1] != "tests":
             continue
@@ -39,7 +39,7 @@ def list_scripts(product: str | None = None, domain: str | None = None):
 
 @router.get("/{product}/{domain}/{feature}")
 def get_script(product: str, domain: str, feature: str):
-    path = _EXAMPLES_DIR / product / "tests" / domain / f"test_{feature}.py"
+    path = _PRODUCTS_DIR / product / "tests" / domain / f"test_{feature}.py"
     if not path.exists():
         raise HTTPException(status_code=404, detail="Script not found")
     return {

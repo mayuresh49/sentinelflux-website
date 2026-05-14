@@ -83,8 +83,8 @@ Use `claude-sonnet-4-6` as default; `claude-haiku-4-5-20251001` for high-volume,
 
 ## Key Files
 
-- `framework_knowledge/RESUME.md` — **read this first** for any new session
-- `framework_knowledge/progress/backlog.yaml` — ordered work items
+- `ai/context/RESUME.md` — **read this first** for any new session
+- `ai/context/progress/backlog.yaml` — ordered work items
 - `ai/knowledge_base/kb_loader.py` — KB ingestion (base + increments)
 - `ai/knowledge_base/increments/` — drop feature YAMLs here for AI pipeline
 - `ai/clients/mistral_client.py` — LLM client
