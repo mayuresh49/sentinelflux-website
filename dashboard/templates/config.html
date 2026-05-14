@@ -20,14 +20,14 @@
 
   <div>
     <h1 class="text-2xl font-bold text-slate-900">Configuration</h1>
-    <p class="text-sm text-slate-500 mt-0.5">Labels, priorities, custom fields, and test type settings</p>
+    <p class="text-sm text-slate-500 mt-0.5">Test types, priorities, custom fields, and test type distribution</p>
   </div>
 
   <div x-data="{ tab: 'labels' }">
 
     <!-- Tab bar -->
     <div class="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit flex-wrap">
-      {% for t, label in [('labels','Labels'),('priorities','Priorities'),('fields','Custom Fields'),('testtypes','Test Types'),('assignments','Test Assignments')] %}
+      {% for t, label in [('labels','Test type'),('priorities','Priorities'),('fields','Custom Fields'),('testtypes','Distribution'),('assignments','Test Assignments')] %}
       <button @click="tab='{{ t }}'"
               :class="tab==='{{ t }}' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
               class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">{{ label }}</button>
@@ -38,8 +38,8 @@
     <div x-show="tab==='labels'" x-cloak class="mt-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
         <div class="px-5 py-4 border-b border-slate-100">
-          <h2 class="font-semibold text-slate-800">Labels</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Categorize tests — carried over to generated scripts</p>
+          <h2 class="font-semibold text-slate-800">Test type</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Categorize tests (sanity, regression, smoke…) — carried over to generated scripts</p>
         </div>
         <div id="labels-list">
           {% include "partials/config_labels.html" %}
@@ -67,7 +67,7 @@
             </div>
             <button type="submit"
                     class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-1.5 transition-colors">
-              Add Label
+              Add Test type
             </button>
           </form>
         </div>
@@ -166,15 +166,16 @@
     <div x-show="tab==='assignments'" x-cloak class="mt-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
         <div class="border-b border-slate-100">
-          <div class="px-5 py-4 flex items-center gap-4 flex-wrap">
-            <h2 class="font-semibold text-slate-800 shrink-0">Test Assignments</h2>
-            <form id="asgn-filter-form"
-                  hx-get="/ui/config/assignments"
-                  hx-target="#assignments-list"
-                  hx-swap="innerHTML"
-                  hx-trigger="change, input from:input[name='search'] delay:400ms, input from:input[name='filter_owner'] delay:400ms"
-                  class="flex items-center gap-2 ml-auto flex-wrap">
-              <input type="hidden" name="product" value="{{ filter_product }}">
+          <!-- Single form wrapping all filters so HTMX serialises everything together -->
+          <form hx-get="/ui/config/assignments"
+                hx-target="#assignments-list"
+                hx-swap="innerHTML"
+                hx-trigger="change, input from:input[name='search'] delay:400ms, input from:input[name='filter_owner'] delay:400ms"
+                class="px-5 py-3 space-y-2.5">
+            <input type="hidden" name="product" value="{{ filter_product }}">
+            <!-- Row 1: title + search + priority + owner + jira -->
+            <div class="flex items-center gap-3 flex-wrap">
+              <h2 class="font-semibold text-slate-800 shrink-0 mr-1">Test Assignments</h2>
               <input type="text" name="search" placeholder="Search test name…"
                      class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-44">
               <select name="filter_priority"
@@ -191,20 +192,21 @@
                        class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
                 Has Jira
               </label>
-            </form>
-          </div>
-          {% if labels %}
-          <div class="px-5 pb-3 flex items-center gap-2 flex-wrap">
-            <span class="text-xs font-medium text-slate-400 shrink-0">Labels:</span>
-            {% for lbl in labels %}
-            <label class="flex items-center gap-1 cursor-pointer" form="asgn-filter-form">
-              <input type="checkbox" name="filter_labels" value="{{ lbl.name }}" form="asgn-filter-form"
-                     class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
-              <span class="text-xs px-1.5 py-0.5 rounded-full font-medium {{ color_map.get(lbl.color, 'bg-slate-100 text-slate-500') }}">{{ lbl.name }}</span>
-            </label>
-            {% endfor %}
-          </div>
-          {% endif %}
+            </div>
+            <!-- Row 2: test type checkboxes (inside same form) -->
+            {% if labels %}
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-medium text-slate-400 shrink-0">Test type:</span>
+              {% for lbl in labels %}
+              <label class="flex items-center gap-1 cursor-pointer">
+                <input type="checkbox" name="filter_labels" value="{{ lbl.name }}"
+                       class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-300">
+                <span class="text-xs px-1.5 py-0.5 rounded-full font-medium {{ color_map.get(lbl.color, 'bg-slate-100 text-slate-500') }}">{{ lbl.name }}</span>
+              </label>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </form>
         </div>
         <div id="assignments-list">
           {% include "partials/config_assignments.html" %}
