@@ -17,19 +17,25 @@ JSON API:
     /api/activities, /api/approvals, /api/docs, /api/scripts, /api/agents, /api/health
     Interactive docs at /api/docs (FastAPI Swagger UI)
 """
+import os
+import secrets
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 
 from dashboard.routers import activities, approvals, docs, scripts, agents
 from dashboard.routers import pages, partials
 from dashboard.routers import kb as kb_router, pipeline as pipeline_router
 from dashboard.routers import chat as chat_router, quality as quality_router
 from dashboard.routers import config_router
+from dashboard.routers import auth as auth_router
 
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
+# Use a stable secret from env so sessions survive restarts; fall back to a generated one.
+_SESSION_SECRET = os.environ.get("SF_SESSION_SECRET") or secrets.token_hex(32)
 
 app = FastAPI(
     title="SentinelFlux Dashboard",
@@ -40,6 +46,8 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
 )
 
+# SessionMiddleware must be added before CORSMiddleware
+app.add_middleware(SessionMiddleware, secret_key=_SESSION_SECRET, https_only=False)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -49,6 +57,9 @@ app.add_middleware(
 
 # Static assets
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
+
+# Auth (login / logout — no prefix, routes are /login and /logout)
+app.include_router(auth_router.router)
 
 # HTML UI pages and HTMX partials
 app.include_router(pages.router)

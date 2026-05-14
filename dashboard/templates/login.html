@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign in — SentinelFlux</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+
+  <div class="w-full max-w-sm">
+
+    <!-- Logo / title -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 mb-4">
+        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-slate-900">SentinelFlux</h1>
+      <p class="text-sm text-slate-500 mt-1">Sign in to your workspace</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+
+      {% if error %}
+      <div class="mb-5 flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+        <svg class="w-4 h-4 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+        <p class="text-sm text-red-700">{{ error }}</p>
+      </div>
+      {% endif %}
+
+      <form method="post" action="/login" class="space-y-5">
+        <input type="hidden" name="next" value="{{ next }}">
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+          <input type="email" name="email" required autofocus
+                 placeholder="you@example.com"
+                 class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5
+                        focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400
+                        placeholder:text-slate-400">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+          <input type="password" name="password" required
+                 placeholder="••••••••"
+                 class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2.5
+                        focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400
+                        placeholder:text-slate-400">
+        </div>
+
+        <button type="submit"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm
+                       rounded-lg py-2.5 transition-colors">
+          Sign in
+        </button>
+      </form>
+    </div>
+
+    <p class="text-center text-xs text-slate-400 mt-6">
+      Passwords are set by an admin in Config → Users.
+    </p>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+from fastapi import APIRouter, Form, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+from passlib.context import CryptContext
+
+router = APIRouter(tags=["auth"])
+templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
+
+_pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+_FK_DIR = Path(__file__).resolve().parent.parent.parent / "framework_knowledge"
+_CONFIG_PATH = _FK_DIR / "config.yaml"
+
+
+def _load_users() -> list[dict]:
+    import yaml
+    if not _CONFIG_PATH.exists():
+        return []
+    cfg = yaml.safe_load(_CONFIG_PATH.read_text(encoding="utf-8")) or {}
+    return cfg.get("users", [])
+
+
+def get_session_user(request: Request) -> dict | None:
+    """Return the logged-in user dict, or None if not authenticated."""
+    email = request.session.get("user_email")
+    if not email:
+        return None
+    return next((u for u in _load_users() if u.get("email") == email), None)
+
+
+def require_user(request: Request) -> dict:
+    """FastAPI dependency — redirects to /login if not authenticated."""
+    user = get_session_user(request)
+    if user is None:
+        # raise a redirect; caller catches it via exception handler
+        from fastapi import HTTPException
+        raise HTTPException(status_code=307, headers={"Location": "/login"})
+    return user
+
+
+def user_products(user: dict, all_products: list[str]) -> list[str]:
+    """Return the product list visible to this user."""
+    if user.get("admin"):
+        return all_products
+    assigned = user.get("products") or []
+    # keep filesystem order, filter to assigned
+    return [p for p in all_products if p in assigned]
+
+
+@router.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request, next: str = "/"):
+    if get_session_user(request):
+        return RedirectResponse(next, status_code=302)
+    return templates.TemplateResponse(request, "login.html", {"error": None, "next": next})
+
+
+@router.post("/login", response_class=HTMLResponse)
+async def login_submit(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    next: str = Form(default="/"),
+):
+    users = _load_users()
+    user = next((u for u in users if u.get("email", "").lower() == email.strip().lower()), None)
+
+    if not user:
+        return templates.TemplateResponse(request, "login.html",
+                                          {"error": "Invalid email or password.", "next": next})
+
+    pw_hash = user.get("password_hash", "")
+    if not pw_hash:
+        return templates.TemplateResponse(request, "login.html",
+                                          {"error": "Account has no password set. Ask an admin to set one.", "next": next})
+
+    if not _pwd_ctx.verify(password, pw_hash):
+        return templates.TemplateResponse(request, "login.html",
+                                          {"error": "Invalid email or password.", "next": next})
+
+    request.session["user_email"] = user["email"]
+    return RedirectResponse(next if next.startswith("/") else "/", status_code=302)
+
+
+@router.get("/logout")
+async def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse("/login", status_code=302)

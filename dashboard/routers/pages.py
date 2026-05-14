@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from collections import defaultdict
@@ -12,6 +12,7 @@ from utils.activity_log import ActivityLog
 from utils.approval_manager import ApprovalManager
 from dashboard.routers.approval_dispatch import derive_feature
 from dashboard.routers.kb import _list_products
+from dashboard.routers.auth import get_session_user, user_products
 
 router = APIRouter(tags=["pages"])
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
@@ -20,8 +21,24 @@ _alog = ActivityLog()
 _am = ApprovalManager()
 
 
-def _ctx(**kwargs) -> dict:
-    return {"pending_count": len(_am.pending()), "all_products": _list_products(), **kwargs}
+def _require_auth(request: Request) -> dict:
+    """Dependency: return session user or redirect to /login."""
+    user = get_session_user(request)
+    if user is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=307, headers={"Location": f"/login?next={request.url.path}"})
+    return user
+
+
+def _ctx(request: Request, current_user: dict, **kwargs) -> dict:
+    all_prods = _list_products()
+    visible = user_products(current_user, all_prods)
+    return {
+        "pending_count": len(_am.pending()),
+        "all_products": visible,
+        "current_user": current_user,
+        **kwargs,
+    }
 
 
 def _queued_gaps() -> list[dict]:
@@ -108,34 +125,49 @@ async def approvals(request: Request, product: str | None = None):
 @router.get("/docs", response_class=HTMLResponse)
 async def docs_page(request: Request, product: str | None = None):
     from dashboard.routers.docs import _find_docs
-    from dashboard.routers.config_router import assignments_summary_by_feature, _load_config
     all_docs = _find_docs()
     products = sorted(set(d["product"] for d in all_docs))
     domains = sorted(set(d["domain"] for d in all_docs))
     docs = _find_docs(product=product or None)
-    cfg = _load_config()
     return templates.TemplateResponse(request, "docs.html", context=_ctx(
         docs=docs, products=products, domains=domains,
-        assignments_summary=assignments_summary_by_feature(),
-        cfg_labels=cfg.get("labels", []),
-        cfg_priorities=cfg.get("priorities", []),
     ))
 
 
 @router.get("/scripts", response_class=HTMLResponse)
 async def scripts_page(request: Request, product: str | None = None):
     from dashboard.routers.scripts import _find_scripts
-    from dashboard.routers.config_router import assignments_summary_by_feature, _load_config
     all_scripts = _find_scripts()
     products = sorted(set(s["product"] for s in all_scripts))
     domains = sorted(set(s["domain"] for s in all_scripts))
     scripts = _find_scripts(product=product or None)
-    cfg = _load_config()
     return templates.TemplateResponse(request, "scripts.html", context=_ctx(
         scripts=scripts, products=products, domains=domains,
-        assignments_summary=assignments_summary_by_feature(),
-        cfg_labels=cfg.get("labels", []),
-        cfg_priorities=cfg.get("priorities", []),
+    ))
+
+
+@router.get("/assignments", response_class=HTMLResponse)
+async def assignments_page(request: Request):
+    from dashboard.routers.config_router import _load_config, _load_assignments, _all_tests
+    cfg = _load_config()
+    assignments = _load_assignments()
+    tests = _all_tests()
+    products = sorted(set(t["product"] for t in tests))
+    return templates.TemplateResponse(request, "assignments.html", context=_ctx(
+        cfg=cfg,
+        labels=cfg.get("labels", []),
+        priorities=cfg.get("priorities", []),
+        custom_fields=cfg.get("custom_fields", []),
+        users=cfg.get("users", []),
+        tests=tests,
+        assignments=assignments,
+        products=products,
+        search="",
+        filter_product="",
+        filter_labels=[],
+        filter_priority="",
+        filter_owner="",
+        filter_jira_exists="",
     ))
 
 

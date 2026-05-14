@@ -1,0 +1,57 @@
+{% set color_map = {
+  "emerald": "bg-emerald-100 text-emerald-700",
+  "indigo":  "bg-indigo-100 text-indigo-700",
+  "amber":   "bg-amber-100 text-amber-700",
+  "red":     "bg-red-100 text-red-700",
+  "slate":   "bg-slate-100 text-slate-500",
+  "cyan":    "bg-cyan-100 text-cyan-700",
+  "purple":  "bg-purple-100 text-purple-700",
+  "orange":  "bg-orange-100 text-orange-700",
+} %}
+{% if bulk_result is defined and bulk_result %}
+<div class="px-4 py-2.5 flex items-start gap-2 bg-emerald-50 border-b border-emerald-100">
+  <svg class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+  </svg>
+  <div>
+    <p class="text-xs font-medium text-emerald-700">{{ bulk_result.updated }} test{{ 's' if bulk_result.updated != 1 else '' }} updated</p>
+    {% if bulk_result.skipped %}
+    <p class="text-xs text-amber-600 mt-0.5">{{ bulk_result.skipped }} skipped:
+      <span class="font-mono">{{ bulk_result.skipped_names | join(', ') }}{% if bulk_result.skipped > 10 %}…{% endif %}</span>
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% if tests %}
+{% for t in tests %}
+{% set asgn = assignments.get(t.name, {}) %}
+<button data-test="{{ t.name }}"
+        hx-get="/ui/assignments/form?test_name={{ t.name | urlencode }}"
+        hx-target="#assignment-panel"
+        hx-swap="innerHTML"
+        @click="selected = '{{ t.name }}'"
+        :class="selected === '{{ t.name }}' ? 'bg-indigo-50 border-l-2 border-indigo-500' : 'hover:bg-slate-50 border-l-2 border-transparent'"
+        class="w-full text-left px-4 py-3 transition-colors">
+  <p class="text-xs font-mono text-slate-700 truncate">{{ t.name }}</p>
+  <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+    <span class="text-xs text-indigo-500 font-medium">{{ t.product }}</span>
+    <span class="text-xs text-slate-400">{{ t.domain }}</span>
+    {% for lbl_name in asgn.get('labels', []) %}
+      {% set lbl = labels | selectattr('name', 'eq', lbl_name) | first %}
+      {% if lbl %}
+      <span class="text-xs px-1.5 py-0.5 rounded-full font-medium {{ color_map.get(lbl.color, 'bg-slate-100 text-slate-500') }}">{{ lbl.name }}</span>
+      {% endif %}
+    {% endfor %}
+    {% if asgn.get('priority') %}
+      {% set pri = priorities | selectattr('name', 'eq', asgn.priority) | first %}
+      {% if pri %}
+      <span class="text-xs px-1.5 py-0.5 rounded font-medium {{ color_map.get(pri.color, 'bg-slate-100 text-slate-500') }}">{{ pri.name }}</span>
+      {% endif %}
+    {% endif %}
+  </div>
+</button>
+{% endfor %}
+{% else %}
+<div class="px-4 py-10 text-center text-sm text-slate-400">No tests found.</div>
+{% endif %}
