@@ -66,7 +66,7 @@
           <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide w-24"></th>
         </tr>
       </thead>
-      <tbody id="activities-body" class="divide-y divide-slate-50">
+      <tbody id="activities-body" x-data="{ openRows: {} }" class="divide-y divide-slate-50">
         {% include "partials/activities_rows.html" %}
       </tbody>
     </table>
@@ -101,10 +101,10 @@
 
 {% block scripts %}
 <script>
-  // Re-initialise Alpine on every HTMX swap into the activities table
+  // Re-initialise Alpine on new rows after HTMX swap (tbody itself persists with its x-data scope)
   document.body.addEventListener('htmx:afterSettle', function (evt) {
     if (evt.detail.target && evt.detail.target.id === 'activities-body') {
-      Alpine.initTree(evt.detail.target);
+      Array.from(evt.detail.target.children).forEach(child => Alpine.initTree(child));
     }
   });
 </script>

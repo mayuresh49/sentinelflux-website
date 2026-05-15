@@ -85,11 +85,7 @@ class ResultAnalyzerAgent(BaseAgent):
     def _analyze(self, test: dict, artifacts_dir: Path | None) -> dict:
         test_id = test.get("nodeid", "unknown")
         max_err = self.ctx.get("max_error_chars", 3000)
-        error = (
-            test.get("call", {}).get("longrepr", "")
-            or test.get("longrepr", "")
-            or ""
-        )
+        error = self._build_error_text(test)
 
         artifacts_text = ""
         if artifacts_dir:
@@ -123,6 +119,43 @@ class ResultAnalyzerAgent(BaseAgent):
             }
 
         return {"test_id": test_id, **parsed}
+
+    @staticmethod
+    def _build_error_text(test: dict) -> str:
+        """Collect all available error context from a pytest-json-report test node."""
+        parts: list[str] = []
+
+        # Quick crash summary (short exception message)
+        crash = test.get("call", {}).get("crash") or test.get("crash") or {}
+        if crash.get("message"):
+            parts.append(f"Error: {crash['message']}")
+
+        # Main call traceback
+        longrepr = (
+            test.get("call", {}).get("longrepr", "")
+            or test.get("longrepr", "")
+            or ""
+        )
+        if longrepr:
+            parts.append(longrepr)
+
+        # Setup failure (e.g. fixture error)
+        setup_repr = test.get("setup", {}).get("longrepr", "")
+        if setup_repr:
+            parts.append(f"Setup failure:\n{setup_repr}")
+
+        # Teardown failure
+        teardown_repr = test.get("teardown", {}).get("longrepr", "")
+        if teardown_repr:
+            parts.append(f"Teardown failure:\n{teardown_repr}")
+
+        # Captured log output (present when log_cli or caplog is active)
+        for stage in ("setup", "call", "teardown"):
+            captured = test.get(stage, {}).get("caplog", "")
+            if captured:
+                parts.append(f"Captured log ({stage}):\n{captured}")
+
+        return "\n\n".join(parts) or "(no error details captured)"
 
     def _read_artifacts(self, artifact_dir: Path) -> str:
         max_chars = self.ctx.get("max_artifact_chars", 2000)

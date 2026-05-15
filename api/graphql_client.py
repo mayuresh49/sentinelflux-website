@@ -1,4 +1,6 @@
 import json
+import shlex
+import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -11,6 +13,10 @@ class GraphQLClient:
     def __init__(self, endpoint: str, logger=None):
         self.endpoint = endpoint
         self.logger = logger
+        self._request_log: list[dict] = []
+
+    def clear_log(self) -> None:
+        self._request_log.clear()
 
     def _load_json(self, relative_path: str) -> Dict[str, Any]:
         path = ROOT_DIR / relative_path
@@ -45,6 +51,26 @@ class GraphQLClient:
             payload["variables"].update(extra_payload)
 
         self._log(f"GraphQL execute: {query_name}")
+        t0 = time.monotonic()
         response = requests.post(self.endpoint, json=payload, headers=headers)
+        elapsed_ms = round((time.monotonic() - t0) * 1000)
         self._log(f"Response status: {response.status_code}")
+
+        hdrs = headers or {}
+        parts = ["curl", "-X", "POST"]
+        for k, v in hdrs.items():
+            parts += ["-H", f"{k}: {v}"]
+        parts += ["-H", "Content-Type: application/json", "-d", json.dumps(payload), self.endpoint]
+        curl = " ".join(shlex.quote(p) for p in parts)
+        try:
+            resp_body = response.json()
+        except Exception:
+            resp_body = response.text
+        self._request_log.append({
+            "status": response.status_code,
+            "elapsed_ms": elapsed_ms,
+            "curl": curl,
+            "response": resp_body,
+        })
+
         return response

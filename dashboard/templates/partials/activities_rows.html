@@ -3,7 +3,7 @@
 {% if entries %}
 {% for e in entries %}
 
-<tr class="hover:bg-slate-50/60 transition-colors" x-data="{ open: false }">
+<tr class="hover:bg-slate-50/60 transition-colors">
   <td class="px-4 py-3 text-xs text-slate-400 whitespace-nowrap font-mono">{{ e.timestamp[5:16].replace('T',' ') }}</td>
   <td class="px-4 py-3 text-sm font-medium text-slate-700 whitespace-nowrap">{{ e.agent | replace('_',' ') | title }}</td>
   <td class="px-4 py-3">
@@ -26,15 +26,15 @@
       <span class="text-xs bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-medium">Needs Review</span>
       {% endif %}
       {% if e.output %}
-      <button @click="open = !open"
+      <button @click="openRows['{{ e.id }}'] = !openRows['{{ e.id }}']"
               class="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
-              x-text="open ? 'Hide Details' : 'View Details'"></button>
+              x-text="openRows['{{ e.id }}'] ? 'Hide Details' : 'View Details'"></button>
       {% endif %}
     </div>
   </td>
 </tr>
 {% if e.output %}
-<tr x-show="open" x-cloak class="bg-slate-50/80">
+<tr x-show="openRows['{{ e.id }}']" x-cloak class="bg-slate-50/80">
   <td colspan="7" class="px-4 py-3">
     <pre class="text-xs text-slate-600 overflow-auto max-h-48 bg-white rounded-lg border border-slate-100 p-3 font-mono">{{ e.output | tojson(indent=2) }}</pre>
   </td>

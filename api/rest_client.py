@@ -1,4 +1,6 @@
 import json
+import shlex
+import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -13,6 +15,10 @@ class RestClient:
         self.base_url = base_url.rstrip("/")
         self.logger = logger
         self._data_dir = Path(data_dir) if data_dir else _DEFAULT_DATA_DIR
+        self._request_log: list[dict] = []
+
+    def clear_log(self) -> None:
+        self._request_log.clear()
 
     def _load_json(self, relative_path: str) -> Dict[str, Any]:
         path = self._data_dir / relative_path
@@ -71,13 +77,50 @@ class RestClient:
         if data:
             self._log(f"Payload: {data}")
 
+        t0 = time.monotonic()
         response = requests.request(method=method, url=url, json=data, params=params, headers=headers)
+        elapsed_ms = round((time.monotonic() - t0) * 1000)
+
         self._log(f"Response code: {response.status_code}")
+        self._request_log.append(self._build_log_entry(method, url, data, params, headers or {}, response, elapsed_ms))
 
         if schema_name:
             self._validate_schema(response, schema_name)
 
         return response
+
+    @staticmethod
+    def _build_log_entry(
+        method: str,
+        url: str,
+        data: Optional[dict],
+        params: Optional[dict],
+        headers: dict,
+        response: requests.Response,
+        elapsed_ms: int,
+    ) -> dict:
+        parts = ["curl", "-X", method.upper()]
+        for k, v in headers.items():
+            parts += ["-H", f"{k}: {v}"]
+        if data:
+            parts += ["-H", "Content-Type: application/json", "-d", json.dumps(data)]
+        if params:
+            qs = "&".join(f"{k}={v}" for k, v in params.items())
+            url = f"{url}?{qs}"
+        parts.append(url)
+        curl = " ".join(shlex.quote(p) for p in parts)
+
+        try:
+            resp_body = response.json()
+        except Exception:
+            resp_body = response.text
+
+        return {
+            "status": response.status_code,
+            "elapsed_ms": elapsed_ms,
+            "curl": curl,
+            "response": resp_body,
+        }
 
     def get(
         self,
