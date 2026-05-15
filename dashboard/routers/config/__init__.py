@@ -38,6 +38,7 @@ async def config_page(request: Request, product: Optional[str] = None,
     for _p in cfg.get("products", []):
         tc = _products._product_test_count(_p["name"])
         enriched_products.append({**_p, "has_tests": tc > 0, "test_count": tc})
+    from core.audit_logger import recent as _audit_recent
     return templates.TemplateResponse(request, "config.html", context={
         "pending_count": len(_am.pending()),
         "all_products": visible_products,
@@ -52,6 +53,7 @@ async def config_page(request: Request, product: Optional[str] = None,
         "tests": tests,
         "assignments": assignments,
         "search": "",
+        "audit_events": [e for e in _audit_recent(100) if e.get("type") == "config_change"],
     })
 
 

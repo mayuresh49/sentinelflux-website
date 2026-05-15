@@ -140,7 +140,7 @@
         <span class="w-2 h-2 rounded-full shrink-0 {{ 'bg-emerald-500' if s.enabled else 'bg-slate-300' }}"></span>
         <div class="flex-1 min-w-[180px]">
           <p class="text-sm font-medium text-slate-800">{{ s.name }}</p>
-          <p class="text-xs text-slate-500">{{ s.product }} / {{ s.domain }}{% if s.get('module') %} / {{ s.module }}{% endif %} · {{ '%02d:%02d' % (s.hour, s.minute) }} on {{ s.days | join(', ') }}{% if s.get('environment') %} · env: {{ s.environment }}{% endif %}{% if s.get('browser') %} · {{ s.browser }}{% endif %}{% if s.get('device') %} · {{ s.device }}{% endif %}</p>
+          <p class="text-xs text-slate-500">{{ s.product }} / {{ s.domain }}{% if s.get('module') %} / {{ s.module }}{% endif %} · {{ '%02d:%02d UTC' % (s.hour, s.minute) }} on {{ s.days | join(', ') }}{% if s.get('environment') %} · env: {{ s.environment }}{% endif %}{% if s.get('browser') %} · {{ s.browser }}{% endif %}{% if s.get('device') %} · {{ s.device }}{% endif %}</p>
           {% if s.last_run_at %}
           <p class="text-[10px] text-slate-400">Last run: {{ s.last_run_at[5:16].replace('T',' ') }}</p>
           {% endif %}
@@ -249,7 +249,7 @@
           </div>
         </template>
         <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Time (HH:MM)</label>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Time (UTC, HH:MM)</label>
           <input type="time" x-model="newSched.time"
                  class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
         </div>
@@ -460,6 +460,31 @@
   {% else %}
   <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-6 py-16 text-center">
     <p class="text-slate-400 text-sm">No runs yet. Click <strong>Run Now</strong> to trigger your first suite.</p>
+  </div>
+  {% endif %}
+
+  <!-- Pagination -->
+  {% if total_pages > 1 %}
+  <div class="flex items-center justify-between px-1 py-2 text-xs text-slate-500">
+    <span>{{ total }} run{{ 's' if total != 1 else '' }} · page {{ page }} of {{ total_pages }}</span>
+    <div class="flex items-center gap-1">
+      {% if page > 1 %}
+      <a href="?page={{ page - 1 }}{{ ('&product=' + filter_product) if filter_product else '' }}{{ ('&domain=' + filter_domain) if filter_domain else '' }}{{ ('&status=' + filter_status) if filter_status else '' }}"
+         class="px-2 py-1 rounded border border-slate-200 hover:bg-slate-50">← Prev</a>
+      {% endif %}
+      {% for p in range(1, total_pages + 1) %}
+      {% if total_pages <= 7 or p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+      <a href="?page={{ p }}{{ ('&product=' + filter_product) if filter_product else '' }}{{ ('&domain=' + filter_domain) if filter_domain else '' }}{{ ('&status=' + filter_status) if filter_status else '' }}"
+         class="px-2 py-1 rounded border {{ 'bg-indigo-600 text-white border-indigo-600' if p == page else 'border-slate-200 hover:bg-slate-50' }}">{{ p }}</a>
+      {% elif (p == page - 3 or p == page + 3) %}
+      <span class="px-1">…</span>
+      {% endif %}
+      {% endfor %}
+      {% if page < total_pages %}
+      <a href="?page={{ page + 1 }}{{ ('&product=' + filter_product) if filter_product else '' }}{{ ('&domain=' + filter_domain) if filter_domain else '' }}{{ ('&status=' + filter_status) if filter_status else '' }}"
+         class="px-2 py-1 rounded border border-slate-200 hover:bg-slate-50">Next →</a>
+      {% endif %}
+    </div>
   </div>
   {% endif %}
 

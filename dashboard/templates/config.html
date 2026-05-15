@@ -44,6 +44,9 @@
       <button @click="tab='runconfig'"
               :class="tab==='runconfig' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
               class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">Run Configuration</button>
+      <button @click="tab='auditlog'"
+              :class="tab==='auditlog' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
+              class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">Audit Log</button>
     </div>
 
     <!-- ── PRODUCTS ── -->
@@ -266,6 +269,44 @@
           </div>
           {% else %}
           <p class="text-sm text-slate-400">No products configured yet. Add a product first.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── AUDIT LOG ── -->
+    <div x-show="tab==='auditlog'" x-cloak class="mt-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100">
+          <h2 class="font-semibold text-slate-800">Configuration Audit Log</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Most recent 100 configuration changes</p>
+        </div>
+        <div class="overflow-x-auto">
+          {% if audit_events %}
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-100">
+                <th class="px-4 py-2 text-left font-medium text-slate-500 whitespace-nowrap">Time (UTC)</th>
+                <th class="px-4 py-2 text-left font-medium text-slate-500">User</th>
+                <th class="px-4 py-2 text-left font-medium text-slate-500">Section</th>
+                <th class="px-4 py-2 text-left font-medium text-slate-500">Detail</th>
+                <th class="px-4 py-2 text-left font-medium text-slate-500">IP</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+              {% for ev in audit_events %}
+              <tr class="hover:bg-slate-50/50">
+                <td class="px-4 py-2 text-slate-400 whitespace-nowrap font-mono">{{ ev.timestamp[:19].replace('T', ' ') }}</td>
+                <td class="px-4 py-2 text-slate-600">{{ ev.user_name or ev.user_email or '—' }}</td>
+                <td class="px-4 py-2"><span class="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded text-[11px] font-medium">{{ ev.section or '—' }}</span></td>
+                <td class="px-4 py-2 text-slate-700">{{ ev.detail }}</td>
+                <td class="px-4 py-2 text-slate-400 font-mono">{{ ev.ip or '—' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <div class="px-5 py-10 text-center text-sm text-slate-400">No configuration changes recorded yet.</div>
           {% endif %}
         </div>
       </div>

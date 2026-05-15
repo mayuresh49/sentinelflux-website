@@ -26,6 +26,8 @@ _alog = ActivityLog()
 _am = ApprovalManager()
 
 
+_ACT_PAGE_SIZE = 50
+
 @router.get("/activities", response_class=HTMLResponse)
 async def activities_partial(
     request: Request,
@@ -33,6 +35,7 @@ async def activities_partial(
     domain: Optional[str] = None,
     product: Optional[str] = None,
     requires_human: Optional[str] = None,
+    page: int = 1,
 ):
     rh: Optional[bool] = None
     if requires_human == "true":
@@ -40,14 +43,25 @@ async def activities_partial(
     elif requires_human == "false":
         rh = False
 
-    entries = _alog.filter(
+    all_filtered = list(reversed(_alog.filter(
         agent=agent or None,
         domain=domain or None,
         product=product or None,
         requires_human=rh,
-    )
+    )))
+    total = len(all_filtered)
+    total_pages = max(1, (total + _ACT_PAGE_SIZE - 1) // _ACT_PAGE_SIZE)
+    page = max(1, min(page, total_pages))
     return templates.TemplateResponse(request, "partials/activities_rows.html", context={
-        "entries": list(reversed(entries))[:200],
+        "request": request,
+        "entries": all_filtered[(page - 1) * _ACT_PAGE_SIZE: page * _ACT_PAGE_SIZE],
+        "page": page,
+        "total_pages": total_pages,
+        "total": total,
+        "filter_agent": agent or "",
+        "filter_domain": domain or "",
+        "filter_product": product or "",
+        "filter_requires_human": requires_human or "",
     })
 
 

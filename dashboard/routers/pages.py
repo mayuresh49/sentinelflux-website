@@ -4,7 +4,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from core.activity_log import ActivityLog
@@ -98,6 +98,8 @@ async def home(request: Request, product: str | None = None,
     ))
 
 
+_PAGE_SIZE = 50
+
 @router.get("/activities", response_class=HTMLResponse)
 async def activities(
     request: Request,
@@ -105,6 +107,7 @@ async def activities(
     agent: str | None = None,
     domain: str | None = None,
     requires_human: str | None = None,
+    page: int = 1,
     current_user: dict = Depends(_require_auth),
 ):
     all_entries = _alog.all()
@@ -119,18 +122,24 @@ async def activities(
         rh = True
     elif requires_human == "false":
         rh = False
-    entries = _alog.filter(
+    all_filtered = list(reversed(_alog.filter(
         agent=agent or None,
         domain=domain or None,
         product=product or None,
         requires_human=rh,
-    )
+    )))
+    total = len(all_filtered)
+    total_pages = max(1, (total + _PAGE_SIZE - 1) // _PAGE_SIZE)
+    page = max(1, min(page, total_pages))
     return templates.TemplateResponse(request, "activities.html", context=_ctx(
         request, current_user,
         agents=agents,
         domains=domains,
         products=products,
-        entries=list(reversed(entries))[:200],
+        entries=all_filtered[(page - 1) * _PAGE_SIZE: page * _PAGE_SIZE],
+        page=page,
+        total_pages=total_pages,
+        total=total,
     ))
 
 
@@ -333,6 +342,7 @@ async def runs_page(
     product: str | None = None,
     domain: str | None = None,
     status: str | None = None,
+    page: int = 1,
     current_user: dict = Depends(_require_auth),
 ):
     from core.run_manager import RunManager
@@ -349,14 +359,20 @@ async def runs_page(
         runs = [r for r in runs if r.get("status") == status]
     schedules = rm.all_schedules()
     any_running = any(r.get("status") in ("running", "queued") for r in rm.all_runs())
+    total = len(runs)
+    total_pages = max(1, (total + _PAGE_SIZE - 1) // _PAGE_SIZE)
+    page = max(1, min(page, total_pages))
     return templates.TemplateResponse(request, "runs.html", context=_ctx(
         request, current_user,
-        runs=runs[:100],
+        runs=runs[(page - 1) * _PAGE_SIZE: page * _PAGE_SIZE],
         schedules=schedules,
         any_running=any_running,
         filter_product=product or "",
         filter_domain=domain or "",
         filter_status=status or "",
+        page=page,
+        total_pages=total_pages,
+        total=total,
     ))
 
 
@@ -366,6 +382,7 @@ async def failures_page(
     run_id: str | None = None,
     domain: str | None = None,
     category: str | None = None,
+    page: int = 1,
     current_user: dict = Depends(_require_auth),
 ):
     from core.run_manager import RunManager
@@ -415,16 +432,20 @@ async def failures_page(
 
     counts = Counter(f["mapped_category"] for f in failures)
     total_failures = len(failures)
+    total_pages = max(1, (total_failures + _PAGE_SIZE - 1) // _PAGE_SIZE)
+    page = max(1, min(page, total_pages))
 
     return templates.TemplateResponse(request, "failures.html", context=_ctx(
         request, current_user,
-        failures=failures,
+        failures=failures[(page - 1) * _PAGE_SIZE: page * _PAGE_SIZE],
         counts=counts,
         total_failures=total_failures,
         cat_styles=_cat_styles,
         filter_run_id=run_id or "",
         filter_domain=domain or "",
         filter_category=category or "",
+        page=page,
+        total_pages=total_pages,
     ))
 
 
@@ -466,17 +487,25 @@ async def kb_page(request: Request, product: str | None = None,
 
 
 @router.get("/admin/users", response_class=HTMLResponse)
-async def admin_users_page(request: Request, current_user: dict = Depends(_require_auth)):
+async def admin_users_page(request: Request, audit_page: int = 1,
+                           current_user: dict = Depends(_require_auth)):
     if not current_user.get("admin"):
-        raise HTTPException(status_code=403, headers={"Location": "/"})
+        return RedirectResponse("/", status_code=302)
     from dashboard.routers.config_router import _load_config
     from core.audit_logger import recent as _audit_recent
     cfg = _load_config()
+    all_events = _audit_recent(500)
+    total_audit = len(all_events)
+    audit_total_pages = max(1, (total_audit + _PAGE_SIZE - 1) // _PAGE_SIZE)
+    audit_page = max(1, min(audit_page, audit_total_pages))
     return templates.TemplateResponse(request, "admin_users.html", context=_ctx(
         request, current_user,
         users=cfg.get("users", []),
         all_products=[p["name"] for p in cfg.get("products", []) if p.get("active", True)],
-        audit_events=_audit_recent(200),
+        audit_events=all_events[(audit_page - 1) * _PAGE_SIZE: audit_page * _PAGE_SIZE],
+        audit_page=audit_page,
+        audit_total_pages=audit_total_pages,
+        total_audit=total_audit,
     ))
 
 

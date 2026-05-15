@@ -86,16 +86,15 @@ def _audit_config(request: Request, section: str, detail: str) -> None:
     try:
         from dashboard.routers.auth import get_session_user
         from core.audit_logger import log as _audit_log
-        user = get_session_user(request)
-        if user:
-            _audit_log(
-                "config_change",
-                user.get("email", ""),
-                user.get("name", ""),
-                detail,
-                ip=request.client.host if request.client else "",
-                section=section,
-            )
+        user = get_session_user(request) or {}
+        _audit_log(
+            "config_change",
+            user.get("email", ""),
+            user.get("name", ""),
+            detail,
+            ip=request.client.host if request.client else "",
+            section=section,
+        )
     except Exception:
         pass
 
