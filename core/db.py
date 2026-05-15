@@ -120,6 +120,17 @@ _DDL = [
     )""",
     "CREATE INDEX IF NOT EXISTS idx_history_test_id ON run_history(test_id)",
     "CREATE INDEX IF NOT EXISTS idx_history_date ON run_history(date)",
+    """CREATE TABLE IF NOT EXISTS pipeline_jobs (
+        id TEXT PRIMARY KEY,
+        started TEXT NOT NULL,
+        finished TEXT,
+        product TEXT,
+        feature TEXT,
+        domain TEXT,
+        increment_file TEXT NOT NULL DEFAULT '',
+        status TEXT NOT NULL DEFAULT 'running',
+        output TEXT NOT NULL DEFAULT ''
+    )""",
 ]
 
 

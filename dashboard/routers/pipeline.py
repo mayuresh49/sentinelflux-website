@@ -1,23 +1,20 @@
 """Pipeline trigger and background job tracking."""
 from __future__ import annotations
 
-import json
 import subprocess
 import sys
 import uuid
 from datetime import datetime, timezone
-from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks
-from filelock import FileLock
 from pydantic import BaseModel
 
 from core.activity_log import ActivityLog
+from core.db import get_conn
 from utils.paths import ROOT as _ROOT_DIR
 
 router = APIRouter(prefix="/pipeline", tags=["pipeline"])
 
-_JOBS_PATH = _ROOT_DIR / "data" / "pipeline_jobs.json"
 _alog = ActivityLog()
 _MAX_JOBS = 50
 
@@ -26,44 +23,56 @@ class TriggerBody(BaseModel):
     product: str
     feature: str
     domain: str
-    increment_file: str = ""          # optional — pass --increment instead of --feature
+    increment_file: str = ""
     local_url: str = "http://localhost:11434"
     doc_model: str = "mistral:7b-instruct-v0.3-q4_K_M"
     script_model: str = "qwen2.5-coder:14b-instruct-q4_K_M"
     skip_script: bool = False
-    source: str = ""                  # optional — OpenAPI spec path/URL, service code path
+    source: str = ""
 
 
 @router.post("/trigger")
 def trigger(body: TriggerBody, background_tasks: BackgroundTasks):
     job_id = str(uuid.uuid4())
-    _write_job({
-        "id": job_id,
-        "started": datetime.now(timezone.utc).isoformat(),
-        "product": body.product,
-        "feature": body.feature,
-        "domain": body.domain,
-        "increment_file": body.increment_file,
-        "status": "running",
-        "output": "",
-        "finished": None,
-    })
+    conn = get_conn()
+    conn.execute(
+        """INSERT INTO pipeline_jobs
+           (id, started, finished, product, feature, domain, increment_file, status, output)
+           VALUES (?, ?, NULL, ?, ?, ?, ?, 'running', '')""",
+        (
+            job_id,
+            datetime.now(timezone.utc).isoformat(),
+            body.product, body.feature, body.domain, body.increment_file,
+        ),
+    )
+    # Enforce max jobs cap
+    conn.execute(
+        "DELETE FROM pipeline_jobs WHERE id NOT IN "
+        "(SELECT id FROM pipeline_jobs ORDER BY started DESC LIMIT ?)",
+        (_MAX_JOBS,),
+    )
+    conn.commit()
     background_tasks.add_task(_run, job_id, body)
     return {"job_id": job_id, "status": "started"}
 
 
 @router.get("/jobs")
 def list_jobs():
-    return {"jobs": list(reversed(_load_jobs()))[:_MAX_JOBS]}
+    rows = get_conn().execute(
+        "SELECT * FROM pipeline_jobs ORDER BY started DESC LIMIT ?", (_MAX_JOBS,)
+    ).fetchall()
+    return {"jobs": [dict(r) for r in rows]}
 
 
 @router.get("/jobs/{job_id}")
 def get_job(job_id: str):
-    job = next((j for j in _load_jobs() if j["id"] == job_id), None)
-    if not job:
+    row = get_conn().execute(
+        "SELECT * FROM pipeline_jobs WHERE id = ?", (job_id,)
+    ).fetchone()
+    if not row:
         from fastapi import HTTPException
         raise HTTPException(404, "Job not found")
-    return job
+    return dict(row)
 
 
 # ── internals ──────────────────────────────────────────────────────────────
@@ -132,32 +141,10 @@ def _run(job_id: str, body: TriggerBody):
         _patch_job(job_id, "failed", str(exc))
 
 
-def _load_jobs() -> list[dict[str, Any]]:
-    if not _JOBS_PATH.exists():
-        return []
-    with _JOBS_PATH.open(encoding="utf-8") as f:
-        return json.load(f).get("jobs", [])
-
-
-def _write_job(job: dict[str, Any]):
-    jobs = _load_jobs()
-    jobs.append(job)
-    if len(jobs) > _MAX_JOBS:
-        jobs = jobs[-_MAX_JOBS:]
-    _JOBS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with FileLock(str(_JOBS_PATH) + ".lock"):
-        with _JOBS_PATH.open("w", encoding="utf-8") as f:
-            json.dump({"jobs": jobs}, f, indent=2)
-
-
 def _patch_job(job_id: str, status: str, output: str):
-    jobs = _load_jobs()
-    for j in jobs:
-        if j["id"] == job_id:
-            j["status"] = status
-            j["output"] = output
-            j["finished"] = datetime.now(timezone.utc).isoformat()
-            break
-    with FileLock(str(_JOBS_PATH) + ".lock"):
-        with _JOBS_PATH.open("w", encoding="utf-8") as f:
-            json.dump({"jobs": jobs}, f, indent=2)
+    conn = get_conn()
+    conn.execute(
+        "UPDATE pipeline_jobs SET status = ?, output = ?, finished = ? WHERE id = ?",
+        (status, output, datetime.now(timezone.utc).isoformat(), job_id),
+    )
+    conn.commit()
