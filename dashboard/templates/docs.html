@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Docs{% endblock %}
 
+{% block header_filter %}<div></div>{% endblock %}
+
 {% block content %}
 <div class="flex flex-col space-y-4" style="height: calc(100vh - 3.5rem);">
 
@@ -85,12 +87,12 @@
               </div>
               <p class="text-xs text-slate-700 mt-0.5 leading-snug line-clamp-2">{{ tc.title }}</p>
               <span class="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded font-medium
-                {% if tc.type == 'positive' %}bg-emerald-50 text-emerald-700
-                {% elif tc.type == 'negative' %}bg-red-50 text-red-600
-                {% elif tc.type == 'edge' %}bg-amber-50 text-amber-700
-                {% elif tc.type == 'security' %}bg-purple-50 text-purple-700
+                {% if tc.heuristic == 'positive' %}bg-emerald-50 text-emerald-700
+                {% elif tc.heuristic == 'negative' %}bg-red-50 text-red-600
+                {% elif tc.heuristic == 'edge' %}bg-amber-50 text-amber-700
+                {% elif tc.heuristic == 'security' %}bg-purple-50 text-purple-700
                 {% else %}bg-slate-100 text-slate-500{% endif %}">
-                {{ tc.type }}
+                {{ tc.heuristic }}
               </span>
             </button>
             {% endfor %}

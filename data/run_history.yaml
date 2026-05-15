@@ -3,7 +3,25 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
   tests/unit/test_utils.py::TestActivityLog::test_append_returns_id:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
   - status: passed
     date: '2026-05-14'
     duration: 0.0
@@ -11,7 +29,25 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
   tests/unit/test_utils.py::TestActivityLog::test_filter_by_product:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
   - status: passed
     date: '2026-05-14'
     duration: 0.001
@@ -19,7 +55,25 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 2.677
+  - status: passed
+    date: '2026-05-14'
+    duration: 2.653
+  - status: passed
+    date: '2026-05-14'
+    duration: 2.658
+  - status: passed
+    date: '2026-05-14'
+    duration: 2.639
   tests/unit/test_utils.py::TestActivityLog::test_empty_path_returns_empty:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
   - status: passed
     date: '2026-05-14'
     duration: 0.0
@@ -27,7 +81,25 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
   tests/unit/test_utils.py::TestActivityLog::test_requires_human_filter:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
   - status: passed
     date: '2026-05-14'
     duration: 0.001
@@ -35,7 +107,25 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
   tests/unit/test_utils.py::TestApprovalManager::test_resolve_approve:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.002
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.002
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
   - status: passed
     date: '2026-05-14'
     duration: 0.002
@@ -43,7 +133,25 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
   tests/unit/test_utils.py::TestApprovalManager::test_pending_type_filter:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.002
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.002
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.002
   - status: passed
     date: '2026-05-14'
     duration: 0.002
@@ -51,7 +159,25 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
   tests/unit/test_utils.py::TestApprovalManager::test_empty_path_returns_empty:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
   - status: passed
     date: '2026-05-14'
     duration: 0.0
@@ -59,7 +185,31 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.001
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
   tests/unit/test_utils.py::TestRunManager::test_patch_run:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.0
   - status: passed
     date: '2026-05-14'
     duration: 0.001
@@ -67,11 +217,38 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.001
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.001
   tests/unit/test_utils.py::TestRunManager::test_max_runs_cap:
   - status: passed
     date: '2026-05-14'
     duration: 0.197
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.191
   tests/unit/test_utils.py::TestRunManagerIsDue::test_due_when_conditions_match:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
   - status: passed
     date: '2026-05-14'
     duration: 0.0
@@ -79,7 +256,25 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
   tests/unit/test_utils.py::TestRunManagerIsDue::test_not_due_wrong_hour:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
   - status: passed
     date: '2026-05-14'
     duration: 0.0
@@ -87,11 +282,73 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
   tests/unit/test_utils.py::TestRunManagerIsDue::test_not_due_when_disabled:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
   - status: passed
     date: '2026-05-14'
     duration: 0.0
   tests/unit/test_utils.py::TestRunManagerIsDue::test_due_ran_yesterday:
   - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/api/test_graphql_api.py::test_countries_query:
+  - status: passed
+    date: '2026-05-14'
+    duration: 0.482
+  tests/api/test_rest_api.py::test_create_booking:
+  - status: passed
+    date: '2026-05-14'
+    duration: 1.342
+  tests/api/test_rest_api.py::test_get_booking:
+  - status: passed
+    date: '2026-05-14'
+    duration: 2.433
+  tests/web/test_web_ui.py::test_fill_and_verify_form[chromium]:
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.0
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/web/test_web_ui.py::test_submit_form[chromium]:
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/web/test_web_ui.py::test_optional_fields_can_be_left_blank[chromium]:
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/web/test_web_ui.py::test_invalid_name_characters_are_retained[chromium]:
+  - status: failed
+    date: '2026-05-14'
+    duration: 0.0
+  tests/web/test_web_ui.py::test_long_message_input[chromium]:
+  - status: failed
     date: '2026-05-14'
     duration: 0.0

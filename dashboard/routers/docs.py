@@ -30,7 +30,7 @@ def _parse_tc_index(content: str) -> list[dict]:
             tcs.append({
                 "id": parts[0],
                 "title": parts[1],
-                "type": parts[2],
+                "heuristic": parts[2],
                 "status": parts[3],
                 "script": parts[4],
             })
