@@ -64,35 +64,35 @@ class QuarantineManager:
         Write candidates to pending_actions. Returns number of new proposals added.
         Call apply_pending() to promote them (after human review or CI gate).
         """
-        data = self._load_quarantine()
-        pending: list[dict] = data.setdefault("pending_actions", [])
         added = 0
 
-        for c in quarantine_candidates:
-            if not self._is_quarantined(data, c["test_id"]) and not self._is_pending(pending, c["test_id"]):
-                pending.append({
-                    "action": "quarantine",
-                    "test_id": c["test_id"],
-                    "reason": c["rule"],
-                    "fail_rate": c["fail_rate"],
-                    "proposed_date": str(date.today()),
-                })
-                added += 1
-                _log.info("Proposed quarantine: %s (%.0f%% fail rate)", c["test_id"], c["fail_rate"] * 100)
+        def mutate(data: dict) -> None:
+            nonlocal added
+            pending: list[dict] = data.setdefault("pending_actions", [])
+            for c in quarantine_candidates:
+                if not self._is_quarantined(data, c["test_id"]) and not self._is_pending(pending, c["test_id"]):
+                    pending.append({
+                        "action": "quarantine",
+                        "test_id": c["test_id"],
+                        "reason": c["rule"],
+                        "fail_rate": c["fail_rate"],
+                        "proposed_date": str(date.today()),
+                    })
+                    added += 1
+                    _log.info("Proposed quarantine: %s (%.0f%% fail rate)", c["test_id"], c["fail_rate"] * 100)
+            for c in unquarantine_candidates:
+                if self._is_quarantined(data, c["test_id"]) and not self._is_pending(pending, c["test_id"]):
+                    pending.append({
+                        "action": "unquarantine",
+                        "test_id": c["test_id"],
+                        "reason": c["rule"],
+                        "consecutive_passes": c["consecutive_passes"],
+                        "proposed_date": str(date.today()),
+                    })
+                    added += 1
+                    _log.info("Proposed unquarantine: %s (%d consecutive passes)", c["test_id"], c["consecutive_passes"])
 
-        for c in unquarantine_candidates:
-            if self._is_quarantined(data, c["test_id"]) and not self._is_pending(pending, c["test_id"]):
-                pending.append({
-                    "action": "unquarantine",
-                    "test_id": c["test_id"],
-                    "reason": c["rule"],
-                    "consecutive_passes": c["consecutive_passes"],
-                    "proposed_date": str(date.today()),
-                })
-                added += 1
-                _log.info("Proposed unquarantine: %s (%d consecutive passes)", c["test_id"], c["consecutive_passes"])
-
-        self._save_quarantine(data)
+        self._mutate_quarantine(mutate)
         return added
 
     def apply_pending(self) -> dict[str, list[str]]:
@@ -100,59 +100,61 @@ class QuarantineManager:
         Promote all pending_actions to active quarantine/release.
         Returns summary of applied changes.
         """
-        data = self._load_quarantine()
-        pending: list[dict] = data.pop("pending_actions", [])
-        quarantined: list[dict] = data.setdefault("quarantined", [])
         applied: dict[str, list[str]] = {"quarantined": [], "unquarantined": []}
 
-        for action in pending:
-            tid = action["test_id"]
-            if action["action"] == "quarantine":
-                quarantined.append({
-                    "test_id": tid,
-                    "reason": action["reason"],
-                    "quarantined_date": str(date.today()),
-                    "consecutive_passes": 0,
-                })
-                applied["quarantined"].append(tid)
-                _log.info("Quarantined: %s", tid)
-            elif action["action"] == "unquarantine":
-                quarantined[:] = [q for q in quarantined if q["test_id"] != tid]
-                applied["unquarantined"].append(tid)
-                _log.info("Unquarantined: %s", tid)
+        def mutate(data: dict) -> None:
+            pending: list[dict] = data.pop("pending_actions", [])
+            quarantined: list[dict] = data.setdefault("quarantined", [])
+            for action in pending:
+                tid = action["test_id"]
+                if action["action"] == "quarantine":
+                    quarantined.append({
+                        "test_id": tid,
+                        "reason": action["reason"],
+                        "quarantined_date": str(date.today()),
+                        "consecutive_passes": 0,
+                    })
+                    applied["quarantined"].append(tid)
+                    _log.info("Quarantined: %s", tid)
+                elif action["action"] == "unquarantine":
+                    quarantined[:] = [q for q in quarantined if q["test_id"] != tid]
+                    applied["unquarantined"].append(tid)
+                    _log.info("Unquarantined: %s", tid)
 
-        self._save_quarantine(data)
+        self._mutate_quarantine(mutate)
         return applied
 
     # ── run history ────────────────────────────────────────────────────────
 
     def record_run(self, test_id: str, status: str, meta: dict | None = None):
         """Append one run result to run_history.yaml."""
-        history = self._load_history()
-        entry: dict = {"status": status, "date": str(date.today())}
-        if meta:
-            entry.update(meta)
-        history.setdefault("tests", {}).setdefault(test_id, []).append(entry)
-        cutoff = str(date.today() - timedelta(days=_HISTORY_WINDOW_DAYS))
-        history["tests"][test_id] = [e for e in history["tests"][test_id] if e.get("date", "") >= cutoff]
-        self._save_history(history)
+        def mutate(history: dict) -> None:
+            entry: dict = {"status": status, "date": str(date.today())}
+            if meta:
+                entry.update(meta)
+            history.setdefault("tests", {}).setdefault(test_id, []).append(entry)
+            cutoff = str(date.today() - timedelta(days=_HISTORY_WINDOW_DAYS))
+            history["tests"][test_id] = [e for e in history["tests"][test_id] if e.get("date", "") >= cutoff]
+
+        self._mutate_history(mutate)
 
     def record_run_bulk(self, results: list[dict]):
         """Batch-record results. Each item: {test_id, status, meta?}."""
-        history = self._load_history()
-        tests = history.setdefault("tests", {})
-        today = str(date.today())
-        for r in results:
-            entry: dict = {"status": r["status"], "date": today}
-            if "meta" in r:
-                entry.update(r["meta"])
-            tests.setdefault(r["test_id"], []).append(entry)
-        cutoff = str(date.today() - timedelta(days=_HISTORY_WINDOW_DAYS))
-        for tid in list(tests.keys()):
-            tests[tid] = [e for e in tests[tid] if e.get("date", "") >= cutoff]
-            if not tests[tid]:
-                del tests[tid]
-        self._save_history(history)
+        def mutate(history: dict) -> None:
+            tests = history.setdefault("tests", {})
+            today = str(date.today())
+            for r in results:
+                entry: dict = {"status": r["status"], "date": today}
+                if "meta" in r:
+                    entry.update(r["meta"])
+                tests.setdefault(r["test_id"], []).append(entry)
+            cutoff = str(date.today() - timedelta(days=_HISTORY_WINDOW_DAYS))
+            for tid in list(tests.keys()):
+                tests[tid] = [e for e in tests[tid] if e.get("date", "") >= cutoff]
+                if not tests[tid]:
+                    del tests[tid]
+
+        self._mutate_history(mutate)
 
     # ── read side ──────────────────────────────────────────────────────────
 
@@ -167,28 +169,36 @@ class QuarantineManager:
     # ── internal ───────────────────────────────────────────────────────────
 
     def _load_quarantine(self) -> dict:
+        """Read-only load — no lock (safe for reads, callers must not use for write paths)."""
         if not self._qpath.exists():
             return {}
         with self._qpath.open(encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
 
-    def _save_quarantine(self, data: dict):
-        self._qpath.parent.mkdir(parents=True, exist_ok=True)
-        with FileLock(str(self._qpath) + ".lock"):
-            with self._qpath.open("w", encoding="utf-8") as f:
-                yaml.dump(data, f, default_flow_style=False, sort_keys=False)
-
     def _load_history(self) -> dict:
+        """Read-only load — no lock (safe for reads, callers must not use for write paths)."""
         if not self._hpath.exists():
             return {"tests": {}}
         with self._hpath.open(encoding="utf-8") as f:
             return yaml.safe_load(f) or {"tests": {}}
 
-    def _save_history(self, data: dict):
+    def _mutate_quarantine(self, mutator) -> None:
+        """Atomic read-modify-write for quarantine.yaml under FileLock."""
+        self._qpath.parent.mkdir(parents=True, exist_ok=True)
+        with FileLock(str(self._qpath) + ".lock"):
+            data = self._load_quarantine()
+            mutator(data)
+            with self._qpath.open("w", encoding="utf-8") as f:
+                yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+
+    def _mutate_history(self, mutator) -> None:
+        """Atomic read-modify-write for run_history.yaml under FileLock."""
         self._hpath.parent.mkdir(parents=True, exist_ok=True)
         with FileLock(str(self._hpath) + ".lock"):
+            history = self._load_history()
+            mutator(history)
             with self._hpath.open("w", encoding="utf-8") as f:
-                yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+                yaml.dump(history, f, default_flow_style=False, sort_keys=False)
 
     @staticmethod
     def _is_quarantined(data: dict, test_id: str) -> bool:

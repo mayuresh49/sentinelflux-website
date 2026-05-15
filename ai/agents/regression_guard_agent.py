@@ -78,6 +78,15 @@ class RegressionGuardAgent(BaseAgent):
             self.ctx.domain,
             len(regressions), len(new_failures), len(fixed), len(new_tests),
         )
+        # Test identity is based on nodeid which changes when tests are renamed or
+        # moved. A renamed failing test appears as one "fixed" + one "new_failure".
+        # This is expected behaviour — not a bug — but worth knowing during triage.
+        if new_failures and fixed:
+            self._log.debug(
+                "%d new_failure(s) and %d fixed in same run — if tests were recently "
+                "renamed, these may be the same tests under new nodeids",
+                len(new_failures), len(fixed),
+            )
 
         if regressions:
             for r in regressions:

@@ -233,9 +233,11 @@ class SentinelOrchestrator:
                 status="success",
                 summary=f"{len(regs)} regression(s) detected" if regs else "No regressions",
                 output=result,
-                requires_human=bool(regs),
+                requires_human=bool(approval_ids),
             )
-            if regs:
+            # Only add a blocker when we have valid approval IDs — an empty list means
+            # every approval submission failed and the UI has nothing to link to.
+            if approval_ids:
                 blockers.append({
                     "type": "regression",
                     "count": len(regs),
@@ -285,6 +287,7 @@ class SentinelOrchestrator:
                 output=result,
                 requires_human=bool(gaps),
             )
+            # Only add a blocker when we have valid approval IDs.
             if approval_ids:
                 blockers.append({
                     "type": "coverage_gap",
