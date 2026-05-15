@@ -317,7 +317,7 @@ async def runs_page(
 @router.get("/failures", response_class=HTMLResponse)
 async def failures_page(
     request: Request,
-    product: str | None = None,
+    run_id: str | None = None,
     domain: str | None = None,
     category: str | None = None,
     current_user: dict = Depends(_require_auth),
@@ -325,8 +325,6 @@ async def failures_page(
     from core.run_manager import RunManager
     rm = RunManager()
     visible = user_products(current_user, _list_products())
-    if product and product not in visible:
-        product = None
 
     _cat_map = {
         "assertion": "Product Bug",
@@ -349,7 +347,7 @@ async def failures_page(
     for run in all_runs:
         if run.get("status") not in ("completed", "failed"):
             continue
-        if product and run.get("product") != product:
+        if run_id and run["id"] != run_id:
             continue
         if domain and run.get("domain") != domain:
             continue
@@ -378,10 +376,9 @@ async def failures_page(
         counts=counts,
         total_failures=total_failures,
         cat_styles=_cat_styles,
-        filter_product=product or "",
+        filter_run_id=run_id or "",
         filter_domain=domain or "",
         filter_category=category or "",
-        all_products=visible,
     ))
 
 

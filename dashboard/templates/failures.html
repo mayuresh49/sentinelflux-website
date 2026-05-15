@@ -20,7 +20,7 @@
   <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
     {% for label, card_cls, count_cls in card_defs %}
     {% set n = counts.get(label, 0) %}
-    <a href="{{ request.url.path }}?{% if filter_product %}product={{ filter_product }}&{% endif %}{% if filter_domain %}domain={{ filter_domain }}&{% endif %}category={{ label }}"
+    <a href="{{ request.url.path }}?{% if filter_run_id %}run_id={{ filter_run_id }}&{% endif %}{% if filter_domain %}domain={{ filter_domain }}&{% endif %}category={{ label }}"
        class="block border rounded-xl p-4 {{ card_cls }} hover:shadow-sm transition-shadow {{ 'ring-2 ring-offset-1 ring-slate-400' if filter_category == label else '' }}">
       <p class="text-xs font-medium opacity-70">{{ label }}</p>
       <p class="text-2xl font-bold mt-1 {{ count_cls }} px-2 py-0.5 rounded-lg inline-block">{{ n }}</p>
@@ -32,17 +32,9 @@
   <div class="flex items-center gap-3 flex-wrap">
     <span class="text-xs font-medium text-slate-500">{{ total_failures }} failure{{ 's' if total_failures != 1 else '' }}
       {% if filter_category %} · {{ filter_category }}{% endif %}
-      {% if filter_product %} · {{ filter_product }}{% endif %}
       {% if filter_domain %} · {{ filter_domain }}{% endif %}
     </span>
     <div class="ml-auto flex items-center gap-2 flex-wrap">
-      <select onchange="applyFilter('product', this.value)"
-              class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200">
-        <option value="">All products</option>
-        {% for p in all_products %}
-        <option value="{{ p }}" {{ 'selected' if filter_product == p else '' }}>{{ p }}</option>
-        {% endfor %}
-      </select>
       <select onchange="applyFilter('domain', this.value)"
               class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200">
         <option value="">All domains</option>
@@ -59,7 +51,7 @@
         <option value="Script/Data"  {{ 'selected' if filter_category == 'Script/Data' else '' }}>Script/Data</option>
         <option value="Unanalyzed"   {{ 'selected' if filter_category == 'Unanalyzed' else '' }}>Unanalyzed</option>
       </select>
-      {% if filter_product or filter_domain or filter_category %}
+      {% if filter_domain or filter_category %}
       <a href="/failures" class="text-xs text-slate-400 hover:text-slate-600 underline">Clear</a>
       {% endif %}
     </div>
@@ -131,7 +123,7 @@
 
   {% else %}
   <div class="bg-white rounded-xl border border-slate-100 shadow-sm px-6 py-16 text-center">
-    {% if filter_category or filter_product or filter_domain %}
+    {% if filter_category or filter_domain %}
     <p class="text-slate-400 text-sm">No failures match the current filters.</p>
     <a href="/failures" class="text-xs text-indigo-500 hover:underline mt-1 inline-block">Clear filters</a>
     {% else %}
