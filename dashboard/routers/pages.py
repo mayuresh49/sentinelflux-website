@@ -470,11 +470,13 @@ async def admin_users_page(request: Request, current_user: dict = Depends(_requi
     if not current_user.get("admin"):
         raise HTTPException(status_code=403, headers={"Location": "/"})
     from dashboard.routers.config_router import _load_config
+    from core.audit_logger import recent as _audit_recent
     cfg = _load_config()
     return templates.TemplateResponse(request, "admin_users.html", context=_ctx(
         request, current_user,
         users=cfg.get("users", []),
         all_products=[p["name"] for p in cfg.get("products", []) if p.get("active", True)],
+        audit_events=_audit_recent(200),
     ))
 
 

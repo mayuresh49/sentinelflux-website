@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 
 import bcrypt as _bcrypt
+import yaml as _yaml
 from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -93,10 +95,47 @@ async def login_submit(
                                           {"error": "Invalid email or password.", "next": next_url})
 
     request.session["user_email"] = matched["email"]
+
+    # Persist last login timestamp
+    try:
+        cfg_data = _yaml.safe_load(_CONFIG_PATH.read_text(encoding="utf-8")) or {}
+        for _u in cfg_data.get("users", []):
+            if _u.get("email", "").lower() == matched["email"].lower():
+                _u["last_login_at"] = datetime.now(timezone.utc).isoformat()
+                break
+        _CONFIG_PATH.write_text(
+            _yaml.dump(cfg_data, default_flow_style=False, allow_unicode=True),
+            encoding="utf-8",
+        )
+    except Exception:
+        pass
+
+    # Audit
+    try:
+        from core.audit_logger import log as _audit
+        _audit(
+            "login", matched["email"], matched.get("name", ""),
+            f"Logged in",
+            ip=request.client.host if request.client else "",
+        )
+    except Exception:
+        pass
+
     return RedirectResponse(next_url if next_url.startswith("/") else "/", status_code=302)
 
 
 @router.get("/logout")
 async def logout(request: Request):
+    try:
+        user = get_session_user(request)
+        if user:
+            from core.audit_logger import log as _audit
+            _audit(
+                "logout", user["email"], user.get("name", ""),
+                "Logged out",
+                ip=request.client.host if request.client else "",
+            )
+    except Exception:
+        pass
     request.session.clear()
     return RedirectResponse("/login", status_code=302)

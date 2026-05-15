@@ -16,6 +16,7 @@ from dashboard.routers.config._helpers import (
     _KB_PRODUCTS_DIR,
     _PRODUCTS_DIR,
     _SAFE_PRODUCT_RE,
+    _audit_config,
     _load_config,
     _save_assignments,
     _save_config,
@@ -147,6 +148,7 @@ async def products_add(
         (_KB_PRODUCTS_DIR / name).mkdir(parents=True, exist_ok=True)
         (_PRODUCTS_DIR / name / "tests").mkdir(parents=True, exist_ok=True)
         (_PRODUCTS_DIR / name / "pages").mkdir(parents=True, exist_ok=True)
+        _audit_config(request, "Products", f"Added product '{name}'")
     return _render_products(request, cfg)
 
 
@@ -154,6 +156,7 @@ async def products_add(
 async def products_delete(request: Request, name: str = Form(...)):
     name = name.strip()
     cfg = _load_config()
+    _audit_config(request, "Products", f"Deleted product '{name}' and all associated data")
     _purge_product_data(name, cfg)
     return _render_products(request, cfg, flash=f"'{name}' and all associated data have been permanently deleted.")
 
@@ -167,4 +170,5 @@ async def products_set_active(request: Request, name: str = Form(...), active: s
             p["active"] = is_active
             break
     _save_config(cfg)
+    _audit_config(request, "Products", f"Set product '{name}' {'active' if is_active else 'inactive'}")
     return _render_products(request, cfg, flash=f"'{name}' is now {'active' if is_active else 'inactive'}.")

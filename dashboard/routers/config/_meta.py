@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse
 
-from dashboard.routers.config._helpers import _load_config, _save_config, templates
+from dashboard.routers.config._helpers import _audit_config, _load_config, _save_config, templates
 
 router = APIRouter()
 
@@ -34,6 +34,7 @@ async def labels_add(request: Request, name: str = Form(...), color: str = Form(
     if name and not any(lbl["name"] == name for lbl in cfg.get("labels", [])):
         cfg.setdefault("labels", []).append({"name": name, "color": color})
         _save_config(cfg)
+        _audit_config(request, "Test Types", f"Added test type label '{name}'")
     return _render_labels(request, cfg)
 
 
@@ -42,6 +43,7 @@ async def labels_delete(request: Request, name: str = Form(...)):
     cfg = _load_config()
     cfg["labels"] = [lbl for lbl in cfg.get("labels", []) if lbl["name"] != name]
     _save_config(cfg)
+    _audit_config(request, "Test Types", f"Deleted test type label '{name}'")
     return _render_labels(request, cfg)
 
 
@@ -52,6 +54,7 @@ async def priorities_add(request: Request, name: str = Form(...), color: str = F
     if name and not any(p["name"] == name for p in cfg.get("priorities", [])):
         cfg.setdefault("priorities", []).append({"name": name, "color": color})
         _save_config(cfg)
+        _audit_config(request, "Priorities", f"Added priority '{name}'")
     return _render_priorities(request, cfg)
 
 
@@ -60,6 +63,7 @@ async def priorities_delete(request: Request, name: str = Form(...)):
     cfg = _load_config()
     cfg["priorities"] = [p for p in cfg.get("priorities", []) if p["name"] != name]
     _save_config(cfg)
+    _audit_config(request, "Priorities", f"Deleted priority '{name}'")
     return _render_priorities(request, cfg)
 
 
@@ -70,6 +74,7 @@ async def fields_add(request: Request, name: str = Form(...), field_type: str = 
     if name and not any(f["name"] == name for f in cfg.get("custom_fields", [])):
         cfg.setdefault("custom_fields", []).append({"name": name, "type": field_type})
         _save_config(cfg)
+        _audit_config(request, "Custom Fields", f"Added custom field '{name}' ({field_type})")
     return _render_fields(request, cfg)
 
 
@@ -78,6 +83,7 @@ async def fields_delete(request: Request, name: str = Form(...)):
     cfg = _load_config()
     cfg["custom_fields"] = [f for f in cfg.get("custom_fields", []) if f["name"] != name]
     _save_config(cfg)
+    _audit_config(request, "Custom Fields", f"Deleted custom field '{name}'")
     return _render_fields(request, cfg)
 
 
@@ -87,6 +93,7 @@ async def test_types_save(request: Request, sanity: int = Form(...)):
     cfg = _load_config()
     cfg["test_type_distribution"] = {"sanity": sanity, "regression": 100 - sanity}
     _save_config(cfg)
+    _audit_config(request, "Test Distribution", f"Set sanity {sanity}% / regression {100 - sanity}%")
     return templates.TemplateResponse(request, "partials/config_test_types.html", context={
         "request": request, "dist": cfg["test_type_distribution"], "saved": True,
     })
@@ -104,6 +111,8 @@ async def generation_categories_save(request: Request):
         "accessibility": form.get("accessibility") == "on",
     }
     _save_config(cfg)
+    enabled = [k for k, v in cfg["generation_categories"].items() if v]
+    _audit_config(request, "Test Generation", f"Updated generation categories: {', '.join(enabled)}")
     return templates.TemplateResponse(request, "partials/config_generation_categories.html", context={
         "request": request, "cats": cfg["generation_categories"], "saved": True,
     })

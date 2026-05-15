@@ -81,6 +81,25 @@ def _save_config(cfg: dict) -> None:
     _CONFIG_PATH.write_text(yaml.dump(cfg, default_flow_style=False, allow_unicode=True), encoding="utf-8")
 
 
+def _audit_config(request: Request, section: str, detail: str) -> None:
+    """Best-effort audit call — never raises."""
+    try:
+        from dashboard.routers.auth import get_session_user
+        from core.audit_logger import log as _audit_log
+        user = get_session_user(request)
+        if user:
+            _audit_log(
+                "config_change",
+                user.get("email", ""),
+                user.get("name", ""),
+                detail,
+                ip=request.client.host if request.client else "",
+                section=section,
+            )
+    except Exception:
+        pass
+
+
 def _load_assignments() -> dict:
     if _ASSIGNMENTS_PATH.exists():
         data = yaml.safe_load(_ASSIGNMENTS_PATH.read_text(encoding="utf-8")) or {}

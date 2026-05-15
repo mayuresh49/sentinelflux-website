@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse
 
-from dashboard.routers.config._helpers import _load_config, _require_admin, _save_config, templates
+from dashboard.routers.config._helpers import _audit_config, _load_config, _require_admin, _save_config, templates
 
 router = APIRouter()
 
@@ -29,6 +29,7 @@ async def users_add(request: Request, name: str = Form(...), email: str = Form("
             "products": [], "admin": False, "password_hash": "",
         })
         _save_config(cfg)
+        _audit_config(request, "User Management", f"Added user '{name}' ({email})")
     return _render_users(request, cfg)
 
 
@@ -37,6 +38,7 @@ async def users_delete(request: Request, name: str = Form(...), _: dict = Depend
     cfg = _load_config()
     cfg["users"] = [u for u in cfg.get("users", []) if u["name"] != name]
     _save_config(cfg)
+    _audit_config(request, "User Management", f"Removed user '{name}'")
     return _render_users(request, cfg)
 
 
@@ -53,6 +55,7 @@ async def users_set_password(request: Request, name: str = Form(...), password: 
             )
             break
     _save_config(cfg)
+    _audit_config(request, "User Management", f"{'Set' if password.strip() else 'Cleared'} password for '{name}'")
     return _render_users(request, cfg)
 
 
@@ -65,6 +68,7 @@ async def users_set_admin(request: Request, name: str = Form(...),
             u["admin"] = admin == "on"
             break
     _save_config(cfg)
+    _audit_config(request, "User Management", f"{'Granted' if admin == 'on' else 'Revoked'} admin role for '{name}'")
     return _render_users(request, cfg)
 
 
@@ -79,4 +83,6 @@ async def users_set_products(request: Request, _: dict = Depends(_require_admin)
             u["products"] = products
             break
     _save_config(cfg)
+    _audit_config(request, "User Management",
+                  f"Updated product access for '{name}': {', '.join(products) or 'none'}")
     return _render_users(request, cfg)

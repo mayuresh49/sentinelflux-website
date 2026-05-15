@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse
 
 from dashboard.routers.auth import require_user
 from dashboard.routers.config._helpers import (
+    _audit_config,
     _load_config,
     _save_config,
     templates,
@@ -88,6 +89,7 @@ async def env_add(
         return _render(request, product, flash=f"Environment '{name}' already exists.")
     p["run_config"]["environments"].append({"name": name, "base_url": base_url.strip(), "api_url": api_url.strip()})
     _save_config(cfg)
+    _audit_config(request, "Run Configuration", f"[{product}] Added environment '{name}'")
     return _render(request, product, flash=f"Environment '{name}' added.")
 
 
@@ -105,6 +107,7 @@ async def env_delete(
     if p["run_config"]["defaults"].get("environment") == name:
         p["run_config"]["defaults"]["environment"] = ""
     _save_config(cfg)
+    _audit_config(request, "Run Configuration", f"[{product}] Deleted environment '{name}'")
     return _render(request, product)
 
 
@@ -132,6 +135,7 @@ async def browser_add(
         "headless": headless.lower() in ("true", "on", "1", "yes"),
     })
     _save_config(cfg)
+    _audit_config(request, "Run Configuration", f"[{product}] Added browser profile '{name}'")
     return _render(request, product, flash=f"Browser profile '{name}' added.")
 
 
@@ -149,6 +153,7 @@ async def browser_delete(
     if p["run_config"]["defaults"].get("browser") == name:
         p["run_config"]["defaults"]["browser"] = ""
     _save_config(cfg)
+    _audit_config(request, "Run Configuration", f"[{product}] Deleted browser profile '{name}'")
     return _render(request, product)
 
 
@@ -183,6 +188,7 @@ async def device_add(
         "capabilities": caps,
     })
     _save_config(cfg)
+    _audit_config(request, "Run Configuration", f"[{product}] Added device profile '{name}'")
     return _render(request, product, flash=f"Device profile '{name}' added.")
 
 
@@ -200,6 +206,7 @@ async def device_delete(
     if p["run_config"]["defaults"].get("device") == name:
         p["run_config"]["defaults"]["device"] = ""
     _save_config(cfg)
+    _audit_config(request, "Run Configuration", f"[{product}] Deleted device profile '{name}'")
     return _render(request, product)
 
 
@@ -227,6 +234,7 @@ async def credential_add(
         "password_env": password_env.strip(),
     })
     _save_config(cfg)
+    _audit_config(request, "Run Configuration", f"[{product}] Added credential '{name}'")
     return _render(request, product, flash=f"Credential '{name}' added.")
 
 
@@ -242,6 +250,7 @@ async def credential_delete(
     _backfill_run_config(p)
     p["run_config"]["credentials"] = [c for c in p["run_config"]["credentials"] if c["name"] != name]
     _save_config(cfg)
+    _audit_config(request, "Run Configuration", f"[{product}] Deleted credential '{name}'")
     return _render(request, product)
 
 
@@ -260,4 +269,5 @@ async def defaults_save(
     _backfill_run_config(p)
     p["run_config"]["defaults"] = {"environment": environment, "browser": browser, "device": device}
     _save_config(cfg)
+    _audit_config(request, "Run Configuration", f"[{product}] Updated default profile")
     return _render(request, product, flash="Defaults saved.")
