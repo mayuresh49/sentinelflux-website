@@ -234,7 +234,12 @@ function docsPage() {
       if (dom) params.set('domain', dom);
       if (mod) params.set('feature', mod);
       params.set('format', fmt);
-      window.location.href = '/ui/docs/export?' + params.toString();
+      const a = document.createElement('a');
+      a.href = '/ui/docs/export?' + params.toString();
+      a.download = fmt === 'xlsx' ? 'test_cases.xlsx' : 'test_cases.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     },
   };
 }
