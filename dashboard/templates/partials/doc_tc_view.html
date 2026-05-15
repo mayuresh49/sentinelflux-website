@@ -54,7 +54,7 @@
         </div>
         <!-- Delete confirm -->
         <div x-show="confirmDelete" class="flex items-center gap-1.5">
-          <span class="text-xs text-red-600 font-medium">Delete this TC?</span>
+          <span class="text-xs text-red-600 font-medium">Delete this Test Case?</span>
           <form hx-post="/ui/docs/test-case/delete" hx-target="body" hx-push-url="true" class="inline">
             <input type="hidden" name="product" value="{{ product }}">
             <input type="hidden" name="domain" value="{{ domain }}">

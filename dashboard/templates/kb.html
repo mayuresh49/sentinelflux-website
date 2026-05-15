@@ -33,7 +33,7 @@ scenarios:
 {% endset %}
 
 {% block content %}
-<div class="max-w-full space-y-5"
+<div class="max-w-full space-y-6"
      x-data="{
        tab: 'files',
        selectedProduct: '{{ selected_product }}',
@@ -54,13 +54,13 @@ scenarios:
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-2xl font-bold text-slate-900">Knowledge Base</h1>
-      <p class="text-sm text-slate-500 mt-0.5">Browse KB files, create increments, trigger test generation</p>
+      <p class="text-sm text-slate-500 mt-0.5">Browse knowledge base files, create feature increments, and trigger test generation</p>
     </div>
   </div>
 
   <!-- Tab bar -->
   <div class="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
-    {% for t, label, count in [('files','KB Files', none), ('increments','Increments', increments|length), ('pipeline','Pipeline', recent_jobs|length)] %}
+    {% for t, label, count in [('files','Knowledge Base Files', none), ('increments','Feature Increments', increments|length), ('pipeline','Pipeline', recent_jobs|length)] %}
     <button @click="tab = '{{ t }}'"
             :class="tab === '{{ t }}' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
             class="px-4 py-1.5 text-sm font-medium rounded-lg transition-all">
@@ -188,12 +188,12 @@ scenarios:
           <button @click="showDocxUpload = !showDocxUpload"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white text-xs font-medium rounded-lg transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-            Upload .docx
+            Upload Word Document
           </button>
           <button @click="showIncrementForm = !showIncrementForm"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            New Increment
+            New YAML Increment
           </button>
         </div>
       </div>
@@ -201,7 +201,7 @@ scenarios:
       <!-- DOCX upload panel — same scope as button above -->
       <div x-show="showDocxUpload" x-cloak
            class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
-        <h3 class="font-semibold text-slate-800 text-sm">Convert .docx → KB Increment YAML</h3>
+        <h3 class="font-semibold text-slate-800 text-sm">Convert Word Document to KB Increment YAML</h3>
         <p class="text-xs text-slate-500">Upload an API spec document, feature description, or any Word doc. The system extracts the text and uses an LLM to produce a KB YAML increment ready for test generation.</p>
         <div class="grid grid-cols-2 gap-3">
           <div class="flex flex-col gap-1 col-span-2">
@@ -390,22 +390,22 @@ scenarios:
                      class="text-xs font-mono border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none">
             </div>
             <div class="flex flex-col gap-1">
-              <label class="text-xs text-slate-500">Ollama URL</label>
+              <label class="text-xs text-slate-500">Local LLM URL (Ollama)</label>
               <input id="pipeline-local-url" type="text" value="http://localhost:11434"
                      class="text-xs font-mono border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none">
             </div>
             <div class="flex flex-col gap-1">
-              <label class="text-xs text-slate-500">Doc model</label>
+              <label class="text-xs text-slate-500">Documentation Model</label>
               <input id="pipeline-doc-model" type="text" value="mistral:7b-instruct-v0.3-q4_K_M"
                      class="text-xs font-mono border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none">
             </div>
             <div class="flex flex-col gap-1">
-              <label class="text-xs text-slate-500">Script model</label>
+              <label class="text-xs text-slate-500">Script Generation Model</label>
               <input id="pipeline-script-model" type="text" value="qwen2.5-coder:14b-instruct-q4_K_M"
                      class="text-xs font-mono border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none">
             </div>
             <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-              <input id="pipeline-skip-script" type="checkbox" class="rounded"> Skip script generation (doc only)
+              <input id="pipeline-skip-script" type="checkbox" class="rounded"> Generate documentation only (skip script generation)
             </label>
           </div>
         </div>

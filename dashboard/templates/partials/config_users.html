@@ -15,15 +15,15 @@
           <span class="text-xs bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-medium">admin</span>
           {% endif %}
           {% if u.password_hash %}
-          <span class="text-xs bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded">pw set</span>
+          <span class="text-xs bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded">Password set</span>
           {% else %}
-          <span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">no password</span>
+          <span class="text-xs bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded">No password set</span>
           {% endif %}
         </div>
         <p class="text-xs text-slate-400">{{ u.email or '—' }}</p>
         {% if not u.admin %}
         <p class="text-xs text-slate-400 mt-0.5">
-          Products: {% if u.products %}{{ u.products | join(', ') }}{% else %}<span class="italic">none assigned</span>{% endif %}
+          Assigned Products: {% if u.products %}{{ u.products | join(', ') }}{% else %}<span class="italic">none assigned</span>{% endif %}
         </p>
         {% else %}
         <p class="text-xs text-slate-400 mt-0.5 italic">All products (admin)</p>
@@ -65,7 +65,7 @@
       <form hx-post="/ui/config/users/set-products" hx-target="#users-list" hx-swap="innerHTML"
             class="space-y-2">
         <input type="hidden" name="name" value="{{ u.name }}">
-        <p class="text-xs font-medium text-slate-600">Product access</p>
+        <p class="text-xs font-medium text-slate-600">Product Access</p>
         <div class="flex flex-wrap gap-3">
           {% for product in all_products %}
           <label class="flex items-center gap-1.5 cursor-pointer">
@@ -78,7 +78,7 @@
         </div>
         <button type="submit"
                 class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-3 py-1 rounded transition-colors">
-          Save products
+          Save Product Access
         </button>
       </form>
       {% endif %}
@@ -87,13 +87,13 @@
       <form hx-post="/ui/config/users/set-password" hx-target="#users-list" hx-swap="innerHTML"
             class="space-y-2">
         <input type="hidden" name="name" value="{{ u.name }}">
-        <p class="text-xs font-medium text-slate-600">{{ 'Change password' if u.password_hash else 'Set password' }}</p>
+        <p class="text-xs font-medium text-slate-600">{{ 'Change Password' if u.password_hash else 'Set Password' }}</p>
         <div class="flex items-center gap-2">
           <input type="password" name="password" placeholder="New password"
                  class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-48">
           <button type="submit"
                   class="text-xs bg-slate-700 hover:bg-slate-800 text-white font-medium px-3 py-1.5 rounded transition-colors">
-            Set
+            Set Password
           </button>
         </div>
       </form>

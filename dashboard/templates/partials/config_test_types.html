@@ -2,7 +2,7 @@
 {% set regression_pct = dist.regression if dist else 70 %}
 
 {% if saved %}
-<div class="mb-4 text-sm text-emerald-600 font-medium">Distribution saved.</div>
+<div class="mb-4 text-sm text-emerald-600 font-medium">Test Distribution saved.</div>
 {% endif %}
 
 <form hx-post="/ui/config/test-types/save" hx-target="#test-types-panel" hx-swap="innerHTML"
@@ -42,6 +42,6 @@
 
   <button type="submit"
           class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-5 py-2 transition-colors">
-    Save Distribution
+    Save Test Distribution
   </button>
 </form>

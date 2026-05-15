@@ -22,12 +22,12 @@
   <td class="px-4 py-3 whitespace-nowrap">
     <div class="flex items-center gap-2">
       {% if e.requires_human %}
-      <span class="text-xs bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-medium">review</span>
+      <span class="text-xs bg-red-50 text-red-600 px-1.5 py-0.5 rounded font-medium">Needs Review</span>
       {% endif %}
       {% if e.output %}
       <button @click="open = !open"
               class="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
-              x-text="open ? 'hide' : 'details'"></button>
+              x-text="open ? 'Hide Details' : 'View Details'"></button>
       {% endif %}
     </div>
   </td>

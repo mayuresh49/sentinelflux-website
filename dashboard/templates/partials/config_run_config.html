@@ -166,7 +166,7 @@
         <label class="block text-xs font-medium text-slate-600 mb-1">
           Capabilities (JSON)
           <button type="button" @click="showCaps = !showCaps"
-                  class="ml-1 text-indigo-500 hover:text-indigo-700">[{{ 'hide' if showCaps else 'show' }}]</button>
+                  class="ml-1 text-indigo-500 hover:text-indigo-700">[{{ 'Hide' if showCaps else 'Show' }}]</button>
         </label>
         <textarea x-show="showCaps" name="capabilities"
                   placeholder='{"deviceName": "Pixel 5", "platformVersion": "12"}'
@@ -222,7 +222,7 @@
                class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-32">
       </div>
       <div>
-        <label class="block text-xs font-medium text-slate-600 mb-1">Password env var</label>
+        <label class="block text-xs font-medium text-slate-600 mb-1">Password Environment Variable</label>
         <input type="text" name="password_env" placeholder="MYAPP_PASS"
                class="text-sm font-mono border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-36">
       </div>
@@ -241,7 +241,7 @@
           hx-target="#run-config-content" hx-swap="innerHTML"
           class="flex items-end gap-3 flex-wrap">
       <div>
-        <label class="block text-xs font-medium text-slate-600 mb-1">Default environment</label>
+        <label class="block text-xs font-medium text-slate-600 mb-1">Default Environment</label>
         <select name="environment"
                 class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-36">
           <option value="">— none —</option>
@@ -251,7 +251,7 @@
         </select>
       </div>
       <div>
-        <label class="block text-xs font-medium text-slate-600 mb-1">Default browser</label>
+        <label class="block text-xs font-medium text-slate-600 mb-1">Default Browser</label>
         <select name="browser"
                 class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-36">
           <option value="">— none —</option>
@@ -261,7 +261,7 @@
         </select>
       </div>
       <div>
-        <label class="block text-xs font-medium text-slate-600 mb-1">Default device</label>
+        <label class="block text-xs font-medium text-slate-600 mb-1">Default Device</label>
         <select name="device"
                 class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-36">
           <option value="">— none —</option>

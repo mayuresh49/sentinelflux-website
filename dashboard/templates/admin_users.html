@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block title %}User Management{% endblock %}
 
+{% block header_filter %}<div></div>{% endblock %}
+
 {% block content %}
 <div class="max-w-4xl mx-auto space-y-6">
 
@@ -9,13 +11,32 @@
     <p class="text-sm text-slate-500 mt-0.5">Manage user accounts, roles, and product access</p>
   </div>
 
-  <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"
-       hx-target="this" hx-swap="outerHTML">
+  <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
     <div class="px-5 py-4 border-b border-slate-100">
       <h2 class="font-semibold text-slate-800 text-sm">Users</h2>
+      <p class="text-xs text-slate-400 mt-0.5">Manage team members and their product access</p>
     </div>
-    <div id="admin-users-panel">
+    <div id="users-list">
       {% include "partials/config_users.html" %}
+    </div>
+    <div class="px-5 py-4 border-t border-slate-50 bg-slate-50/40">
+      <form hx-post="/ui/config/users/add" hx-target="#users-list" hx-swap="innerHTML"
+            class="flex items-end gap-3 flex-wrap">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Name</label>
+          <input type="text" name="name" required placeholder="e.g. Jane Smith"
+                 class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-44">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Email</label>
+          <input type="email" name="email" placeholder="jane@example.com"
+                 class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-52">
+        </div>
+        <button type="submit"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-1.5 transition-colors">
+          Add User
+        </button>
+      </form>
     </div>
   </div>
 
