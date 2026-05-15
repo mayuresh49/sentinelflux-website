@@ -73,6 +73,31 @@ Run independent agents **in parallel** (single message, multiple Agent blocks).
 
 ---
 
+## Access Control Rules (Dashboard)
+
+Two user roles: **admin** (`admin: True`) and **regular** (product-scoped).
+
+### Backend (FastAPI routes)
+
+| What | Dependency to use |
+|---|---|
+| Any logged-in user | `require_user` (from `dashboard.routers.auth`) |
+| Admin-only action | `_require_admin` (from `dashboard.routers.config._helpers`) |
+
+- Every route that mutates global config (labels, priorities, products, fields, test distribution, generation categories) **must** use `_: dict = Depends(_require_admin)`.
+- Every route that returns product-scoped data **must** filter with `user_products(current_user, all_products)` before returning.
+- **Never** use `HTTPException(status_code=403, headers={"Location": "/"})` to redirect — the `headers` are silently ignored and the client gets raw JSON `{"detail":"Forbidden"}`. Use `return RedirectResponse("/", status_code=302)` for page routes, or `raise HTTPException(403, detail="Admin access required")` for API routes.
+- **Never** use 307 for auth redirects on POST-capable pages — 307 tells the browser to re-POST to the redirect URL (e.g. `/login`), which then fails its own field validation. Always use **303** so the browser converts the redirect to a GET, showing the login page cleanly.
+
+### Template (Jinja2)
+
+- Wrap all admin-only tabs, buttons, and sections with `{% if current_user.admin %}`.
+- Default Alpine tab state must reflect role: `x-data="{ tab: '{{ 'admin_tab' if current_user.admin else 'user_tab' }}' }"`.
+- Never render destructive action buttons (delete, deactivate) unless the user has the right to perform them server-side.
+- The `current_user` dict is available in every page template via `_ctx()` — use `current_user.admin` for guards.
+
+---
+
 ## Project Structure
 
 ```

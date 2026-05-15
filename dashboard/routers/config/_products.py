@@ -7,7 +7,7 @@ import shutil
 from typing import List
 
 import yaml
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse
 
 from dashboard.routers.config._helpers import (
@@ -18,6 +18,7 @@ from dashboard.routers.config._helpers import (
     _SAFE_PRODUCT_RE,
     _audit_config,
     _load_config,
+    _require_admin,
     _save_assignments,
     _save_config,
     templates,
@@ -133,6 +134,7 @@ async def products_add(
     name: str = Form(...),
     display_name: str = Form(""),
     domains: List[str] = Form(default=[]),
+    _: dict = Depends(_require_admin),
 ):
     name = name.strip().lower().replace(" ", "_")
     cfg = _load_config()
@@ -153,7 +155,7 @@ async def products_add(
 
 
 @router.post("/ui/config/products/delete", response_class=HTMLResponse)
-async def products_delete(request: Request, name: str = Form(...)):
+async def products_delete(request: Request, name: str = Form(...), _: dict = Depends(_require_admin)):
     name = name.strip()
     cfg = _load_config()
     _audit_config(request, "Products", f"Deleted product '{name}' and all associated data")
@@ -162,7 +164,8 @@ async def products_delete(request: Request, name: str = Form(...)):
 
 
 @router.post("/ui/config/products/set-active", response_class=HTMLResponse)
-async def products_set_active(request: Request, name: str = Form(...), active: str = Form("true")):
+async def products_set_active(request: Request, name: str = Form(...), active: str = Form("true"),
+                              _: dict = Depends(_require_admin)):
     cfg = _load_config()
     is_active = active.lower() not in {"false", "0", "no"}
     for p in cfg.get("products", []):

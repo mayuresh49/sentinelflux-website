@@ -25,7 +25,7 @@ def _require_auth(request: Request) -> dict:
     user = get_session_user(request)
     if user is None:
         from fastapi import HTTPException
-        raise HTTPException(status_code=307, headers={"Location": f"/login?next={request.url.path}"})
+        raise HTTPException(status_code=303, headers={"Location": f"/login?next={request.url.path}"})
     return user
 
 
@@ -406,7 +406,7 @@ async def failures_page(
     }
 
     all_runs = list(reversed(rm.all_runs()))
-    failures = []
+    all_failures = []
     for run in all_runs:
         if run.get("status") not in ("completed", "failed"):
             continue
@@ -417,9 +417,7 @@ async def failures_page(
         for f in run.get("failures", []):
             raw_cat = f.get("category") or f.get("classification", "unknown")
             mapped = _cat_map.get(raw_cat, "Unanalyzed")
-            if category and mapped != category:
-                continue
-            failures.append({
+            all_failures.append({
                 **f,
                 "mapped_category": mapped,
                 "run_id":      run["id"],
@@ -430,7 +428,8 @@ async def failures_page(
                 "analyzed":    run.get("analyzed", False),
             })
 
-    counts = Counter(f["mapped_category"] for f in failures)
+    counts = Counter(f["mapped_category"] for f in all_failures)
+    failures = [f for f in all_failures if not category or f["mapped_category"] == category]
     total_failures = len(failures)
     total_pages = max(1, (total_failures + _PAGE_SIZE - 1) // _PAGE_SIZE)
     page = max(1, min(page, total_pages))

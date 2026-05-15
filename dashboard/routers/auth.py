@@ -51,7 +51,7 @@ def require_user(request: Request) -> dict:
     if user is None:
         # raise a redirect; caller catches it via exception handler
         from fastapi import HTTPException
-        raise HTTPException(status_code=307, headers={"Location": "/login"})
+        raise HTTPException(status_code=303, headers={"Location": "/login"})
     return user
 
 
