@@ -20,7 +20,7 @@ TC_START="${7:-1}"
 SOURCE="${8:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+cd "${SCRIPT_DIR}/.."
 
 # Prefer venv Python over system python3
 if [ -f "$SCRIPT_DIR/.venv/bin/python" ]; then
@@ -32,7 +32,7 @@ else
 fi
 
 EXAMPLE_DIR="products/$PROJECT"
-KB_DIR="ai/knowledge_base/$PROJECT"
+KB_DIR="products/$PROJECT/ai/knowledge_base"
 
 if [ ! -d "$EXAMPLE_DIR" ]; then
   echo "ERROR: Example directory not found: $EXAMPLE_DIR"
@@ -42,7 +42,7 @@ fi
 
 if [ ! -d "$KB_DIR" ]; then
   echo "ERROR: KB directory not found: $KB_DIR"
-  echo "Available KBs: $(ls ai/knowledge_base/ | grep -v '\.yaml$' | grep -v '^increments$')"
+  echo "Available KBs: $(ls products/ | xargs -I{} sh -c '[ -d products/{}/ai/knowledge_base ] && echo {}')"
   exit 1
 fi
 

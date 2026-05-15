@@ -59,7 +59,7 @@
 ### OH-WEB-009 — Employee List Loads
 **Pre-conditions:** Authenticated as Admin  
 **Steps:** Navigate to Employee List  
-**Expected:** Page loads; "Records Found" text visible
+**Expected:** Page loads; "Records Found" text visible on ui
 
 ### OH-WEB-010 — Add Employee Required Fields Only
 **Steps:** Navigate to Add, fill First Name="Test", Last Name="User", save  

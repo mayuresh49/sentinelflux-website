@@ -1,6 +1,6 @@
 .PHONY: web web-serial api \
-        orangehrm-web orangehrm-api \
-        restfulbooker-web restfulbooker-api \
+        orangehrm-web orangehrm-api orangehrm-mobile \
+        restfulbooker-web restfulbooker-api restfulbooker-mobile \
         framework-tests
 
 # ── OrangeHRM ──────────────────────────────────────────────────────────────
@@ -13,6 +13,9 @@ orangehrm-web-serial:
 orangehrm-api:
 	cd products/orangehrm && python3 -m pytest tests/api/ -m api
 
+orangehrm-mobile:
+	cd products/orangehrm && python3 -m pytest tests/mobile/ -m mobile -v
+
 # ── Restful Booker ──────────────────────────────────────────────────────────
 restfulbooker-web:
 	cd products/restfulbooker && python3 -m pytest tests/web/ -m web -n 4
@@ -22,6 +25,9 @@ restfulbooker-web-serial:
 
 restfulbooker-api:
 	cd products/restfulbooker && python3 -m pytest tests/api/ -m api
+
+restfulbooker-mobile:
+	cd products/restfulbooker && python3 -m pytest tests/mobile/ -m mobile -v
 
 # ── Framework unit/integration tests ───────────────────────────────────────
 framework-tests:

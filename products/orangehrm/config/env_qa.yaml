@@ -12,6 +12,16 @@ logging:
   level: "INFO"
   file: "logs/sentinelflux.log"
 
+mobile:
+  appium_url: "http://localhost:4723"
+  platform: "android"
+  capabilities:
+    platformName: "Android"
+    deviceName: "emulator-5554"
+    appPackage: "com.orangehrm.opensource"
+    appActivity: ".SplashActivity"
+    automationName: "UiAutomator2"
+
 sentinelflux:
   ai:
     enabled: false

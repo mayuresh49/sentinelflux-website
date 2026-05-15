@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 {% block title %}Configuration{% endblock %}
 
+{% block header_filter %}
+<div class="flex items-center gap-2">
+  <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"/>
+  </svg>
+  <span class="text-xs text-slate-400">Global settings — not scoped to a product</span>
+</div>
+{% endblock %}
+
 {% set color_map = {
   "emerald": "bg-emerald-100 text-emerald-700",
   "indigo":  "bg-indigo-100 text-indigo-700",
@@ -66,6 +75,23 @@
               <label class="block text-xs font-medium text-slate-600 mb-1">Display Name <span class="text-slate-400 font-normal">(optional)</span></label>
               <input type="text" name="display_name" placeholder="e.g. My Application"
                      class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-48">
+            </div>
+            <div x-data="{ selected: [] }">
+              <label class="block text-xs font-medium text-slate-600 mb-1">Domains</label>
+              <div class="flex gap-1.5">
+                {% for domain, color in [('web','indigo'),('api','blue'),('mobile','emerald')] %}
+                <label class="cursor-pointer">
+                  <input type="checkbox" name="domains" value="{{ domain }}" class="sr-only"
+                         @change="selected = [...$el.closest('.flex').querySelectorAll('input:checked')].map(e => e.value)">
+                  <span :class="selected.includes('{{ domain }}')
+                                  ? 'bg-{{ color }}-100 text-{{ color }}-700 border-{{ color }}-300'
+                                  : 'bg-white text-slate-500 border-slate-200 hover:border-{{ color }}-300'"
+                        class="text-xs font-medium px-2 py-1 rounded border transition-colors select-none block">
+                    {{ domain }}
+                  </span>
+                </label>
+                {% endfor %}
+              </div>
             </div>
             <button type="submit"
                     class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-1.5 transition-colors">

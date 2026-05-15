@@ -83,7 +83,7 @@ def analyze_run(run_id: str, background_tasks: BackgroundTasks):
         raise HTTPException(404, "Run not found")
     if run.get("status") not in ("completed", "failed"):
         raise HTTPException(400, "Run not finished yet")
-    report_path = Path(run["report_path"])
+    report_path = _ROOT / run["report_path"]
     if not report_path.exists():
         raise HTTPException(404, "Report file not found — re-run to regenerate")
     background_tasks.add_task(_analyze_failures, run_id, run["domain"], report_path)
@@ -168,7 +168,7 @@ def schedule_run_now(sched_id: str, background_tasks: BackgroundTasks):
 def _execute_run(run_id: str, product: str, domain: str, extra_args: str,
                  environment: str = "", browser: str = "", device: str = "") -> None:
     _rm.patch_run(run_id, status="running")
-    report_path = Path(_rm.get_run(run_id)["report_path"])
+    report_path = _ROOT / _rm.get_run(run_id)["report_path"]
     report_path.parent.mkdir(parents=True, exist_ok=True)
 
     env_overrides = _build_env_overrides(product, environment, browser, device)

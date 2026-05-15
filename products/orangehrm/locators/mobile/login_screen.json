@@ -1,0 +1,60 @@
+{
+  "username_field": {
+    "primary": "~username",
+    "alternatives": [
+      "//android.widget.EditText[@content-desc='Username']",
+      "//XCUIElementTypeTextField[@name='Username']"
+    ],
+    "android": "id:com.orangehrm.opensource:id/input_username",
+    "ios": "~username"
+  },
+  "password_field": {
+    "primary": "~password",
+    "alternatives": [
+      "//android.widget.EditText[@content-desc='Password']",
+      "//XCUIElementTypeSecureTextField[@name='Password']"
+    ],
+    "android": "id:com.orangehrm.opensource:id/input_password",
+    "ios": "~password"
+  },
+  "login_button": {
+    "primary": "~Login",
+    "alternatives": [
+      "//android.widget.Button[@text='Login']",
+      "//XCUIElementTypeButton[@name='Login']"
+    ],
+    "android": "id:com.orangehrm.opensource:id/btn_login",
+    "ios": "~Login"
+  },
+  "error_message": {
+    "primary": "~error_message",
+    "alternatives": [
+      "//android.widget.TextView[contains(@text, 'Invalid')]",
+      "//android.widget.TextView[contains(@text, 'Required')]",
+      "//XCUIElementTypeStaticText[contains(@name, 'Invalid')]"
+    ]
+  },
+  "dashboard_header": {
+    "primary": "~Dashboard",
+    "alternatives": [
+      "//android.widget.TextView[@text='Dashboard']",
+      "//XCUIElementTypeStaticText[@name='Dashboard']"
+    ],
+    "android": "id:com.orangehrm.opensource:id/tv_dashboard_title",
+    "ios": "~Dashboard"
+  },
+  "username_error": {
+    "primary": "~username_error",
+    "alternatives": [
+      "//android.widget.TextView[contains(@text, 'Required')]",
+      "//XCUIElementTypeStaticText[contains(@name, 'Required')]"
+    ]
+  },
+  "password_error": {
+    "primary": "~password_error",
+    "alternatives": [
+      "//android.widget.TextView[contains(@text, 'Required')]",
+      "//XCUIElementTypeStaticText[contains(@name, 'Required')]"
+    ]
+  }
+}
