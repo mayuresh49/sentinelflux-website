@@ -42,8 +42,9 @@ class ScriptGenAgent(BaseAgent):
 
         skill = TestScriptGenSkill(self.client, self.kb)
         tc_prefix = self.ctx.get("tc_prefix", "")
-        type_instruction = get_generation_type_instruction()
-        categories_instruction = get_generation_categories_instruction()
+        product = self.ctx.product or None
+        type_instruction = get_generation_type_instruction(product=product)
+        categories_instruction = get_generation_categories_instruction(product=product)
         code = skill.generate_script(
             test_case_doc, self.ctx.domain, feature_name,
             tc_prefix=tc_prefix,

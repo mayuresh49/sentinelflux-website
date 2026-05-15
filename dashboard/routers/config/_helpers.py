@@ -168,19 +168,56 @@ def assignments_summary_by_feature() -> dict:
     return result
 
 
-def get_test_type_for_index(index: int, total: int, cfg: dict | None = None) -> str:
+# ── Per-product accessors (fall back to global when product has no override) ──
+
+def _product_entry(cfg: dict, product: str) -> dict | None:
+    return next((p for p in cfg.get("products", []) if p["name"] == product), None)
+
+
+def _product_gen_cats(cfg: dict, product: str) -> dict:
+    base = {**_DEFAULT_GENERATION_CATEGORIES, **cfg.get("generation_categories", {})}
+    p = _product_entry(cfg, product)
+    if p and "generation_categories" in p:
+        base = {**base, **p["generation_categories"]}
+    return base
+
+
+def _product_dist(cfg: dict, product: str) -> dict:
+    p = _product_entry(cfg, product)
+    if p and "test_type_distribution" in p:
+        return p["test_type_distribution"]
+    return cfg.get("test_type_distribution", {"sanity": 30, "regression": 70})
+
+
+def _product_labels(cfg: dict, product: str) -> list:
+    p = _product_entry(cfg, product)
+    if p is not None and "labels" in p:
+        return p["labels"]
+    return cfg.get("labels", [])
+
+
+def _product_priorities(cfg: dict, product: str) -> list:
+    p = _product_entry(cfg, product)
+    if p is not None and "priorities" in p:
+        return p["priorities"]
+    return cfg.get("priorities", [])
+
+
+def get_test_type_for_index(index: int, total: int, cfg: dict | None = None,
+                            product: str | None = None) -> str:
     if cfg is None:
         cfg = _load_config()
-    dist = cfg.get("test_type_distribution", {})
+    dist = _product_dist(cfg, product) if product else cfg.get("test_type_distribution", {})
     sanity_pct = dist.get("sanity", 30)
     sanity_count = max(1, round(total * sanity_pct / 100))
     return "sanity" if index < sanity_count else "regression"
 
 
-def get_generation_categories_instruction(cfg: dict | None = None) -> str:
+def get_generation_categories_instruction(cfg: dict | None = None,
+                                          product: str | None = None) -> str:
     if cfg is None:
         cfg = _load_config()
-    cats = cfg.get("generation_categories", _DEFAULT_GENERATION_CATEGORIES)
+    cats = _product_gen_cats(cfg, product) if product else cfg.get("generation_categories", _DEFAULT_GENERATION_CATEGORIES)
     _LABELS = {
         "functional": "positive / happy-path functional tests",
         "negative": "negative tests (invalid input, missing fields, error paths)",
@@ -197,10 +234,11 @@ def get_generation_categories_instruction(cfg: dict | None = None) -> str:
     return "\n".join(lines)
 
 
-def get_generation_type_instruction(cfg: dict | None = None) -> str:
+def get_generation_type_instruction(cfg: dict | None = None,
+                                    product: str | None = None) -> str:
     if cfg is None:
         cfg = _load_config()
-    dist = cfg.get("test_type_distribution", {})
+    dist = _product_dist(cfg, product) if product else cfg.get("test_type_distribution", {})
     sanity_pct = dist.get("sanity", 30)
     regression_pct = dist.get("regression", 70)
     return (

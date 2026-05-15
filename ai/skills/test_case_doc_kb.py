@@ -26,6 +26,8 @@ class TestCaseDocumentationSkill:
     def __init__(self, ai_client: AIClient, kb_loader: KnowledgeBaseLoader = None):
         self.ai_client = ai_client
         self.kb_loader = kb_loader or KnowledgeBaseLoader()
+        # derive product name from kb_dir path (e.g. ai/knowledge_base/orangehrm → "orangehrm")
+        self._product: str | None = self.kb_loader.kb_dir.name if self.kb_loader.kb_dir else None
 
     # --- web ---
 
@@ -159,7 +161,7 @@ class TestCaseDocumentationSkill:
             kb_context=self.kb_loader.get_feature_context(feature_name),
             tc_id_instruction=tc_id_instruction,
             source_context=formatted_source,
-            categories_instruction=get_generation_categories_instruction(),
+            categories_instruction=get_generation_categories_instruction(product=self._product),
         )
         return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()
 
@@ -210,6 +212,6 @@ class TestCaseDocumentationSkill:
             feature_context=feature_context + "\n" + increments_context,
             kb_context=kb_context,
             ID_PREFIX=tc_prefix or "TC",
-            categories_instruction=get_generation_categories_instruction(),
+            categories_instruction=get_generation_categories_instruction(product=self._product),
         )
         return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()

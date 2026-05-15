@@ -32,23 +32,28 @@
     <p class="text-sm text-slate-500 mt-0.5">Test types, priorities, custom fields, and run settings</p>
   </div>
 
-  <div x-data="{ tab: 'products' }">
+  <div x-data="{ tab: '{{ 'products' if current_user.admin else 'runconfig' }}' }">
 
     <!-- Tab bar -->
     <div class="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit flex-wrap">
+      {% if current_user.admin %}
       {% for t, label in [('products','Products'),('labels','Test Types'),('priorities','Priorities'),('fields','Custom Fields'),('testtypes','Test Distribution'),('gencategories','Test Generation')] %}
       <button @click="tab='{{ t }}'"
               :class="tab==='{{ t }}' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
               class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">{{ label }}</button>
       {% endfor %}
+      {% endif %}
       <button @click="tab='runconfig'"
               :class="tab==='runconfig' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
               class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">Run Configuration</button>
+      {% if current_user.admin %}
       <button @click="tab='auditlog'"
               :class="tab==='auditlog' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
               class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">Audit Log</button>
+      {% endif %}
     </div>
 
+    {% if current_user.admin %}
     <!-- ── PRODUCTS ── -->
     <div x-show="tab==='products'" x-cloak class="mt-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
@@ -101,81 +106,69 @@
     </div>
 
     <!-- ── LABELS ── -->
-    <div x-show="tab==='labels'" x-cloak class="mt-4">
+    <div x-show="tab==='labels'" x-cloak class="mt-4"
+         x-data="{ labelsProduct: '{{ all_products[0] if all_products else '' }}' }">
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="px-5 py-4 border-b border-slate-100">
-          <h2 class="font-semibold text-slate-800">Test Types</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Categorize tests (e.g. sanity, regression, smoke) — labels are carried over to generated scripts</p>
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-4 flex-wrap">
+          <div class="flex-1 min-w-0">
+            <h2 class="font-semibold text-slate-800">Test Types</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Categorize tests per product — labels are carried over to generated scripts</p>
+          </div>
+          {% if all_products %}
+          <div class="shrink-0">
+            <label class="text-xs font-medium text-slate-500 mr-2">Product</label>
+            <select x-model="labelsProduct"
+                    @change="htmx.ajax('GET', '/ui/config/labels/' + labelsProduct, '#labels-panel')"
+                    class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              {% for p in all_products %}
+              <option value="{{ p }}">{{ p }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
         </div>
-        <div id="labels-list">
-          {% include "partials/config_labels.html" %}
-        </div>
-        <div class="px-5 py-4 border-t border-slate-50 bg-slate-50/40">
-          <form hx-post="/ui/config/labels/add" hx-target="#labels-list" hx-swap="innerHTML"
-                class="flex items-end gap-3 flex-wrap">
-            <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">Name</label>
-              <input type="text" name="name" required placeholder="e.g. smoke"
-                     class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-36">
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">Color</label>
-              <select name="color" class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300">
-                <option value="slate">slate</option>
-                <option value="emerald">emerald</option>
-                <option value="indigo">indigo</option>
-                <option value="amber">amber</option>
-                <option value="red">red</option>
-                <option value="cyan">cyan</option>
-                <option value="purple">purple</option>
-                <option value="orange">orange</option>
-              </select>
-            </div>
-            <button type="submit"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-1.5 transition-colors">
-              Add Test Type
-            </button>
-          </form>
+        <div id="labels-panel"
+             {% if all_products %}
+             hx-get="/ui/config/labels/{{ all_products[0] }}"
+             hx-trigger="load"
+             {% endif %}>
+          {% if not all_products %}
+          <div class="px-5 py-8 text-center text-sm text-slate-400">No products configured yet. Add a product first.</div>
+          {% endif %}
         </div>
       </div>
     </div>
 
     <!-- ── PRIORITIES ── -->
-    <div x-show="tab==='priorities'" x-cloak class="mt-4">
+    <div x-show="tab==='priorities'" x-cloak class="mt-4"
+         x-data="{ prioritiesProduct: '{{ all_products[0] if all_products else '' }}' }">
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="px-5 py-4 border-b border-slate-100">
-          <h2 class="font-semibold text-slate-800">Priorities</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Priority tiers for test cases</p>
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-4 flex-wrap">
+          <div class="flex-1 min-w-0">
+            <h2 class="font-semibold text-slate-800">Priorities</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Priority tiers per product for test case assignment</p>
+          </div>
+          {% if all_products %}
+          <div class="shrink-0">
+            <label class="text-xs font-medium text-slate-500 mr-2">Product</label>
+            <select x-model="prioritiesProduct"
+                    @change="htmx.ajax('GET', '/ui/config/priorities/' + prioritiesProduct, '#priorities-panel')"
+                    class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              {% for p in all_products %}
+              <option value="{{ p }}">{{ p }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
         </div>
-        <div id="priorities-list">
-          {% include "partials/config_priorities.html" %}
-        </div>
-        <div class="px-5 py-4 border-t border-slate-50 bg-slate-50/40">
-          <form hx-post="/ui/config/priorities/add" hx-target="#priorities-list" hx-swap="innerHTML"
-                class="flex items-end gap-3 flex-wrap">
-            <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">Name</label>
-              <input type="text" name="name" required placeholder="e.g. P4"
-                     class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 w-28">
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">Color</label>
-              <select name="color" class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300">
-                <option value="slate">slate</option>
-                <option value="red">red</option>
-                <option value="orange">orange</option>
-                <option value="amber">amber</option>
-                <option value="emerald">emerald</option>
-                <option value="cyan">cyan</option>
-                <option value="indigo">indigo</option>
-                <option value="purple">purple</option>
-              </select>
-            </div>
-            <button type="submit"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-1.5 transition-colors">
-              Add Priority
-            </button>
-          </form>
+        <div id="priorities-panel"
+             {% if all_products %}
+             hx-get="/ui/config/priorities/{{ all_products[0] }}"
+             hx-trigger="load"
+             {% endif %}>
+          {% if not all_products %}
+          <div class="px-5 py-8 text-center text-sm text-slate-400">No products configured yet. Add a product first.</div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -215,33 +208,73 @@
     </div>
 
     <!-- ── TEST TYPES ── -->
-    <div x-show="tab==='testtypes'" x-cloak class="mt-4">
+    <div x-show="tab==='testtypes'" x-cloak class="mt-4"
+         x-data="{ distProduct: '{{ all_products[0] if all_products else '' }}' }">
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="px-5 py-4 border-b border-slate-100">
-          <h2 class="font-semibold text-slate-800">Test Type Distribution</h2>
-          <p class="text-xs text-slate-400 mt-0.5">When the AI generates test scripts, it assigns sanity/regression labels based on this split</p>
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-4 flex-wrap">
+          <div class="flex-1 min-w-0">
+            <h2 class="font-semibold text-slate-800">Test Type Distribution</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Sanity/regression split used by the AI when generating scripts — set per product</p>
+          </div>
+          {% if all_products %}
+          <div class="shrink-0">
+            <label class="text-xs font-medium text-slate-500 mr-2">Product</label>
+            <select x-model="distProduct"
+                    @change="htmx.ajax('GET', '/ui/config/test-distribution/' + distProduct, '#test-types-panel')"
+                    class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              {% for p in all_products %}
+              <option value="{{ p }}">{{ p }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
         </div>
-        <div id="test-types-panel" class="px-5 py-5">
-          {% set dist = cfg.get('test_type_distribution', {'sanity': 30, 'regression': 70}) %}
-          {% include "partials/config_test_types.html" %}
+        <div id="test-types-panel" class="px-5 py-5"
+             {% if all_products %}
+             hx-get="/ui/config/test-distribution/{{ all_products[0] }}"
+             hx-trigger="load"
+             {% endif %}>
+          {% if not all_products %}
+          <p class="text-sm text-slate-400">No products configured yet. Add a product first.</p>
+          {% endif %}
         </div>
       </div>
     </div>
 
     <!-- ── GENERATION CATEGORIES ── -->
-    <div x-show="tab==='gencategories'" x-cloak class="mt-4">
+    <div x-show="tab==='gencategories'" x-cloak class="mt-4"
+         x-data="{ genProduct: '{{ all_products[0] if all_products else '' }}' }">
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="px-5 py-4 border-b border-slate-100">
-          <h2 class="font-semibold text-slate-800">Test Generation Categories</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Control which categories the AI generates. Disabled categories are excluded from test case docs and scripts.</p>
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-4 flex-wrap">
+          <div class="flex-1 min-w-0">
+            <h2 class="font-semibold text-slate-800">Test Generation Categories</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Control which categories the AI generates per product. Disabled categories are excluded from docs and scripts.</p>
+          </div>
+          {% if all_products %}
+          <div class="shrink-0">
+            <label class="text-xs font-medium text-slate-500 mr-2">Product</label>
+            <select x-model="genProduct"
+                    @change="htmx.ajax('GET', '/ui/config/generation-categories/' + genProduct, '#generation-categories-panel')"
+                    class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              {% for p in all_products %}
+              <option value="{{ p }}">{{ p }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
         </div>
-        <div id="generation-categories-panel" class="px-5 py-5">
-          {% set cats = cfg.get('generation_categories', {}) %}
-          {% include "partials/config_generation_categories.html" %}
+        <div id="generation-categories-panel" class="px-5 py-5"
+             {% if all_products %}
+             hx-get="/ui/config/generation-categories/{{ all_products[0] }}"
+             hx-trigger="load"
+             {% endif %}>
+          {% if not all_products %}
+          <p class="text-sm text-slate-400">No products configured yet. Add a product first.</p>
+          {% endif %}
         </div>
       </div>
     </div>
-
+    {% endif %}{# end admin-only tabs #}
 
     <!-- ── RUN CONFIG ── -->
     <div x-show="tab==='runconfig'" x-cloak class="mt-4"
@@ -274,6 +307,7 @@
       </div>
     </div>
 
+    {% if current_user.admin %}
     <!-- ── AUDIT LOG ── -->
     <div x-show="tab==='auditlog'" x-cloak class="mt-4">
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
@@ -311,6 +345,7 @@
         </div>
       </div>
     </div>
+    {% endif %}{# end admin audit log #}
 
   </div>
 </div>
