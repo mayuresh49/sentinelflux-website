@@ -1,0 +1,3 @@
+sentinelflux.in {
+    reverse_proxy localhost:8765
+}
