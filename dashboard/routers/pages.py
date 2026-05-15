@@ -253,12 +253,15 @@ async def agents_page(request: Request, current_user: dict = Depends(_require_au
         agent_config = data.get("agents", {})
 
     # Determine whether AI and KB are configured
-    chat_cfg_path = _ROOT / "data" / "chat_config.json"
+    chat_cfg_path = _ROOT / "dashboard" / "chat_config.json"
     has_ai = False
     if chat_cfg_path.exists():
         try:
             cc = json.loads(chat_cfg_path.read_text(encoding="utf-8"))
-            has_ai = bool(cc.get("provider") and cc.get("api_key"))
+            provider = cc.get("provider", "")
+            api_key = cc.get("api_key", "")
+            # ollama and similar local providers don't need an API key
+            has_ai = bool(provider and (api_key or provider == "ollama"))
         except Exception:
             pass
 
