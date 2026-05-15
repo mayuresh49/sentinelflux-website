@@ -6,13 +6,12 @@ import subprocess
 import sys
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks
+from filelock import FileLock
 from pydantic import BaseModel
 
-from filelock import FileLock
 from core.activity_log import ActivityLog
 from utils.paths import ROOT as _ROOT_DIR
 

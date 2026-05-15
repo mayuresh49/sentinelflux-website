@@ -7,10 +7,13 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 
 from dashboard.routers.auth import require_user, user_products
+from dashboard.routers.config import _assignments, _meta, _products, _run_config, _users
 from dashboard.routers.config._helpers import (
-    _load_config, _load_assignments, _all_tests, templates,
+    _all_tests,
+    _load_assignments,
+    _load_config,
+    templates,
 )
-from dashboard.routers.config import _meta, _users, _products, _assignments, _run_config
 
 router = APIRouter(tags=["config"], dependencies=[Depends(require_user)])
 
@@ -54,13 +57,10 @@ async def config_page(request: Request, product: Optional[str] = None,
 
 # Re-export public API so external callers can still import from the subpackage
 from dashboard.routers.config._helpers import (  # noqa: E402, F401
-    _save_config,
     _save_assignments,
-    _load_config,
-    _load_assignments,
-    _all_tests,
+    _save_config,
     assignments_summary_by_feature,
-    get_test_type_for_index,
     get_generation_categories_instruction,
     get_generation_type_instruction,
+    get_test_type_for_index,
 )

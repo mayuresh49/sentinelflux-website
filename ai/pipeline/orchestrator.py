@@ -129,7 +129,7 @@ class TestPipelineOrchestrator:
         tc_start: int = 1,
         source: str = "",
     ) -> Path:
-        from ai.agents import DocGenAgent, AgentContext
+        from ai.agents import AgentContext, DocGenAgent
 
         base = output_base if output_base else ROOT_DIR
         ctx = AgentContext(domain=domain, output_base=base).extend(
@@ -147,7 +147,7 @@ class TestPipelineOrchestrator:
         output_base: Path = None,
         tc_prefix: str = "",
     ) -> Path:
-        from ai.agents import ScriptGenAgent, AgentContext
+        from ai.agents import AgentContext, ScriptGenAgent
 
         base = output_base if output_base else ROOT_DIR
         ctx = AgentContext(domain=domain, output_base=base).extend(tc_prefix=tc_prefix)
@@ -198,6 +198,7 @@ class TestPipelineOrchestrator:
 def _build_client(model: str, args) -> object:
     """Build AI client from CLI args or env vars."""
     import os
+
     from core.ai_factory import create_ai_client
 
     ai_config = {

@@ -10,8 +10,14 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse
 
 from dashboard.routers.config._helpers import (
-    _load_config, _save_config, _save_assignments,
-    _DATA_DIR, _PRODUCTS_DIR, _KB_PRODUCTS_DIR, _ASSIGNMENTS_PATH, _SAFE_PRODUCT_RE,
+    _ASSIGNMENTS_PATH,
+    _DATA_DIR,
+    _KB_PRODUCTS_DIR,
+    _PRODUCTS_DIR,
+    _SAFE_PRODUCT_RE,
+    _load_config,
+    _save_assignments,
+    _save_config,
     templates,
 )
 

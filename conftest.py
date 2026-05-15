@@ -11,14 +11,16 @@ try:
 except ImportError:
     pass
 
-import yaml
 import pytest
+import yaml
 from pytest_html import extras as html_extras
-from utils.logger import create_logger
-from core.ai_factory import create_ai_client
-from utils.step import reset as _reset_steps, snapshot as _snapshot_steps
-from api.rest_client import RestClient
+
 from api.graphql_client import GraphQLClient
+from api.rest_client import RestClient
+from core.ai_factory import create_ai_client
+from utils.logger import create_logger
+from utils.step import reset as _reset_steps
+from utils.step import snapshot as _snapshot_steps
 
 ROOT_DIR = Path(__file__).resolve().parent
 _ARTIFACT_ROOT = ROOT_DIR / "reports" / "artifacts"
@@ -314,9 +316,6 @@ def graphql_client(config, logger):
 @pytest.fixture(scope="function")
 def browser_page(page, config, logger, locale, ai_client, ai_config):
     page.set_default_timeout(config.get("browser", {}).get("timeout", 10000))
-    ai_self_healing = ai_config.get("self_healing", False)
-    # Note: ai_client is passed to page objects, but for now, we can store it in a way
-    # Since page is from playwright, we can't modify it directly, but page objects will get it
     yield page
 
 

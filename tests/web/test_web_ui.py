@@ -1,4 +1,3 @@
-import pytest
 from pages.web.test_page import SeleniumTestPage
 
 

@@ -1,14 +1,12 @@
 """Test Case Documentation Skill — KB-aware, domain-specific context injection."""
 
-import yaml
-from pathlib import Path
 from ai.clients.base_client import AIClient
+from ai.knowledge_base.kb_loader import KnowledgeBaseLoader
 from ai.prompts.prompt_templates import (
-    TEST_CASE_DOC_PROMPT,
     API_TEST_CASE_DOC_PROMPT,
     FEATURE_DOC_PROMPT,
+    TEST_CASE_DOC_PROMPT,
 )
-from ai.knowledge_base.kb_loader import KnowledgeBaseLoader
 from dashboard.routers.config_router import get_generation_categories_instruction
 
 

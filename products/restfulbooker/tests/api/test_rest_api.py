@@ -1,4 +1,3 @@
-import pytest
 from utils.assertions import assert_status_code
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse
 
-from dashboard.routers.config._helpers import _load_config, _save_config, _require_admin, templates
+from dashboard.routers.config._helpers import _load_config, _require_admin, _save_config, templates
 
 router = APIRouter()
 

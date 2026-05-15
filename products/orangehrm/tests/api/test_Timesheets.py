@@ -1,5 +1,7 @@
 import pytest
+
 from utils.assertions import assert_status_code
+
 
 @pytest.mark.api
 @pytest.mark.sanity

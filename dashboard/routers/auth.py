@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import bcrypt as _bcrypt
 from fastapi import APIRouter, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-import bcrypt as _bcrypt
+
+from utils.paths import ROOT as _ROOT
 
 router = APIRouter(tags=["auth"])
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
@@ -21,7 +23,6 @@ def _verify_password(password: str, hashed: str) -> bool:
     except Exception:
         return False
 
-from utils.paths import ROOT as _ROOT
 _DATA_DIR = _ROOT / "data"
 _CONFIG_PATH = _DATA_DIR / "config.yaml"
 

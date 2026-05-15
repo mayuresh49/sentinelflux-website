@@ -1,11 +1,11 @@
 import argparse
 from pathlib import Path
+
 import yaml
 
 from ai.clients.mistral_client import MistralClient
-from ai.skills.test_case_doc_kb import TestCaseDocumentationSkill
 from ai.knowledge_base.kb_loader import KnowledgeBaseLoader
-
+from ai.skills.test_case_doc_kb import TestCaseDocumentationSkill
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 

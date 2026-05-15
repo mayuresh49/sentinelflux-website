@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 from typing import Any, Dict, Optional
+
 import requests
 
 ROOT_DIR = Path(__file__).resolve().parent.parent

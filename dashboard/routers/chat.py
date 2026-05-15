@@ -6,16 +6,15 @@ import re
 import subprocess
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
 
 import httpx
 import yaml
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-router = APIRouter(prefix="/chat", tags=["chat"])
-
 from utils.paths import ROOT as _FRAMEWORK_ROOT
+
+router = APIRouter(prefix="/chat", tags=["chat"])
 
 # ── tool schemas ───────────────────────────────────────────────────────────────
 

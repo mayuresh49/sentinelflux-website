@@ -1,5 +1,7 @@
 import pytest
+from pages.web.login_page import LoginPage
 from pages.web.timesheets import TimesheetsPage
+
 
 @pytest.fixture(scope="function")
 def logged_in_page(page, session_authed_page):

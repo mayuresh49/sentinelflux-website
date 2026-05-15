@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from pathlib import Path
+import re
 
 from fastapi import APIRouter, HTTPException
 
@@ -8,6 +8,46 @@ from utils.paths import ROOT as _ROOT_DIR
 
 router = APIRouter(prefix="/docs", tags=["docs"])
 _PRODUCTS_DIR = _ROOT_DIR / "products"
+
+
+def _parse_tc_index(content: str) -> list[dict]:
+    """Parse the index table from a test case doc and return structured TC list."""
+    tcs: list[dict] = []
+    in_table = False
+    for line in content.splitlines():
+        stripped = line.strip()
+        if re.match(r'\|\s*ID\s*\|', stripped, re.IGNORECASE):
+            in_table = True
+            continue
+        if not in_table:
+            continue
+        if stripped.startswith("|---") or stripped.startswith("| ---"):
+            continue
+        if not stripped.startswith("|"):
+            break
+        parts = [p.strip() for p in stripped.strip("|").split("|")]
+        if len(parts) >= 5 and parts[0] and not parts[0].startswith("---"):
+            tcs.append({
+                "id": parts[0],
+                "title": parts[1],
+                "type": parts[2],
+                "status": parts[3],
+                "script": parts[4],
+            })
+    return tcs
+
+
+def _parse_tc_block(content: str, tc_id: str) -> str | None:
+    """Extract the ### TC-ID block from the test cases section (handles varied headings)."""
+    detail_match = re.search(r'^##\s+(Detailed\s+)?Test Cases', content, re.MULTILINE | re.IGNORECASE)
+    if not detail_match:
+        # Fall back: search entire document for the ### block
+        section = content
+    else:
+        section = content[detail_match.end():]
+    pattern = rf'^(###\s+{re.escape(tc_id)}\b[^\n]*\n(?:(?!^###)[\s\S])*)'
+    match = re.search(pattern, section, re.MULTILINE)
+    return match.group(1).strip() if match else None
 
 
 def _find_docs(product: str | None = None, domain: str | None = None) -> list[dict]:

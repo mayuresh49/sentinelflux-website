@@ -11,8 +11,8 @@ for _p in (str(_EXAMPLE_ROOT), str(_FRAMEWORK_ROOT)):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-import yaml
-import pytest
+import pytest  # noqa: E402
+import yaml  # noqa: E402
 
 
 def _load_config(request) -> dict:
@@ -57,8 +57,8 @@ def session_authed_page(request, browser, orangehrm_credentials):
 @pytest.fixture(scope="session")
 def orangehrm_client(browser, session_authed_page, orangehrm_credentials):
     """Session-scoped OrangeHRM API client, reuses web session cookies when available."""
-    from pages.web.login_page import LoginPage
     from api.orangehrm_client import OrangeHRMClient
+    from pages.web.login_page import LoginPage
 
     if session_authed_page is not None:
         client = OrangeHRMClient.from_playwright_cookies(

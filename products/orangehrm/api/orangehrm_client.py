@@ -1,6 +1,7 @@
 import json
 import shlex
 import time
+
 import requests
 
 BASE_URL = "https://opensource-demo.orangehrmlive.com"

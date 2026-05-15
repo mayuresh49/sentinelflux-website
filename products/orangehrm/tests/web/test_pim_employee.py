@@ -1,4 +1,5 @@
 import random
+
 import pytest
 from pages.web.login_page import LoginPage
 from pages.web.pim_employee_page import PIMEmployeePage

@@ -1,11 +1,10 @@
 import json
 import logging
-from pathlib import Path
-from typing import Any, Dict, Optional
-
-_log = logging.getLogger(__name__)
+from typing import Any, Dict
 
 from utils.paths import ROOT as ROOT_DIR
+
+_log = logging.getLogger(__name__)
 
 
 class LocatorManager:

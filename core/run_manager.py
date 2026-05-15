@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from filelock import FileLock
+
 from utils.paths import ROOT as _ROOT
 
 _RUNS_PATH = _ROOT / "data" / "test_runs.json"

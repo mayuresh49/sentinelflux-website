@@ -6,10 +6,12 @@ import json as _json
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
-from dashboard.routers.config._helpers import (
-    _load_config, _save_config, templates,
-)
 from dashboard.routers.auth import require_user
+from dashboard.routers.config._helpers import (
+    _load_config,
+    _save_config,
+    templates,
+)
 
 router = APIRouter()
 

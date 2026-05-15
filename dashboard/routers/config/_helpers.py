@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
-from typing import Optional
 
 import yaml
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import Depends, HTTPException
 from fastapi.templating import Jinja2Templates
 
-from dashboard.routers.auth import require_user, user_products
+from dashboard.routers.auth import require_user
 from utils.paths import ROOT as _ROOT
 
 templates = Jinja2Templates(directory=str(_ROOT / "dashboard" / "templates"))
@@ -118,7 +116,7 @@ def assignments_summary_by_feature() -> dict:
     """Return {product/domain/feature: {labels, priorities, assigned, total}} for dashboard overlays."""
     assignments = _load_assignments()
     cfg = _load_config()
-    label_colors = {l["name"]: l["color"] for l in cfg.get("labels", [])}
+    label_colors = {lbl["name"]: lbl["color"] for lbl in cfg.get("labels", [])}
     priority_colors = {p["name"]: p["color"] for p in cfg.get("priorities", [])}
     result = {}
     for py in _PRODUCTS_DIR.rglob("test_*.py"):

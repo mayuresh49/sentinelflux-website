@@ -1,5 +1,13 @@
 import typer
-from sentinelflux.commands import init_cmd, run_cmd, generate_cmd, doctor_cmd, analyze_cmd, dashboard_cmd
+
+from sentinelflux.commands import (
+    analyze_cmd,
+    dashboard_cmd,
+    doctor_cmd,
+    generate_cmd,
+    init_cmd,
+    run_cmd,
+)
 
 app = typer.Typer(
     name="sentinelflux",

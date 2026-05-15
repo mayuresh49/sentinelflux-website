@@ -32,8 +32,8 @@ class ScriptGenAgent(BaseAgent):
     ) -> dict:
         from ai.skills.test_script_gen import TestScriptGenSkill
         from dashboard.routers.config_router import (
-            get_generation_type_instruction,
             get_generation_categories_instruction,
+            get_generation_type_instruction,
         )
 
         skill = TestScriptGenSkill(self.client, self.kb)

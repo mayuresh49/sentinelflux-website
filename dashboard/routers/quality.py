@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 
 import yaml
 from fastapi import APIRouter

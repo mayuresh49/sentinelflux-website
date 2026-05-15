@@ -2,7 +2,8 @@
 
 import logging
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
+
 import yaml
 
 _log = logging.getLogger(__name__)

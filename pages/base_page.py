@@ -1,8 +1,10 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Callable
+
 from playwright.sync_api import Page, TimeoutError
+
 from utils.constants import LOCATOR_HEAL_TIMEOUT_MS
 
 _log = logging.getLogger(__name__)
@@ -111,6 +113,7 @@ class BasePage:
             )
 
         # Tier 2: AI + page HTML → JS in same session
+        t2_exc: Exception | None = None
         try:
             html = self.page.content()[:8000]
             js = self._ai_js(ai_client, description, context=f"Page HTML:\n{html}")
@@ -118,7 +121,8 @@ class BasePage:
             result = self.page.evaluate(js)
             _log.info("[Tier2] succeeded for '%s'", description)
             return result
-        except Exception as t2_exc:
+        except Exception as exc:
+            t2_exc = exc
             _log.warning("[Tier2] failed for '%s': %s — trying accessibility tree", description, t2_exc)
 
         # Tier 3: AI + accessibility tree (semantic, richer than HTML) → JS in same session

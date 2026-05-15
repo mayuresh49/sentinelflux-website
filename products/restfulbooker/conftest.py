@@ -8,8 +8,8 @@ for _p in (str(_EXAMPLE_ROOT), str(_FRAMEWORK_ROOT)):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-import yaml
-import pytest
+import pytest  # noqa: E402
+import yaml  # noqa: E402
 
 
 def _load_config(request) -> dict:

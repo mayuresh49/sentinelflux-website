@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ai.agents.base_agent import BaseAgent, AgentContext
+from ai.agents.base_agent import BaseAgent
 from utils.paths import ROOT as _ROOT_DIR
 
 
@@ -31,8 +31,8 @@ class DocGenAgent(BaseAgent):
         feature_name: str,
         output_path: Path | None = None,
     ) -> dict:
-        from ai.skills.test_case_doc_kb import TestCaseDocumentationSkill
         from ai.skills.api_source_parser import ApiSourceParser
+        from ai.skills.test_case_doc_kb import TestCaseDocumentationSkill
 
         skill = TestCaseDocumentationSkill(self.client, self.kb)
         domain = self.ctx.domain

@@ -1,4 +1,5 @@
 import requests
+
 from ai.clients.base_client import AIClient
 from utils.constants import MISTRAL_CLOUD_TIMEOUT_S, MISTRAL_LOCAL_TIMEOUT_S
 

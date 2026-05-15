@@ -1,11 +1,12 @@
 import asyncio
+import os
+
 from browser_use import Agent
 from langchain_ollama import ChatOllama
-import os
-from pathlib import Path
 
 # Add project root to path for local imports
 from utils.paths import ROOT as PROJECT_ROOT
+
 os.sys.path.insert(0, str(PROJECT_ROOT))
 
 async def main():

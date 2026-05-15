@@ -20,10 +20,9 @@ from pathlib import Path
 from typing import Any
 
 from ai.agents.base_agent import AgentContext
-from ai.agents.quarantine_manager import QuarantineManager, _HISTORY_PATH
+from ai.agents.quarantine_manager import _HISTORY_PATH, QuarantineManager
 from core.activity_log import ActivityLog
 from core.approval_manager import ApprovalManager
-
 from utils.paths import ROOT as _ROOT_DIR
 
 _log = logging.getLogger("sentinelflux.sentinel_orchestrator")

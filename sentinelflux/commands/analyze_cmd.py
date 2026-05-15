@@ -34,9 +34,9 @@ def run(
       sentinelflux analyze --report .sentinelflux_report.json --domain api
       sentinelflux analyze --domain api --apply-quarantine
     """
+    from ai.agents import AgentContext, FlakyDetectorAgent, ResultAnalyzerAgent
+    from ai.agents.quarantine_manager import _HISTORY_PATH, QuarantineManager
     from core.ai_factory import create_ai_client
-    from ai.agents import AgentContext, ResultAnalyzerAgent, FlakyDetectorAgent
-    from ai.agents.quarantine_manager import QuarantineManager, _HISTORY_PATH
 
     # ── 1. Resolve report ─────────────────────────────────────────────────
     report_path = Path(report) if report else _ROOT_DIR / ".sentinelflux_report.json"
@@ -113,7 +113,7 @@ def _run_pytest(tests_dir: Path, domain: str, report_path: Path, env: str) -> bo
     cmd = [
         sys.executable, "-m", "pytest",
         str(tests_dir),
-        f"-m", domain,
+        "-m", domain,
         "--json-report", f"--json-report-file={report_path}",
         "--tb=short", "-q",
         f"--env={env}",

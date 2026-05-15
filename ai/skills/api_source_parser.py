@@ -116,7 +116,7 @@ class ApiSourceParser:
                 props = list(schema.get("properties", {}).keys()) if isinstance(schema, dict) else []
                 lines.append(f"  {name}: {', '.join(props[:8])}" + (" …" if len(props) > 8 else ""))
 
-        return "\n".join(l for l in lines if l is not None)
+        return "\n".join(line for line in lines if line is not None)
 
     # ── Source code ────────────────────────────────────────────────────────
 

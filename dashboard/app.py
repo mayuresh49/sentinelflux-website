@@ -26,12 +26,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
-from dashboard.routers import activities, approvals, docs, scripts, agents
-from dashboard.routers import pages, partials
-from dashboard.routers import kb as kb_router, pipeline as pipeline_router
-from dashboard.routers import chat as chat_router, quality as quality_router
-from dashboard.routers import config_router, runs as runs_router
+from dashboard.routers import (
+    activities,
+    agents,
+    approvals,
+    config_router,
+    docs,
+    pages,
+    partials,
+    scripts,
+)
 from dashboard.routers import auth as auth_router
+from dashboard.routers import chat as chat_router
+from dashboard.routers import kb as kb_router
+from dashboard.routers import pipeline as pipeline_router
+from dashboard.routers import quality as quality_router
+from dashboard.routers import runs as runs_router
 
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
 # Use a stable secret from env so sessions survive restarts; fall back to a generated one.
@@ -94,6 +104,7 @@ async def _start_schedule_checker():
 async def _schedule_loop():
     import asyncio
     from datetime import datetime, timezone
+
     from core.run_manager import RunManager
     rm = RunManager()
     while True:

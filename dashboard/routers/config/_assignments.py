@@ -5,11 +5,15 @@ import csv
 import io
 from typing import List
 
-from fastapi import APIRouter, File, Form, Query, Request, UploadFile
+from fastapi import APIRouter, File, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, Response
 
 from dashboard.routers.config._helpers import (
-    _load_config, _load_assignments, _save_assignments, _all_tests, templates,
+    _all_tests,
+    _load_assignments,
+    _load_config,
+    _save_assignments,
+    templates,
 )
 
 router = APIRouter()
@@ -141,7 +145,7 @@ async def assignments_bulk_upload_v2(request: Request, file: UploadFile = File(.
         existing = assignments.get(test_name, {"labels": [], "priority": "", "custom_fields": {}})
         raw_labels = (row.get("labels") or "").strip()
         if raw_labels:
-            new_labels = [l.strip() for l in raw_labels.split(",") if l.strip()]
+            new_labels = [lbl.strip() for lbl in raw_labels.split(",") if lbl.strip()]
             existing["labels"] = list(dict.fromkeys(existing.get("labels", []) + new_labels))
         if priority := (row.get("priority") or "").strip():
             existing["priority"] = priority
@@ -223,7 +227,7 @@ async def assignments_bulk_upload(request: Request, file: UploadFile = File(...)
         existing = assignments.get(test_name, {"labels": [], "priority": "", "custom_fields": {}})
         raw_labels = (row.get("labels") or "").strip()
         if raw_labels:
-            new_labels = [l.strip() for l in raw_labels.split(",") if l.strip()]
+            new_labels = [lbl.strip() for lbl in raw_labels.split(",") if lbl.strip()]
             existing["labels"] = list(dict.fromkeys(existing.get("labels", []) + new_labels))
         if priority := (row.get("priority") or "").strip():
             existing["priority"] = priority

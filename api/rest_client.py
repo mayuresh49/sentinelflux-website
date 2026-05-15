@@ -1,8 +1,9 @@
 import json
 from pathlib import Path
 from typing import Any, Dict, Optional
+
 import requests
-from jsonschema import validate, ValidationError
+from jsonschema import ValidationError, validate
 
 _DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent
 

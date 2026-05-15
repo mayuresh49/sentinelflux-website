@@ -1,5 +1,5 @@
-import requests
 import pytest
+import requests
 
 _API_BASE = "https://opensource-demo.orangehrmlive.com/web/index.php/api/v2"
 

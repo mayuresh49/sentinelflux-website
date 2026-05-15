@@ -4,12 +4,9 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from pathlib import Path
 
-import pytest
-
 from core.activity_log import ActivityLog
 from core.approval_manager import ApprovalManager
 from core.run_manager import RunManager
-
 
 # ── ActivityLog ───────────────────────────────────────────────────────────────
 

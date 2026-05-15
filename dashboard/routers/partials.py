@@ -14,13 +14,13 @@ from fastapi.templating import Jinja2Templates
 
 from core.activity_log import ActivityLog
 from core.approval_manager import ApprovalManager
-from dashboard.routers.approval_dispatch import dispatch as _dispatch, _load_quarantine, _save_quarantine
+from dashboard.routers.approval_dispatch import _load_quarantine, _save_quarantine
+from dashboard.routers.approval_dispatch import dispatch as _dispatch
 from dashboard.routers.kb import _list_products
+from utils.paths import ROOT as _ROOT_DIR
 
 router = APIRouter(prefix="/ui", tags=["partials"])
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
-
-from utils.paths import ROOT as _ROOT_DIR
 
 _alog = ActivityLog()
 _am = ApprovalManager()
@@ -62,6 +62,34 @@ async def doc_content(product: str, domain: str, feature: str):
         extensions=["fenced_code", "tables", "toc"],
     )
     return HTMLResponse(f'<div class="markdown-content fade-in">{content}</div>')
+
+
+@router.get("/docs/test-case", response_class=HTMLResponse)
+async def tc_view(request: Request, product: str, domain: str, feature: str, tc_id: str):
+    import re as _re
+
+    import markdown as _md
+    path = _ROOT_DIR / "products" / product / "docs" / "test_cases" / domain / f"{feature}.md"
+    if not path.exists():
+        return HTMLResponse('<p class="text-red-500 text-sm p-4">Document not found.</p>')
+    content = path.read_text(encoding="utf-8")
+    from dashboard.routers.docs import _parse_tc_block, _parse_tc_index
+    meta = next((t for t in _parse_tc_index(content) if t["id"] == tc_id), {})
+    block = _parse_tc_block(content, tc_id)
+    if not block:
+        return HTMLResponse(f'<p class="text-slate-400 text-sm p-4">{tc_id} not found in document.</p>')
+    # Strip the H3 header line — shown in the card header instead
+    body_md = _re.sub(r'^###[^\n]+\n', '', block).strip()
+    html = _md.markdown(body_md, extensions=["fenced_code", "tables"])
+    return templates.TemplateResponse(request, "partials/doc_tc_view.html", context={
+        "request": request,
+        "tc_id": tc_id,
+        "meta": meta,
+        "product": product,
+        "domain": domain,
+        "feature": feature,
+        "html": html,
+    })
 
 
 @router.get("/scripts/content", response_class=HTMLResponse)
@@ -130,7 +158,7 @@ async def kb_save(
 
 @router.post("/pipeline/trigger", response_class=HTMLResponse)
 async def pipeline_trigger_partial(request: Request, background_tasks: BackgroundTasks):
-    from dashboard.routers.pipeline import TriggerBody, _write_job, _run
+    from dashboard.routers.pipeline import TriggerBody, _run, _write_job
     body_data = await request.json()
     body = TriggerBody(**body_data)
     job_id = str(uuid.uuid4())

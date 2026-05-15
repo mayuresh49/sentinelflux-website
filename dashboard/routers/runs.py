@@ -220,8 +220,8 @@ def _execute_run(run_id: str, product: str, domain: str, extra_args: str,
 def _analyze_failures(run_id: str, domain: str, report_path: Path) -> None:
     """Run ResultAnalyzerAgent if an AI client is available; update run record."""
     try:
-        from ai.agents.result_analyzer_agent import ResultAnalyzerAgent
         from ai.agents.base_agent import AgentContext
+        from ai.agents.result_analyzer_agent import ResultAnalyzerAgent
         client = _build_ai_client()
         if not client:
             return

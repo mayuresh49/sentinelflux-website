@@ -1,5 +1,6 @@
 import shutil
 from pathlib import Path
+
 import typer
 
 _TEMPLATES = Path(__file__).resolve().parent.parent / "templates"
@@ -32,6 +33,6 @@ def run(
 
     typer.echo(f"[ok] Project '{project}' created.")
     typer.echo(f"     1. cd {project}")
-    typer.echo(f"     2. pip install sentinelflux[ai]")
-    typer.echo(f"     3. playwright install")
-    typer.echo(f"     4. Edit config/env_qa.yaml, then: sentinelflux run")
+    typer.echo("     2. pip install sentinelflux[ai]")
+    typer.echo("     3. playwright install")
+    typer.echo("     4. Edit config/env_qa.yaml, then: sentinelflux run")

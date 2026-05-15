@@ -2,70 +2,139 @@
 {% block title %}Docs{% endblock %}
 
 {% block content %}
-<div class="h-full flex flex-col space-y-4" style="height: calc(100vh - 3rem);">
+<div class="flex flex-col space-y-4" style="height: calc(100vh - 3.5rem);">
 
+  <!-- Page header -->
   <div class="flex items-center justify-between shrink-0">
     <div>
       <h1 class="text-2xl font-bold text-slate-900">Test Case Docs</h1>
-      <p class="text-sm text-slate-500 mt-0.5">AI-generated test case documentation</p>
+      <p class="text-sm text-slate-500 mt-0.5">AI-generated test cases — browse by module and test case</p>
     </div>
-    <span class="text-sm text-slate-400">{{ docs | length }} document{{ 's' if docs | length != 1 else '' }}</span>
+    <span class="text-sm text-slate-400" id="tc-total-badge">
+      {{ modules | map(attribute='test_cases') | map('length') | sum }} test cases across {{ modules | length }} module{{ 's' if modules | length != 1 else '' }}
+    </span>
   </div>
 
-  <div class="flex gap-4 flex-1 min-h-0" x-data="{ selected: null }">
+  <div class="flex gap-4 flex-1 min-h-0" x-data="docsPage()" x-init="init()">
 
-    <!-- Left: file list -->
-    <div class="w-72 shrink-0 flex flex-col bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+    <!-- ── Left: Module / TC list ── -->
+    <div class="w-80 shrink-0 flex flex-col bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+
       <!-- Filters -->
       <div class="p-3 border-b border-slate-100 space-y-2">
-        <input type="text" placeholder="Search..." id="doc-search"
-               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-               x-on:input="filterDocs($event.target.value)">
-        <select id="doc-domain-filter" class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
-                x-on:change="filterDocs()">
-          <option value="">All domains</option>
-          {% for d in domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
-        </select>
+        <input type="text" id="tc-search" placeholder="Search by TC ID or title…"
+               @input="applyFilters()"
+               class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+        <div class="flex gap-2">
+          <select id="tc-product-filter" @change="applyFilters()"
+                  class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            <option value="">All products</option>
+            {% for p in products %}<option value="{{ p }}" {{ 'selected' if filter_product == p else '' }}>{{ p }}</option>{% endfor %}
+          </select>
+          <select id="tc-domain-filter" @change="applyFilters()"
+                  class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200">
+            <option value="">All domains</option>
+            {% for d in domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+          </select>
+        </div>
       </div>
-      <!-- List -->
-      <div class="flex-1 overflow-y-auto divide-y divide-slate-50" id="doc-list">
-        {% for d in docs %}
-        <button data-product="{{ d.product }}" data-domain="{{ d.domain }}" data-feature="{{ d.feature }}"
-                hx-get="/ui/docs/content?product={{ d.product }}&domain={{ d.domain }}&feature={{ d.feature }}"
-                hx-target="#content-viewer"
-                hx-indicator="#content-loading"
-                @click="selected = '{{ d.product }}/{{ d.domain }}/{{ d.feature }}'"
-                :class="selected === '{{ d.product }}/{{ d.domain }}/{{ d.feature }}' ? 'bg-indigo-50 border-l-2 border-indigo-500' : 'hover:bg-slate-50 border-l-2 border-transparent'"
-                class="w-full text-left px-4 py-3 transition-colors">
-          <p class="text-sm font-medium text-slate-700">{{ d.feature | replace('_', ' ') | title }}</p>
-          <div class="flex items-center gap-2 mt-0.5">
-            <span class="text-xs text-indigo-600 font-medium">{{ d.product }}</span>
-            <span class="text-xs text-slate-400">{{ d.domain }}</span>
+
+      <!-- TC count bar -->
+      <div class="px-3 py-1.5 border-b border-slate-50 flex items-center justify-between">
+        <span class="text-[11px] text-slate-400" id="tc-visible-count"></span>
+      </div>
+
+      <!-- Module groups + TC items -->
+      <div class="flex-1 overflow-y-auto divide-y divide-slate-50" id="tc-list">
+
+        {% for mod in modules %}
+        <div class="tc-module" data-product="{{ mod.product }}" data-domain="{{ mod.domain }}"
+             x-data="{ open: true }">
+          <!-- Module header -->
+          <button @click="open = !open"
+                  class="w-full flex items-center gap-2 px-3 py-2.5 bg-slate-50/80 hover:bg-slate-100 transition-colors text-left sticky top-0 z-10 border-b border-slate-100">
+            <svg class="w-3 h-3 text-slate-400 transition-transform shrink-0" :class="open ? 'rotate-90' : ''"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+            <span class="flex-1 text-xs font-semibold text-slate-700 truncate">{{ mod.feature | replace('_', ' ') | title }}</span>
+            <span class="text-[10px] text-slate-400 shrink-0">{{ mod.test_cases | length }}</span>
+            <span class="text-[10px] bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded shrink-0">{{ mod.domain }}</span>
+          </button>
+
+          <!-- TC items -->
+          <div x-show="open" x-cloak>
+            {% if mod.test_cases %}
+            {% for tc in mod.test_cases %}
+            <button
+              class="tc-item w-full text-left px-4 py-2.5 transition-colors border-l-2"
+              data-tc-id="{{ tc.id }}"
+              data-tc-title="{{ tc.title | lower }}"
+              :class="selectedKey === '{{ mod.product }}/{{ mod.domain }}/{{ mod.feature }}/{{ tc.id }}' ? 'bg-indigo-50 border-indigo-500' : 'hover:bg-slate-50 border-transparent'"
+              @click="selectTC('{{ mod.product }}', '{{ mod.domain }}', '{{ mod.feature }}', '{{ tc.id }}')"
+              hx-get="/ui/docs/test-case?product={{ mod.product }}&domain={{ mod.domain }}&feature={{ mod.feature }}&tc_id={{ tc.id }}"
+              hx-target="#tc-viewer"
+              hx-swap="innerHTML"
+              hx-indicator="#tc-loading">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-mono font-bold text-indigo-600 shrink-0">{{ tc.id }}</span>
+                <span class="w-1.5 h-1.5 rounded-full shrink-0
+                  {% if tc.status == 'automated' %}bg-emerald-500
+                  {% elif tc.status == 'not_automatable' %}bg-orange-400
+                  {% else %}bg-slate-300{% endif %}"></span>
+              </div>
+              <p class="text-xs text-slate-700 mt-0.5 leading-snug line-clamp-2">{{ tc.title }}</p>
+              <span class="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded font-medium
+                {% if tc.type == 'positive' %}bg-emerald-50 text-emerald-700
+                {% elif tc.type == 'negative' %}bg-red-50 text-red-600
+                {% elif tc.type == 'edge' %}bg-amber-50 text-amber-700
+                {% elif tc.type == 'security' %}bg-purple-50 text-purple-700
+                {% else %}bg-slate-100 text-slate-500{% endif %}">
+                {{ tc.type }}
+              </span>
+            </button>
+            {% endfor %}
+            {% else %}
+            <div class="px-4 py-3 text-xs text-slate-400 italic">No test cases parsed — view raw doc below</div>
+            {% endif %}
           </div>
-        </button>
+        </div>
         {% endfor %}
-        {% if not docs %}
-        <div class="p-6 text-center text-sm text-slate-400">No docs generated yet.</div>
-        {% else %}
-        <div id="doc-no-results" class="p-6 text-center text-sm text-slate-400" style="display:none">No matching documents.</div>
+
+        {% if not modules %}
+        <div class="p-8 text-center text-sm text-slate-400">
+          <p class="font-medium">No docs generated yet.</p>
+          <p class="text-xs mt-1">Run the AI pipeline from the KB page to generate test case docs.</p>
+        </div>
         {% endif %}
+        <div id="tc-no-results" class="p-6 text-center text-sm text-slate-400" style="display:none">
+          No matching test cases.
+        </div>
       </div>
     </div>
 
-    <!-- Right: content viewer -->
+    <!-- ── Right: TC detail viewer ── -->
     <div class="flex-1 min-w-0 bg-white rounded-xl border border-slate-100 shadow-sm flex flex-col overflow-hidden">
+      <!-- Viewer header -->
       <div class="px-5 py-3 border-b border-slate-100 flex items-center gap-3 shrink-0">
-        <span class="text-sm font-medium text-slate-600">Document Viewer</span>
-        <span id="content-loading" class="htmx-indicator flex items-center gap-1.5 text-xs text-indigo-600">
+        <span class="text-sm font-medium text-slate-600">Test Case Details</span>
+        <span id="tc-loading" class="htmx-indicator flex items-center gap-1.5 text-xs text-indigo-600">
           <svg class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-          </svg>Loading…
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+          </svg>
+          Loading…
         </span>
+        <span x-show="selectedKey" class="ml-auto text-[11px] font-mono text-slate-400"
+              x-text="selectedKey ? selectedKey.split('/').slice(2).join(' / ') : ''"></span>
       </div>
-      <div id="content-viewer" class="flex-1 overflow-auto p-6">
-        <div class="h-full flex items-center justify-center">
-          <p class="text-slate-400 text-sm">Select a document from the list to view its contents.</p>
+      <!-- Content area -->
+      <div id="tc-viewer" class="flex-1 overflow-auto p-6">
+        <div class="h-full flex flex-col items-center justify-center text-center gap-3">
+          <svg class="w-10 h-10 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <p class="text-slate-400 text-sm">Select a test case from the list to view its details.</p>
         </div>
       </div>
     </div>
@@ -76,19 +145,61 @@
 
 {% block scripts %}
 <script>
-function filterDocs(searchVal) {
-  const search = (searchVal ?? document.getElementById('doc-search').value).toLowerCase();
-  const domain = document.getElementById('doc-domain-filter').value;
-  let visible = 0;
-  document.querySelectorAll('#doc-list button[data-feature]').forEach(btn => {
-    const matchSearch = !search || btn.dataset.feature.includes(search) || btn.dataset.product.includes(search) || btn.dataset.domain.includes(search);
-    const matchDomain = !domain || btn.dataset.domain === domain;
-    const show = matchSearch && matchDomain;
-    btn.style.display = show ? '' : 'none';
-    if (show) visible++;
-  });
-  const noResults = document.getElementById('doc-no-results');
-  if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
+function docsPage() {
+  return {
+    selectedKey: null,
+
+    init() {
+      this.updateVisibleCount();
+      // Pre-apply product filter if set server-side
+      const prod = document.getElementById('tc-product-filter').value;
+      if (prod) this.applyFilters();
+    },
+
+    selectTC(product, domain, feature, tcId) {
+      this.selectedKey = `${product}/${domain}/${feature}/${tcId}`;
+    },
+
+    applyFilters() {
+      const q = (document.getElementById('tc-search').value || '').toLowerCase();
+      const prod = document.getElementById('tc-product-filter').value;
+      const dom = document.getElementById('tc-domain-filter').value;
+      let totalVisible = 0;
+
+      document.querySelectorAll('.tc-module').forEach(modEl => {
+        const mProd = modEl.dataset.product;
+        const mDom = modEl.dataset.domain;
+
+        if ((prod && mProd !== prod) || (dom && mDom !== dom)) {
+          modEl.style.display = 'none';
+          return;
+        }
+
+        let modVisible = false;
+        modEl.querySelectorAll('.tc-item').forEach(btn => {
+          const idMatch = btn.dataset.tcId && btn.dataset.tcId.toLowerCase().includes(q);
+          const titleMatch = btn.dataset.tcTitle && btn.dataset.tcTitle.includes(q);
+          const show = !q || idMatch || titleMatch;
+          btn.style.display = show ? '' : 'none';
+          if (show) { modVisible = true; totalVisible++; }
+        });
+
+        modEl.style.display = modVisible ? '' : 'none';
+      });
+
+      document.getElementById('tc-no-results').style.display = totalVisible === 0 ? '' : 'none';
+      this.updateVisibleCount(totalVisible);
+    },
+
+    updateVisibleCount(count) {
+      const el = document.getElementById('tc-visible-count');
+      if (!el) return;
+      if (count === undefined) {
+        count = document.querySelectorAll('.tc-item:not([style*="display: none"])').length;
+      }
+      el.textContent = count + ' test case' + (count !== 1 ? 's' : '');
+    },
+  };
 }
 </script>
 {% endblock %}

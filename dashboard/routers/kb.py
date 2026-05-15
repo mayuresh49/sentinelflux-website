@@ -1,7 +1,6 @@
 """JSON API for Knowledge Base file browsing, editing, and increment management."""
 from __future__ import annotations
 
-import html
 import tempfile
 from pathlib import Path
 

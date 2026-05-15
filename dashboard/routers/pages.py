@@ -1,18 +1,17 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-
-from collections import defaultdict
 
 from core.activity_log import ActivityLog
 from core.approval_manager import ApprovalManager
 from dashboard.routers.approval_dispatch import derive_feature
-from dashboard.routers.kb import _list_products
 from dashboard.routers.auth import get_session_user, user_products
+from dashboard.routers.kb import _list_products
 
 router = APIRouter(tags=["pages"])
 templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent / "templates"))
@@ -154,17 +153,31 @@ async def approvals(request: Request, product: str | None = None,
 @router.get("/docs", response_class=HTMLResponse)
 async def docs_page(request: Request, product: str | None = None,
                     current_user: dict = Depends(_require_auth)):
-    from dashboard.routers.docs import _find_docs
+    from dashboard.routers.docs import _find_docs, _parse_tc_index
+    from utils.paths import ROOT as _froot
     visible = user_products(current_user, _list_products())
     if product and product not in visible:
         product = None
     all_docs = _find_docs()
-    products = [p for p in sorted(set(d["product"] for d in all_docs)) if p in visible]
+    products = sorted(p for p in set(d["product"] for d in all_docs) if p in visible)
     domains = sorted(set(d["domain"] for d in all_docs))
-    docs = _find_docs(product=product or None)
-    docs = [d for d in docs if d["product"] in visible]
+    docs = [d for d in _find_docs() if d["product"] in visible]
+    modules = []
+    for d in docs:
+        path = _froot / "products" / d["product"] / "docs" / "test_cases" / d["domain"] / f"{d['feature']}.md"
+        tcs: list[dict] = []
+        if path.exists():
+            try:
+                tcs = _parse_tc_index(path.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+        modules.append({**d, "test_cases": tcs})
     return templates.TemplateResponse(request, "docs.html", context=_ctx(
-        request, current_user, docs=docs, products=products, domains=domains,
+        request, current_user,
+        modules=modules,
+        products=products,
+        domains=domains,
+        filter_product=product or "",
     ))
 
 
@@ -186,7 +199,7 @@ async def scripts_page(request: Request, product: str | None = None,
 
 @router.get("/assignments", response_class=HTMLResponse)
 async def assignments_page(request: Request, current_user: dict = Depends(_require_auth)):
-    from dashboard.routers.config_router import _load_config, _load_assignments, _all_tests
+    from dashboard.routers.config_router import _all_tests, _load_assignments, _load_config
     cfg = _load_config()
     visible = user_products(current_user, _list_products())
     filter_product = request.query_params.get("product", "")
@@ -218,8 +231,9 @@ async def assignments_page(request: Request, current_user: dict = Depends(_requi
 @router.get("/agents", response_class=HTMLResponse)
 async def agents_page(request: Request, current_user: dict = Depends(_require_auth)):
     import yaml
-    from dashboard.routers.agents import _AGENT_REGISTRY
+
     from dashboard.agent_meta import AGENT_META
+    from dashboard.routers.agents import _AGENT_REGISTRY
     from utils.paths import ROOT as _ROOT
     config_path = _ROOT / "ai" / "context" / "agent_config.yaml"
     agent_config: dict = {}
@@ -243,8 +257,8 @@ async def agents_page(request: Request, current_user: dict = Depends(_require_au
 @router.get("/quality", response_class=HTMLResponse)
 async def quality_page(request: Request, product: str | None = None,
                        current_user: dict = Depends(_require_auth)):
-    from dashboard.routers.quality import compute_metrics, _all_test_functions
     from dashboard.routers.partials import _quarantine_groups
+    from dashboard.routers.quality import _all_test_functions, compute_metrics
     visible = user_products(current_user, _list_products())
     if product and product not in visible:
         product = None
@@ -294,7 +308,13 @@ async def runs_page(
 @router.get("/kb", response_class=HTMLResponse)
 async def kb_page(request: Request, product: str | None = None,
                   current_user: dict = Depends(_require_auth)):
-    from dashboard.routers.kb import _list_products, _kb_files, _load_increments_log, _INCREMENTS_DIR, _TEXT_SUFFIXES
+    from dashboard.routers.kb import (
+        _INCREMENTS_DIR,
+        _TEXT_SUFFIXES,
+        _kb_files,
+        _list_products,
+        _load_increments_log,
+    )
     from dashboard.routers.pipeline import _load_jobs
     all_prods = _list_products()
     visible = user_products(current_user, all_prods)
@@ -350,6 +370,7 @@ async def change_password_submit(
     current_user: dict = Depends(_require_auth),
 ):
     import bcrypt as _bcrypt
+
     from dashboard.routers.config_router import _load_config, _save_config
     cfg = _load_config()
     user_entry = next((u for u in cfg.get("users", []) if u["email"] == current_user["email"]), None)

@@ -1,4 +1,5 @@
 from typing import Optional
+
 from ai.clients.base_client import AIClient
 
 
@@ -23,6 +24,7 @@ def create_ai_client(ai_config: dict) -> Optional[AIClient]:
         )
     if mode == "openai":
         import os
+
         from ai.clients.openai_client import OpenAIClient
         return OpenAIClient(
             api_key=os.environ.get("OPENAI_API_KEY", ai_config.get("api_key", "")),
@@ -30,6 +32,7 @@ def create_ai_client(ai_config: dict) -> Optional[AIClient]:
         )
     if mode == "anthropic":
         import os
+
         from ai.clients.anthropic_client import AnthropicClient
         return AnthropicClient(
             api_key=os.environ.get("ANTHROPIC_API_KEY", ai_config.get("api_key", "")),

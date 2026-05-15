@@ -1,6 +1,6 @@
 import pytest
-from pages.web.login_page import LoginPage
 from pages.web.leave_page import LeavePage
+from pages.web.login_page import LoginPage
 
 ADMIN_USER = "Admin"
 ADMIN_PASS = "admin123"

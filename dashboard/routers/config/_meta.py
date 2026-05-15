@@ -31,7 +31,7 @@ def _render_fields(request: Request, cfg: dict) -> HTMLResponse:
 async def labels_add(request: Request, name: str = Form(...), color: str = Form("slate")):
     cfg = _load_config()
     name = name.strip().lower().replace(" ", "_")
-    if name and not any(l["name"] == name for l in cfg.get("labels", [])):
+    if name and not any(lbl["name"] == name for lbl in cfg.get("labels", [])):
         cfg.setdefault("labels", []).append({"name": name, "color": color})
         _save_config(cfg)
     return _render_labels(request, cfg)
@@ -40,7 +40,7 @@ async def labels_add(request: Request, name: str = Form(...), color: str = Form(
 @router.post("/ui/config/labels/delete", response_class=HTMLResponse)
 async def labels_delete(request: Request, name: str = Form(...)):
     cfg = _load_config()
-    cfg["labels"] = [l for l in cfg.get("labels", []) if l["name"] != name]
+    cfg["labels"] = [lbl for lbl in cfg.get("labels", []) if lbl["name"] != name]
     _save_config(cfg)
     return _render_labels(request, cfg)
 

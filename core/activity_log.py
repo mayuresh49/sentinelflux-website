@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from filelock import FileLock
+
 from utils.paths import ROOT as _ROOT_DIR
 
 _log = logging.getLogger("sentinelflux.activity_log")

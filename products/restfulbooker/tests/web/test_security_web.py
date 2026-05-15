@@ -1,6 +1,5 @@
 import pytest
 from pages.web.home_page import HomePage
-from pages.web.admin_page import AdminPage
 
 _XSS = "<script>window.__xss_fired=true</script>"
 
