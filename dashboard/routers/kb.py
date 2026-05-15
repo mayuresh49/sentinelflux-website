@@ -5,8 +5,10 @@ import tempfile
 from pathlib import Path
 
 import yaml
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
+
+from dashboard.routers.auth import require_user, user_products
 
 from utils.paths import ROOT as _ROOT_DIR
 
@@ -62,15 +64,16 @@ def _load_increments_log() -> dict:
 
 
 @router.get("/")
-def list_kb():
-    products = _list_products()
+def list_kb(current_user: dict = Depends(require_user)):
+    all_prods = _list_products()
+    visible = user_products(current_user, all_prods)
     return {
-        "products": [{"product": p, "files": _kb_files(p)} for p in products]
+        "products": [{"product": p, "files": _kb_files(p)} for p in visible]
     }
 
 
 @router.get("/increments")
-def list_increments():
+def list_increments(current_user: dict = Depends(require_user)):
     log = _load_increments_log()
     files: list[str] = []
     if _INCREMENTS_DIR.exists():
@@ -86,8 +89,15 @@ def list_increments():
     }
 
 
+def _check_product_access(product: str, current_user: dict) -> None:
+    visible = user_products(current_user, _list_products())
+    if product not in visible:
+        raise HTTPException(403, "Access denied to this product")
+
+
 @router.get("/{product}/openapi-url")
-def get_openapi_url(product: str):
+def get_openapi_url(product: str, current_user: dict = Depends(require_user)):
+    _check_product_access(product, current_user)
     path = _product_kb_dir(product) / "openapi_specs.yaml"
     if not path.exists():
         return {"openapi_url": ""}
@@ -100,7 +110,8 @@ class OpenapiUrlBody(BaseModel):
 
 
 @router.put("/{product}/openapi-url")
-def save_openapi_url(product: str, body: OpenapiUrlBody):
+def save_openapi_url(product: str, body: OpenapiUrlBody, current_user: dict = Depends(require_user)):
+    _check_product_access(product, current_user)
     kb_dir = _product_kb_dir(product)
     kb_dir.mkdir(parents=True, exist_ok=True)
     path = kb_dir / "openapi_specs.yaml"
@@ -112,7 +123,8 @@ def save_openapi_url(product: str, body: OpenapiUrlBody):
 
 
 @router.get("/{product}/{filename}")
-def get_file(product: str, filename: str):
+def get_file(product: str, filename: str, current_user: dict = Depends(require_user)):
+    _check_product_access(product, current_user)
     path = _product_kb_dir(product) / filename
     if not path.exists():
         raise HTTPException(404, "File not found")
@@ -128,7 +140,8 @@ class SaveBody(BaseModel):
 
 
 @router.put("/{product}/{filename}")
-def save_file(product: str, filename: str, body: SaveBody):
+def save_file(product: str, filename: str, body: SaveBody, current_user: dict = Depends(require_user)):
+    _check_product_access(product, current_user)
     path = _product_kb_dir(product) / filename
     if not path.exists():
         raise HTTPException(404, "File not found")
@@ -142,7 +155,7 @@ class IncrementBody(BaseModel):
 
 
 @router.post("/increments")
-def create_increment(body: IncrementBody):
+def create_increment(body: IncrementBody, current_user: dict = Depends(require_user)):
     if not body.filename.endswith((".yaml", ".yml")):
         raise HTTPException(400, "Filename must end with .yaml")
     _INCREMENTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -159,6 +172,7 @@ async def upload_kb_file(
     file: UploadFile = File(...),
     product: str = Form(...),
     filename: str = Form(""),
+    current_user: dict = Depends(require_user),
 ):
     """Upload a YAML/MD/TXT file into ai/knowledge_base/<product>/."""
     product = product.strip()
@@ -194,6 +208,7 @@ async def upload_docx(
     output_filename: str = Form(""),
     local_url: str = Form("http://localhost:11434"),
     model: str = Form("mistral:7b-instruct-v0.3-q4_K_M"),
+    current_user: dict = Depends(require_user),
 ):
     """Accept a .docx upload, extract text, convert to KB YAML via LLM, save to increments/."""
     if not (file.filename or "").lower().endswith(".docx"):

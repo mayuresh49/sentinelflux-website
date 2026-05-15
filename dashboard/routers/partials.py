@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
-from fastapi import APIRouter, BackgroundTasks, Form, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -16,6 +16,7 @@ from core.activity_log import ActivityLog
 from core.approval_manager import ApprovalManager
 from dashboard.routers.approval_dispatch import _load_quarantine, _save_quarantine
 from dashboard.routers.approval_dispatch import dispatch as _dispatch
+from dashboard.routers.auth import require_user, user_products
 from dashboard.routers.kb import _list_products
 from utils.paths import ROOT as _ROOT_DIR
 
@@ -36,6 +37,7 @@ async def activities_partial(
     product: Optional[str] = None,
     requires_human: Optional[str] = None,
     page: int = 1,
+    current_user: dict = Depends(require_user),
 ):
     rh: Optional[bool] = None
     if requires_human == "true":
@@ -43,12 +45,18 @@ async def activities_partial(
     elif requires_human == "false":
         rh = False
 
+    visible = user_products(current_user, _list_products())
+    if product and product not in visible:
+        product = None
+
     all_filtered = list(reversed(_alog.filter(
         agent=agent or None,
         domain=domain or None,
         product=product or None,
         requires_human=rh,
     )))
+    if not current_user.get("admin"):
+        all_filtered = [e for e in all_filtered if e.get("product") in visible]
     total = len(all_filtered)
     total_pages = max(1, (total + _ACT_PAGE_SIZE - 1) // _ACT_PAGE_SIZE)
     page = max(1, min(page, total_pages))

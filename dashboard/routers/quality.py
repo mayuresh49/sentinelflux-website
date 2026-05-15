@@ -4,9 +4,10 @@ import re
 from datetime import datetime, timedelta, timezone
 
 import yaml
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from core.activity_log import ActivityLog
+from dashboard.routers.auth import require_user, user_products
 from utils.paths import ROOT as _ROOT_DIR
 
 router = APIRouter(prefix="/quality", tags=["quality"])
@@ -84,8 +85,8 @@ def _daily_pass_rate(all_entries: list, days: int = 7) -> list:
     return trend
 
 
-def compute_metrics(product: str | None = None) -> dict:
-    all_prods = _all_products()
+def compute_metrics(product: str | None = None, allowed_products: list[str] | None = None) -> dict:
+    all_prods = allowed_products if allowed_products is not None else _all_products()
     scope = [product] if (product and product in all_prods) else all_prods
 
     all_entries = _alog.all()
@@ -167,5 +168,8 @@ def _all_test_functions() -> list[dict]:
 
 
 @router.get("/")
-def get_quality(product: str | None = None):
-    return compute_metrics(product)
+def get_quality(product: str | None = None, current_user: dict = Depends(require_user)):
+    visible = user_products(current_user, _all_products())
+    if product and product not in visible:
+        product = None
+    return compute_metrics(product, allowed_products=visible)

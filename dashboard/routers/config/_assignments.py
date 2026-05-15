@@ -5,16 +5,23 @@ import csv
 import io
 from typing import List
 
-from fastapi import APIRouter, File, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Query, Request, UploadFile
 from fastapi.responses import HTMLResponse, Response
 
+from dashboard.routers.auth import require_user, user_products
 from dashboard.routers.config._helpers import (
+    _require_admin,
     _all_tests,
     _load_assignments,
     _load_config,
     _save_assignments,
     templates,
 )
+
+
+def _visible_products(current_user: dict) -> list[str]:
+    from dashboard.routers.kb import _list_products
+    return user_products(current_user, _list_products())
 
 router = APIRouter()
 
@@ -64,19 +71,26 @@ async def assignments_partial(
     request: Request, product: str = "", search: str = "",
     filter_labels: List[str] = Query(default=[]),
     filter_priority: str = "", filter_owner: str = "", filter_jira_exists: str = "",
+    current_user: dict = Depends(require_user),
 ):
+    visible = _visible_products(current_user)
     assignments = _load_assignments()
     cfg = _load_config()
-    tests = _all_tests()
+    tests = [t for t in _all_tests() if t["product"] in visible]
     if product:
-        tests = [t for t in tests if t["product"] == product]
+        if product not in visible:
+            product = ""
+        else:
+            tests = [t for t in tests if t["product"] == product]
     tests = _apply_filters(tests, assignments, search, filter_labels, filter_priority, filter_owner, filter_jira_exists)
     return _assignments_ctx(request, tests, assignments, cfg, product, search,
                             filter_labels, filter_priority, filter_owner, filter_jira_exists)
 
 
 @router.get("/ui/assignments/export")
-async def assignments_export():
+async def assignments_export(current_user: dict = Depends(require_user)):
+    visible = _visible_products(current_user)
+    all_test_names = {t["name"] for t in _all_tests() if t["product"] in visible}
     assignments = _load_assignments()
     cfg = _load_config()
     cf_names = [f["name"] for f in cfg.get("custom_fields", [])]
@@ -84,6 +98,8 @@ async def assignments_export():
     writer = csv.DictWriter(out, fieldnames=["test_name", "labels", "priority"] + cf_names)
     writer.writeheader()
     for test_name, asgn in sorted(assignments.items()):
+        if test_name not in all_test_names:
+            continue
         row = {"test_name": test_name, "labels": ",".join(asgn.get("labels", [])), "priority": asgn.get("priority", "")}
         for cf in cf_names:
             row[cf] = asgn.get("custom_fields", {}).get(cf, "")
@@ -95,7 +111,7 @@ async def assignments_export():
 
 
 @router.get("/ui/assignments/csv-template")
-async def assignments_csv_template_v2():
+async def assignments_csv_template_v2(current_user: dict = Depends(require_user)):
     cfg = _load_config()
     cf_names = [f["name"] for f in cfg.get("custom_fields", [])]
     header = ",".join(["test_name", "labels", "priority"] + cf_names)
@@ -111,12 +127,17 @@ async def assignments_list_partial(
     request: Request, product: str = "", search: str = "",
     filter_labels: List[str] = Query(default=[]),
     filter_priority: str = "", filter_owner: str = "", filter_jira_exists: str = "",
+    current_user: dict = Depends(require_user),
 ):
+    visible = _visible_products(current_user)
     assignments = _load_assignments()
     cfg = _load_config()
-    tests = _all_tests()
+    tests = [t for t in _all_tests() if t["product"] in visible]
     if product:
-        tests = [t for t in tests if t["product"] == product]
+        if product not in visible:
+            product = ""
+        else:
+            tests = [t for t in tests if t["product"] == product]
     tests = _apply_filters(tests, assignments, search, filter_labels, filter_priority, filter_owner, filter_jira_exists)
     return templates.TemplateResponse(request, "partials/assignment_list.html", context={
         "request": request, "tests": tests, "assignments": assignments,
@@ -128,7 +149,7 @@ async def assignments_list_partial(
 
 
 @router.post("/ui/assignments/bulk-upload", response_class=HTMLResponse)
-async def assignments_bulk_upload_v2(request: Request, file: UploadFile = File(...)):
+async def assignments_bulk_upload_v2(request: Request, file: UploadFile = File(...), current_user: dict = Depends(require_user)):
     content = (await file.read()).decode("utf-8", errors="replace")
     reader = csv.DictReader(io.StringIO(content))
     known_tests = {t["name"] for t in _all_tests()}
@@ -169,7 +190,7 @@ async def assignments_bulk_upload_v2(request: Request, file: UploadFile = File(.
 
 
 @router.get("/ui/assignments/form", response_class=HTMLResponse)
-async def assignment_form_partial(request: Request, test_name: str):
+async def assignment_form_partial(request: Request, test_name: str, current_user: dict = Depends(require_user)):
     assignments = _load_assignments()
     cfg = _load_config()
     return templates.TemplateResponse(request, "partials/assignment_form.html", context={
@@ -182,7 +203,7 @@ async def assignment_form_partial(request: Request, test_name: str):
 
 
 @router.post("/ui/assignments/save", response_class=HTMLResponse)
-async def assignments_save_v2(request: Request):
+async def assignments_save_v2(request: Request, current_user: dict = Depends(require_user)):
     form = await request.form()
     test_name = form.get("test_name", "")
     cfg = _load_config()
@@ -200,7 +221,7 @@ async def assignments_save_v2(request: Request):
 
 
 @router.get("/ui/config/assignments/csv-template")
-async def assignments_csv_template():
+async def assignments_csv_template(_: dict = Depends(_require_admin)):
     return Response(
         content="test_name,labels,priority,owner,jira_ticket\n"
                 'test_example_function,"sanity,regression",P1,Jane Smith,PROJ-123\n',
@@ -210,7 +231,7 @@ async def assignments_csv_template():
 
 
 @router.post("/ui/config/assignments/bulk-upload", response_class=HTMLResponse)
-async def assignments_bulk_upload(request: Request, file: UploadFile = File(...)):
+async def assignments_bulk_upload(request: Request, file: UploadFile = File(...), _: dict = Depends(_require_admin)):
     content = (await file.read()).decode("utf-8", errors="replace")
     reader = csv.DictReader(io.StringIO(content))
     known_tests = {t["name"] for t in _all_tests()}
@@ -246,7 +267,7 @@ async def assignments_bulk_upload(request: Request, file: UploadFile = File(...)
 
 
 @router.post("/ui/config/assignments/save", response_class=HTMLResponse)
-async def assignments_save(request: Request):
+async def assignments_save(request: Request, _: dict = Depends(_require_admin)):
     form = await request.form()
     test_name = form.get("test_name", "")
     product = form.get("filter_product", "")

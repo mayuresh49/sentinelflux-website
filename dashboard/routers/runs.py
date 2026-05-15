@@ -12,8 +12,10 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel
+
+from dashboard.routers.auth import require_user, user_products
 
 from core.run_manager import RunManager
 from utils.paths import ROOT as _ROOT
@@ -21,6 +23,16 @@ from utils.paths import ROOT as _ROOT
 router = APIRouter(prefix="/runs", tags=["runs"])
 _ARTIFACTS_DIR = _ROOT / "reports" / "artifacts"
 _rm = RunManager()
+
+
+def _visible_products(current_user: dict) -> list[str]:
+    from dashboard.routers.kb import _list_products
+    return user_products(current_user, _list_products())
+
+
+def _check_product(product: str, current_user: dict) -> None:
+    if product not in _visible_products(current_user):
+        raise HTTPException(403, "Access denied to this product")
 
 
 # ── request models ────────────────────────────────────────────────────────────
@@ -50,8 +62,9 @@ class CreateScheduleBody(BaseModel):
 # ── trigger & history ─────────────────────────────────────────────────────────
 
 @router.get("/modules")
-def list_modules(product: str, domain: str = "all"):
+def list_modules(product: str, domain: str = "all", current_user: dict = Depends(require_user)):
     """Return test file stems for a product+domain combo."""
+    _check_product(product, current_user)
     base = _resolve_test_path(product, domain)
     if not base:
         return {"modules": []}
@@ -61,7 +74,8 @@ def list_modules(product: str, domain: str = "all"):
 
 
 @router.post("/trigger")
-def trigger_run(body: TriggerRunBody, background_tasks: BackgroundTasks):
+def trigger_run(body: TriggerRunBody, background_tasks: BackgroundTasks, current_user: dict = Depends(require_user)):
+    _check_product(body.product, current_user)
     snapshot = _build_run_config_snapshot(body.product, body.environment, body.browser, body.device)
     run = _rm.create_run(product=body.product, domain=body.domain, module=body.module,
                          trigger="manual", run_config_snapshot=snapshot)
@@ -72,10 +86,16 @@ def trigger_run(body: TriggerRunBody, background_tasks: BackgroundTasks):
 
 @router.get("/")
 def list_runs(product: str | None = None, domain: str | None = None,
-              status: str | None = None, limit: int = 50):
+              status: str | None = None, limit: int = 50,
+              current_user: dict = Depends(require_user)):
+    visible = _visible_products(current_user)
     runs = list(reversed(_rm.all_runs()))
     if product:
+        if product not in visible:
+            return {"runs": [], "total": 0}
         runs = [r for r in runs if r.get("product") == product]
+    else:
+        runs = [r for r in runs if r.get("product") in visible]
     if domain:
         runs = [r for r in runs if r.get("domain") == domain]
     if status:
@@ -84,25 +104,33 @@ def list_runs(product: str | None = None, domain: str | None = None,
 
 
 @router.get("/{run_id}")
-def get_run(run_id: str):
+def get_run(run_id: str, current_user: dict = Depends(require_user)):
     run = _rm.get_run(run_id)
     if not run:
         raise HTTPException(404, "Run not found")
+    if run.get("product") not in _visible_products(current_user):
+        raise HTTPException(403, "Access denied")
     return run
 
 
 @router.delete("/{run_id}")
-def delete_run(run_id: str):
-    if not _rm.delete_run(run_id):
+def delete_run(run_id: str, current_user: dict = Depends(require_user)):
+    run = _rm.get_run(run_id)
+    if not run:
         raise HTTPException(404, "Run not found")
+    if run.get("product") not in _visible_products(current_user):
+        raise HTTPException(403, "Access denied")
+    _rm.delete_run(run_id)
     return {"deleted": run_id}
 
 
 @router.post("/{run_id}/analyze")
-def analyze_run(run_id: str, background_tasks: BackgroundTasks):
+def analyze_run(run_id: str, background_tasks: BackgroundTasks, current_user: dict = Depends(require_user)):
     run = _rm.get_run(run_id)
     if not run:
         raise HTTPException(404, "Run not found")
+    if run.get("product") not in _visible_products(current_user):
+        raise HTTPException(403, "Access denied")
     if run.get("status") not in ("completed", "failed"):
         raise HTTPException(400, "Run not finished yet")
     report_path = _ROOT / run["report_path"]
@@ -113,10 +141,12 @@ def analyze_run(run_id: str, background_tasks: BackgroundTasks):
 
 
 @router.post("/{run_id}/rerun")
-def rerun(run_id: str, background_tasks: BackgroundTasks):
+def rerun(run_id: str, background_tasks: BackgroundTasks, current_user: dict = Depends(require_user)):
     run = _rm.get_run(run_id)
     if not run:
         raise HTTPException(404, "Run not found")
+    if run.get("product") not in _visible_products(current_user):
+        raise HTTPException(403, "Access denied")
     snap = run.get("run_config_snapshot", {})
     new_run = _rm.create_run(
         product=run["product"], domain=run["domain"], module=run.get("module", ""),
@@ -131,12 +161,15 @@ def rerun(run_id: str, background_tasks: BackgroundTasks):
 # ── schedules ─────────────────────────────────────────────────────────────────
 
 @router.get("/schedules/all")
-def list_schedules():
-    return {"schedules": _rm.all_schedules()}
+def list_schedules(current_user: dict = Depends(require_user)):
+    visible = _visible_products(current_user)
+    schedules = [s for s in _rm.all_schedules() if s.get("product") in visible]
+    return {"schedules": schedules}
 
 
 @router.post("/schedules")
-def create_schedule(body: CreateScheduleBody):
+def create_schedule(body: CreateScheduleBody, current_user: dict = Depends(require_user)):
+    _check_product(body.product, current_user)
     sched = _rm.create_schedule(
         name=body.name,
         product=body.product,
@@ -153,26 +186,31 @@ def create_schedule(body: CreateScheduleBody):
 
 
 @router.post("/schedules/{sched_id}/toggle")
-def toggle_schedule(sched_id: str):
+def toggle_schedule(sched_id: str, current_user: dict = Depends(require_user)):
     sched = _rm.get_schedule(sched_id)
     if not sched:
         raise HTTPException(404, "Schedule not found")
+    _check_product(sched["product"], current_user)
     updated = _rm.patch_schedule(sched_id, enabled=not sched.get("enabled", True))
     return updated
 
 
 @router.delete("/schedules/{sched_id}")
-def delete_schedule(sched_id: str):
-    if not _rm.delete_schedule(sched_id):
+def delete_schedule(sched_id: str, current_user: dict = Depends(require_user)):
+    sched = _rm.get_schedule(sched_id)
+    if not sched:
         raise HTTPException(404, "Schedule not found")
+    _check_product(sched["product"], current_user)
+    _rm.delete_schedule(sched_id)
     return {"deleted": sched_id}
 
 
 @router.post("/schedules/{sched_id}/run-now")
-def schedule_run_now(sched_id: str, background_tasks: BackgroundTasks):
+def schedule_run_now(sched_id: str, background_tasks: BackgroundTasks, current_user: dict = Depends(require_user)):
     sched = _rm.get_schedule(sched_id)
     if not sched:
         raise HTTPException(404, "Schedule not found")
+    _check_product(sched["product"], current_user)
     env = sched.get("environment", "")
     browser = sched.get("browser", "")
     device = sched.get("device", "")
