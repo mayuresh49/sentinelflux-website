@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from ai.agents.base_agent import BaseAgent
@@ -178,11 +179,26 @@ class ResultAnalyzerAgent(BaseAgent):
     @staticmethod
     def _parse_json(raw: str) -> dict:
         raw = raw.strip()
-        if "```" in raw:
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        return json.loads(raw.strip())
+        fence_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", raw)
+        if fence_match:
+            raw = fence_match.group(1).strip()
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"LLM returned invalid JSON: {exc}") from exc
+        # Validate required fields and types
+        if parsed.get("classification") not in (
+            "assertion", "infra", "flaky", "env", "locator", "unknown"
+        ):
+            parsed["classification"] = "unknown"
+        confidence = parsed.get("confidence", 0.0)
+        if not isinstance(confidence, (int, float)):
+            parsed["confidence"] = 0.0
+        else:
+            parsed["confidence"] = max(0.0, min(1.0, float(confidence)))
+        parsed.setdefault("summary", "")
+        parsed.setdefault("suggestion", "")
+        return parsed
 
     @staticmethod
     def _tally(results: list[dict]) -> dict[str, int]:

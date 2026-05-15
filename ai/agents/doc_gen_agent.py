@@ -50,7 +50,9 @@ class DocGenAgent(BaseAgent):
                 source_context = ApiSourceParser().parse(source)
                 self._log.info("Source context loaded from: %s", source)
             except Exception as exc:
-                self._log.warning("Could not parse source '%s': %s", source, exc)
+                # Re-raise: user explicitly provided a source and expects it to ground the output.
+                # Silently continuing with empty source_context causes the LLM to hallucinate API details.
+                raise RuntimeError(f"DocGenAgent: failed to parse source '{source}': {exc}") from exc
 
         if domain == "api":
             content = skill.generate_api_test_document(

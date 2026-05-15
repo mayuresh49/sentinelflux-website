@@ -160,7 +160,9 @@ class TestPipelineOrchestrator:
         if not path.exists():
             _log.warning("Increment file not found: %s — skipping", path)
             return
+        # invalidate flushes the cache; load_increments re-reads all files including the new one
         self.kb_loader.invalidate()
+        self.kb_loader.load_increments()
         _log.info("Loaded increment: %s", increment_file)
 
     def _log_increment(

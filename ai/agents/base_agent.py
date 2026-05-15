@@ -98,7 +98,14 @@ class BaseAgent:
 
     def _prompt_key(self) -> str:
         from ai.agents.registry import PROMPT_KEYS
-        return PROMPT_KEYS.get(self.ctx.domain, self.ctx.domain.upper())
+        key = PROMPT_KEYS.get(self.ctx.domain)
+        if key is None:
+            self._log.warning(
+                "_prompt_key: domain '%s' has no PROMPT_KEYS entry — add it to registry.py",
+                self.ctx.domain,
+            )
+            return self.ctx.domain.upper()
+        return key
 
     def _domain_marker(self) -> str:
         from ai.agents.registry import DOMAIN_MARKERS

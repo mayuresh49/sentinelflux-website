@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from ai.agents.base_agent import BaseAgent
@@ -20,14 +21,15 @@ Page context (HTML excerpt or accessibility snapshot):
 Current locator entry:
 {current_entry}
 
-Rules:
-- Prefer stable attributes: id, name, data-testid, aria-label, role
-- Avoid positional selectors like nth-child unless unavoidable
-- For web: use CSS or XPath strings compatible with Playwright
-- For mobile: use Appium-compatible locators (accessibility id, xpath)
-- Do NOT invent elements that may not exist — base suggestions on the page context
-
-Respond in JSON only — no prose, no markdown fences:
+STRICT RULES — violating these produces broken test suites:
+1. ONLY suggest selectors for elements you can see in the Page context above.
+   If the element is not visible in the provided context, respond with:
+   {{"error": "element_not_found_in_context"}}
+2. Do NOT invent attributes, IDs, or class names that are not present in the page context.
+3. Prefer stable attributes in this order: id > name > data-testid > aria-label > role > class
+4. Avoid positional selectors (nth-child, nth-of-type) unless no stable attribute exists.
+5. For web: use CSS or XPath strings compatible with Playwright.
+6. Respond in JSON only — no prose, no markdown fences:
 {{
   "primary": "<updated selector>",
   "alternatives": ["<alt1>", "<alt2>", "<alt3>"]
@@ -47,12 +49,15 @@ Page context (accessibility tree or page source excerpt):
 Current locator entry:
 {current_entry}
 
-Rules:
-- Prefer accessibility id > xpath > class name
-- accessibility id maps to content-desc (Android) or accessibilityIdentifier (iOS)
-- XPath expressions must be valid for Appium (no CSS)
-
-Respond in JSON only — no prose, no markdown fences:
+STRICT RULES — violating these produces broken test suites:
+1. ONLY suggest locators for elements you can see in the Page context above.
+   If the element is not visible in the provided context, respond with:
+   {{"error": "element_not_found_in_context"}}
+2. Do NOT invent accessibility IDs, content-desc values, or XPath paths not present in context.
+3. Prefer accessibility id > xpath > class name.
+4. accessibility id maps to content-desc (Android) or accessibilityIdentifier (iOS).
+5. XPath expressions must be valid for Appium (no CSS).
+6. Respond in JSON only — no prose, no markdown fences:
 {{
   "primary": "<updated locator>",
   "alternatives": ["<alt1>", "<alt2>"]
@@ -110,9 +115,24 @@ class LocatorHealerAgent(BaseAgent):
             self._log.warning("Locator healing failed for '%s': %s", element_name, exc)
             return {"success": False, "element": element_name, "error": str(exc)}
 
+        err = proposal.get("error")
+        if err:
+            self._log.warning("Locator healing refused for '%s': %s", element_name, err)
+            return {"success": False, "element": element_name, "error": err}
+
+        validation_error = self._validate_proposal(proposal)
+        if validation_error:
+            self._log.warning("Invalid proposal for '%s': %s", element_name, validation_error)
+            return {"success": False, "element": element_name, "error": validation_error}
+
         if not self.ctx.get("dry_run", False):
-            current[element_name] = proposal
             locator_file.parent.mkdir(parents=True, exist_ok=True)
+            # Backup before overwrite so healing can be rolled back
+            if locator_file.exists():
+                locator_file.with_suffix(".json.bak").write_text(
+                    locator_file.read_text(encoding="utf-8"), encoding="utf-8"
+                )
+            current[element_name] = proposal
             locator_file.write_text(json.dumps(current, indent=2), encoding="utf-8")
             self._log.info(
                 "Healed locator '%s' in %s: %s → %s",
@@ -137,10 +157,21 @@ class LocatorHealerAgent(BaseAgent):
         return json.loads(path.read_text(encoding="utf-8"))
 
     @staticmethod
+    def _validate_proposal(proposal: dict) -> str | None:
+        """Return an error string if the proposal is malformed, else None."""
+        primary = proposal.get("primary", "")
+        if not isinstance(primary, str) or not primary.strip():
+            return "proposal missing non-empty 'primary' selector"
+        alts = proposal.get("alternatives")
+        if alts is not None and not isinstance(alts, list):
+            return "'alternatives' must be a list"
+        return None
+
+    @staticmethod
     def _parse_json(raw: str) -> dict:
         raw = raw.strip()
-        if "```" in raw:
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        return json.loads(raw.strip())
+        # Strip markdown fences robustly via regex
+        fence_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", raw)
+        if fence_match:
+            raw = fence_match.group(1).strip()
+        return json.loads(raw)

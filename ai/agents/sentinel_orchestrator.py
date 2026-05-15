@@ -142,7 +142,7 @@ class SentinelOrchestrator:
             steps.append({"agent": "result_analyzer", "status": "success"})
             return result
         except Exception as exc:
-            _log.error("ResultAnalyzerAgent error: %s", exc)
+            _log.error("ResultAnalyzerAgent error: %s", exc, exc_info=True)
             steps.append({"agent": "result_analyzer", "status": "error", "error": str(exc)})
             return {"total": 0, "failures": []}
 
@@ -199,7 +199,7 @@ class SentinelOrchestrator:
             steps.append({"agent": "flaky_detector", "status": "success"})
             return result
         except Exception as exc:
-            _log.error("FlakyDetectorAgent error: %s", exc)
+            _log.error("FlakyDetectorAgent error: %s", exc, exc_info=True)
             steps.append({"agent": "flaky_detector", "status": "error", "error": str(exc)})
             return {"quarantine_candidates": [], "unquarantine_candidates": []}
 
@@ -245,7 +245,7 @@ class SentinelOrchestrator:
             steps.append({"agent": "regression_guard", "status": "success"})
             return result
         except Exception as exc:
-            _log.error("RegressionGuardAgent error: %s", exc)
+            _log.error("RegressionGuardAgent error: %s", exc, exc_info=True)
             steps.append({"agent": "regression_guard", "status": "error", "error": str(exc)})
             return {"regressions": [], "fixed": [], "new_failures": [], "new_tests": []}
 
@@ -295,7 +295,7 @@ class SentinelOrchestrator:
             steps.append({"agent": "coverage_gap", "status": "success"})
             return result
         except Exception as exc:
-            _log.error("CoverageGapAgent error: %s", exc)
+            _log.error("CoverageGapAgent error: %s", exc, exc_info=True)
             steps.append({"agent": "coverage_gap", "status": "error", "error": str(exc)})
             return {"gaps": []}
 
@@ -348,6 +348,6 @@ class SentinelOrchestrator:
             steps.append({"agent": "locator_healer", "status": "success", "heal_count": len(heals)})
             return heals
         except Exception as exc:
-            _log.error("LocatorHealerAgent error: %s", exc)
+            _log.error("LocatorHealerAgent error: %s", exc, exc_info=True)
             steps.append({"agent": "locator_healer", "status": "error", "error": str(exc)})
             return []

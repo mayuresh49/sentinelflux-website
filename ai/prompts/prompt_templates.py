@@ -6,15 +6,19 @@ class PromptTemplate:
         return self.template.format(**kwargs)
 
 
-# Example prompts
 LOCATOR_HEALING_PROMPT = PromptTemplate("""
-Given the following HTML snippet and a broken locator, suggest a new locator.
+A UI locator is broken. Suggest a replacement CSS selector.
 
 HTML: {html}
 Broken Locator: {broken_locator}
 Page URL: {url}
 
-Suggest a valid CSS or XPath selector.
+STRICT RULES:
+1. ONLY suggest a selector that matches an element present in the HTML above.
+   If the element cannot be found, respond with exactly: NOT_FOUND
+2. Do NOT invent attributes, IDs, or class names not present in the HTML.
+3. Prefer stable attributes in this order: id > name > data-testid > aria-label > role > class.
+4. Respond with the selector string only — no explanation, no markdown, no JSON.
 """)
 
 TEST_GENERATION_PROMPT = PromptTemplate("""
@@ -121,19 +125,25 @@ Feature: {feature_name}
 --- FRAMEWORK CONVENTIONS ---
 {conventions}
 
+--- AVAILABLE PAGE OBJECTS ---
+{page_catalog}
+
 --- TEST CASE DOCUMENT ---
 {test_case_doc}
 
 --- RULES ---
 - Output ONLY valid Python code. No markdown, no explanations, no code fences.
 - Follow the conventions above exactly (fixtures, imports, markers, assertion style).
+- ONLY import page objects listed in the "AVAILABLE PAGE OBJECTS" section above.
+  Do NOT invent page class names or module paths not listed there.
+  If no page object is listed, use only the fixtures and patterns from FRAMEWORK CONVENTIONS.
 - One pytest function per test case. Name: test_{{action}}_{{expected_outcome}}.
 - If a test case has an ID in the document (format PRODUCT-LAYER-NNN, e.g. RB-API-001), use it as a prefix in the function name: test_{{ID_underscored}}_{{description}} (hyphens → underscores). Example: "RB-API-001" → test_RB_API_001_create_booking.{tc_prefix_hint}
 - SKIP any test case with status `not_automatable` — do not generate a pytest function for it.
 - For test cases with status `async_dependent`: generate the function, add `@pytest.mark.async_wait` and `@pytest.mark.dependency` markers, and use `wait_for()` from `utils.wait` for polling steps.
 - Use parametrize only when test data sets share identical steps.
 - Do not add comments unless a business rule is non-obvious.
-- Do not import anything not in the conventions or standard library.
+- Do not import anything not in the conventions, AVAILABLE PAGE OBJECTS, or standard library.
 - NEVER hardcode URLs or credentials in test scripts. All URLs and credentials MUST come from product config fixtures (e.g. orangehrm_base_url, orangehrm_api_base_url, orangehrm_credentials, rb_api_base, rb_web_base, rb_credentials). These fixtures are loaded from config/env_{{env}}.yaml at runtime based on the --env pytest option.
 - All page object constructors require base_url as the second argument. Never instantiate a page object without passing the URL fixture: PageClass(page, {{product}}_base_url).
 {test_type_instruction}

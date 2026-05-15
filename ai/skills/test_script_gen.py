@@ -1,5 +1,6 @@
 """Generate runnable pytest scripts from test case documentation."""
 
+import re
 from pathlib import Path
 
 from ai.clients.base_client import AIClient
@@ -262,6 +263,47 @@ Example test (OrangeHRM):
 }
 
 
+def _discover_page_objects(output_base: Path | None, domain: str) -> str:
+    """
+    Scan the product's pages directory and return a catalog of importable page classes.
+    Provides the LLM with exact import paths so it cannot hallucinate class names.
+    """
+    from utils.paths import ROOT
+
+    page_domain = "web" if domain in ("web", "a11y", "security") else domain
+    if page_domain not in ("web", "mobile"):
+        return ""
+
+    search_dirs = []
+    if output_base:
+        search_dirs.append(output_base / "pages" / page_domain)
+    search_dirs.append(ROOT / "pages" / page_domain)
+
+    entries: list[str] = []
+    for base in search_dirs:
+        if not base.exists():
+            continue
+        for py_file in sorted(base.glob("*.py")):
+            if py_file.name.startswith("_"):
+                continue
+            # Derive importable module path relative to ROOT
+            try:
+                rel = py_file.with_suffix("").relative_to(ROOT)
+                module_path = ".".join(rel.parts)
+            except ValueError:
+                continue
+            classes = re.findall(r"^class (\w+)", py_file.read_text(encoding="utf-8"), re.MULTILINE)
+            for cls in classes:
+                entries.append(f"  from {module_path} import {cls}")
+
+    if not entries:
+        return ""
+    return (
+        "Available page object imports — use ONLY these exact names, do NOT invent others:\n"
+        + "\n".join(entries)
+    )
+
+
 class TestScriptGenSkill:
     def __init__(self, ai_client: AIClient, kb_loader: KnowledgeBaseLoader = None):
         self.ai_client = ai_client
@@ -275,6 +317,7 @@ class TestScriptGenSkill:
         tc_prefix: str = "",
         test_type_instruction: str = "",
         categories_instruction: str = "",
+        output_base: Path | None = None,
     ) -> str:
         """Generate a runnable pytest file from a test case markdown document."""
         _fallback = "web" if domain == "a11y" else "api"
@@ -283,6 +326,7 @@ class TestScriptGenSkill:
             f" If no ID is present and tc_prefix='{tc_prefix}', infer IDs from order in document."
             if tc_prefix else ""
         )
+        page_catalog = _discover_page_objects(output_base, domain)
         prompt = TEST_SCRIPT_GEN_PROMPT.format(
             domain=domain,
             feature_name=feature_name,
@@ -291,6 +335,7 @@ class TestScriptGenSkill:
             tc_prefix_hint=tc_prefix_hint,
             test_type_instruction=test_type_instruction,
             categories_instruction=categories_instruction,
+            page_catalog=page_catalog,
         )
         code = self.ai_client.generate(prompt, max_tokens=3000, temperature=0.1).strip()
         return _clean_code_output(code)

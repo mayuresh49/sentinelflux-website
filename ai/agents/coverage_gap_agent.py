@@ -94,8 +94,19 @@ class CoverageGapAgent(BaseAgent):
         if not self.kb:
             return []
         max_s = self.ctx.get("max_scenarios", 50)
+        if not isinstance(max_s, int):
+            self._log.warning("max_scenarios must be int, got %r — using default 50", max_s)
+            max_s = 50
         try:
-            context = self.kb.get_all_context()
+            # Use targeted loaders instead of get_all_context() to avoid loading
+            # every KB module (personas, mobile, REST specs, etc.) for a scenario diff.
+            feature_name = self.ctx.get("feature_name")
+            parts = [
+                self.kb.get_feature_context(feature_name),
+                self.kb.get_use_cases_context(),
+                self.kb.get_business_rules_context(),
+            ]
+            context = "\n".join(p for p in parts if p)
             lines = [
                 line.strip().lstrip("-•* ")
                 for line in context.splitlines()
@@ -124,8 +135,21 @@ class CoverageGapAgent(BaseAgent):
     @staticmethod
     def _parse_gaps(raw: str) -> list[dict]:
         raw = raw.strip()
-        if "```" in raw:
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        return json.loads(raw.strip()).get("gaps", [])
+        fence_match = re.search(r"```(?:json)?\s*([\s\S]*?)```", raw)
+        if fence_match:
+            raw = fence_match.group(1).strip()
+        try:
+            gaps = json.loads(raw).get("gaps", [])
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"LLM returned invalid JSON for gap analysis: {exc}") from exc
+        validated = []
+        for g in gaps:
+            if not isinstance(g, dict):
+                continue
+            if not g.get("scenario") or not g.get("suggested_test_name"):
+                continue
+            g.setdefault("priority", "medium")
+            if g["priority"] not in ("high", "medium", "low"):
+                g["priority"] = "medium"
+            validated.append(g)
+        return validated

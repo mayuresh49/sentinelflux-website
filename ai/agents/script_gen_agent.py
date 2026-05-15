@@ -1,6 +1,7 @@
 """ScriptGenAgent — generates a pytest script from a test case document."""
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 
 from ai.agents.base_agent import BaseAgent
@@ -50,7 +51,15 @@ class ScriptGenAgent(BaseAgent):
             tc_prefix=tc_prefix,
             test_type_instruction=type_instruction,
             categories_instruction=categories_instruction,
+            output_base=self.ctx.output_base,
         )
+
+        try:
+            ast.parse(code)
+        except SyntaxError as exc:
+            raise ValueError(
+                f"ScriptGenAgent: generated code for '{feature_name}' has syntax error at line {exc.lineno}: {exc.msg}"
+            ) from exc
 
         out = output_path or self._default_output(feature_name)
         out.parent.mkdir(parents=True, exist_ok=True)

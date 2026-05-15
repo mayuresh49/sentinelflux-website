@@ -21,15 +21,19 @@ ARTIFACT_PATHS: dict[str, list[str]] = {
     "mobile":   ["screenshot.png", "logcat.txt"],
     "security": ["api_calls.log"],
     "graphql":  ["api_calls.log"],
+    "a11y":     ["screenshot_full_page.png", "console.log"],
 }
 
-# Prompt template keys → maps to constants in ai/prompts/prompt_templates.py
+# Prompt template keys → maps to constant names in ai/prompts/prompt_templates.py.
+# All script-generation domains use TEST_SCRIPT_GEN_PROMPT (domain-specific conventions
+# are injected at call time via the 'conventions' argument).
 PROMPT_KEYS: dict[str, str] = {
-    "api":      "API_TEST_GENERATION",
-    "web":      "WEB_TEST_GENERATION",
-    "mobile":   "MOBILE_TEST_GENERATION",
-    "security": "SECURITY_TEST_GENERATION",
-    "graphql":  "API_TEST_GENERATION",
+    "api":      "API_TEST_GENERATION_PROMPT",
+    "web":      "TEST_SCRIPT_GEN_PROMPT",
+    "mobile":   "TEST_SCRIPT_GEN_PROMPT",
+    "security": "TEST_SCRIPT_GEN_PROMPT",
+    "graphql":  "API_TEST_GENERATION_PROMPT",
+    "a11y":     "TEST_SCRIPT_GEN_PROMPT",
 }
 
 # Failure analysis guidance injected into ResultAnalyzerAgent prompts per domain
@@ -55,6 +59,10 @@ FAILURE_HINTS: dict[str, str] = {
         "Focus on GraphQL errors array in the response, auth failures (401/403), "
         "and schema violations in the API call log."
     ),
+    "a11y": (
+        "Focus on accessibility violations: missing labels, broken keyboard navigation, "
+        "missing alt text, and ARIA role mismatches visible in the console log."
+    ),
 }
 
 # pytest marker name used on generated test scripts per domain
@@ -64,6 +72,7 @@ DOMAIN_MARKERS: dict[str, str] = {
     "mobile":   "mobile",
     "security": "security",
     "graphql":  "api",
+    "a11y":     "a11y",
 }
 
 # Default fixture names injected into generated test scripts per domain
@@ -73,6 +82,7 @@ DOMAIN_FIXTURES: dict[str, list[str]] = {
     "mobile":   ["mobile_driver"],
     "security": ["rest_client"],
     "graphql":  ["graphql_client"],
+    "a11y":     ["page"],
 }
 
 # Classification labels used by ResultAnalyzerAgent

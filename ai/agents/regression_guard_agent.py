@@ -84,6 +84,12 @@ class RegressionGuardAgent(BaseAgent):
                 self._log.warning("REGRESSION: %s", r["test_id"])
 
         if self.ctx.get("save_as_baseline", False):
+            if regressions:
+                self._log.warning(
+                    "save_as_baseline=True but %d regression(s) detected — "
+                    "saving this run as baseline means next run won't detect these regressions",
+                    len(regressions),
+                )
             self._save_baseline(current_report, baseline_report)
             self._log.info("Baseline updated: %s", baseline_report)
 
