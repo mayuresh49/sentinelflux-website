@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 
 from dashboard.routers.auth import require_user, user_products
-from dashboard.routers.config import _assignments, _meta, _products, _run_config, _users
+from dashboard.routers.config import _assignments, _meta, _products, _run_config, _runners, _users
 from dashboard.routers.config._helpers import (
     _all_tests,
     _load_assignments,
@@ -22,6 +22,7 @@ router.include_router(_users.router)
 router.include_router(_products.router)
 router.include_router(_assignments.router)
 router.include_router(_run_config.router)
+router.include_router(_runners.router)
 
 
 @router.get("/config", response_class=HTMLResponse)

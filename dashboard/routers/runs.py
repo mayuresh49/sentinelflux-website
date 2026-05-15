@@ -11,7 +11,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-import yaml
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -419,12 +418,8 @@ def _build_ai_client():
 
 def _load_product_run_config(product: str) -> dict:
     try:
-        cfg_path = _ROOT / "data" / "config.yaml"
-        if not cfg_path.exists():
-            return {}
-        cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
-        p = next((p for p in cfg.get("products", []) if p["name"] == product), None)
-        return (p or {}).get("run_config", {})
+        from dashboard.routers.config._run_config import _load_rc
+        return _load_rc(product)
     except Exception:
         return {}
 

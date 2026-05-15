@@ -111,27 +111,24 @@ class TestApprovalManager:
 # ── RunManager ────────────────────────────────────────────────────────────────
 
 class TestRunManager:
-    def _make_rm(self, tmp_path: Path) -> RunManager:
+    def _patch_paths(self, tmp_path: Path):
+        """Context manager patching all RunManager storage paths to tmp_path."""
         from unittest.mock import patch
-        # Patch the module-level path constants so RunManager writes to tmp_path
-        runs_path = tmp_path / "test_runs.json"
-        schedules_path = tmp_path / "test_schedules.json"
-        with patch("core.run_manager._RUNS_PATH", runs_path), \
-             patch("core.run_manager._SCHEDULES_PATH", schedules_path), \
-             patch("core.run_manager._RUNS_DIR", tmp_path / "runs"):
-            rm = RunManager()
-        # Expose patched paths on the instance for test helpers
-        rm._runs_path = runs_path
-        rm._schedules_path = schedules_path
-        return rm
+        return patch.multiple(
+            "core.run_manager",
+            _RUNS_STORE_DIR=tmp_path / "test_runs",
+            _SCHEDULES_STORE_DIR=tmp_path / "test_schedules",
+            _RUNS_DIR=tmp_path / "runs",
+            _RUN_INDEX_PATH=tmp_path / "run_index.json",
+            _LEGACY_RUNS_PATH=tmp_path / "legacy_runs.json",
+            _LEGACY_SCHEDULES_PATH=tmp_path / "legacy_schedules.json",
+        )
+
+    def setup_method(self):
+        RunManager._migrated = False
 
     def test_create_and_get_run(self, tmp_path):
-        from unittest.mock import patch
-        runs_path = tmp_path / "test_runs.json"
-        schedules_path = tmp_path / "test_schedules.json"
-        with patch("core.run_manager._RUNS_PATH", runs_path), \
-             patch("core.run_manager._SCHEDULES_PATH", schedules_path), \
-             patch("core.run_manager._RUNS_DIR", tmp_path / "runs"):
+        with self._patch_paths(tmp_path):
             rm = RunManager()
             run = rm.create_run(product="acme", domain="api")
             assert run["status"] == "queued"
@@ -140,12 +137,7 @@ class TestRunManager:
             assert fetched is not None and fetched["id"] == run["id"]
 
     def test_patch_run(self, tmp_path):
-        runs_path = tmp_path / "test_runs.json"
-        schedules_path = tmp_path / "test_schedules.json"
-        from unittest.mock import patch
-        with patch("core.run_manager._RUNS_PATH", runs_path), \
-             patch("core.run_manager._SCHEDULES_PATH", schedules_path), \
-             patch("core.run_manager._RUNS_DIR", tmp_path / "runs"):
+        with self._patch_paths(tmp_path):
             rm = RunManager()
             run = rm.create_run(product="acme", domain="web")
             updated = rm.patch_run(run["id"], status="completed", passed=10)
@@ -153,12 +145,7 @@ class TestRunManager:
             assert updated["passed"] == 10
 
     def test_create_and_delete_schedule(self, tmp_path):
-        runs_path = tmp_path / "test_runs.json"
-        schedules_path = tmp_path / "test_schedules.json"
-        from unittest.mock import patch
-        with patch("core.run_manager._RUNS_PATH", runs_path), \
-             patch("core.run_manager._SCHEDULES_PATH", schedules_path), \
-             patch("core.run_manager._RUNS_DIR", tmp_path / "runs"):
+        with self._patch_paths(tmp_path):
             rm = RunManager()
             sched = rm.create_schedule("nightly", "acme", "api", hour=2, minute=0, days=["mon"])
             assert len(rm.all_schedules()) == 1
@@ -167,12 +154,7 @@ class TestRunManager:
 
     def test_max_runs_cap(self, tmp_path):
         from core.run_manager import _MAX_RUNS
-        runs_path = tmp_path / "test_runs.json"
-        schedules_path = tmp_path / "test_schedules.json"
-        from unittest.mock import patch
-        with patch("core.run_manager._RUNS_PATH", runs_path), \
-             patch("core.run_manager._SCHEDULES_PATH", schedules_path), \
-             patch("core.run_manager._RUNS_DIR", tmp_path / "runs"):
+        with self._patch_paths(tmp_path):
             rm = RunManager()
             for _ in range(_MAX_RUNS + 3):
                 rm.create_run(product="p", domain="api")

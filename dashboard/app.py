@@ -41,6 +41,7 @@ from dashboard.routers import chat as chat_router
 from dashboard.routers import kb as kb_router
 from dashboard.routers import pipeline as pipeline_router
 from dashboard.routers import quality as quality_router
+from dashboard.routers import runner as runner_router
 from dashboard.routers import runs as runs_router
 
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
@@ -93,6 +94,7 @@ app.include_router(pipeline_router.router, prefix="/api")
 app.include_router(chat_router.router, prefix="/api")
 app.include_router(quality_router.router, prefix="/api")
 app.include_router(runs_router.router, prefix="/api")
+app.include_router(runner_router.router, prefix="/api")
 
 
 @app.on_event("startup")

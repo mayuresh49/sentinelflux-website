@@ -7,6 +7,7 @@ from sentinelflux.commands import (
     generate_cmd,
     init_cmd,
     run_cmd,
+    runner_cmd,
 )
 
 app = typer.Typer(
@@ -21,6 +22,7 @@ app.command("generate")(generate_cmd.run)
 app.command("doctor")(doctor_cmd.run)
 app.command("analyze")(analyze_cmd.run)
 app.command("dashboard")(dashboard_cmd.run)
+app.command("runner")(runner_cmd.run)
 
 if __name__ == "__main__":
     app()

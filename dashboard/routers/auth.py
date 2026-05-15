@@ -37,6 +37,14 @@ def _load_users() -> list[dict]:
     return cfg.get("users", [])
 
 
+def _load_runner_tokens() -> list[dict]:
+    import yaml
+    if not _CONFIG_PATH.exists():
+        return []
+    cfg = yaml.safe_load(_CONFIG_PATH.read_text(encoding="utf-8")) or {}
+    return cfg.get("runner_tokens", [])
+
+
 def get_session_user(request: Request) -> dict | None:
     """Return the logged-in user dict, or None if not authenticated."""
     email = request.session.get("user_email")
@@ -53,6 +61,19 @@ def require_user(request: Request) -> dict:
         from fastapi import HTTPException
         raise HTTPException(status_code=303, headers={"Location": "/login"})
     return user
+
+
+def require_runner_token(request: Request) -> dict:
+    """FastAPI dependency for machine-to-machine runner auth via Bearer token."""
+    from fastapi import HTTPException as _HTTPException
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        raise _HTTPException(status_code=401, detail="Missing or invalid bearer token")
+    raw = auth[7:]
+    for t in _load_runner_tokens():
+        if t.get("enabled", True) and _verify_password(raw, t.get("token_hash", "")):
+            return t
+    raise _HTTPException(status_code=403, detail="Invalid runner token")
 
 
 def user_products(user: dict, all_products: list[str]) -> list[str]:
