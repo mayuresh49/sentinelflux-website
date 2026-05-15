@@ -11,6 +11,18 @@ restfulbooker:
 browser:
   timeout: 15000
 
+mobile:
+  appium_url: "http://localhost:4723"
+  platform: "android"
+  capabilities:
+    platformName: "Android"
+    deviceName: "emulator-5554"
+    automationName: "UiAutomator2"
+    appPackage: "com.example.booking"
+    appActivity: ".MainActivity"
+    noReset: true
+    newCommandTimeout: 60
+
 logging:
   level: "INFO"
   file: "logs/sentinelflux.log"

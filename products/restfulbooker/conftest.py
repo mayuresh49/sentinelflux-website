@@ -57,6 +57,18 @@ def rb_web_base(rb_config):
 
 
 @pytest.fixture(scope="session")
+def logger(rb_config):
+    from utils.logger import create_logger
+    return create_logger(rb_config.get("logging", {}))
+
+
+@pytest.fixture(scope="session")
+def rest_client(rb_api_base, logger):
+    from api.rest_client import RestClient
+    return RestClient(base_url=rb_api_base, logger=logger, data_dir=_EXAMPLE_ROOT)
+
+
+@pytest.fixture(scope="session")
 def booking_client(rb_api_base, rb_credentials):
     from booking_client import BookingClient
     client = BookingClient(rb_api_base, rb_credentials["username"], rb_credentials["password"])

@@ -1,8 +1,11 @@
 """Booking screen POM for mobile (Appium)."""
 
+from pathlib import Path
+
 from pages.mobile.base_mobile_page import BaseMobilePage
 
-LOCATOR_FILE = "mobile/booking_screen.json"
+_PRODUCT_ROOT = Path(__file__).resolve().parent.parent.parent  # products/restfulbooker
+LOCATOR_FILE = _PRODUCT_ROOT / "locators" / "mobile" / "booking_screen.json"
 
 
 class BookingScreen(BaseMobilePage):

@@ -22,8 +22,8 @@ def pytest_collection_modifyitems(items):
 
 
 @pytest.fixture(scope="session")
-def mobile_config(config):
-    return config.get("mobile", {})
+def mobile_config(rb_config):
+    return rb_config.get("mobile", {})
 
 
 @pytest.fixture(scope="session")

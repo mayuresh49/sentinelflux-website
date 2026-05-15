@@ -54,11 +54,11 @@ class BaseMobilePage:
         self._locators: dict[str, Any] = {}
         self._locator_file: str = ""
 
-    def load_locators(self, locator_file: str):
-        path = ROOT_DIR / "locators" / locator_file
+    def load_locators(self, locator_file: str | Path):
+        path = Path(locator_file) if Path(str(locator_file)).is_absolute() else ROOT_DIR / "locators" / locator_file
         with path.open("r", encoding="utf-8") as f:
             self._locators = json.load(f)
-        self._locator_file = locator_file
+        self._locator_file = str(locator_file)
 
     # --- locator resolution ---
 
