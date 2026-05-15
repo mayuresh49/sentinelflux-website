@@ -514,8 +514,8 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 async function createIncrement(filename, content) {
-  if (!filename) { alert('Enter a filename'); return; }
-  if (!filename.endsWith('.yaml') && !filename.endsWith('.yml')) { alert('Filename must end with .yaml'); return; }
+  if (!filename) { sfToast('Enter a filename', 'warn'); return; }
+  if (!filename.endsWith('.yaml') && !filename.endsWith('.yml')) { sfToast('Filename must end with .yaml', 'warn'); return; }
   const res = await fetch('/api/kb/increments', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -525,7 +525,7 @@ async function createIncrement(filename, content) {
     window.location.reload();
   } else {
     const err = await res.json();
-    alert('Error: ' + (err.detail || JSON.stringify(err)));
+    sfToast('Error: ' + (err.detail || JSON.stringify(err)));
   }
 }
 
@@ -540,7 +540,7 @@ async function triggerPipeline() {
   const script_model = document.getElementById('pipeline-script-model')?.value || 'qwen2.5-coder:14b-instruct-q4_K_M';
   const skip_script = document.getElementById('pipeline-skip-script')?.checked || false;
 
-  if (!feature && !increment_file) { alert('Enter a feature name or increment file'); return; }
+  if (!feature && !increment_file) { sfToast('Enter a feature name or increment file', 'warn'); return; }
 
   const res = await fetch('/ui/pipeline/trigger', {
     method: 'POST',
@@ -558,7 +558,7 @@ async function triggerPipeline() {
 
 async function uploadDocx() {
   const fileInput = document.getElementById('docx-file-input');
-  if (!fileInput || !fileInput.files.length) { alert('Select a .docx file first'); return; }
+  if (!fileInput || !fileInput.files.length) { sfToast('Select a .docx file first', 'warn'); return; }
 
   window.dispatchEvent(new CustomEvent('docx-loading'));
 
@@ -579,9 +579,9 @@ async function uploadDocx() {
 
 async function uploadKbFile() {
   const fileInput = document.getElementById('kb-file-input');
-  if (!fileInput || !fileInput.files.length) { alert('Select a file first'); return; }
+  if (!fileInput || !fileInput.files.length) { sfToast('Select a file first', 'warn'); return; }
   const product = (document.getElementById('kb-upload-product')?.value || '').trim();
-  if (!product) { alert('Enter a product name'); return; }
+  if (!product) { sfToast('Enter a product name', 'warn'); return; }
 
   window.dispatchEvent(new CustomEvent('kb-upload-loading'));
 
@@ -610,7 +610,7 @@ async function saveEditedDocxYaml(filename, yaml) {
     window.location.reload();
   } else {
     const err = await res.json();
-    alert('Save failed: ' + (err.detail || JSON.stringify(err)));
+    sfToast('Save failed: ' + (err.detail || JSON.stringify(err)));
   }
 }
 </script>

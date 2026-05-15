@@ -572,7 +572,7 @@ function runsPage() {
     },
 
     async deleteRun(runId) {
-      if (!confirm('Delete this run record?')) return;
+      if (!await sfConfirm('Delete this run record?')) return;
       const r = await fetch(`/api/runs/${runId}`, { method: 'DELETE' });
       if (r.ok) location.reload();
     },
@@ -602,7 +602,7 @@ function runsPage() {
     },
 
     async deleteSchedule(schedId) {
-      if (!confirm('Delete this schedule?')) return;
+      if (!await sfConfirm('Delete this schedule?')) return;
       await fetch(`/api/runs/schedules/${schedId}`, { method: 'DELETE' });
       location.reload();
     },
