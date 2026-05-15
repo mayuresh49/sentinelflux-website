@@ -26,6 +26,7 @@ _rm = RunManager()
 class TriggerRunBody(BaseModel):
     product: str
     domain: str = "all"       # all | api | web | mobile | security
+    module: str = ""          # specific test file stem, e.g. "test_login"; "" = run all
     extra_args: str = ""       # appended verbatim to pytest command
     environment: str = ""     # name of environment profile; "" = use product default
     browser: str = ""         # name of browser profile; "" = use product default
@@ -35,6 +36,7 @@ class CreateScheduleBody(BaseModel):
     name: str
     product: str
     domain: str = "all"
+    module: str = ""
     hour: int = 2
     minute: int = 0
     days: list[str] = ["mon", "tue", "wed", "thu", "fri"]
@@ -45,13 +47,24 @@ class CreateScheduleBody(BaseModel):
 
 # ── trigger & history ─────────────────────────────────────────────────────────
 
+@router.get("/modules")
+def list_modules(product: str, domain: str = "all"):
+    """Return test file stems for a product+domain combo."""
+    base = _resolve_test_path(product, domain)
+    if not base:
+        return {"modules": []}
+    pattern = "test_*.py"
+    files = sorted(p.stem for p in base.glob(pattern) if p.is_file())
+    return {"modules": files}
+
+
 @router.post("/trigger")
 def trigger_run(body: TriggerRunBody, background_tasks: BackgroundTasks):
     snapshot = _build_run_config_snapshot(body.product, body.environment, body.browser, body.device)
-    run = _rm.create_run(product=body.product, domain=body.domain, trigger="manual",
-                         run_config_snapshot=snapshot)
-    background_tasks.add_task(_execute_run, run["id"], body.product, body.domain, body.extra_args,
-                               body.environment, body.browser, body.device)
+    run = _rm.create_run(product=body.product, domain=body.domain, module=body.module,
+                         trigger="manual", run_config_snapshot=snapshot)
+    background_tasks.add_task(_execute_run, run["id"], body.product, body.domain, body.module,
+                               body.extra_args, body.environment, body.browser, body.device)
     return {"run_id": run["id"], "status": "queued"}
 
 
@@ -97,10 +110,11 @@ def rerun(run_id: str, background_tasks: BackgroundTasks):
         raise HTTPException(404, "Run not found")
     snap = run.get("run_config_snapshot", {})
     new_run = _rm.create_run(
-        product=run["product"], domain=run["domain"], trigger="manual",
-        run_config_snapshot=snap,
+        product=run["product"], domain=run["domain"], module=run.get("module", ""),
+        trigger="manual", run_config_snapshot=snap,
     )
-    background_tasks.add_task(_execute_run, new_run["id"], run["product"], run["domain"], "",
+    background_tasks.add_task(_execute_run, new_run["id"], run["product"], run["domain"],
+                               run.get("module", ""), "",
                                snap.get("environment", ""), snap.get("browser", ""), snap.get("device", ""))
     return {"run_id": new_run["id"], "status": "queued"}
 
@@ -118,6 +132,7 @@ def create_schedule(body: CreateScheduleBody):
         name=body.name,
         product=body.product,
         domain=body.domain,
+        module=body.module,
         hour=body.hour,
         minute=body.minute,
         days=body.days,
@@ -153,19 +168,20 @@ def schedule_run_now(sched_id: str, background_tasks: BackgroundTasks):
     browser = sched.get("browser", "")
     device = sched.get("device", "")
     snapshot = _build_run_config_snapshot(sched["product"], env, browser, device)
+    module = sched.get("module", "")
     run = _rm.create_run(
-        product=sched["product"], domain=sched["domain"],
+        product=sched["product"], domain=sched["domain"], module=module,
         trigger="schedule", schedule_id=sched_id,
         run_config_snapshot=snapshot,
     )
-    background_tasks.add_task(_execute_run, run["id"], sched["product"], sched["domain"], "",
-                               env, browser, device)
+    background_tasks.add_task(_execute_run, run["id"], sched["product"], sched["domain"],
+                               module, "", env, browser, device)
     return {"run_id": run["id"], "status": "queued"}
 
 
 # ── background tasks ──────────────────────────────────────────────────────────
 
-def _execute_run(run_id: str, product: str, domain: str, extra_args: str,
+def _execute_run(run_id: str, product: str, domain: str, module: str, extra_args: str,
                  environment: str = "", browser: str = "", device: str = "") -> None:
     _rm.patch_run(run_id, status="running")
     report_path = _ROOT / _rm.get_run(run_id)["report_path"]
@@ -173,13 +189,13 @@ def _execute_run(run_id: str, product: str, domain: str, extra_args: str,
 
     env_overrides = _build_env_overrides(product, environment, browser, device)
 
-    test_path = _resolve_test_path(product, domain)
+    test_path = _resolve_test_path(product, domain, module)
     if not test_path:
         _rm.patch_run(run_id, status="failed",
                       finished_at=datetime.now(timezone.utc).isoformat(),
                       failures=[],
                       total=0,
-                      summary_error=f"No tests found for product={product} domain={domain}")
+                      summary_error=f"No tests found for product={product} domain={domain} module={module}")
         return
 
     cmd = [
@@ -272,18 +288,28 @@ def _parse_report(report_path: Path) -> dict[str, Any]:
         return {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0, "duration": 0.0, "failures": []}
 
 
-def _resolve_test_path(product: str, domain: str) -> Path | None:
+def _resolve_test_path(product: str, domain: str, module: str = "") -> Path | None:
     base = _ROOT / "products" / product / "tests"
     if base.exists():
-        if domain and domain != "all":
-            specific = base / domain
-            return specific if specific.exists() else base
-        return base
+        domain_dir = (base / domain) if (domain and domain != "all") else base
+        if not domain_dir.exists():
+            domain_dir = base
+        if module:
+            stem = module if module.endswith(".py") else f"{module}.py"
+            candidate = domain_dir / stem
+            return candidate if candidate.exists() else None
+        return domain_dir
     fallback = _ROOT / "tests"
-    if domain and domain != "all":
-        dp = fallback / domain
-        return dp if dp.exists() else (fallback if fallback.exists() else None)
-    return fallback if fallback.exists() else None
+    domain_dir = (fallback / domain) if (domain and domain != "all") else fallback
+    if not domain_dir.exists():
+        domain_dir = fallback if fallback.exists() else None
+    if not domain_dir:
+        return None
+    if module:
+        stem = module if module.endswith(".py") else f"{module}.py"
+        candidate = domain_dir / stem
+        return candidate if candidate.exists() else None
+    return domain_dir
 
 
 def _build_ai_client():
@@ -387,16 +413,17 @@ def fire_scheduled_run(sched_id: str) -> str | None:
     env = sched.get("environment", "")
     browser = sched.get("browser", "")
     device = sched.get("device", "")
+    module = sched.get("module", "")
     snapshot = _build_run_config_snapshot(sched["product"], env, browser, device)
     run = _rm.create_run(
-        product=sched["product"], domain=sched["domain"],
+        product=sched["product"], domain=sched["domain"], module=module,
         trigger="schedule", schedule_id=sched_id,
         run_config_snapshot=snapshot,
     )
     import threading
     t = threading.Thread(
         target=_execute_run,
-        args=(run["id"], sched["product"], sched["domain"], "", env, browser, device),
+        args=(run["id"], sched["product"], sched["domain"], module, "", env, browser, device),
         daemon=True,
     )
     t.start()

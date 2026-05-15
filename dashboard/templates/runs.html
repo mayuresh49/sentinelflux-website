@@ -39,7 +39,8 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
       <div class="md:col-span-1">
         <label class="block text-xs font-medium text-slate-600 mb-1">Product</label>
-        <select x-model="trigger.product" @change="loadRunConfig(trigger.product, 'trigger')"
+        <select x-model="trigger.product"
+                @change="loadRunConfig(trigger.product, 'trigger'); loadModules(trigger.product, trigger.domain, 'trigger')"
                 class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
           <option value="">— select —</option>
           {% for p in all_products %}
@@ -50,6 +51,7 @@
       <div>
         <label class="block text-xs font-medium text-slate-600 mb-1">Domain</label>
         <select x-model="trigger.domain"
+                @change="loadModules(trigger.product, trigger.domain, 'trigger')"
                 class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
           <option value="all">All</option>
           <option value="api">API</option>
@@ -58,9 +60,19 @@
           <option value="security">Security</option>
         </select>
       </div>
-      <div class="md:col-span-2">
-        <label class="block text-xs font-medium text-slate-600 mb-1">Extra pytest args <span class="text-slate-400 font-normal">(optional)</span></label>
-        <input type="text" x-model="trigger.extra_args" placeholder="-k test_login --tb=long"
+      <div>
+        <label class="block text-xs font-medium text-slate-600 mb-1">Module</label>
+        <select x-model="trigger.module"
+                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <option value="">— all modules —</option>
+          <template x-for="m in triggerModules" :key="m">
+            <option :value="m" x-text="m"></option>
+          </template>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-600 mb-1">Extra args <span class="text-slate-400 font-normal">(optional)</span></label>
+        <input type="text" x-model="trigger.extra_args" placeholder="--tb=long"
                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-300">
       </div>
     </div>
@@ -128,7 +140,7 @@
         <span class="w-2 h-2 rounded-full shrink-0 {{ 'bg-emerald-500' if s.enabled else 'bg-slate-300' }}"></span>
         <div class="flex-1 min-w-[180px]">
           <p class="text-sm font-medium text-slate-800">{{ s.name }}</p>
-          <p class="text-xs text-slate-500">{{ s.product }} / {{ s.domain }} · {{ '%02d:%02d' % (s.hour, s.minute) }} on {{ s.days | join(', ') }}{% if s.get('environment') %} · env: {{ s.environment }}{% endif %}{% if s.get('browser') %} · {{ s.browser }}{% endif %}{% if s.get('device') %} · {{ s.device }}{% endif %}</p>
+          <p class="text-xs text-slate-500">{{ s.product }} / {{ s.domain }}{% if s.get('module') %} / {{ s.module }}{% endif %} · {{ '%02d:%02d' % (s.hour, s.minute) }} on {{ s.days | join(', ') }}{% if s.get('environment') %} · env: {{ s.environment }}{% endif %}{% if s.get('browser') %} · {{ s.browser }}{% endif %}{% if s.get('device') %} · {{ s.device }}{% endif %}</p>
           {% if s.last_run_at %}
           <p class="text-[10px] text-slate-400">Last run: {{ s.last_run_at[5:16].replace('T',' ') }}</p>
           {% endif %}
@@ -160,7 +172,7 @@
         <svg class="w-3.5 h-3.5 transition-transform" :class="open ? 'rotate-45' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
         </svg>
-        Add schedule
+        Add Schedule
       </button>
       <div x-show="open" x-cloak class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
         <div class="md:col-span-2">
@@ -170,7 +182,7 @@
         </div>
         <div>
           <label class="block text-xs font-medium text-slate-600 mb-1">Product</label>
-          <select x-model="newSched.product" @change="loadRunConfig(newSched.product, 'sched')"
+          <select x-model="newSched.product" @change="loadRunConfig(newSched.product, 'sched'); loadModules(newSched.product, newSched.domain, 'sched')"
                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
             <option value="">— select —</option>
             {% for p in all_products %}
@@ -181,11 +193,22 @@
         <div>
           <label class="block text-xs font-medium text-slate-600 mb-1">Domain</label>
           <select x-model="newSched.domain"
+                  @change="loadModules(newSched.product, newSched.domain, 'sched')"
                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
             <option value="all">All</option>
             <option value="api">API</option>
             <option value="web">Web</option>
             <option value="mobile">Mobile</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Module</label>
+          <select x-model="newSched.module"
+                  class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option value="">— all modules —</option>
+            <template x-for="m in schedModules" :key="m">
+              <option :value="m" x-text="m"></option>
+            </template>
           </select>
         </div>
         <!-- Run config fields for schedule -->
@@ -236,7 +259,7 @@
             {% for day in ['mon','tue','wed','thu','fri','sat','sun'] %}
             <label class="flex items-center gap-1 text-xs text-slate-600 cursor-pointer">
               <input type="checkbox" :value="'{{ day }}'" x-model="newSched.days" class="rounded text-indigo-600">
-              {{ day }}
+              {{ day | capitalize }}
             </label>
             {% endfor %}
           </div>
@@ -319,6 +342,7 @@
             <div class="flex items-center gap-2 flex-wrap">
               <span class="text-sm font-semibold text-slate-800">{{ run.product }}</span>
               <span class="text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-medium">{{ run.domain }}</span>
+              {% if run.get('module') %}<span class="text-xs bg-violet-50 text-violet-600 px-1.5 py-0.5 rounded font-medium font-mono">{{ run.module }}</span>{% endif %}
               <span class="text-xs {{ status_colors.get(run.status, 'bg-slate-100 text-slate-500') }} px-1.5 py-0.5 rounded font-medium">{{ run.status }}</span>
               <span class="text-xs text-slate-400">via {{ run.trigger }}</span>
               {% set snap = run.get('run_config_snapshot', {}) %}
@@ -364,13 +388,13 @@
               {% if n_env > 0 %}
               <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded font-medium">
                 <span class="w-1 h-1 rounded-full bg-amber-500 inline-block"></span>
-                Env Issue: {{ n_env }}
+                Environment Issue: {{ n_env }}
               </span>
               {% endif %}
               {% if n_script > 0 %}
               <span class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded font-medium">
                 <span class="w-1 h-1 rounded-full bg-orange-400 inline-block"></span>
-                Script/Data: {{ n_script }}
+                Script or Data: {{ n_script }}
               </span>
               {% endif %}
               {% if not run.analyzed and run.failed > 0 %}
@@ -423,10 +447,10 @@
       <div x-show="open" x-cloak class="border-t border-slate-50 divide-y divide-slate-50">
         {% set cat_labels = {
           "assertion":  ("Product Bug",  "bg-red-50 text-red-700 border-red-200"),
-          "infra":      ("Env Issue",    "bg-amber-50 text-amber-700 border-amber-200"),
-          "env":        ("Env Issue",    "bg-amber-50 text-amber-700 border-amber-200"),
-          "locator":    ("Script/Data",  "bg-orange-50 text-orange-700 border-orange-200"),
-          "flaky":      ("Script/Data",  "bg-orange-50 text-orange-700 border-orange-200"),
+          "infra":      ("Environment Issue",  "bg-amber-50 text-amber-700 border-amber-200"),
+          "env":        ("Environment Issue",  "bg-amber-50 text-amber-700 border-amber-200"),
+          "locator":    ("Script or Data",     "bg-orange-50 text-orange-700 border-orange-200"),
+          "flaky":      ("Script or Data",     "bg-orange-50 text-orange-700 border-orange-200"),
           "unanalyzed": ("Unanalyzed",   "bg-slate-50 text-slate-500 border-slate-200"),
           "unknown":    ("Unknown",      "bg-slate-50 text-slate-500 border-slate-200"),
         } %}
@@ -472,17 +496,42 @@ function runsPage() {
   return {
     showTrigger: {{ 'true' if not runs else 'false' }},
     showSchedule: false,
-    trigger: { product: '{{ filter_product }}', domain: 'all', extra_args: '', environment: '', browser: '', device: '' },
+    trigger: { product: '{{ filter_product }}', domain: 'all', module: '', extra_args: '', environment: '', browser: '', device: '' },
     triggerRunConfig: { environments: [], browsers: [], devices: [] },
+    triggerModules: [],
     triggerLoading: false,
     triggerMsg: '',
     triggerErr: '',
-    newSched: { name: '', product: '', domain: 'all', time: '02:00', days: ['mon','tue','wed','thu','fri'], environment: '', browser: '', device: '' },
+    newSched: { name: '', product: '', domain: 'all', module: '', time: '02:00', days: ['mon','tue','wed','thu','fri'], environment: '', browser: '', device: '' },
     schedRunConfig: { environments: [], browsers: [], devices: [] },
+    schedModules: [],
     schedMsg: '',
 
     async init() {
-      if (this.trigger.product) await this.loadRunConfig(this.trigger.product, 'trigger');
+      if (this.trigger.product) {
+        await this.loadRunConfig(this.trigger.product, 'trigger');
+        await this.loadModules(this.trigger.product, this.trigger.domain, 'trigger');
+      }
+    },
+
+    async loadModules(product, domain, target) {
+      if (!product) {
+        if (target === 'trigger') this.triggerModules = [];
+        else this.schedModules = [];
+        return;
+      }
+      try {
+        const r = await fetch(`/api/runs/modules?product=${encodeURIComponent(product)}&domain=${encodeURIComponent(domain || 'all')}`);
+        if (!r.ok) return;
+        const d = await r.json();
+        if (target === 'trigger') {
+          this.triggerModules = d.modules || [];
+          this.trigger.module = '';
+        } else {
+          this.schedModules = d.modules || [];
+          this.newSched.module = '';
+        }
+      } catch(e) {}
     },
 
     async loadRunConfig(product, target) {
@@ -519,7 +568,15 @@ function runsPage() {
         const r = await fetch('/api/runs/trigger', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.trigger),
+          body: JSON.stringify({
+            product: this.trigger.product,
+            domain: this.trigger.domain,
+            module: this.trigger.module || '',
+            extra_args: this.trigger.extra_args || '',
+            environment: this.trigger.environment || '',
+            browser: this.trigger.browser || '',
+            device: this.trigger.device || '',
+          }),
         });
         if (!r.ok) throw new Error(await r.text());
         const d = await r.json();
@@ -577,6 +634,7 @@ function runsPage() {
           name: this.newSched.name,
           product: this.newSched.product,
           domain: this.newSched.domain,
+          module: this.newSched.module || '',
           hour: h, minute: m,
           days: this.newSched.days,
           environment: this.newSched.environment || '',
