@@ -398,7 +398,7 @@ async def failures_page(
         if domain and run.get("domain") != domain:
             continue
         for f in run.get("failures", []):
-            raw_cat = f.get("category", "unknown")
+            raw_cat = f.get("category") or f.get("classification", "unknown")
             mapped = _cat_map.get(raw_cat, "Unanalyzed")
             if category and mapped != category:
                 continue
