@@ -254,6 +254,62 @@ async def credential_delete(
     return _render(request, product)
 
 
+# ── Toggle Defaults ───────────────────────────────────────────────────────────
+
+@router.post("/ui/config/run-config/{product}/env/toggle-default", response_class=HTMLResponse)
+async def env_toggle_default(
+    request: Request, product: str, name: str = Form(...),
+    _: dict = Depends(_require_admin),
+):
+    cfg = _load_config()
+    p = _find_product(cfg, product)
+    if not p:
+        raise HTTPException(404)
+    _backfill_run_config(p)
+    current = p["run_config"]["defaults"].get("environment", "")
+    p["run_config"]["defaults"]["environment"] = "" if current == name else name
+    _save_config(cfg)
+    action = "Unset" if current == name else "Set"
+    _audit_config(request, "Run Configuration", f"[{product}] {action} default environment '{name}'")
+    return _render(request, product)
+
+
+@router.post("/ui/config/run-config/{product}/browser/toggle-default", response_class=HTMLResponse)
+async def browser_toggle_default(
+    request: Request, product: str, name: str = Form(...),
+    _: dict = Depends(_require_admin),
+):
+    cfg = _load_config()
+    p = _find_product(cfg, product)
+    if not p:
+        raise HTTPException(404)
+    _backfill_run_config(p)
+    current = p["run_config"]["defaults"].get("browser", "")
+    p["run_config"]["defaults"]["browser"] = "" if current == name else name
+    _save_config(cfg)
+    action = "Unset" if current == name else "Set"
+    _audit_config(request, "Run Configuration", f"[{product}] {action} default browser '{name}'")
+    return _render(request, product)
+
+
+@router.post("/ui/config/run-config/{product}/device/toggle-default", response_class=HTMLResponse)
+async def device_toggle_default(
+    request: Request, product: str, name: str = Form(...),
+    _: dict = Depends(_require_admin),
+):
+    cfg = _load_config()
+    p = _find_product(cfg, product)
+    if not p:
+        raise HTTPException(404)
+    _backfill_run_config(p)
+    current = p["run_config"]["defaults"].get("device", "")
+    p["run_config"]["defaults"]["device"] = "" if current == name else name
+    _save_config(cfg)
+    action = "Unset" if current == name else "Set"
+    _audit_config(request, "Run Configuration", f"[{product}] {action} default device '{name}'")
+    return _render(request, product)
+
+
 # ── Defaults ──────────────────────────────────────────────────────────────────
 
 @router.post("/ui/config/run-config/{product}/defaults", response_class=HTMLResponse)

@@ -16,18 +16,46 @@
 </div>
 {% endif %}
 
-<div class="space-y-6">
+<div x-data="{
+  tab: localStorage.getItem('rcTab_{{ product }}') || 'environments',
+  setTab(t) { this.tab = t; localStorage.setItem('rcTab_{{ product }}', t); }
+}">
+
+  <!-- Tab Bar -->
+  <div class="flex gap-0 border-b border-slate-100 mb-5">
+    <button type="button" @click="setTab('environments')"
+            :class="tab === 'environments' ? 'border-b-2 border-indigo-500 text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 border-b-2 border-transparent'"
+            class="px-4 py-2.5 text-xs transition-colors whitespace-nowrap">Environments</button>
+    <button type="button" @click="setTab('browsers')"
+            :class="tab === 'browsers' ? 'border-b-2 border-indigo-500 text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 border-b-2 border-transparent'"
+            class="px-4 py-2.5 text-xs transition-colors whitespace-nowrap">Browsers (Web)</button>
+    <button type="button" @click="setTab('devices')"
+            :class="tab === 'devices' ? 'border-b-2 border-indigo-500 text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 border-b-2 border-transparent'"
+            class="px-4 py-2.5 text-xs transition-colors whitespace-nowrap">Devices (Mobile)</button>
+    <button type="button" @click="setTab('credentials')"
+            :class="tab === 'credentials' ? 'border-b-2 border-indigo-500 text-indigo-600 font-semibold' : 'text-slate-500 hover:text-slate-700 border-b-2 border-transparent'"
+            class="px-4 py-2.5 text-xs transition-colors whitespace-nowrap">Credentials</button>
+  </div>
 
   <!-- ── Environments ── -->
-  <div>
-    <h3 class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">Environments</h3>
+  <div x-show="tab === 'environments'" x-cloak class="space-y-4">
     {% if rc.environments %}
-    <div class="divide-y divide-slate-50 mb-3">
+    <div class="divide-y divide-slate-50">
       {% for e in rc.environments %}
-      <div class="py-2 flex items-center gap-3 flex-wrap">
+      <div class="py-2.5 flex items-center gap-3 flex-wrap">
         <span class="text-sm font-medium text-slate-700 w-28 shrink-0">{{ e.name }}</span>
-        <span class="text-xs text-slate-400 font-mono flex-1 truncate" title="{{ e.base_url }}">{{ e.base_url or '—' }}</span>
-        <span class="text-xs text-slate-400 font-mono flex-1 truncate" title="{{ e.api_url }}">{{ e.api_url or '—' }}</span>
+        <span class="text-xs text-slate-400 font-mono flex-1 min-w-0 truncate" title="{{ e.base_url }}">{{ e.base_url or '—' }}</span>
+        <span class="text-xs text-slate-400 font-mono flex-1 min-w-0 truncate" title="{{ e.api_url }}">{{ e.api_url or '—' }}</span>
+        <form hx-post="/ui/config/run-config/{{ product }}/env/toggle-default"
+              hx-target="#run-config-content" hx-swap="innerHTML" class="shrink-0">
+          <input type="hidden" name="name" value="{{ e.name }}">
+          <button type="submit"
+                  class="text-xs px-2 py-0.5 rounded-full border transition-colors
+                         {{ 'bg-indigo-600 text-white border-indigo-600' if rc.defaults.get('environment') == e.name
+                            else 'border-slate-200 text-slate-400 hover:border-indigo-300 hover:text-indigo-500' }}">
+            Default
+          </button>
+        </form>
         <form hx-post="/ui/config/run-config/{{ product }}/env/delete"
               hx-target="#run-config-content" hx-swap="innerHTML" class="shrink-0">
           <input type="hidden" name="name" value="{{ e.name }}">
@@ -40,11 +68,11 @@
       {% endfor %}
     </div>
     {% else %}
-    <p class="text-xs text-slate-400 mb-3">No environments configured.</p>
+    <p class="text-xs text-slate-400">No environments configured.</p>
     {% endif %}
     <form hx-post="/ui/config/run-config/{{ product }}/env/add"
           hx-target="#run-config-content" hx-swap="innerHTML"
-          class="flex items-end gap-2 flex-wrap">
+          class="flex items-end gap-2 flex-wrap pt-1 border-t border-slate-50">
       <div>
         <label class="block text-xs font-medium text-slate-600 mb-1">Environment</label>
         <select name="name" required
@@ -75,34 +103,45 @@
   </div>
 
   <!-- ── Browsers ── -->
-  <div>
-    <h3 class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">Browsers (Web)</h3>
+  <div x-show="tab === 'browsers'" x-cloak class="space-y-4">
     {% if rc.browsers %}
-    <div class="divide-y divide-slate-50 mb-3">
+    <div class="divide-y divide-slate-50">
       {% for b in rc.browsers %}
-      <div class="py-2 flex items-center gap-3 flex-wrap">
+      <div class="py-2.5 flex items-center gap-3 flex-wrap">
         <span class="text-sm font-medium text-slate-700 w-32 shrink-0">{{ b.name }}</span>
         <span class="text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">{{ b.browser }}</span>
         <span class="text-xs {{ 'bg-amber-50 text-amber-700' if b.headless else 'bg-slate-50 text-slate-500' }} px-1.5 py-0.5 rounded">
           {{ 'headless' if b.headless else 'headed' }}
         </span>
-        <form hx-post="/ui/config/run-config/{{ product }}/browser/delete"
-              hx-target="#run-config-content" hx-swap="innerHTML" class="ml-auto shrink-0">
-          <input type="hidden" name="name" value="{{ b.name }}">
-          <button type="submit"
-                  class="text-xs text-red-500 hover:text-red-700 px-2 py-0.5 rounded hover:bg-red-50 transition-colors">
-            Delete
-          </button>
-        </form>
+        <div class="ml-auto flex items-center gap-2 shrink-0">
+          <form hx-post="/ui/config/run-config/{{ product }}/browser/toggle-default"
+                hx-target="#run-config-content" hx-swap="innerHTML">
+            <input type="hidden" name="name" value="{{ b.name }}">
+            <button type="submit"
+                    class="text-xs px-2 py-0.5 rounded-full border transition-colors
+                           {{ 'bg-indigo-600 text-white border-indigo-600' if rc.defaults.get('browser') == b.name
+                              else 'border-slate-200 text-slate-400 hover:border-indigo-300 hover:text-indigo-500' }}">
+              Default
+            </button>
+          </form>
+          <form hx-post="/ui/config/run-config/{{ product }}/browser/delete"
+                hx-target="#run-config-content" hx-swap="innerHTML">
+            <input type="hidden" name="name" value="{{ b.name }}">
+            <button type="submit"
+                    class="text-xs text-red-500 hover:text-red-700 px-2 py-0.5 rounded hover:bg-red-50 transition-colors">
+              Delete
+            </button>
+          </form>
+        </div>
       </div>
       {% endfor %}
     </div>
     {% else %}
-    <p class="text-xs text-slate-400 mb-3">No browser profiles configured.</p>
+    <p class="text-xs text-slate-400">No browser profiles configured.</p>
     {% endif %}
     <form hx-post="/ui/config/run-config/{{ product }}/browser/add"
           hx-target="#run-config-content" hx-swap="innerHTML"
-          class="flex items-end gap-2 flex-wrap">
+          class="flex items-end gap-2 flex-wrap pt-1 border-t border-slate-50">
       <div>
         <label class="block text-xs font-medium text-slate-600 mb-1">Name</label>
         <input type="text" name="name" required placeholder="Chrome Headless"
@@ -133,32 +172,43 @@
   </div>
 
   <!-- ── Devices ── -->
-  <div>
-    <h3 class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">Devices (Mobile)</h3>
+  <div x-show="tab === 'devices'" x-cloak class="space-y-4">
     {% if rc.devices %}
-    <div class="divide-y divide-slate-50 mb-3">
+    <div class="divide-y divide-slate-50">
       {% for d in rc.devices %}
-      <div class="py-2 flex items-center gap-3 flex-wrap">
+      <div class="py-2.5 flex items-center gap-3 flex-wrap">
         <span class="text-sm font-medium text-slate-700 w-36 shrink-0">{{ d.name }}</span>
         <span class="text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">{{ d.platform }}</span>
         <span class="text-xs text-slate-400 font-mono">{{ d.appium_url }}</span>
-        <form hx-post="/ui/config/run-config/{{ product }}/device/delete"
-              hx-target="#run-config-content" hx-swap="innerHTML" class="ml-auto shrink-0">
-          <input type="hidden" name="name" value="{{ d.name }}">
-          <button type="submit"
-                  class="text-xs text-red-500 hover:text-red-700 px-2 py-0.5 rounded hover:bg-red-50 transition-colors">
-            Delete
-          </button>
-        </form>
+        <div class="ml-auto flex items-center gap-2 shrink-0">
+          <form hx-post="/ui/config/run-config/{{ product }}/device/toggle-default"
+                hx-target="#run-config-content" hx-swap="innerHTML">
+            <input type="hidden" name="name" value="{{ d.name }}">
+            <button type="submit"
+                    class="text-xs px-2 py-0.5 rounded-full border transition-colors
+                           {{ 'bg-indigo-600 text-white border-indigo-600' if rc.defaults.get('device') == d.name
+                              else 'border-slate-200 text-slate-400 hover:border-indigo-300 hover:text-indigo-500' }}">
+              Default
+            </button>
+          </form>
+          <form hx-post="/ui/config/run-config/{{ product }}/device/delete"
+                hx-target="#run-config-content" hx-swap="innerHTML">
+            <input type="hidden" name="name" value="{{ d.name }}">
+            <button type="submit"
+                    class="text-xs text-red-500 hover:text-red-700 px-2 py-0.5 rounded hover:bg-red-50 transition-colors">
+              Delete
+            </button>
+          </form>
+        </div>
       </div>
       {% endfor %}
     </div>
     {% else %}
-    <p class="text-xs text-slate-400 mb-3">No device profiles configured.</p>
+    <p class="text-xs text-slate-400">No device profiles configured.</p>
     {% endif %}
     <form hx-post="/ui/config/run-config/{{ product }}/device/add"
           hx-target="#run-config-content" hx-swap="innerHTML"
-          class="flex items-end gap-2 flex-wrap" x-data="{ showCaps: false }">
+          class="flex items-end gap-2 flex-wrap pt-1 border-t border-slate-50" x-data="{ showCaps: false }">
       <div>
         <label class="block text-xs font-medium text-slate-600 mb-1">Name</label>
         <input type="text" name="name" required placeholder="Android Pixel 5"
@@ -181,7 +231,7 @@
         <label class="block text-xs font-medium text-slate-600 mb-1">
           Capabilities (JSON)
           <button type="button" @click="showCaps = !showCaps"
-                  class="ml-1 text-indigo-500 hover:text-indigo-700">[{{ 'Hide' if showCaps else 'Show' }}]</button>
+                  class="ml-1 text-indigo-500 hover:text-indigo-700">[<span x-text="showCaps ? 'Hide' : 'Show'"></span>]</button>
         </label>
         <textarea x-show="showCaps" name="capabilities"
                   placeholder='{"deviceName": "Pixel 5", "platformVersion": "12"}'
@@ -197,13 +247,12 @@
   </div>
 
   <!-- ── Credentials ── -->
-  <div>
-    <h3 class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">Credentials</h3>
-    <p class="text-xs text-slate-400 mb-2">Passwords are stored as env var names — the actual value must exist in the shell environment at run time.</p>
+  <div x-show="tab === 'credentials'" x-cloak class="space-y-4">
+    <p class="text-xs text-slate-400">Passwords are stored as environment variable names — the actual value must exist in the shell environment at run time.</p>
     {% if rc.credentials %}
-    <div class="divide-y divide-slate-50 mb-3">
+    <div class="divide-y divide-slate-50">
       {% for c in rc.credentials %}
-      <div class="py-2 flex items-center gap-3 flex-wrap">
+      <div class="py-2.5 flex items-center gap-3 flex-wrap">
         <span class="text-sm font-medium text-slate-700 w-28 shrink-0">{{ c.name }}</span>
         <span class="text-xs text-slate-600">{{ c.username }}</span>
         <span class="text-xs font-mono bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded text-slate-500">
@@ -221,11 +270,11 @@
       {% endfor %}
     </div>
     {% else %}
-    <p class="text-xs text-slate-400 mb-3">No credentials configured.</p>
+    <p class="text-xs text-slate-400">No credentials configured.</p>
     {% endif %}
     <form hx-post="/ui/config/run-config/{{ product }}/credential/add"
           hx-target="#run-config-content" hx-swap="innerHTML"
-          class="flex items-end gap-2 flex-wrap">
+          class="flex items-end gap-2 flex-wrap pt-1 border-t border-slate-50">
       <div>
         <label class="block text-xs font-medium text-slate-600 mb-1">Name</label>
         <input type="text" name="name" required placeholder="Admin"
@@ -247,51 +296,5 @@
       </button>
     </form>
   </div>
-
-  <!-- ── Defaults — only shown after at least one profile item is saved ── -->
-  {% if rc.environments or rc.browsers or rc.devices %}
-  <div class="border-t border-slate-100 pt-5">
-    <h3 class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-3">Default Profile</h3>
-    <p class="text-xs text-slate-400 mb-3">Set the defaults used when a run or schedule doesn't specify an explicit profile.</p>
-    <form hx-post="/ui/config/run-config/{{ product }}/defaults"
-          hx-target="#run-config-content" hx-swap="innerHTML"
-          class="flex items-end gap-3 flex-wrap">
-      <div>
-        <label class="block text-xs font-medium text-slate-600 mb-1">Default Environment</label>
-        <select name="environment"
-                class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-36">
-          <option value="">— none —</option>
-          {% for e in rc.environments %}
-          <option value="{{ e.name }}" {{ 'selected' if rc.defaults.get('environment') == e.name else '' }}>{{ e.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-slate-600 mb-1">Default Browser</label>
-        <select name="browser"
-                class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-36">
-          <option value="">— none —</option>
-          {% for b in rc.browsers %}
-          <option value="{{ b.name }}" {{ 'selected' if rc.defaults.get('browser') == b.name else '' }}>{{ b.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-slate-600 mb-1">Default Device</label>
-        <select name="device"
-                class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300 w-36">
-          <option value="">— none —</option>
-          {% for d in rc.devices %}
-          <option value="{{ d.name }}" {{ 'selected' if rc.defaults.get('device') == d.name else '' }}>{{ d.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <button type="submit"
-              class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-1.5 transition-colors">
-        Save Defaults
-      </button>
-    </form>
-  </div>
-  {% endif %}
 
 </div>
