@@ -227,21 +227,22 @@ function docsPage() {
       el.textContent = count + ' test case' + (count !== 1 ? 's' : '');
     },
 
-    exportDocs(fmt) {
-      const params = new URLSearchParams(location.search);
-      const dom = document.getElementById('tc-domain-filter').value;
-      const mod = document.getElementById('tc-module-filter').value;
-      if (dom) params.set('domain', dom);
-      if (mod) params.set('feature', mod);
-      params.set('format', fmt);
-      const a = document.createElement('a');
-      a.href = '/ui/docs/export?' + params.toString();
-      a.download = fmt === 'xlsx' ? 'test_cases.xlsx' : 'test_cases.csv';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    },
   };
+}
+
+function exportDocs(fmt) {
+  const params = new URLSearchParams(location.search);
+  const dom = document.getElementById('tc-domain-filter').value;
+  const mod = document.getElementById('tc-module-filter').value;
+  if (dom) params.set('domain', dom);
+  if (mod) params.set('feature', mod);
+  params.set('format', fmt);
+  const a = document.createElement('a');
+  a.href = '/ui/docs/export?' + params.toString();
+  a.download = fmt === 'xlsx' ? 'test_cases.xlsx' : 'test_cases.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 </script>
 {% endblock %}
