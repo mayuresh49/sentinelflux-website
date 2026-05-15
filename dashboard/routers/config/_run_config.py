@@ -6,7 +6,7 @@ import json as _json
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
 
-from dashboard.routers.auth import require_user
+from dashboard.routers.auth import get_session_user, require_user
 from dashboard.routers.config._helpers import (
     _audit_config,
     _load_config,
@@ -29,7 +29,11 @@ def _backfill_run_config(p: dict) -> None:
     rc.setdefault("browsers", [])
     rc.setdefault("devices", [])
     rc.setdefault("credentials", [])
-    rc.setdefault("defaults", {"environment": "", "browser": "", "device": ""})
+    defaults = rc.setdefault("defaults", {})
+    defaults.setdefault("environment", "")
+    defaults.setdefault("browser", "")
+    defaults.setdefault("device", "")
+    defaults.setdefault("skip_quarantined", True)
 
 
 def _find_product(cfg: dict, product: str) -> dict | None:
@@ -42,11 +46,13 @@ def _render(request: Request, product: str, flash: str = "") -> HTMLResponse:
     if not p:
         raise HTTPException(404, "Product not found")
     _backfill_run_config(p)
+    current_user = get_session_user(request) or {}
     return templates.TemplateResponse(request, "partials/config_run_config.html", context={
         "request": request,
         "product": product,
         "rc": p["run_config"],
         "flash": flash,
+        "current_user": current_user,
     })
 
 
@@ -323,7 +329,33 @@ async def defaults_save(
     if not p:
         raise HTTPException(404)
     _backfill_run_config(p)
-    p["run_config"]["defaults"] = {"environment": environment, "browser": browser, "device": device}
+    existing = p["run_config"]["defaults"]
+    p["run_config"]["defaults"] = {
+        "environment": environment,
+        "browser": browser,
+        "device": device,
+        "skip_quarantined": existing.get("skip_quarantined", True),
+    }
     _save_config(cfg)
     _audit_config(request, "Run Configuration", f"[{product}] Updated default profile")
     return _render(request, product, flash="Defaults saved.")
+
+
+# ── Quarantine behavior ───────────────────────────────────────────────────────
+
+@router.post("/ui/config/run-config/{product}/toggle-skip-quarantined", response_class=HTMLResponse)
+async def toggle_skip_quarantined(
+    request: Request, product: str,
+    _: dict = Depends(_require_admin),
+):
+    cfg = _load_config()
+    p = _find_product(cfg, product)
+    if not p:
+        raise HTTPException(404)
+    _backfill_run_config(p)
+    current = p["run_config"]["defaults"].get("skip_quarantined", True)
+    p["run_config"]["defaults"]["skip_quarantined"] = not current
+    _save_config(cfg)
+    verb = "enabled" if not current else "disabled"
+    _audit_config(request, "Run Configuration", f"[{product}] Skip Quarantined Tests {verb}")
+    return _render(request, product)

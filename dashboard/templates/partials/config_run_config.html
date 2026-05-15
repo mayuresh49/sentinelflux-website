@@ -21,6 +21,31 @@
   setTab(t) { this.tab = t; localStorage.setItem('rcTab_{{ product }}', t); }
 }">
 
+  <!-- Quarantine Behavior -->
+  <div class="flex items-center justify-between px-3 py-2 mb-4 bg-slate-50 border border-slate-100 rounded-lg">
+    <div>
+      <span class="text-xs font-medium text-slate-700">Skip Quarantined Tests</span>
+      <span class="text-xs text-slate-400 ml-2">Quarantined tests are excluded from runs; pass <code class="font-mono bg-slate-100 px-1 rounded">--run-quarantined</code> to include them</span>
+    </div>
+    {% if current_user.get('admin') %}
+    <form hx-post="/ui/config/run-config/{{ product }}/toggle-skip-quarantined"
+          hx-target="#run-config-content" hx-swap="innerHTML">
+      <button type="submit"
+              class="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors
+                     {{ 'bg-indigo-600' if rc.defaults.get('skip_quarantined', True) else 'bg-slate-300' }}">
+        <span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform
+                     {{ 'translate-x-4' if rc.defaults.get('skip_quarantined', True) else 'translate-x-0.5' }}"></span>
+      </button>
+    </form>
+    {% else %}
+    <span class="inline-flex h-5 w-9 shrink-0 items-center rounded-full
+                 {{ 'bg-indigo-600' if rc.defaults.get('skip_quarantined', True) else 'bg-slate-300' }}">
+      <span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow
+                   {{ 'translate-x-4' if rc.defaults.get('skip_quarantined', True) else 'translate-x-0.5' }}"></span>
+    </span>
+    {% endif %}
+  </div>
+
   <!-- Tab Bar -->
   <div class="flex gap-0 border-b border-slate-100 mb-5">
     <button type="button" @click="setTab('environments')"

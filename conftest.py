@@ -282,6 +282,12 @@ def pytest_addoption(parser):
         default=False,
         help="Reuse one authenticated browser session per worker (skips per-test login)",
     )
+    parser.addoption(
+        "--run-quarantined",
+        action="store_true",
+        default=False,
+        help="Include quarantined tests in the run (marks them xfail instead of skipping)",
+    )
 
 
 @pytest.fixture(scope="session")
@@ -347,10 +353,11 @@ def pytest_collection_modifyitems(config, items):
         quarantined = QuarantineManager().quarantined_ids()
         if not quarantined:
             return
-        marker = pytest.mark.xfail(
-            strict=False,
-            reason="quarantined: flaky — see data/quarantine.yaml",
-        )
+        run_quarantined = config.getoption("--run-quarantined", default=False)
+        if run_quarantined:
+            marker = pytest.mark.xfail(strict=False, reason="quarantined: flaky — see data/quarantine.yaml")
+        else:
+            marker = pytest.mark.skip(reason="quarantined: flaky — see data/quarantine.yaml")
         for item in items:
             if item.nodeid in quarantined:
                 item.add_marker(marker)
