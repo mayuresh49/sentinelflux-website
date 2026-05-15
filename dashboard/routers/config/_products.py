@@ -92,26 +92,18 @@ def _purge_product_data(name: str, cfg: dict) -> None:
         ]
         kb_log_path.write_text(yaml.dump(raw, default_flow_style=False, allow_unicode=True), encoding="utf-8")
 
-    # 5. Pending approvals
-    approvals_path = _DATA_DIR / "pending_approvals.yaml"
-    if approvals_path.exists():
-        raw = yaml.safe_load(approvals_path.read_text(encoding="utf-8")) or {}
-        for key in ("pending_actions", "resolved", "pending"):
-            raw[key] = [e for e in raw.get(key, []) if e.get("product") != name]
-        approvals_path.write_text(yaml.dump(raw, default_flow_style=False, allow_unicode=True), encoding="utf-8")
-
-    # 6. Run history
-    run_history_path = _DATA_DIR / "run_history.yaml"
-    if run_history_path.exists():
-        raw = yaml.safe_load(run_history_path.read_text(encoding="utf-8")) or {}
-        prefix = f"products/{name}/"
-        raw["tests"] = {k: v for k, v in raw.get("tests", {}).items() if not k.startswith(prefix)}
-        run_history_path.write_text(
-            "# SentinelFlux Run History\n"
-            "# Managed by QuarantineManager.record_run() — do not edit manually.\n"
-            + yaml.dump({"tests": raw["tests"]}, default_flow_style=False, allow_unicode=True),
-            encoding="utf-8",
-        )
+    # 5. Pending approvals + quarantine data
+    from core.db import get_conn as _get_conn
+    _conn = _get_conn()
+    _conn.execute("DELETE FROM approvals WHERE product = ?", (name,))
+    _conn.execute("DELETE FROM quarantine WHERE product = ?", (name,))
+    _conn.execute("DELETE FROM quarantine_pending WHERE product = ?", (name,))
+    _conn.execute("DELETE FROM test_runs WHERE product = ?", (name,))
+    _conn.execute("DELETE FROM test_schedules WHERE product = ?", (name,))
+    # run_history has no product column in all rows, but node IDs include product path
+    prefix = f"products/{name}/"
+    _conn.execute("DELETE FROM run_history WHERE test_id LIKE ?", (prefix + "%",))
+    _conn.commit()
 
     # 7. Unassign product from all users + remove from products list
     for u in cfg.get("users", []):

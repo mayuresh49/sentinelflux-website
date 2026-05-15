@@ -8,7 +8,6 @@ import uuid
 from datetime import datetime, timezone
 
 import httpx
-import yaml
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -210,7 +209,6 @@ def _parse_embedded_tool_calls(content: str):
     return None
 
 _CONFIG_FILE = _FRAMEWORK_ROOT / "dashboard" / "chat_config.json"
-_APPROVAL_FILE = _FRAMEWORK_ROOT / "data" / "pending_approvals.yaml"
 
 _SYSTEM_PROMPT = (
     "You are the SentinelFlux assistant. Answer the user's question directly using tools.\n\n"
@@ -360,23 +358,15 @@ def _extract_action(text: str) -> dict | None:
 
 
 def _queue_action(action: dict, context: dict) -> str:
-    item_id = str(uuid.uuid4())[:8]
-    item = {
-        "id": item_id,
-        "type": "chat_suggestion",
-        "status": "pending",
-        "proposed_date": datetime.now(timezone.utc).date().isoformat(),
-        "title": action.get("description", action.get("action", "AI suggestion")),
-        "detail": action,
-        "product": context.get("product") or None,
-        "domain": context.get("domain") or None,
-    }
-    data: dict = {"pending_actions": [], "quarantined": []}
-    if _APPROVAL_FILE.exists():
-        data = yaml.safe_load(_APPROVAL_FILE.read_text(encoding="utf-8")) or data
-    data.setdefault("pending_actions", []).append(item)
-    _APPROVAL_FILE.write_text(yaml.dump(data, default_flow_style=False, allow_unicode=True), encoding="utf-8")
-    return item_id
+    from core.approval_manager import ApprovalManager
+    aid = ApprovalManager().submit(
+        approval_type="script_review",
+        title=action.get("description", action.get("action", "AI suggestion")),
+        domain=context.get("domain") or "unknown",
+        product=context.get("product") or None,
+        details=action,
+    )
+    return aid[:8]
 
 
 @router.get("/config")

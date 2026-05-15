@@ -26,6 +26,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
+from core.db import init_db
+
 from dashboard.routers import (
     activities,
     agents,
@@ -53,6 +55,8 @@ _ALLOWED_ORIGINS = [
         "http://sentinelflux.in,https://sentinelflux.in,http://localhost:8765,http://127.0.0.1:8765"
     ).split(",") if o.strip()
 ]
+
+init_db()
 
 app = FastAPI(
     title="SentinelFlux Dashboard",

@@ -3,17 +3,16 @@ from __future__ import annotations
 import re
 from datetime import datetime, timedelta, timezone
 
-import yaml
 from fastapi import APIRouter, Depends
 
 from core.activity_log import ActivityLog
+from core.db import get_conn
 from dashboard.routers.auth import require_user, user_products
 from utils.paths import ROOT as _ROOT_DIR
 
 router = APIRouter(prefix="/quality", tags=["quality"])
 _PRODUCTS_DIR = _ROOT_DIR / "products"
 _KB_DIR = _ROOT_DIR / "ai" / "knowledge_base"
-_QUARANTINE_FILE = _ROOT_DIR / "data" / "quarantine.yaml"
 _SKIP_KB = {"__pycache__", "increments"}
 
 _alog = ActivityLog()
@@ -52,10 +51,8 @@ def _doc_features(product: str) -> set[str]:
 
 
 def _load_quarantine() -> list:
-    if not _QUARANTINE_FILE.exists():
-        return []
-    data = yaml.safe_load(_QUARANTINE_FILE.read_text(encoding="utf-8")) or {}
-    return data.get("quarantined", [])
+    rows = get_conn().execute("SELECT * FROM quarantine").fetchall()
+    return [dict(r) for r in rows]
 
 
 def _parse_ts(ts: str) -> datetime:

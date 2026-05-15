@@ -1,31 +1,17 @@
-"""
-ApprovalManager — unified human-in-the-loop gate for all agent proposals.
-
-Extends the QuarantineManager.pending_actions pattern to all agent output types.
-
-File: data/pending_approvals.yaml
-
-Structure:
-  pending:
-    - id, type, product, domain, title, proposed_date, details
-  resolved:
-    - same fields + decision, resolved_date, resolved_by, notes
-"""
+"""ApprovalManager — unified human-in-the-loop gate for all agent proposals."""
 from __future__ import annotations
 
+import json
 import logging
+import sqlite3
 import uuid
 from datetime import date
 from pathlib import Path
 from typing import Any
 
-import yaml
-from filelock import FileLock
-
-from utils.paths import ROOT as _ROOT_DIR
+from core.db import apply_schema, get_conn
 
 _log = logging.getLogger("sentinelflux.approval_manager")
-_APPROVALS_PATH = _ROOT_DIR / "data" / "pending_approvals.yaml"
 
 APPROVAL_TYPES = frozenset({
     "quarantine",
@@ -38,8 +24,20 @@ APPROVAL_TYPES = frozenset({
 
 
 class ApprovalManager:
-    def __init__(self, path: Path = _APPROVALS_PATH):
-        self._path = path
+    def __init__(self, path: Path | None = None):
+        # When path is given (e.g. in tests), use an isolated SQLite DB in the same dir.
+        if path is not None:
+            db_path = path.parent / "sentinelflux.db"
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+            self._isolated_conn: sqlite3.Connection | None = sqlite3.connect(str(db_path))
+            self._isolated_conn.row_factory = sqlite3.Row
+            self._isolated_conn.execute("PRAGMA journal_mode=WAL")
+            apply_schema(self._isolated_conn)
+        else:
+            self._isolated_conn = None
+
+    def _conn(self) -> sqlite3.Connection:
+        return self._isolated_conn if self._isolated_conn is not None else get_conn()
 
     def submit(
         self,
@@ -50,21 +48,16 @@ class ApprovalManager:
         product: str | None = None,
         details: dict[str, Any] | None = None,
     ) -> str:
-        """Submit a new approval request. Returns the approval ID."""
         approval_id = str(uuid.uuid4())
-
-        def _add(data: dict) -> None:
-            data.setdefault("pending", []).append({
-                "id": approval_id,
-                "type": approval_type,
-                "product": product,
-                "domain": domain,
-                "title": title,
-                "proposed_date": str(date.today()),
-                "details": details or {},
-            })
-
-        self._mutate(_add)
+        conn = self._conn()
+        conn.execute(
+            """INSERT INTO approvals
+               (id, type, product, domain, title, proposed_date, details, status)
+               VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')""",
+            (approval_id, approval_type, product, domain, title,
+             str(date.today()), json.dumps(details or {})),
+        )
+        conn.commit()
         _log.info("Approval submitted: %s [%s]", title, approval_id[:8])
         return approval_id
 
@@ -76,56 +69,54 @@ class ApprovalManager:
         resolved_by: str = "human",
         notes: str = "",
     ) -> bool:
-        """Approve or reject a pending approval. Returns True if found and resolved."""
-        found: list[dict] = []
-
-        def _resolve(data: dict) -> None:
-            pending = data.get("pending", [])
-            match = next((p for p in pending if p["id"] == approval_id), None)
-            if not match:
-                return
-            found.append(match)
-            data["pending"] = [p for p in pending if p["id"] != approval_id]
-            data.setdefault("resolved", []).append({
-                **match,
-                "decision": decision,
-                "resolved_date": str(date.today()),
-                "resolved_by": resolved_by,
-                "notes": notes,
-            })
-
-        self._mutate(_resolve)
-        if not found:
+        conn = self._conn()
+        row = conn.execute(
+            "SELECT id FROM approvals WHERE id = ? AND status = 'pending'",
+            (approval_id,),
+        ).fetchone()
+        if not row:
             return False
-        _log.info("Approval %s: %s [%s]", decision, found[0]["title"], approval_id[:8])
+        conn.execute(
+            """UPDATE approvals
+               SET status = ?, decision = ?, resolved_date = ?, resolved_by = ?, notes = ?
+               WHERE id = ?""",
+            (decision, decision, str(date.today()), resolved_by, notes, approval_id),
+        )
+        conn.commit()
+        _log.info("Approval %s [%s]", decision, approval_id[:8])
         return True
 
     def pending(self, approval_type: str | None = None) -> list[dict]:
-        items = self._load().get("pending", [])
         if approval_type:
-            items = [i for i in items if i["type"] == approval_type]
-        return items
+            rows = self._conn().execute(
+                "SELECT * FROM approvals WHERE status = 'pending' AND type = ?",
+                (approval_type,),
+            ).fetchall()
+        else:
+            rows = self._conn().execute(
+                "SELECT * FROM approvals WHERE status = 'pending'"
+            ).fetchall()
+        return [_row(r) for r in rows]
 
     def resolved(self, limit: int = 100) -> list[dict]:
-        return self._load().get("resolved", [])[-limit:]
+        rows = self._conn().execute(
+            "SELECT * FROM approvals WHERE status != 'pending' "
+            "ORDER BY resolved_date DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+        return [_row(r) for r in rows]
 
     def get(self, approval_id: str) -> dict | None:
-        data = self._load()
-        all_items = data.get("pending", []) + data.get("resolved", [])
-        return next((i for i in all_items if i["id"] == approval_id), None)
+        row = self._conn().execute(
+            "SELECT * FROM approvals WHERE id = ?", (approval_id,)
+        ).fetchone()
+        return _row(row) if row else None
 
-    def _load(self) -> dict:
-        """Read-only load — safe for query methods, not for write paths."""
-        if not self._path.exists():
-            return {"pending": [], "resolved": []}
-        with self._path.open(encoding="utf-8") as f:
-            return yaml.safe_load(f) or {"pending": [], "resolved": []}
 
-    def _mutate(self, mutator) -> None:
-        """Atomic read-modify-write under FileLock — use for all writes."""
-        self._path.parent.mkdir(parents=True, exist_ok=True)
-        with FileLock(str(self._path) + ".lock"):
-            data = self._load()
-            mutator(data)
-            with self._path.open("w", encoding="utf-8") as f:
-                yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+def _row(r) -> dict:
+    d = dict(r)
+    try:
+        d["details"] = json.loads(d["details"])
+    except (json.JSONDecodeError, TypeError):
+        d["details"] = {}
+    return d

@@ -11,13 +11,11 @@ import logging
 from datetime import date
 from pathlib import Path
 
-import yaml
-
 from core.activity_log import ActivityLog
+from core.db import get_conn
 from utils.paths import ROOT as _ROOT_DIR
 
 _log = logging.getLogger("sentinelflux.approval_dispatch")
-_QUARANTINE_PATH = _ROOT_DIR / "data" / "quarantine.yaml"
 _alog = ActivityLog()
 
 
@@ -74,24 +72,24 @@ def _apply_quarantine(item: dict, details: dict, decision: str) -> str:
     if not test_id:
         return "Missing test_id in quarantine details"
 
-    data = _load_quarantine()
-    # Always remove this specific test from pending_actions
-    data["pending_actions"] = [
-        p for p in data.get("pending_actions", []) if p.get("test_id") != test_id
-    ]
+    conn = get_conn()
+    # Remove from pending regardless of decision
+    conn.execute("DELETE FROM quarantine_pending WHERE test_id = ?", (test_id,))
 
     if decision == "approved":
-        quarantined = data.setdefault("quarantined", [])
-        if not any(q.get("test_id") == test_id for q in quarantined):
-            quarantined.append({
-                "test_id": test_id,
-                "product": item.get("product"),
-                "domain": item.get("domain"),
-                "reason": details.get("rule", "flaky"),
-                "quarantined_date": str(date.today()),
-                "consecutive_passes": 0,
-            })
-        _save_quarantine(data)
+        conn.execute(
+            """INSERT OR REPLACE INTO quarantine
+               (test_id, domain, product, reason, quarantined_date, consecutive_passes)
+               VALUES (?, ?, ?, ?, ?, 0)""",
+            (
+                test_id,
+                item.get("domain", ""),
+                item.get("product"),
+                details.get("rule", "flaky"),
+                str(date.today()),
+            ),
+        )
+        conn.commit()
         _alog.append(
             event_type="approval_action", agent="quarantine_manager",
             domain=item.get("domain"), product=item.get("product"),
@@ -99,7 +97,7 @@ def _apply_quarantine(item: dict, details: dict, decision: str) -> str:
         )
         return f"Quarantined — {test_id} marked xfail in next run"
     else:
-        _save_quarantine(data)
+        conn.commit()
         _alog.append(
             event_type="approval_action", agent="quarantine_manager",
             domain=item.get("domain"), product=item.get("product"),
@@ -113,16 +111,12 @@ def _apply_unquarantine(item: dict, details: dict, decision: str) -> str:
     if not test_id:
         return "Missing test_id in unquarantine details"
 
-    data = _load_quarantine()
-    data["pending_actions"] = [
-        p for p in data.get("pending_actions", []) if p.get("test_id") != test_id
-    ]
+    conn = get_conn()
+    conn.execute("DELETE FROM quarantine_pending WHERE test_id = ?", (test_id,))
 
     if decision == "approved":
-        data["quarantined"] = [
-            q for q in data.get("quarantined", []) if q.get("test_id") != test_id
-        ]
-        _save_quarantine(data)
+        conn.execute("DELETE FROM quarantine WHERE test_id = ?", (test_id,))
+        conn.commit()
         _alog.append(
             event_type="approval_action", agent="quarantine_manager",
             domain=item.get("domain"), product=item.get("product"),
@@ -130,7 +124,7 @@ def _apply_unquarantine(item: dict, details: dict, decision: str) -> str:
         )
         return f"Unquarantined — {test_id} re-enabled in next run"
     else:
-        _save_quarantine(data)
+        conn.commit()
         _alog.append(
             event_type="approval_action", agent="quarantine_manager",
             domain=item.get("domain"), product=item.get("product"),
@@ -253,16 +247,3 @@ def _log_acknowledgement(item: dict, decision: str) -> str:
     return summary
 
 
-# ── quarantine.yaml helpers ─────────────────────────────────────────────────
-
-def _load_quarantine() -> dict:
-    if not _QUARANTINE_PATH.exists():
-        return {}
-    with _QUARANTINE_PATH.open(encoding="utf-8") as f:
-        return yaml.safe_load(f) or {}
-
-
-def _save_quarantine(data: dict):
-    _QUARANTINE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with _QUARANTINE_PATH.open("w", encoding="utf-8") as f:
-        yaml.dump(data, f, default_flow_style=False, sort_keys=False)

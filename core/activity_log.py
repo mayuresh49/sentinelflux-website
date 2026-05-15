@@ -1,34 +1,35 @@
-"""
-ActivityLog — append-only event store for all agent and pipeline runs.
-
-Written by SentinelOrchestrator (and individual agents if needed).
-Read by the FastAPI dashboard backend.
-
-File: data/activity_log.json
-Trims to MAX_ENTRIES on each write to prevent unbounded growth.
-"""
+"""ActivityLog — append-only event store for all agent and pipeline runs."""
 from __future__ import annotations
 
 import json
 import logging
+import sqlite3
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from filelock import FileLock
-
-from utils.paths import ROOT as _ROOT_DIR
+from core.db import apply_schema, get_conn
 
 _log = logging.getLogger("sentinelflux.activity_log")
-_LOG_PATH = _ROOT_DIR / "data" / "activity_log.json"
-
 MAX_ENTRIES = 1000
 
 
 class ActivityLog:
-    def __init__(self, path: Path = _LOG_PATH):
-        self._path = path
+    def __init__(self, path: Path | None = None):
+        # When path is given (e.g. in tests), use an isolated SQLite DB in the same dir.
+        if path is not None:
+            db_path = path.parent / "sentinelflux.db"
+            db_path.parent.mkdir(parents=True, exist_ok=True)
+            self._isolated_conn: sqlite3.Connection | None = sqlite3.connect(str(db_path))
+            self._isolated_conn.row_factory = sqlite3.Row
+            self._isolated_conn.execute("PRAGMA journal_mode=WAL")
+            apply_schema(self._isolated_conn)
+        else:
+            self._isolated_conn = None
+
+    def _conn(self) -> sqlite3.Connection:
+        return self._isolated_conn if self._isolated_conn is not None else get_conn()
 
     def append(
         self,
@@ -43,41 +44,47 @@ class ActivityLog:
         requires_human: bool = False,
         approval_id: str | None = None,
     ) -> str:
-        """Append one event. Returns the new entry ID."""
         entry_id = str(uuid.uuid4())
-        entry = {
-            "id": entry_id,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "event_type": event_type,
-            "agent": agent,
-            "product": product,
-            "domain": domain,
-            "status": status,
-            "summary": summary,
-            "output": output or {},
-            "requires_human": requires_human,
-            "approval_id": approval_id,
-        }
-
-        def _add(data: dict) -> None:
-            data["entries"].append(entry)
-            if len(data["entries"]) > MAX_ENTRIES:
-                data["entries"] = data["entries"][-MAX_ENTRIES:]
-
-        self._mutate(_add)
+        conn = self._conn()
+        conn.execute(
+            """INSERT INTO activity_log
+               (id, timestamp, event_type, agent, product, domain, status, summary,
+                output, requires_human, approval_id)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                entry_id,
+                datetime.now(timezone.utc).isoformat(),
+                event_type, agent, product, domain, status, summary,
+                json.dumps(output or {}),
+                1 if requires_human else 0,
+                approval_id,
+            ),
+        )
+        conn.execute(
+            "DELETE FROM activity_log WHERE id NOT IN "
+            "(SELECT id FROM activity_log ORDER BY timestamp DESC LIMIT ?)",
+            (MAX_ENTRIES,),
+        )
+        conn.commit()
         return entry_id
 
     def all(self) -> list[dict]:
-        return self._load()["entries"]
+        rows = self._conn().execute(
+            "SELECT * FROM activity_log ORDER BY timestamp ASC"
+        ).fetchall()
+        return [_row(r) for r in rows]
 
     def get(self, entry_id: str) -> dict | None:
-        for e in self._load()["entries"]:
-            if e["id"] == entry_id:
-                return e
-        return None
+        row = self._conn().execute(
+            "SELECT * FROM activity_log WHERE id = ?", (entry_id,)
+        ).fetchone()
+        return _row(row) if row else None
 
     def recent(self, n: int = 50) -> list[dict]:
-        return self._load()["entries"][-n:]
+        rows = self._conn().execute(
+            "SELECT * FROM activity_log ORDER BY timestamp DESC LIMIT ?", (n,)
+        ).fetchall()
+        return [_row(r) for r in reversed(rows)]
 
     def filter(
         self,
@@ -88,31 +95,30 @@ class ActivityLog:
         requires_human: bool | None = None,
         event_type: str | None = None,
     ) -> list[dict]:
-        entries = self.all()
+        clauses: list[str] = []
+        params: list[Any] = []
         if agent:
-            entries = [e for e in entries if e.get("agent") == agent]
+            clauses.append("agent = ?"); params.append(agent)
         if domain:
-            entries = [e for e in entries if e.get("domain") == domain]
+            clauses.append("domain = ?"); params.append(domain)
         if product:
-            entries = [e for e in entries if e.get("product") == product]
+            clauses.append("product = ?"); params.append(product)
         if requires_human is not None:
-            entries = [e for e in entries if e.get("requires_human") == requires_human]
+            clauses.append("requires_human = ?"); params.append(1 if requires_human else 0)
         if event_type:
-            entries = [e for e in entries if e.get("event_type") == event_type]
-        return entries
+            clauses.append("event_type = ?"); params.append(event_type)
+        where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
+        rows = self._conn().execute(
+            f"SELECT * FROM activity_log {where} ORDER BY timestamp ASC", params
+        ).fetchall()
+        return [_row(r) for r in rows]
 
-    def _load(self) -> dict:
-        """Read-only load — safe for query methods, not for write paths."""
-        if not self._path.exists():
-            return {"entries": []}
-        with self._path.open(encoding="utf-8") as f:
-            return json.load(f)
 
-    def _mutate(self, mutator) -> None:
-        """Atomic read-modify-write under FileLock — use for all writes."""
-        self._path.parent.mkdir(parents=True, exist_ok=True)
-        with FileLock(str(self._path) + ".lock"):
-            data = self._load()
-            mutator(data)
-            with self._path.open("w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
+def _row(r) -> dict:
+    d = dict(r)
+    try:
+        d["output"] = json.loads(d["output"])
+    except (json.JSONDecodeError, TypeError):
+        d["output"] = {}
+    d["requires_human"] = bool(d["requires_human"])
+    return d

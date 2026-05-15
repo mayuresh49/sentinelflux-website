@@ -277,7 +277,8 @@ async def agents_page(request: Request, current_user: dict = Depends(_require_au
             pass
 
     has_kb = bool(list((_ROOT / "ai" / "knowledge_base").rglob("*.yaml")))
-    has_history = (_ROOT / "data" / "run_history.yaml").exists()
+    from core.db import get_conn as _get_conn
+    has_history = _get_conn().execute("SELECT COUNT(*) FROM run_history").fetchone()[0] > 0
     has_baseline = (_ROOT / "data" / "baseline_report.json").exists()
 
     # Agents that need KB

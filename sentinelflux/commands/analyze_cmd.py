@@ -35,7 +35,7 @@ def run(
       sentinelflux analyze --domain api --apply-quarantine
     """
     from ai.agents import AgentContext, FlakyDetectorAgent, ResultAnalyzerAgent
-    from ai.agents.quarantine_manager import _HISTORY_PATH, QuarantineManager
+    from ai.agents.quarantine_manager import QuarantineManager
     from core.ai_factory import create_ai_client
 
     # ── 1. Resolve report ─────────────────────────────────────────────────
@@ -86,7 +86,7 @@ def run(
     # ── 5. Flaky detection ────────────────────────────────────────────────
     _console.print("\n[bold cyan]Detecting flaky tests...[/]")
     detector = FlakyDetectorAgent(context=ctx)
-    flaky_result = detector.run(history_path=_HISTORY_PATH)
+    flaky_result = detector.run()
     _print_flaky(flaky_result)
 
     # ── 6. Quarantine proposals ───────────────────────────────────────────
@@ -96,12 +96,12 @@ def run(
         flaky_result["unquarantine_candidates"],
     )
     if proposed:
-        _console.print(f"\n[yellow]{proposed} quarantine action(s) proposed → data/quarantine.yaml[/]")
+        _console.print(f"\n[yellow]{proposed} quarantine action(s) proposed → dashboard approval queue[/]")
         if apply_quarantine:
             applied = qm.apply_pending()
             _console.print(f"[green]Applied: {len(applied['quarantined'])} quarantined, {len(applied['unquarantined'])} released[/]")
         else:
-            _console.print("[dim]Run with --apply-quarantine to activate, or edit quarantine.yaml manually.[/]")
+            _console.print("[dim]Run with --apply-quarantine to activate, or approve via the dashboard.[/]")
 
     # ── Summary ───────────────────────────────────────────────────────────
     _print_summary(analysis, regression_result, flaky_result)

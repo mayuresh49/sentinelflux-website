@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any
 
 from ai.agents.base_agent import AgentContext
-from ai.agents.quarantine_manager import _HISTORY_PATH, QuarantineManager
+from ai.agents.quarantine_manager import QuarantineManager
 from core.activity_log import ActivityLog
 from core.approval_manager import ApprovalManager
 from utils.paths import ROOT as _ROOT_DIR
@@ -150,7 +150,7 @@ class SentinelOrchestrator:
         try:
             from ai.agents.flaky_detector_agent import FlakyDetectorAgent
             agent = FlakyDetectorAgent(context=ctx)
-            result = agent.run(history_path=_HISTORY_PATH)
+            result = agent.run()
 
             qm = QuarantineManager()
             qm.propose(result["quarantine_candidates"], result["unquarantine_candidates"])

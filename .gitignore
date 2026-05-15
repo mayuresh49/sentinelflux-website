@@ -158,3 +158,9 @@ data/quarantine.yaml
 data/config.yaml
 logs/
 stdout
+# SQLite runtime files
+data/sentinelflux.db
+data/sentinelflux.db-shm
+data/sentinelflux.db-wal
+data/run_product_index.json
+data/audit_log.json
