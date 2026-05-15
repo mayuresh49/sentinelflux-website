@@ -14,7 +14,7 @@ from fastapi.templating import Jinja2Templates
 
 from core.activity_log import ActivityLog
 from core.approval_manager import ApprovalManager
-from dashboard.routers.approval_dispatch import _load_quarantine, _save_quarantine
+from core.db import get_conn
 from dashboard.routers.approval_dispatch import dispatch as _dispatch
 from dashboard.routers.auth import require_user, user_products
 from dashboard.routers.kb import _list_products
@@ -341,10 +341,13 @@ async def pipeline_job_partial(request: Request, job_id: str):
 
 
 def _quarantine_groups(filter_product: str | None) -> dict:
-    data = _load_quarantine()
-    items = data.get("quarantined", [])
     if filter_product:
-        items = [q for q in items if q.get("product") == filter_product]
+        rows = get_conn().execute(
+            "SELECT * FROM quarantine WHERE product = ?", (filter_product,)
+        ).fetchall()
+    else:
+        rows = get_conn().execute("SELECT * FROM quarantine").fetchall()
+    items = [dict(r) for r in rows]
     groups: dict = defaultdict(list)
     for q in sorted(items, key=lambda x: (x.get("product") or "", x.get("domain") or "")):
         groups[(q.get("product") or "—", q.get("domain") or "—")].append(q)
@@ -376,19 +379,18 @@ async def quarantine_add(
 ):
     tid = test_id.strip()
     if tid:
-        data = _load_quarantine()
-        quarantined = data.setdefault("quarantined", [])
-        if not any(q.get("test_id") == tid for q in quarantined):
-            quarantined.append({
-                "test_id": tid,
-                "product": product or None,
-                "domain": domain or None,
-                "reason": reason or "manual",
-                "quarantined_date": str(date.today()),
-                "consecutive_passes": 0,
-                "added_by": "human",
-            })
-            _save_quarantine(data)
+        conn = get_conn()
+        existing = conn.execute(
+            "SELECT test_id FROM quarantine WHERE test_id = ?", (tid,)
+        ).fetchone()
+        if not existing:
+            conn.execute(
+                """INSERT INTO quarantine
+                   (test_id, product, domain, reason, quarantined_date, consecutive_passes)
+                   VALUES (?, ?, ?, ?, ?, 0)""",
+                (tid, product or None, domain or None, reason or "manual", str(date.today())),
+            )
+            conn.commit()
             _alog.append(
                 event_type="approval_action", agent="human",
                 product=product or None, domain=domain or None,
@@ -406,9 +408,9 @@ async def quarantine_remove(
 ):
     tid = test_id.strip()
     if tid:
-        data = _load_quarantine()
-        data["quarantined"] = [q for q in data.get("quarantined", []) if q.get("test_id") != tid]
-        _save_quarantine(data)
+        conn = get_conn()
+        conn.execute("DELETE FROM quarantine WHERE test_id = ?", (tid,))
+        conn.commit()
         _alog.append(
             event_type="approval_action", agent="human",
             status="success", summary=f"Manually removed from quarantine: {tid}",
