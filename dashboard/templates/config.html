@@ -274,3 +274,13 @@
   </div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+  document.body.addEventListener('htmx:afterSettle', function (evt) {
+    if (evt.detail.target && evt.detail.target.id === 'run-config-content') {
+      Alpine.initTree(evt.detail.target);
+    }
+  });
+</script>
+{% endblock %}
