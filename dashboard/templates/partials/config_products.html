@@ -23,6 +23,10 @@
         {% else %}
         <span class="text-xs bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium">inactive</span>
         {% endif %}
+        {% set domain_colors = {'web': 'bg-indigo-100 text-indigo-700', 'api': 'bg-blue-100 text-blue-700', 'mobile': 'bg-emerald-100 text-emerald-700'} %}
+        {% for d in p.get('domains', []) %}
+        <span class="text-xs px-1.5 py-0.5 rounded font-medium {{ domain_colors.get(d, 'bg-slate-100 text-slate-500') }}">{{ d }}</span>
+        {% endfor %}
         {% if p.get('has_tests') %}
         <span class="text-xs bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{{ p.test_count }} test{{ 's' if p.test_count != 1 else '' }}</span>
         {% else %}

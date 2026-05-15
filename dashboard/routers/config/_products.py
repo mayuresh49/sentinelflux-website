@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import re as _re
 import shutil
+from typing import List
 
 import yaml
 from fastapi import APIRouter, Form, Request
@@ -122,15 +123,25 @@ def _purge_product_data(name: str, cfg: dict) -> None:
             shutil.rmtree(d)
 
 
+_VALID_DOMAINS = {"web", "api", "mobile"}
+
+
 @router.post("/ui/config/products/add", response_class=HTMLResponse)
-async def products_add(request: Request, name: str = Form(...), display_name: str = Form("")):
+async def products_add(
+    request: Request,
+    name: str = Form(...),
+    display_name: str = Form(""),
+    domains: List[str] = Form(default=[]),
+):
     name = name.strip().lower().replace(" ", "_")
     cfg = _load_config()
     if name and _SAFE_PRODUCT_RE.match(name) and not any(p["name"] == name for p in cfg.get("products", [])):
+        sanitized_domains = sorted({d for d in domains if d in _VALID_DOMAINS})
         cfg.setdefault("products", []).append({
             "name": name,
             "display_name": display_name.strip() or name.replace("_", " ").title(),
             "active": True,
+            "domains": sanitized_domains,
         })
         _save_config(cfg)
         (_KB_PRODUCTS_DIR / name).mkdir(parents=True, exist_ok=True)
