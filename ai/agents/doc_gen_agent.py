@@ -31,6 +31,10 @@ class DocGenAgent(BaseAgent):
         feature_name: str,
         output_path: Path | None = None,
     ) -> dict:
+        if not self.client:
+            raise RuntimeError("DocGenAgent requires an AI client — configure one via the chat config")
+        if not self.kb:
+            raise RuntimeError("DocGenAgent requires a KB loader — pass kb= when constructing the agent")
         from ai.skills.api_source_parser import ApiSourceParser
         from ai.skills.test_case_doc_kb import TestCaseDocumentationSkill
 

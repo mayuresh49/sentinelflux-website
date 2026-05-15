@@ -239,27 +239,70 @@ async def assignments_page(request: Request, current_user: dict = Depends(_requi
 
 @router.get("/agents", response_class=HTMLResponse)
 async def agents_page(request: Request, current_user: dict = Depends(_require_auth)):
+    import json
     import yaml
 
     from dashboard.agent_meta import AGENT_META
     from dashboard.routers.agents import _AGENT_REGISTRY
     from utils.paths import ROOT as _ROOT
+
     config_path = _ROOT / "ai" / "context" / "agent_config.yaml"
     agent_config: dict = {}
     if config_path.exists():
         data = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
         agent_config = data.get("agents", {})
+
+    # Determine whether AI and KB are configured
+    chat_cfg_path = _ROOT / "data" / "chat_config.json"
+    has_ai = False
+    if chat_cfg_path.exists():
+        try:
+            cc = json.loads(chat_cfg_path.read_text(encoding="utf-8"))
+            has_ai = bool(cc.get("provider") and cc.get("api_key"))
+        except Exception:
+            pass
+
+    has_kb = bool(list((_ROOT / "ai" / "knowledge_base").rglob("*.yaml")))
+    has_history = (_ROOT / "data" / "run_history.yaml").exists()
+    has_baseline = (_ROOT / "data" / "baseline_report.json").exists()
+
+    # Agents that need KB
+    _kb_agents = {"doc_gen", "script_gen", "coverage_gap"}
+
+    def _health(agent: dict, last_run: dict | None) -> str:
+        name = agent["name"]
+        if agent.get("requires_ai") and not has_ai:
+            return "needs_config"
+        if name in _kb_agents and not has_kb:
+            return "needs_config"
+        if name == "flaky_detector" and not has_history:
+            return "no_data"
+        if name == "regression_guard" and not has_baseline:
+            return "no_baseline"
+        if last_run:
+            return "degraded" if last_run.get("status") == "error" else "healthy"
+        return "ready"
+
     status_map: dict = {}
     for e in reversed(_alog.all()):
         name = e.get("agent", "")
         if name and name not in status_map:
             status_map[name] = e
-    agents_data = [
-        {**a, "last_run": status_map.get(a["name"]), "meta": AGENT_META.get(a["name"], {}), "config": agent_config.get(a["name"], {})}
-        for a in _AGENT_REGISTRY
-    ]
+
+    agents_data = []
+    for a in _AGENT_REGISTRY:
+        last = status_map.get(a["name"])
+        agents_data.append({
+            **a,
+            "last_run": last,
+            "meta": AGENT_META.get(a["name"], {}),
+            "config": agent_config.get(a["name"], {}),
+            "health": _health(a, last),
+        })
+
+    health_counts = Counter(a["health"] for a in agents_data)
     return templates.TemplateResponse(request, "agents.html", context=_ctx(
-        request, current_user, agents=agents_data,
+        request, current_user, agents=agents_data, health_counts=health_counts,
     ))
 
 

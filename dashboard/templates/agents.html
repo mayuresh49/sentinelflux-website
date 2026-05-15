@@ -9,6 +9,24 @@
     <p class="text-sm text-slate-500 mt-0.5">Agent registry, responsibilities, and configuration overrides</p>
   </div>
 
+  <!-- Health summary cards -->
+  <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+    {% set hs = [
+      ("healthy",      "Healthy",      "bg-emerald-50 border-emerald-100 text-emerald-700"),
+      ("ready",        "Ready",        "bg-blue-50 border-blue-100 text-blue-700"),
+      ("degraded",     "Degraded",     "bg-red-50 border-red-100 text-red-700"),
+      ("needs_config", "Needs Config", "bg-amber-50 border-amber-100 text-amber-700"),
+      ("no_data",      "No Data",      "bg-slate-50 border-slate-100 text-slate-500"),
+    ] %}
+    {% for key, label, cls in hs %}
+    {% set cnt = health_counts.get(key, 0) + (health_counts.get("no_baseline", 0) if key == "no_data" else 0) %}
+    <div class="rounded-xl border p-3 flex flex-col gap-0.5 {{ cls }}">
+      <span class="text-xl font-bold leading-none">{{ cnt }}</span>
+      <span class="text-xs font-medium">{{ label }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
   <div class="space-y-3">
     {% for agent in agents %}
     {% set last = agent.last_run %}
@@ -29,6 +47,22 @@
       "skipped": "bg-slate-300",
       "never": "bg-slate-200",
     } %}
+    {% set health_colors = {
+      "healthy":      "bg-emerald-100 text-emerald-700",
+      "ready":        "bg-blue-100 text-blue-600",
+      "degraded":     "bg-red-100 text-red-600",
+      "needs_config": "bg-amber-100 text-amber-700",
+      "no_data":      "bg-slate-100 text-slate-500",
+      "no_baseline":  "bg-slate-100 text-slate-500",
+    } %}
+    {% set health_labels = {
+      "healthy":      "healthy",
+      "ready":        "ready",
+      "degraded":     "degraded",
+      "needs_config": "needs config",
+      "no_data":      "no history",
+      "no_baseline":  "no baseline",
+    } %}
     <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden" x-data="{ open: false }">
 
       <!-- Summary row (always visible) -->
@@ -40,6 +74,7 @@
             <code class="text-[10px] text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded">{{ agent.name }}</code>
             <span class="text-xs px-1.5 py-0.5 rounded font-medium {{ status_colors.get(status, 'bg-slate-100 text-slate-400') }}">{{ status }}</span>
             <span class="text-xs text-slate-400">{{ 'AI-powered' if agent.requires_ai else 'Rule-based' }}</span>
+            <span class="text-xs px-1.5 py-0.5 rounded font-medium {{ health_colors.get(agent.health, 'bg-slate-100 text-slate-400') }}">{{ health_labels.get(agent.health, agent.health) }}</span>
           </div>
           <p class="text-xs text-slate-500 mt-0.5">{{ agent.description }}</p>
           {% if last %}

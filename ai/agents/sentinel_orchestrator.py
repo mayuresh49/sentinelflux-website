@@ -157,21 +157,27 @@ class SentinelOrchestrator:
 
             approval_ids = []
             for c in result["quarantine_candidates"]:
-                aid = self._approvals.submit(
-                    approval_type="quarantine",
-                    title=f"Quarantine: {c['test_id']}",
-                    domain=ctx.domain, product=ctx.product,
-                    details=c,
-                )
-                approval_ids.append(aid)
+                try:
+                    aid = self._approvals.submit(
+                        approval_type="quarantine",
+                        title=f"Quarantine: {c['test_id']}",
+                        domain=ctx.domain, product=ctx.product,
+                        details=c,
+                    )
+                    approval_ids.append(aid)
+                except Exception as _e:
+                    self._log.warning("Failed to submit quarantine approval: %s", _e)
             for c in result["unquarantine_candidates"]:
-                aid = self._approvals.submit(
-                    approval_type="unquarantine",
-                    title=f"Unquarantine: {c['test_id']}",
-                    domain=ctx.domain, product=ctx.product,
-                    details=c,
-                )
-                approval_ids.append(aid)
+                try:
+                    aid = self._approvals.submit(
+                        approval_type="unquarantine",
+                        title=f"Unquarantine: {c['test_id']}",
+                        domain=ctx.domain, product=ctx.product,
+                        details=c,
+                    )
+                    approval_ids.append(aid)
+                except Exception as _e:
+                    self._log.warning("Failed to submit unquarantine approval: %s", _e)
 
             q = len(result["quarantine_candidates"])
             u = len(result["unquarantine_candidates"])
@@ -210,13 +216,16 @@ class SentinelOrchestrator:
             regs = result.get("regressions", [])
             approval_ids = []
             for r in regs:
-                aid = self._approvals.submit(
-                    approval_type="regression_review",
-                    title=f"Regression: {r['test_id']}",
-                    domain=ctx.domain, product=ctx.product,
-                    details=r,
-                )
-                approval_ids.append(aid)
+                try:
+                    aid = self._approvals.submit(
+                        approval_type="regression_review",
+                        title=f"Regression: {r['test_id']}",
+                        domain=ctx.domain, product=ctx.product,
+                        details=r,
+                    )
+                    approval_ids.append(aid)
+                except Exception as _e:
+                    self._log.warning("Failed to submit regression approval: %s", _e)
 
             entry_id = self._alog.append(
                 event_type="agent_run", agent="regression_guard",
@@ -257,13 +266,16 @@ class SentinelOrchestrator:
             gaps = result.get("gaps", [])
             approval_ids = []
             if gaps:
-                aid = self._approvals.submit(
-                    approval_type="coverage_gap",
-                    title=f"{len(gaps)} coverage gap(s) in {ctx.domain}",
-                    domain=ctx.domain, product=ctx.product,
-                    details=result,
-                )
-                approval_ids.append(aid)
+                try:
+                    aid = self._approvals.submit(
+                        approval_type="coverage_gap",
+                        title=f"{len(gaps)} coverage gap(s) in {ctx.domain}",
+                        domain=ctx.domain, product=ctx.product,
+                        details=result,
+                    )
+                    approval_ids.append(aid)
+                except Exception as _e:
+                    _log.warning("Failed to submit coverage_gap approval: %s", _e)
 
             entry_id = self._alog.append(
                 event_type="agent_run", agent="coverage_gap",
@@ -308,18 +320,21 @@ class SentinelOrchestrator:
                 )
                 if result:
                     heals.append(result)
-                    aid = self._approvals.submit(
-                        approval_type="locator_heal",
-                        title=f"Heal locator: {lf['element_name']}",
-                        domain=ctx.domain, product=ctx.product,
-                        details={**lf, "proposal": result},
-                    )
-                    blockers.append({
-                        "type": "locator_heal",
-                        "count": 1,
-                        "approval_ids": [aid],
-                        "element": lf["element_name"],
-                    })
+                    try:
+                        aid = self._approvals.submit(
+                            approval_type="locator_heal",
+                            title=f"Heal locator: {lf['element_name']}",
+                            domain=ctx.domain, product=ctx.product,
+                            details={**lf, "proposal": result},
+                        )
+                        blockers.append({
+                            "type": "locator_heal",
+                            "count": 1,
+                            "approval_ids": [aid],
+                            "element": lf["element_name"],
+                        })
+                    except Exception as _e:
+                        _log.warning("Failed to submit locator_heal approval: %s", _e)
 
             if heals:
                 self._alog.append(

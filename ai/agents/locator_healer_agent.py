@@ -80,14 +80,16 @@ class LocatorHealerAgent(BaseAgent):
     def run(
         self,
         *,
-        locator_file: Path,
+        locator_file: Path | None,
         element_name: str,
         failed_selector: str,
         page_context: str = "",
     ) -> dict:
         if self.ctx.domain == "api":
-            self._log.info("Locator healing not applicable for API domain — skipping")
             return {"skipped": True, "reason": "api domain has no locators"}
+        if locator_file is None:
+            self._log.warning("LocatorHealerAgent: no locator_file for '%s' — skipping", element_name)
+            return {"success": False, "element": element_name, "error": "no_locator_file"}
 
         current = self._load_locator(locator_file)
         current_entry = json.dumps(current.get(element_name, {}), indent=2)
@@ -110,6 +112,7 @@ class LocatorHealerAgent(BaseAgent):
 
         if not self.ctx.get("dry_run", False):
             current[element_name] = proposal
+            locator_file.parent.mkdir(parents=True, exist_ok=True)
             locator_file.write_text(json.dumps(current, indent=2), encoding="utf-8")
             self._log.info(
                 "Healed locator '%s' in %s: %s → %s",

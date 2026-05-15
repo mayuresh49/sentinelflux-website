@@ -51,6 +51,12 @@ class ResultAnalyzerAgent(BaseAgent):
         report_path: Path,
         artifacts_dir: Path | None = None,
     ) -> dict:
+        if not self.client:
+            self._log.warning("ResultAnalyzerAgent: no AI client — skipping")
+            return {"domain": self.ctx.domain, "failures": [], "total": 0, "by_classification": {}}
+        if not report_path.exists():
+            self._log.warning("ResultAnalyzerAgent: report not found: %s", report_path)
+            return {"domain": self.ctx.domain, "failures": [], "total": 0, "by_classification": {}}
         report = self._load_report(report_path)
         results = []
 

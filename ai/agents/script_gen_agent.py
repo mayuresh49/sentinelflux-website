@@ -30,6 +30,10 @@ class ScriptGenAgent(BaseAgent):
         feature_name: str,
         output_path: Path | None = None,
     ) -> dict:
+        if not self.client:
+            raise RuntimeError("ScriptGenAgent requires an AI client — configure one via the chat config")
+        if not self.kb:
+            raise RuntimeError("ScriptGenAgent requires a KB loader — pass kb= when constructing the agent")
         from ai.skills.test_script_gen import TestScriptGenSkill
         from dashboard.routers.config_router import (
             get_generation_categories_instruction,

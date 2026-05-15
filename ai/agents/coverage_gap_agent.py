@@ -53,6 +53,12 @@ class CoverageGapAgent(BaseAgent):
         *,
         tests_dir: Path,
     ) -> dict:
+        if not self.client:
+            self._log.warning("CoverageGapAgent: no AI client — skipping")
+            return {"domain": self.ctx.domain, "gaps": [], "total": 0}
+        if not self.kb:
+            self._log.warning("CoverageGapAgent: no KB loader — skipping")
+            return {"domain": self.ctx.domain, "gaps": [], "total": 0}
         kb_scenarios = self._extract_kb_scenarios()
         test_names = self._extract_test_names(tests_dir, self.ctx.domain)
 
