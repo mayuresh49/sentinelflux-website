@@ -405,10 +405,20 @@
             {% endif %}
 
             {% if run.status == 'running' %}
-            <p class="text-xs text-amber-600 flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse inline-block"></span>
-              In progress…
-            </p>
+            {% set done = run.get('progress_done', 0) %}
+            {% set tot = run.get('progress_total', 0) %}
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse inline-block shrink-0"></span>
+              {% if tot > 0 %}
+              <span class="text-xs text-amber-600 font-medium">{{ done }} / {{ tot }} done</span>
+              <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden w-32">
+                <div class="h-full bg-amber-400 rounded-full transition-all"
+                     style="width: {{ [((done / tot) * 100) | round(0) | int, 100] | min }}%"></div>
+              </div>
+              {% else %}
+              <span class="text-xs text-amber-600">Collecting tests…</span>
+              {% endif %}
+            </div>
             {% endif %}
           </div>
 
@@ -436,6 +446,10 @@
                 </svg>
               </button>
               {% endif %}
+              <button @click="deleteRun('{{ run.id }}')"
+                      class="text-xs px-2 py-1 bg-red-50 border border-red-200 hover:bg-red-100 text-red-600 rounded transition-colors">
+                Delete
+              </button>
             </div>
             <span class="text-[10px] text-slate-400 font-mono">{{ run.id }}</span>
           </div>
@@ -593,6 +607,12 @@ function runsPage() {
     async rerun(runId) {
       const r = await fetch(`/api/runs/${runId}/rerun`, { method: 'POST' });
       if (r.ok) { setTimeout(() => location.reload(), 800); }
+    },
+
+    async deleteRun(runId) {
+      if (!confirm('Delete this run record?')) return;
+      const r = await fetch(`/api/runs/${runId}`, { method: 'DELETE' });
+      if (r.ok) location.reload();
     },
 
     async analyze(runId) {

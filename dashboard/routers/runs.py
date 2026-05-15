@@ -3,8 +3,10 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -87,6 +89,13 @@ def get_run(run_id: str):
     if not run:
         raise HTTPException(404, "Run not found")
     return run
+
+
+@router.delete("/{run_id}")
+def delete_run(run_id: str):
+    if not _rm.delete_run(run_id):
+        raise HTTPException(404, "Run not found")
+    return {"deleted": run_id}
 
 
 @router.post("/{run_id}/analyze")
@@ -203,30 +212,55 @@ def _execute_run(run_id: str, product: str, domain: str, module: str, extra_args
         str(test_path),
         "--json-report",
         f"--json-report-file={report_path}",
-        "-q", "--tb=short", "--no-header",
-        "--override-ini=addopts=",   # suppress html/screenshot opts for programmatic runs
+        "-v", "--tb=short", "--no-header",
+        "--override-ini=addopts=",
     ]
     if extra_args.strip():
         cmd.extend(extra_args.split())
 
+    _collected_re = re.compile(r"collected (\d+) item")
+    _result_re = re.compile(r"\s(PASSED|FAILED|ERROR|SKIPPED)\s")
+
     try:
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=600, cwd=str(_ROOT),
-            env={**os.environ, **env_overrides},
+        proc = subprocess.Popen(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, cwd=str(_ROOT), env={**os.environ, **env_overrides},
         )
+        progress_total = 0
+        progress_done = 0
+        last_patch = 0.0
+        for line in proc.stdout:
+            m = _collected_re.search(line)
+            if m:
+                progress_total = int(m.group(1))
+                _rm.patch_run(run_id, progress_total=progress_total, progress_done=0)
+            elif _result_re.search(line):
+                progress_done += 1
+                now = time.monotonic()
+                if now - last_patch >= 2.0:
+                    _rm.patch_run(run_id, progress_done=progress_done)
+                    last_patch = now
+
+        try:
+            proc.wait(timeout=600)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait()
+            _rm.patch_run(run_id, status="failed",
+                          finished_at=datetime.now(timezone.utc).isoformat())
+            return
+
         stats = _parse_report(report_path)
-        ok = result.returncode in (0, 1)  # 0=all pass, 1=some fail — both are valid runs
+        ok = proc.returncode in (0, 1)
         _rm.patch_run(
             run_id,
             status="completed" if ok else "failed",
             finished_at=datetime.now(timezone.utc).isoformat(),
+            progress_done=stats.get("total", progress_done),
             **stats,
         )
         if stats.get("failed", 0) > 0 and report_path.exists():
             _analyze_failures(run_id, domain, report_path)
-    except subprocess.TimeoutExpired:
-        _rm.patch_run(run_id, status="failed",
-                      finished_at=datetime.now(timezone.utc).isoformat())
     except Exception as exc:
         _rm.patch_run(run_id, status="failed",
                       finished_at=datetime.now(timezone.utc).isoformat(),

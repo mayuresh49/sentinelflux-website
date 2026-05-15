@@ -72,6 +72,14 @@ class RunManager:
         self._save(_RUNS_PATH, "runs", runs)
         return run
 
+    def delete_run(self, run_id: str) -> bool:
+        runs = self.all_runs()
+        new = [r for r in runs if r["id"] != run_id]
+        if len(new) == len(runs):
+            return False
+        self._save(_RUNS_PATH, "runs", new)
+        return True
+
     def patch_run(self, run_id: str, **fields: Any) -> dict | None:
         runs = self.all_runs()
         for r in runs:
