@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
@@ -311,6 +311,77 @@ async def runs_page(
         filter_product=product or "",
         filter_domain=domain or "",
         filter_status=status or "",
+    ))
+
+
+@router.get("/failures", response_class=HTMLResponse)
+async def failures_page(
+    request: Request,
+    product: str | None = None,
+    domain: str | None = None,
+    category: str | None = None,
+    current_user: dict = Depends(_require_auth),
+):
+    from core.run_manager import RunManager
+    rm = RunManager()
+    visible = user_products(current_user, _list_products())
+    if product and product not in visible:
+        product = None
+
+    _cat_map = {
+        "assertion": "Product Bug",
+        "env":       "Env Issue",
+        "infra":     "Env Issue",
+        "locator":   "Script/Data",
+        "flaky":     "Script/Data",
+        "unanalyzed":"Unanalyzed",
+        "unknown":   "Unanalyzed",
+    }
+    _cat_styles = {
+        "Product Bug":  ("bg-red-50 text-red-700 border-red-200",    "bg-red-500"),
+        "Env Issue":    ("bg-amber-50 text-amber-700 border-amber-200", "bg-amber-500"),
+        "Script/Data":  ("bg-orange-50 text-orange-700 border-orange-200", "bg-orange-400"),
+        "Unanalyzed":   ("bg-slate-50 text-slate-500 border-slate-200", "bg-slate-400"),
+    }
+
+    all_runs = list(reversed(rm.all_runs()))
+    failures = []
+    for run in all_runs:
+        if run.get("status") not in ("completed", "failed"):
+            continue
+        if product and run.get("product") != product:
+            continue
+        if domain and run.get("domain") != domain:
+            continue
+        for f in run.get("failures", []):
+            raw_cat = f.get("category", "unknown")
+            mapped = _cat_map.get(raw_cat, "Unanalyzed")
+            if category and mapped != category:
+                continue
+            failures.append({
+                **f,
+                "mapped_category": mapped,
+                "run_id":      run["id"],
+                "product":     run["product"],
+                "domain":      run["domain"],
+                "module":      run.get("module", ""),
+                "triggered_at": run["triggered_at"],
+                "analyzed":    run.get("analyzed", False),
+            })
+
+    counts = Counter(f["mapped_category"] for f in failures)
+    total_failures = len(failures)
+
+    return templates.TemplateResponse(request, "failures.html", context=_ctx(
+        request, current_user,
+        failures=failures,
+        counts=counts,
+        total_failures=total_failures,
+        cat_styles=_cat_styles,
+        filter_product=product or "",
+        filter_domain=domain or "",
+        filter_category=category or "",
+        all_products=visible,
     ))
 
 
