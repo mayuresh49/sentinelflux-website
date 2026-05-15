@@ -194,8 +194,9 @@ async def scripts_page(request: Request, product: str | None = None,
     products = [p for p in sorted(set(s["product"] for s in all_scripts)) if p in visible]
     domains = sorted(set(s["domain"] for s in all_scripts))
     scripts = [s for s in _find_scripts(product=product or None) if s["product"] in visible]
+    features = sorted(set(s["feature"] for s in scripts))
     return templates.TemplateResponse(request, "scripts.html", context=_ctx(
-        request, current_user, scripts=scripts, products=products, domains=domains,
+        request, current_user, scripts=scripts, products=products, domains=domains, features=features,
     ))
 
 

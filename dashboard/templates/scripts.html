@@ -20,11 +20,18 @@
         <input type="text" placeholder="Search scripts..." id="script-search"
                class="w-full text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
                x-on:input="filterScripts($event.target.value)">
-        <select id="script-domain-filter" class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none"
-                x-on:change="filterScripts()">
-          <option value="">All domains</option>
-          {% for d in domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
-        </select>
+        <div class="flex gap-2">
+          <select id="script-module-filter" class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  x-on:change="filterScripts()">
+            <option value="">All modules</option>
+            {% for f in features %}<option value="{{ f }}">{{ f | replace('_', ' ') | title }}</option>{% endfor %}
+          </select>
+          <select id="script-domain-filter" class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                  x-on:change="filterScripts()">
+            <option value="">All domains</option>
+            {% for d in domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
+          </select>
+        </div>
       </div>
       <div class="flex-1 overflow-y-auto divide-y divide-slate-50" id="script-list">
         {% for s in scripts %}
@@ -77,11 +84,15 @@
 function filterScripts(searchVal) {
   const search = (searchVal ?? document.getElementById('script-search').value).toLowerCase();
   const domain = document.getElementById('script-domain-filter').value;
+  const module = document.getElementById('script-module-filter').value;
+  const prod = new URLSearchParams(location.search).get('product') || '';
   let visible = 0;
   document.querySelectorAll('#script-list button[data-feature]').forEach(btn => {
     const matchSearch = !search || btn.dataset.feature.includes(search) || btn.dataset.product.includes(search) || btn.dataset.domain.includes(search);
     const matchDomain = !domain || btn.dataset.domain === domain;
-    const show = matchSearch && matchDomain;
+    const matchModule = !module || btn.dataset.feature === module;
+    const matchProd   = !prod   || btn.dataset.product === prod;
+    const show = matchSearch && matchDomain && matchModule && matchProd;
     btn.style.display = show ? '' : 'none';
     if (show) visible++;
   });
