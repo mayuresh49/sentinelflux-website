@@ -78,6 +78,12 @@ async def tc_view(request: Request, product: str, domain: str, feature: str, tc_
     block = _parse_tc_block(content, tc_id)
     if not block:
         return HTMLResponse(f'<p class="text-slate-400 text-sm p-4">{tc_id} not found in document.</p>')
+    # Parse inline metadata fields from the block body
+    def _extract(field: str) -> str:
+        m = _re.search(rf'\*\*{field}:\*\*\s*([^\n]+)', block, _re.IGNORECASE)
+        return m.group(1).strip() if m else ""
+    priority = _extract("Priority")
+    owner = _extract("Owner")
     # Strip the H3 header line — shown in the card header instead
     body_md = _re.sub(r'^###[^\n]+\n', '', block).strip()
     html = _md.markdown(body_md, extensions=["fenced_code", "tables"])
@@ -88,6 +94,8 @@ async def tc_view(request: Request, product: str, domain: str, feature: str, tc_
         "product": product,
         "domain": domain,
         "feature": feature,
+        "priority": priority,
+        "owner": owner,
         "html": html,
     })
 
