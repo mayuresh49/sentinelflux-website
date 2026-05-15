@@ -66,12 +66,13 @@ async def home(request: Request, product: str | None = None,
     visible = user_products(current_user, _list_products())
     if product and product not in visible:
         product = None
-    scoped = [e for e in all_entries if e.get("product") == product] if product else all_entries
+    visible_entries = [e for e in all_entries if e.get("product") in visible]
+    scoped = [e for e in visible_entries if e.get("product") == product] if product else visible_entries
     pending = _am.pending()
     pending_ids = {p["id"] for p in pending}
     recent = [e for e in reversed(scoped) if e.get("agent") != "human"][:10]
     status_map: dict = {}
-    for e in reversed(all_entries):
+    for e in reversed(visible_entries):
         name = e.get("agent", "")
         if name and name not in status_map:
             status_map[name] = e
@@ -110,11 +111,7 @@ async def activities(
     page: int = 1,
     current_user: dict = Depends(_require_auth),
 ):
-    all_entries = _alog.all()
     visible = user_products(current_user, _list_products())
-    agents = sorted(set(e.get("agent", "") for e in all_entries if e.get("agent")))
-    domains = sorted(set(e.get("domain", "") for e in all_entries if e.get("domain")))
-    products = [p for p in sorted(set(e.get("product") or "" for e in all_entries if e.get("product"))) if p in visible]
     if product and product not in visible:
         product = None
     rh: bool | None = None
@@ -128,6 +125,11 @@ async def activities(
         product=product or None,
         requires_human=rh,
     )))
+    if not current_user.get("admin"):
+        all_filtered = [e for e in all_filtered if e.get("product") in visible]
+    agents = sorted(set(e.get("agent", "") for e in all_filtered if e.get("agent")))
+    domains = sorted(set(e.get("domain", "") for e in all_filtered if e.get("domain")))
+    products = sorted(set(e.get("product") or "" for e in all_filtered if e.get("product")))
     total = len(all_filtered)
     total_pages = max(1, (total + _PAGE_SIZE - 1) // _PAGE_SIZE)
     page = max(1, min(page, total_pages))
@@ -350,15 +352,15 @@ async def runs_page(
     visible = user_products(current_user, _list_products())
     if product and product not in visible:
         product = None
-    runs = list(reversed(rm.all_runs()))
+    runs = [r for r in reversed(rm.all_runs()) if r.get("product") in visible]
     if product:
         runs = [r for r in runs if r.get("product") == product]
     if domain:
         runs = [r for r in runs if r.get("domain") == domain]
     if status:
         runs = [r for r in runs if r.get("status") == status]
-    schedules = rm.all_schedules()
-    any_running = any(r.get("status") in ("running", "queued") for r in rm.all_runs())
+    schedules = [s for s in rm.all_schedules() if s.get("product") in visible]
+    any_running = any(r.get("status") in ("running", "queued") for r in runs)
     total = len(runs)
     total_pages = max(1, (total + _PAGE_SIZE - 1) // _PAGE_SIZE)
     page = max(1, min(page, total_pages))
@@ -405,7 +407,7 @@ async def failures_page(
         "Unanalyzed":   ("bg-slate-50 text-slate-500 border-slate-200", "bg-slate-400"),
     }
 
-    all_runs = list(reversed(rm.all_runs()))
+    all_runs = [r for r in reversed(rm.all_runs()) if r.get("product") in visible]
     all_failures = []
     for run in all_runs:
         if run.get("status") not in ("completed", "failed"):
