@@ -166,7 +166,7 @@ class SentinelOrchestrator:
                     )
                     approval_ids.append(aid)
                 except Exception as _e:
-                    self._log.warning("Failed to submit quarantine approval: %s", _e)
+                    _log.warning("Failed to submit quarantine approval: %s", _e)
             for c in result["unquarantine_candidates"]:
                 try:
                     aid = self._approvals.submit(
@@ -177,7 +177,7 @@ class SentinelOrchestrator:
                     )
                     approval_ids.append(aid)
                 except Exception as _e:
-                    self._log.warning("Failed to submit unquarantine approval: %s", _e)
+                    _log.warning("Failed to submit unquarantine approval: %s", _e)
 
             q = len(result["quarantine_candidates"])
             u = len(result["unquarantine_candidates"])
@@ -225,7 +225,7 @@ class SentinelOrchestrator:
                     )
                     approval_ids.append(aid)
                 except Exception as _e:
-                    self._log.warning("Failed to submit regression approval: %s", _e)
+                    _log.warning("Failed to submit regression approval: %s", _e)
 
             entry_id = self._alog.append(
                 event_type="agent_run", agent="regression_guard",
