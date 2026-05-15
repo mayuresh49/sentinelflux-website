@@ -277,9 +277,12 @@
 
 {% block scripts %}
 <script>
-  document.body.addEventListener('htmx:afterSettle', function (evt) {
+  // Re-init Alpine after every HTMX swap into run-config-content.
+  // Needed because Alpine (defer) may not have seen the new DOM nodes yet,
+  // and the device form uses x-data / x-show for the capabilities toggle.
+  document.body.addEventListener('htmx:afterSwap', function (evt) {
     if (evt.detail.target && evt.detail.target.id === 'run-config-content') {
-      Alpine.initTree(evt.detail.target);
+      if (typeof Alpine !== 'undefined') Alpine.initTree(evt.detail.target);
     }
   });
 </script>

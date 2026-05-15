@@ -82,10 +82,13 @@ async def env_add(
         raise HTTPException(404)
     _backfill_run_config(p)
     name = name.strip()
-    if name and not any(e["name"] == name for e in p["run_config"]["environments"]):
-        p["run_config"]["environments"].append({"name": name, "base_url": base_url.strip(), "api_url": api_url.strip()})
-        _save_config(cfg)
-    return _render(request, product)
+    if not name:
+        return _render(request, product, flash="Please select an environment.")
+    if any(e["name"] == name for e in p["run_config"]["environments"]):
+        return _render(request, product, flash=f"Environment '{name}' already exists.")
+    p["run_config"]["environments"].append({"name": name, "base_url": base_url.strip(), "api_url": api_url.strip()})
+    _save_config(cfg)
+    return _render(request, product, flash=f"Environment '{name}' added.")
 
 
 @router.post("/ui/config/run-config/{product}/env/delete", response_class=HTMLResponse)
@@ -119,14 +122,17 @@ async def browser_add(
         raise HTTPException(404)
     _backfill_run_config(p)
     name = name.strip()
-    if name and not any(b["name"] == name for b in p["run_config"]["browsers"]):
-        p["run_config"]["browsers"].append({
-            "name": name,
-            "browser": browser,
-            "headless": headless.lower() in ("true", "on", "1", "yes"),
-        })
-        _save_config(cfg)
-    return _render(request, product)
+    if not name:
+        return _render(request, product, flash="Please enter a browser profile name.")
+    if any(b["name"] == name for b in p["run_config"]["browsers"]):
+        return _render(request, product, flash=f"Browser profile '{name}' already exists.")
+    p["run_config"]["browsers"].append({
+        "name": name,
+        "browser": browser,
+        "headless": headless.lower() in ("true", "on", "1", "yes"),
+    })
+    _save_config(cfg)
+    return _render(request, product, flash=f"Browser profile '{name}' added.")
 
 
 @router.post("/ui/config/run-config/{product}/browser/delete", response_class=HTMLResponse)
@@ -162,19 +168,22 @@ async def device_add(
         raise HTTPException(404)
     _backfill_run_config(p)
     name = name.strip()
-    if name and not any(d["name"] == name for d in p["run_config"]["devices"]):
-        try:
-            caps = _json.loads(capabilities)
-        except Exception:
-            caps = {}
-        p["run_config"]["devices"].append({
-            "name": name,
-            "platform": platform,
-            "appium_url": appium_url.strip(),
-            "capabilities": caps,
-        })
-        _save_config(cfg)
-    return _render(request, product)
+    if not name:
+        return _render(request, product, flash="Please enter a device profile name.")
+    if any(d["name"] == name for d in p["run_config"]["devices"]):
+        return _render(request, product, flash=f"Device profile '{name}' already exists.")
+    try:
+        caps = _json.loads(capabilities)
+    except Exception:
+        caps = {}
+    p["run_config"]["devices"].append({
+        "name": name,
+        "platform": platform,
+        "appium_url": appium_url.strip(),
+        "capabilities": caps,
+    })
+    _save_config(cfg)
+    return _render(request, product, flash=f"Device profile '{name}' added.")
 
 
 @router.post("/ui/config/run-config/{product}/device/delete", response_class=HTMLResponse)
@@ -208,14 +217,17 @@ async def credential_add(
         raise HTTPException(404)
     _backfill_run_config(p)
     name = name.strip()
-    if name and not any(c["name"] == name for c in p["run_config"]["credentials"]):
-        p["run_config"]["credentials"].append({
-            "name": name,
-            "username": username.strip(),
-            "password_env": password_env.strip(),
-        })
-        _save_config(cfg)
-    return _render(request, product)
+    if not name:
+        return _render(request, product, flash="Please enter a credential name.")
+    if any(c["name"] == name for c in p["run_config"]["credentials"]):
+        return _render(request, product, flash=f"Credential '{name}' already exists.")
+    p["run_config"]["credentials"].append({
+        "name": name,
+        "username": username.strip(),
+        "password_env": password_env.strip(),
+    })
+    _save_config(cfg)
+    return _render(request, product, flash=f"Credential '{name}' added.")
 
 
 @router.post("/ui/config/run-config/{product}/credential/delete", response_class=HTMLResponse)

@@ -357,7 +357,7 @@ def _build_ai_client():
         model = cfg.get("model", "")
         if provider == "ollama":
             from ai.clients.mistral_client import MistralClient
-            return MistralClient(model=model, base_url=cfg.get("base_url", "http://localhost:11434"))
+            return MistralClient(model=model, local_url=cfg.get("base_url", "http://localhost:11434"))
         if provider == "openai":
             import os
             api_key = os.environ.get("OPENAI_API_KEY", "")
