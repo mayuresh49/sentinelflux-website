@@ -44,8 +44,9 @@ class ActivityLog:
         approval_id: str | None = None,
     ) -> str:
         """Append one event. Returns the new entry ID."""
+        entry_id = str(uuid.uuid4())
         entry = {
-            "id": str(uuid.uuid4()),
+            "id": entry_id,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "event_type": event_type,
             "agent": agent,
@@ -57,12 +58,14 @@ class ActivityLog:
             "requires_human": requires_human,
             "approval_id": approval_id,
         }
-        data = self._load()
-        data["entries"].append(entry)
-        if len(data["entries"]) > MAX_ENTRIES:
-            data["entries"] = data["entries"][-MAX_ENTRIES:]
-        self._save(data)
-        return entry["id"]
+
+        def _add(data: dict) -> None:
+            data["entries"].append(entry)
+            if len(data["entries"]) > MAX_ENTRIES:
+                data["entries"] = data["entries"][-MAX_ENTRIES:]
+
+        self._mutate(_add)
+        return entry_id
 
     def all(self) -> list[dict]:
         return self._load()["entries"]
@@ -99,13 +102,17 @@ class ActivityLog:
         return entries
 
     def _load(self) -> dict:
+        """Read-only load — safe for query methods, not for write paths."""
         if not self._path.exists():
             return {"entries": []}
         with self._path.open(encoding="utf-8") as f:
             return json.load(f)
 
-    def _save(self, data: dict):
+    def _mutate(self, mutator) -> None:
+        """Atomic read-modify-write under FileLock — use for all writes."""
         self._path.parent.mkdir(parents=True, exist_ok=True)
         with FileLock(str(self._path) + ".lock"):
+            data = self._load()
+            mutator(data)
             with self._path.open("w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)

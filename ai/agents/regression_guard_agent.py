@@ -4,10 +4,13 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from filelock import FileLock
+
 from ai.agents.base_agent import BaseAgent
 from utils.paths import ROOT as _ROOT_DIR
 
 _DEFAULT_BASELINE = _ROOT_DIR / "data" / "baseline_report.json"
+_BASELINE_DIR = _ROOT_DIR / "data" / "baselines"
 
 
 class RegressionGuardAgent(BaseAgent):
@@ -34,6 +37,11 @@ class RegressionGuardAgent(BaseAgent):
         current_report: Path,
         baseline_report: Path = _DEFAULT_BASELINE,
     ) -> dict:
+        # Resolve to a per-product baseline when not explicitly overridden.
+        # Prevents orangehrm and restfulbooker from sharing and corrupting one file.
+        if baseline_report == _DEFAULT_BASELINE and self.ctx.product:
+            baseline_report = _BASELINE_DIR / f"{self.ctx.product}_baseline.json"
+
         current = self._load(current_report)
 
         if not baseline_report.exists():
@@ -135,4 +143,5 @@ class RegressionGuardAgent(BaseAgent):
     @staticmethod
     def _save_baseline(src: Path, dest: Path):
         dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_bytes(src.read_bytes())
+        with FileLock(str(dest) + ".lock"):
+            dest.write_bytes(src.read_bytes())

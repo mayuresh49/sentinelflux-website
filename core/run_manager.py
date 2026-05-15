@@ -174,11 +174,13 @@ class RunManager:
             "run_config_snapshot": run_config_snapshot or {},
         }
         path = _RUNS_STORE_DIR / f"{product}.json"
-        runs = self._load(path, "runs")
-        runs.append(run)
-        if len(runs) > _MAX_RUNS:
-            runs = runs[-_MAX_RUNS:]
-        self._save(path, "runs", runs)
+
+        def _add(runs: list) -> None:
+            runs.append(run)
+            if len(runs) > _MAX_RUNS:
+                runs[:] = runs[-_MAX_RUNS:]
+
+        self._mutate_file(path, "runs", _add)
         self._index_run(run_id, product)
         return run
 
@@ -187,11 +189,17 @@ class RunManager:
         if not product:
             return False
         path = _RUNS_STORE_DIR / f"{product}.json"
-        runs = self._load(path, "runs")
-        new = [r for r in runs if r["id"] != run_id]
-        if len(new) == len(runs):
+        deleted: list[bool] = []
+
+        def _del(runs: list) -> None:
+            new = [r for r in runs if r["id"] != run_id]
+            if len(new) < len(runs):
+                deleted.append(True)
+                runs[:] = new
+
+        self._mutate_file(path, "runs", _del)
+        if not deleted:
             return False
-        self._save(path, "runs", new)
         self._deindex_run(run_id)
         return True
 
@@ -200,13 +208,17 @@ class RunManager:
         if not product:
             return None
         path = _RUNS_STORE_DIR / f"{product}.json"
-        runs = self._load(path, "runs")
-        for r in runs:
-            if r["id"] == run_id:
-                r.update(fields)
-                self._save(path, "runs", runs)
-                return r
-        return None
+        patched: list[dict] = []
+
+        def _patch(runs: list) -> None:
+            for r in runs:
+                if r["id"] == run_id:
+                    r.update(fields)
+                    patched.append(r)
+                    return
+
+        self._mutate_file(path, "runs", _patch)
+        return patched[0] if patched else None
 
     # ── schedules ─────────────────────────────────────────────────────────
 
@@ -255,9 +267,7 @@ class RunManager:
             "device": device,
         }
         path = _SCHEDULES_STORE_DIR / f"{product}.json"
-        schedules = self._load(path, "schedules")
-        schedules.append(sched)
-        self._save(path, "schedules", schedules)
+        self._mutate_file(path, "schedules", lambda schedules: schedules.append(sched))
         return sched
 
     def patch_schedule(self, sched_id: str, **fields: Any) -> dict | None:
@@ -265,25 +275,33 @@ class RunManager:
         if not sched:
             return None
         path = _SCHEDULES_STORE_DIR / f"{sched['product']}.json"
-        schedules = self._load(path, "schedules")
-        for s in schedules:
-            if s["id"] == sched_id:
-                s.update(fields)
-                self._save(path, "schedules", schedules)
-                return s
-        return None
+        patched: list[dict] = []
+
+        def _patch(schedules: list) -> None:
+            for s in schedules:
+                if s["id"] == sched_id:
+                    s.update(fields)
+                    patched.append(s)
+                    return
+
+        self._mutate_file(path, "schedules", _patch)
+        return patched[0] if patched else None
 
     def delete_schedule(self, sched_id: str) -> bool:
         sched = self.get_schedule(sched_id)
         if not sched:
             return False
         path = _SCHEDULES_STORE_DIR / f"{sched['product']}.json"
-        schedules = self._load(path, "schedules")
-        new = [s for s in schedules if s["id"] != sched_id]
-        if len(new) == len(schedules):
-            return False
-        self._save(path, "schedules", new)
-        return True
+        deleted: list[bool] = []
+
+        def _del(schedules: list) -> None:
+            new = [s for s in schedules if s["id"] != sched_id]
+            if len(new) < len(schedules):
+                deleted.append(True)
+                schedules[:] = new
+
+        self._mutate_file(path, "schedules", _del)
+        return bool(deleted)
 
     # ── schedule firing check ─────────────────────────────────────────────
 
@@ -308,6 +326,7 @@ class RunManager:
 
     @staticmethod
     def _load(path: Path, key: str) -> list[dict[str, Any]]:
+        """Read-only load — safe for query methods, not for write paths."""
         if not path.exists():
             return []
         try:
@@ -316,7 +335,13 @@ class RunManager:
             return []
 
     @staticmethod
-    def _save(path: Path, key: str, items: list) -> None:
+    def _mutate_file(path: Path, key: str, mutator) -> None:
+        """Atomic read-modify-write under FileLock — use for all writes."""
         path.parent.mkdir(parents=True, exist_ok=True)
         with FileLock(str(path) + ".lock"):
+            try:
+                items: list = json.loads(path.read_text(encoding="utf-8")).get(key, []) if path.exists() else []
+            except Exception:
+                items = []
+            mutator(items)
             path.write_text(json.dumps({key: items}, indent=2), encoding="utf-8")
