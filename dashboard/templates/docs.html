@@ -63,6 +63,13 @@
             {% for d in domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
           </select>
         </div>
+        {% if test_types %}
+        <select id="tc-testtype-filter" @change="applyFilters()"
+                class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200">
+          <option value="">All test types</option>
+          {% for t in test_types %}<option value="{{ t }}">{{ t | title }}</option>{% endfor %}
+        </select>
+        {% endif %}
       </div>
 
       <!-- TC count bar -->
@@ -96,6 +103,7 @@
               class="tc-item w-full text-left px-4 py-2.5 transition-colors border-l-2"
               data-tc-id="{{ tc.id }}"
               data-tc-title="{{ tc.title | lower }}"
+              data-tc-testtype="{{ tc.test_type | lower }}"
               :class="selectedKey === '{{ mod.product }}/{{ mod.domain }}/{{ mod.feature }}/{{ tc.id }}' ? 'bg-indigo-50 border-indigo-500' : 'hover:bg-slate-50 border-transparent'"
               @click="selectTC('{{ mod.product }}', '{{ mod.domain }}', '{{ mod.feature }}', '{{ tc.id }}')"
               hx-get="/ui/docs/test-case?product={{ mod.product }}&domain={{ mod.domain }}&feature={{ mod.feature }}&tc_id={{ tc.id }}"
@@ -110,14 +118,27 @@
                   {% else %}bg-slate-300{% endif %}"></span>
               </div>
               <p class="text-xs text-slate-700 mt-0.5 leading-snug line-clamp-2">{{ tc.title }}</p>
-              <span class="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded font-medium
-                {% if tc.heuristic == 'positive' %}bg-emerald-50 text-emerald-700
-                {% elif tc.heuristic == 'negative' %}bg-red-50 text-red-600
-                {% elif tc.heuristic == 'edge' %}bg-amber-50 text-amber-700
-                {% elif tc.heuristic == 'security' %}bg-purple-50 text-purple-700
-                {% else %}bg-slate-100 text-slate-500{% endif %}">
-                {{ tc.heuristic }}
-              </span>
+              <div class="flex items-center gap-1 mt-1 flex-wrap">
+                <span class="text-[10px] px-1.5 py-0.5 rounded font-medium
+                  {% if tc.heuristic == 'positive' %}bg-emerald-50 text-emerald-700
+                  {% elif tc.heuristic == 'negative' %}bg-red-50 text-red-600
+                  {% elif tc.heuristic == 'edge' %}bg-amber-50 text-amber-700
+                  {% elif tc.heuristic == 'boundary' %}bg-purple-50 text-purple-700
+                  {% else %}bg-slate-100 text-slate-500{% endif %}">
+                  {{ tc.heuristic }}
+                </span>
+                {% if tc.test_type %}
+                <span class="text-[10px] px-1.5 py-0.5 rounded font-medium
+                  {% if tc.test_type == 'sanity' %}bg-sky-50 text-sky-700
+                  {% elif tc.test_type == 'regression' %}bg-violet-50 text-violet-700
+                  {% elif tc.test_type == 'smoke' %}bg-slate-100 text-slate-600
+                  {% elif tc.test_type == 'security' %}bg-red-50 text-red-600
+                  {% elif tc.test_type == 'performance' %}bg-orange-50 text-orange-700
+                  {% else %}bg-slate-100 text-slate-500{% endif %}">
+                  {{ tc.test_type }}
+                </span>
+                {% endif %}
+              </div>
             </button>
             {% endfor %}
             {% else %}
@@ -187,10 +208,10 @@ function docsPage() {
     },
 
     applyFilters() {
-      const q = (document.getElementById('tc-search').value || '').toLowerCase();
-      const mod = document.getElementById('tc-module-filter').value;
-      const dom = document.getElementById('tc-domain-filter').value;
-      // Product comes from the global header filter (URL param)
+      const q    = (document.getElementById('tc-search').value || '').toLowerCase();
+      const mod  = document.getElementById('tc-module-filter').value;
+      const dom  = document.getElementById('tc-domain-filter').value;
+      const tt   = (document.getElementById('tc-testtype-filter')?.value || '');
       const prod = new URLSearchParams(location.search).get('product') || '';
       let totalVisible = 0;
 
@@ -206,7 +227,9 @@ function docsPage() {
 
         let modVisible = false;
         modEl.querySelectorAll('.tc-item').forEach(btn => {
-          const show = !q || btn.dataset.tcId.toLowerCase().includes(q) || btn.dataset.tcTitle.includes(q);
+          const matchSearch = !q || btn.dataset.tcId.toLowerCase().includes(q) || btn.dataset.tcTitle.includes(q);
+          const matchTT     = !tt || btn.dataset.tcTesttype === tt;
+          const show = matchSearch && matchTT;
           btn.style.display = show ? '' : 'none';
           if (show) { modVisible = true; totalVisible++; }
         });

@@ -26,13 +26,15 @@ def _parse_tc_index(content: str) -> list[dict]:
         if not stripped.startswith("|"):
             break
         parts = [p.strip() for p in stripped.strip("|").split("|")]
-        if len(parts) >= 5 and parts[0] and not parts[0].startswith("---"):
+        if len(parts) >= 6 and parts[0] and not parts[0].startswith("---"):
             tcs.append({
-                "id": parts[0],
-                "title": parts[1],
-                "heuristic": parts[2],
-                "status": parts[3],
-                "script": parts[4],
+                "id": parts[0], "title": parts[1], "heuristic": parts[2],
+                "test_type": parts[3], "status": parts[4], "script": parts[5],
+            })
+        elif len(parts) >= 5 and parts[0] and not parts[0].startswith("---"):
+            tcs.append({
+                "id": parts[0], "title": parts[1], "heuristic": parts[2],
+                "test_type": "", "status": parts[3], "script": parts[4],
             })
     return tcs
 

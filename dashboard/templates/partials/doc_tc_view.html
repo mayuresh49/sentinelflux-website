@@ -2,7 +2,15 @@
   "positive":  "bg-emerald-50 text-emerald-700 border border-emerald-200",
   "negative":  "bg-red-50 text-red-600 border border-red-200",
   "edge":      "bg-amber-50 text-amber-700 border border-amber-200",
+  "boundary":  "bg-purple-50 text-purple-700 border border-purple-200",
   "security":  "bg-purple-50 text-purple-700 border border-purple-200",
+} %}
+{% set test_type_colors = {
+  "sanity":      "bg-sky-50 text-sky-700 border border-sky-200",
+  "regression":  "bg-violet-50 text-violet-700 border border-violet-200",
+  "smoke":       "bg-slate-100 text-slate-600 border border-slate-200",
+  "security":    "bg-red-50 text-red-600 border border-red-200",
+  "performance": "bg-orange-50 text-orange-700 border border-orange-200",
 } %}
 {% set status_colors = {
   "automated":       "bg-indigo-50 text-indigo-700 border border-indigo-200",
@@ -70,7 +78,7 @@
       {% if test_type %}
       <div class="flex items-center gap-1">
         <span class="text-slate-400 uppercase tracking-wide font-medium">Test Type</span>
-        <span class="px-1.5 py-0.5 rounded-full font-medium bg-sky-50 text-sky-700 border border-sky-200">{{ test_type }}</span>
+        <span class="px-1.5 py-0.5 rounded-full font-medium {{ test_type_colors.get(test_type, 'bg-slate-100 text-slate-600 border border-slate-200') }}">{{ test_type }}</span>
       </div>
       {% endif %}
       {% if priority %}

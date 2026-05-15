@@ -32,10 +32,18 @@
             {% for d in domains %}<option value="{{ d }}">{{ d }}</option>{% endfor %}
           </select>
         </div>
+        {% if test_types %}
+        <select id="script-testtype-filter" class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-200"
+                x-on:change="filterScripts()">
+          <option value="">All test types</option>
+          {% for t in test_types %}<option value="{{ t }}">{{ t | title }}</option>{% endfor %}
+        </select>
+        {% endif %}
       </div>
       <div class="flex-1 overflow-y-auto divide-y divide-slate-50" id="script-list">
         {% for s in scripts %}
         <button data-product="{{ s.product }}" data-domain="{{ s.domain }}" data-feature="{{ s.feature }}"
+                data-testtypes="{{ s.test_types | join(',') }}"
                 hx-get="/ui/scripts/content?product={{ s.product }}&domain={{ s.domain }}&feature={{ s.feature }}"
                 hx-target="#script-viewer"
                 hx-indicator="#script-loading"
@@ -43,9 +51,18 @@
                 :class="selected === '{{ s.product }}/{{ s.domain }}/{{ s.feature }}' ? 'bg-indigo-50 border-l-2 border-indigo-500' : 'hover:bg-slate-50 border-l-2 border-transparent'"
                 class="w-full text-left px-4 py-3 transition-colors">
           <p class="text-sm font-medium text-slate-700 font-mono">test_{{ s.feature }}.py</p>
-          <div class="flex items-center gap-2 mt-0.5">
+          <div class="flex items-center gap-2 mt-1 flex-wrap">
             <span class="text-xs text-indigo-600 font-medium">{{ s.product }}</span>
             <span class="text-xs text-slate-400">{{ s.domain }}</span>
+            {% for tt in s.test_types %}
+            <span class="text-[10px] px-1.5 py-0.5 rounded font-medium
+              {% if tt == 'sanity' %}bg-sky-50 text-sky-700
+              {% elif tt == 'regression' %}bg-violet-50 text-violet-700
+              {% elif tt == 'smoke' %}bg-slate-100 text-slate-600
+              {% elif tt == 'security' %}bg-red-50 text-red-600
+              {% elif tt == 'performance' %}bg-orange-50 text-orange-700
+              {% else %}bg-slate-100 text-slate-500{% endif %}">{{ tt }}</span>
+            {% endfor %}
           </div>
         </button>
         {% endfor %}
@@ -85,14 +102,16 @@ function filterScripts(searchVal) {
   const search = (searchVal ?? document.getElementById('script-search').value).toLowerCase();
   const domain = document.getElementById('script-domain-filter').value;
   const module = document.getElementById('script-module-filter').value;
-  const prod = new URLSearchParams(location.search).get('product') || '';
+  const tt     = document.getElementById('script-testtype-filter')?.value || '';
+  const prod   = new URLSearchParams(location.search).get('product') || '';
   let visible = 0;
   document.querySelectorAll('#script-list button[data-feature]').forEach(btn => {
     const matchSearch = !search || btn.dataset.feature.includes(search) || btn.dataset.product.includes(search) || btn.dataset.domain.includes(search);
     const matchDomain = !domain || btn.dataset.domain === domain;
     const matchModule = !module || btn.dataset.feature === module;
     const matchProd   = !prod   || btn.dataset.product === prod;
-    const show = matchSearch && matchDomain && matchModule && matchProd;
+    const matchTT     = !tt || (btn.dataset.testtypes || '').split(',').includes(tt);
+    const show = matchSearch && matchDomain && matchModule && matchProd && matchTT;
     btn.style.display = show ? '' : 'none';
     if (show) visible++;
   });

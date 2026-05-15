@@ -8,6 +8,17 @@ router = APIRouter(prefix="/scripts", tags=["scripts"])
 _PRODUCTS_DIR = _ROOT_DIR / "products"
 
 
+_TEST_TYPES = {"sanity", "regression", "smoke", "security", "performance"}
+
+
+def _parse_test_types(path) -> list[str]:
+    try:
+        head = path.read_text(encoding="utf-8").splitlines()[:40]
+        return sorted(t for t in _TEST_TYPES if any(f"pytest.mark.{t}" in l for l in head))
+    except Exception:
+        return []
+
+
 def _find_scripts(product: str | None = None, domain: str | None = None) -> list[dict]:
     results = []
     for py in _PRODUCTS_DIR.rglob("test_*.py"):
@@ -25,6 +36,7 @@ def _find_scripts(product: str | None = None, domain: str | None = None) -> list
             "domain": d,
             "feature": fname.removesuffix(".py").removeprefix("test_"),
             "path": str(py.relative_to(_ROOT_DIR)),
+            "test_types": _parse_test_types(py),
         })
     return results
 

@@ -173,12 +173,16 @@ async def docs_page(request: Request, product: str | None = None,
                 pass
         modules.append({**d, "test_cases": tcs})
     features = sorted(set(m["feature"] for m in modules if m["test_cases"]))
+    test_types = sorted(set(
+        tc["test_type"] for m in modules for tc in m["test_cases"] if tc.get("test_type")
+    ))
     return templates.TemplateResponse(request, "docs.html", context=_ctx(
         request, current_user,
         modules=modules,
         products=products,
         domains=domains,
         features=features,
+        test_types=test_types,
         filter_product=product or "",
     ))
 
@@ -195,8 +199,10 @@ async def scripts_page(request: Request, product: str | None = None,
     domains = sorted(set(s["domain"] for s in all_scripts))
     scripts = [s for s in _find_scripts(product=product or None) if s["product"] in visible]
     features = sorted(set(s["feature"] for s in scripts))
+    test_types = sorted(set(tt for s in scripts for tt in s.get("test_types", [])))
     return templates.TemplateResponse(request, "scripts.html", context=_ctx(
-        request, current_user, scripts=scripts, products=products, domains=domains, features=features,
+        request, current_user, scripts=scripts, products=products, domains=domains,
+        features=features, test_types=test_types,
     ))
 
 
