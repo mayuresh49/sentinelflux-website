@@ -54,6 +54,25 @@ Run independent agents **in parallel** (single message, multiple Agent blocks).
 
 ---
 
+## Dashboard UI Conventions
+
+### Notifications & Confirmations (Alpine-only — no browser dialogs)
+- **Never** use `alert()`, `confirm()`, or `prompt()` — always use the global helpers from `base.html`
+- `sfToast(msg, type)` — inline toast (top-right, auto-dismiss 4.5 s)
+  - `'warn'` — amber — validation failures, missing input
+  - `'error'` — red (default) — API/server errors
+  - `'info'` — slate — neutral messages
+- `sfConfirm(msg)` → `Promise<boolean>` — use `await` inside `async` functions; resolves `true` on Confirm, `false` on Cancel
+  - Always use for destructive actions (delete, overwrite, irreversible ops)
+
+### Labels, Forms, Buttons
+- No abbreviations in user-facing labels
+- Title Case for buttons and headings
+- Descriptive button labels (not just "Submit" or "OK")
+- Expand tab names — no single-letter or cryptic abbreviations
+
+---
+
 ## Project Structure
 
 ```
