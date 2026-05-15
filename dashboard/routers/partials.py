@@ -64,40 +64,163 @@ async def doc_content(product: str, domain: str, feature: str):
     return HTMLResponse(f'<div class="markdown-content fade-in">{content}</div>')
 
 
-@router.get("/docs/test-case", response_class=HTMLResponse)
-async def tc_view(request: Request, product: str, domain: str, feature: str, tc_id: str):
+def _tc_view_ctx(request: Request, product: str, domain: str, feature: str, tc_id: str) -> dict | HTMLResponse:
     import re as _re
-
     import markdown as _md
+    from dashboard.routers.docs import _parse_tc_block, _parse_tc_index
     path = _ROOT_DIR / "products" / product / "docs" / "test_cases" / domain / f"{feature}.md"
     if not path.exists():
         return HTMLResponse('<p class="text-red-500 text-sm p-4">Document not found.</p>')
     content = path.read_text(encoding="utf-8")
-    from dashboard.routers.docs import _parse_tc_block, _parse_tc_index
     meta = next((t for t in _parse_tc_index(content) if t["id"] == tc_id), {})
     block = _parse_tc_block(content, tc_id)
     if not block:
         return HTMLResponse(f'<p class="text-slate-400 text-sm p-4">{tc_id} not found in document.</p>')
-    # Parse inline metadata fields from the block body
+
     def _extract(field: str) -> str:
         m = _re.search(rf'\*\*{field}:\*\*\s*([^\n]+)', block, _re.IGNORECASE)
         return m.group(1).strip() if m else ""
-    priority = _extract("Priority")
-    owner = _extract("Owner")
-    # Strip the H3 header line — shown in the card header instead
+
     body_md = _re.sub(r'^###[^\n]+\n', '', block).strip()
-    html = _md.markdown(body_md, extensions=["fenced_code", "tables"])
-    return templates.TemplateResponse(request, "partials/doc_tc_view.html", context={
-        "request": request,
-        "tc_id": tc_id,
-        "meta": meta,
-        "product": product,
-        "domain": domain,
-        "feature": feature,
-        "priority": priority,
-        "owner": owner,
-        "html": html,
-    })
+    return {
+        "request": request, "tc_id": tc_id, "meta": meta,
+        "product": product, "domain": domain, "feature": feature,
+        "priority": _extract("Priority"),
+        "test_type": _extract("Test Type"),
+        "owner": _extract("Owner"),
+        "body_md": body_md,
+        "html": _md.markdown(body_md, extensions=["fenced_code", "tables"]),
+    }
+
+
+@router.get("/docs/test-case", response_class=HTMLResponse)
+async def tc_view(request: Request, product: str, domain: str, feature: str, tc_id: str):
+    ctx = _tc_view_ctx(request, product, domain, feature, tc_id)
+    if isinstance(ctx, HTMLResponse):
+        return ctx
+    return templates.TemplateResponse(request, "partials/doc_tc_view.html", context=ctx)
+
+
+@router.get("/docs/test-case/edit", response_class=HTMLResponse)
+async def tc_edit(request: Request, product: str, domain: str, feature: str, tc_id: str):
+    ctx = _tc_view_ctx(request, product, domain, feature, tc_id)
+    if isinstance(ctx, HTMLResponse):
+        return ctx
+    return templates.TemplateResponse(request, "partials/doc_tc_edit.html", context=ctx)
+
+
+@router.post("/docs/test-case/save", response_class=HTMLResponse)
+async def tc_save(
+    request: Request,
+    product: str = Form(...), domain: str = Form(...),
+    feature: str = Form(...), tc_id: str = Form(...),
+    body_md: str = Form(...),
+):
+    import re as _re
+    from dashboard.routers.docs import _parse_tc_block
+    path = _ROOT_DIR / "products" / product / "docs" / "test_cases" / domain / f"{feature}.md"
+    if not path.exists():
+        return HTMLResponse('<p class="text-red-500 text-sm p-4">File not found.</p>')
+    content = path.read_text(encoding="utf-8")
+    detail_match = _re.search(r'^##\s+(Detailed\s+)?Test Cases', content, _re.MULTILINE | _re.IGNORECASE)
+    before = content[:detail_match.end()] if detail_match else ""
+    section = content[detail_match.end():] if detail_match else content
+    pattern = rf'^(###\s+{_re.escape(tc_id)}\b[^\n]*\n)((?:(?!^###)[\s\S])*)'
+    new_body = body_md.strip() + "\n\n"
+    new_section, n = _re.subn(pattern, lambda m: m.group(1) + new_body, section, flags=_re.MULTILINE)
+    if not n:
+        return HTMLResponse(f'<p class="text-red-500 text-sm p-4">Block not found for {tc_id}.</p>')
+    path.write_text(before + new_section, encoding="utf-8")
+    ctx = _tc_view_ctx(request, product, domain, feature, tc_id)
+    if isinstance(ctx, HTMLResponse):
+        return ctx
+    return templates.TemplateResponse(request, "partials/doc_tc_view.html", context=ctx)
+
+
+@router.post("/docs/test-case/delete", response_class=HTMLResponse)
+async def tc_delete(
+    product: str = Form(...), domain: str = Form(...),
+    feature: str = Form(...), tc_id: str = Form(...),
+):
+    import re as _re
+    path = _ROOT_DIR / "products" / product / "docs" / "test_cases" / domain / f"{feature}.md"
+    if not path.exists():
+        return HTMLResponse("", headers={"HX-Redirect": "/docs"})
+    content = path.read_text(encoding="utf-8")
+    # Remove index table row
+    content = "\n".join(
+        l for l in content.splitlines()
+        if not _re.match(rf'\|\s*{_re.escape(tc_id)}\s*\|', l.strip())
+    ) + "\n"
+    # Remove detailed block
+    detail_match = _re.search(r'^##\s+(Detailed\s+)?Test Cases', content, _re.MULTILINE | _re.IGNORECASE)
+    if detail_match:
+        before = content[:detail_match.end()]
+        section = content[detail_match.end():]
+        pattern = rf'^###\s+{_re.escape(tc_id)}\b[^\n]*\n(?:(?!^###)[\s\S])*'
+        section = _re.sub(pattern, '', section, flags=_re.MULTILINE)
+        content = before + section
+    path.write_text(content, encoding="utf-8")
+    prod_param = f"?product={product}" if product else ""
+    return HTMLResponse("", headers={"HX-Redirect": f"/docs{prod_param}"})
+
+
+@router.get("/docs/export")
+async def docs_export(
+    product: str | None = None, domain: str | None = None,
+    feature: str | None = None, format: str = "csv",
+):
+    import csv, io, re as _re
+    from fastapi.responses import StreamingResponse
+    from dashboard.routers.docs import _find_docs, _parse_tc_block, _parse_tc_index
+
+    docs = _find_docs(product=product, domain=domain)
+    if feature:
+        docs = [d for d in docs if d["feature"] == feature]
+
+    headers = ["Product", "Domain", "Module", "TC ID", "Title", "Heuristic",
+               "Status", "Priority", "Test Type", "Owner", "Script"]
+    rows: list[dict] = []
+    for d in docs:
+        path = _ROOT_DIR / "products" / d["product"] / "docs" / "test_cases" / d["domain"] / f"{d['feature']}.md"
+        if not path.exists():
+            continue
+        content = path.read_text(encoding="utf-8")
+        for tc in _parse_tc_index(content):
+            block = _parse_tc_block(content, tc["id"]) or ""
+            def _ext(f: str) -> str:
+                m = _re.search(rf'\*\*{f}:\*\*\s*([^\n]+)', block, _re.IGNORECASE)
+                return m.group(1).strip() if m else ""
+            rows.append({
+                "Product": d["product"], "Domain": d["domain"],
+                "Module": d["feature"].replace("_", " ").title(),
+                "TC ID": tc["id"], "Title": tc["title"],
+                "Heuristic": tc["heuristic"], "Status": tc["status"],
+                "Priority": _ext("Priority"), "Test Type": _ext("Test Type"),
+                "Owner": _ext("Owner"), "Script": tc["script"],
+            })
+
+    if format == "xlsx":
+        import openpyxl
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Test Cases"
+        ws.append(headers)
+        for r in rows:
+            ws.append([r.get(h, "") for h in headers])
+        buf = io.BytesIO()
+        wb.save(buf)
+        buf.seek(0)
+        return StreamingResponse(buf,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment; filename=test_cases.xlsx"})
+
+    buf = io.StringIO()
+    w = csv.DictWriter(buf, fieldnames=headers)
+    w.writeheader()
+    w.writerows(rows)
+    return StreamingResponse(iter([buf.getvalue()]), media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=test_cases.csv"})
 
 
 @router.get("/scripts/content", response_class=HTMLResponse)

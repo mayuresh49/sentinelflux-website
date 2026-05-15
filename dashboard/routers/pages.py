@@ -172,11 +172,13 @@ async def docs_page(request: Request, product: str | None = None,
             except Exception:
                 pass
         modules.append({**d, "test_cases": tcs})
+    features = sorted(set(m["feature"] for m in modules if m["test_cases"]))
     return templates.TemplateResponse(request, "docs.html", context=_ctx(
         request, current_user,
         modules=modules,
         products=products,
         domains=domains,
+        features=features,
         filter_product=product or "",
     ))
 
