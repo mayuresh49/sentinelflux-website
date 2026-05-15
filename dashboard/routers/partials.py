@@ -263,8 +263,8 @@ async def reject_partial(approval_id: str, request: Request):
 
 @router.get("/kb/content", response_class=HTMLResponse)
 async def kb_content(request: Request, product: str, file: str):
-    from dashboard.routers.kb import _KB_DIR
-    path = _KB_DIR / product / file
+    from dashboard.routers.kb import _product_kb_dir
+    path = _product_kb_dir(product) / file
     if not path.exists():
         return HTMLResponse('<p class="text-red-500 text-sm p-4">File not found.</p>')
     content = path.read_text(encoding="utf-8")
@@ -279,8 +279,8 @@ async def kb_save(
     filename: str = Form(...),
     content: str = Form(...),
 ):
-    from dashboard.routers.kb import _KB_DIR
-    path = _KB_DIR / product / filename
+    from dashboard.routers.kb import _product_kb_dir
+    path = _product_kb_dir(product) / filename
     if not path.exists():
         return HTMLResponse('<span class="text-red-500 text-xs">File not found</span>')
     path.write_text(content, encoding="utf-8")

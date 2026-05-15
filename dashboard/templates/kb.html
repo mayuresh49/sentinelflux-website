@@ -45,7 +45,31 @@ scenarios:
        kbUploading: false,
        kbUploadResult: null,
        kbUploadError: null,
+       openapiUrl: '',
+       openapiUrlSaving: false,
+       openapiUrlSaved: false,
+       async fetchOpenapiUrl(product) {
+         if (!product) return;
+         try {
+           const res = await fetch('/api/kb/' + product + '/openapi-url');
+           const data = await res.json();
+           this.openapiUrl = data.openapi_url || '';
+         } catch (_) {}
+       },
+       async saveOpenapiUrl() {
+         this.openapiUrlSaving = true; this.openapiUrlSaved = false;
+         try {
+           const res = await fetch('/api/kb/' + this.selectedProduct + '/openapi-url', {
+             method: 'PUT',
+             headers: {'Content-Type': 'application/json'},
+             body: JSON.stringify({ openapi_url: this.openapiUrl }),
+           });
+           if (res.ok) { this.openapiUrlSaved = true; setTimeout(() => this.openapiUrlSaved = false, 2000); }
+         } catch (_) {}
+         this.openapiUrlSaving = false;
+       },
      }"
+     x-init="fetchOpenapiUrl(selectedProduct); $watch('selectedProduct', val => fetchOpenapiUrl(val))"
      @kb-upload-loading.window="kbUploading = true; kbUploadError = null; kbUploadResult = null"
      @kb-upload-result.window="kbUploadResult = $event.detail; kbUploading = false"
      @kb-upload-error.window="kbUploadError = $event.detail; kbUploading = false">
@@ -101,6 +125,24 @@ scenarios:
         {% endfor %}
       </div>
       {% endfor %}
+
+      <!-- OpenAPI Spec URL (per product) -->
+      <div class="px-3 py-3 border-t border-slate-100 shrink-0">
+        <label class="text-xs font-medium text-slate-400 uppercase tracking-wide block mb-1.5">OpenAPI Spec URL</label>
+        <div class="flex gap-1 items-center">
+          <input type="text" x-model="openapiUrl"
+                 placeholder="https://…/openapi.json"
+                 class="flex-1 min-w-0 text-xs font-mono border border-slate-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-300">
+          <button @click="saveOpenapiUrl()"
+                  :disabled="openapiUrlSaving"
+                  class="shrink-0 text-xs px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded transition-colors font-medium min-w-[2.5rem] text-center">
+            <span x-show="openapiUrlSaving">…</span>
+            <span x-show="!openapiUrlSaving && openapiUrlSaved" class="text-green-200">✓</span>
+            <span x-show="!openapiUrlSaving && !openapiUrlSaved">Save</span>
+          </button>
+        </div>
+        <p class="text-xs text-slate-400 mt-1.5">Used automatically by the pipeline generator when no source is specified.</p>
+      </div>
     </div>
 
     <!-- Right panel: upload form OR YAML editor -->

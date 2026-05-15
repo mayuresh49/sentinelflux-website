@@ -87,8 +87,18 @@ def _run(job_id: str, body: TriggerBody):
     ]
     if body.skip_script:
         cmd.append("--skip-script")
-    if body.source:
-        cmd.extend(["--source", body.source])
+    source = body.source
+    if not source:
+        try:
+            from dashboard.routers.kb import _product_kb_dir
+            import yaml as _yaml
+            openapi_file = _product_kb_dir(body.product) / "openapi_specs.yaml"
+            if openapi_file.exists():
+                source = (_yaml.safe_load(openapi_file.read_text(encoding="utf-8")) or {}).get("openapi_url", "")
+        except Exception:
+            pass
+    if source:
+        cmd.extend(["--source", source])
 
     _alog.append(
         event_type="pipeline_run", agent="pipeline",

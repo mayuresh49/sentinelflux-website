@@ -12,11 +12,18 @@ from utils.paths import ROOT as _ROOT_DIR
 
 router = APIRouter(prefix="/kb", tags=["knowledge-base"])
 _KB_DIR = _ROOT_DIR / "ai" / "knowledge_base"
+_PRODUCTS_DIR = _ROOT_DIR / "products"
 _INCREMENTS_DIR = _KB_DIR / "increments"
 _INCREMENTS_LOG = _ROOT_DIR / "data" / "kb_increments_log.yaml"
 
 _SKIP_NAMES = {"__pycache__", "__init__.py", "auto_test_generator.py", "kb_loader.py"}
 _TEXT_SUFFIXES = {".yaml", ".yml", ".md", ".txt"}
+
+
+def _product_kb_dir(product: str) -> Path:
+    """Returns products/<product>/ai/knowledge_base if it exists, falls back to ai/knowledge_base/<product>."""
+    p = _PRODUCTS_DIR / product / "ai" / "knowledge_base"
+    return p if p.exists() else _KB_DIR / product
 
 
 def _list_products() -> list[str]:
@@ -37,7 +44,7 @@ def _list_products() -> list[str]:
 
 
 def _kb_files(product: str) -> list[str]:
-    d = _KB_DIR / product
+    d = _product_kb_dir(product)
     if not d.exists():
         return []
     return sorted(
@@ -79,9 +86,34 @@ def list_increments():
     }
 
 
+@router.get("/{product}/openapi-url")
+def get_openapi_url(product: str):
+    path = _product_kb_dir(product) / "openapi_specs.yaml"
+    if not path.exists():
+        return {"openapi_url": ""}
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return {"openapi_url": data.get("openapi_url", "")}
+
+
+class OpenapiUrlBody(BaseModel):
+    openapi_url: str
+
+
+@router.put("/{product}/openapi-url")
+def save_openapi_url(product: str, body: OpenapiUrlBody):
+    kb_dir = _product_kb_dir(product)
+    kb_dir.mkdir(parents=True, exist_ok=True)
+    path = kb_dir / "openapi_specs.yaml"
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) if path.exists() else {}
+    data = data or {}
+    data["openapi_url"] = body.openapi_url
+    path.write_text(yaml.safe_dump(data, allow_unicode=True, sort_keys=False), encoding="utf-8")
+    return {"status": "saved"}
+
+
 @router.get("/{product}/{filename}")
 def get_file(product: str, filename: str):
-    path = _KB_DIR / product / filename
+    path = _product_kb_dir(product) / filename
     if not path.exists():
         raise HTTPException(404, "File not found")
     return {
@@ -97,7 +129,7 @@ class SaveBody(BaseModel):
 
 @router.put("/{product}/{filename}")
 def save_file(product: str, filename: str, body: SaveBody):
-    path = _KB_DIR / product / filename
+    path = _product_kb_dir(product) / filename
     if not path.exists():
         raise HTTPException(404, "File not found")
     path.write_text(body.content, encoding="utf-8")
