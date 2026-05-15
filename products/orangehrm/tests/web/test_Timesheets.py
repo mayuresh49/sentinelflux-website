@@ -4,26 +4,26 @@ from pages.web.timesheets import TimesheetsPage
 
 
 @pytest.fixture(scope="function")
-def logged_in_page(page, session_authed_page):
+def logged_in_page(page, session_authed_page, orangehrm_base_url, orangehrm_credentials):
     if session_authed_page is not None:
         return session_authed_page
-    lp = LoginPage(page)
+    lp = LoginPage(page, orangehrm_base_url)
     lp.navigate_to_login()
-    lp.login("Admin", "admin123")
+    lp.login(orangehrm_credentials["username"], orangehrm_credentials["password"])
     assert lp.is_on_dashboard()
     return page
 
 @pytest.mark.web
 @pytest.mark.sanity
-def test_user_can_access_timesheets_form(logged_in_page):
-    timesheets = TimesheetsPage(logged_in_page)
+def test_user_can_access_timesheets_form(logged_in_page, orangehrm_base_url):
+    timesheets = TimesheetsPage(logged_in_page, orangehrm_base_url)
     timesheets.navigate_to_timesheets_form()
     assert timesheets.is_on_timesheets_form()
 
 @pytest.mark.web
 @pytest.mark.regression
-def test_valid_timesheet_submission_with_correct_data(logged_in_page):
-    timesheets = TimesheetsPage(logged_in_page)
+def test_valid_timesheet_submission_with_correct_data(logged_in_page, orangehrm_base_url):
+    timesheets = TimesheetsPage(logged_in_page, orangehrm_base_url)
     timesheets.navigate_to_timesheets_form()
     timesheets.fill_employee_id("12345")
     timesheets.fill_from_date("2023-01-01")
@@ -34,8 +34,8 @@ def test_valid_timesheet_submission_with_correct_data(logged_in_page):
 
 @pytest.mark.web
 @pytest.mark.regression
-def test_mandatory_fields_validation_for_timesheet_form(logged_in_page):
-    timesheets = TimesheetsPage(logged_in_page)
+def test_mandatory_fields_validation_for_timesheet_form(logged_in_page, orangehrm_base_url):
+    timesheets = TimesheetsPage(logged_in_page, orangehrm_base_url)
     timesheets.navigate_to_timesheets_form()
     timesheets.fill_from_date("2023-01-01")
     timesheets.fill_to_date("2023-01-07")
@@ -45,8 +45,8 @@ def test_mandatory_fields_validation_for_timesheet_form(logged_in_page):
 
 @pytest.mark.web
 @pytest.mark.regression
-def test_input_restriction_checks_for_timesheet_hours_worked(logged_in_page):
-    timesheets = TimesheetsPage(logged_in_page)
+def test_input_restriction_checks_for_timesheet_hours_worked(logged_in_page, orangehrm_base_url):
+    timesheets = TimesheetsPage(logged_in_page, orangehrm_base_url)
     timesheets.navigate_to_timesheets_form()
     timesheets.fill_employee_id("12345")
     timesheets.fill_from_date("2023-01-01")
@@ -57,8 +57,8 @@ def test_input_restriction_checks_for_timesheet_hours_worked(logged_in_page):
 
 @pytest.mark.web
 @pytest.mark.regression
-def test_negative_scenarios_for_timesheet_from_date_and_to_date(logged_in_page):
-    timesheets = TimesheetsPage(logged_in_page)
+def test_negative_scenarios_for_timesheet_from_date_and_to_date(logged_in_page, orangehrm_base_url):
+    timesheets = TimesheetsPage(logged_in_page, orangehrm_base_url)
     timesheets.navigate_to_timesheets_form()
     timesheets.fill_employee_id("12345")
     timesheets.fill_from_date("")
@@ -68,8 +68,8 @@ def test_negative_scenarios_for_timesheet_from_date_and_to_date(logged_in_page):
 
 @pytest.mark.web
 @pytest.mark.regression
-def test_validate_employee_id_uniqueness(logged_in_page):
-    timesheets = TimesheetsPage(logged_in_page)
+def test_validate_employee_id_uniqueness(logged_in_page, orangehrm_base_url):
+    timesheets = TimesheetsPage(logged_in_page, orangehrm_base_url)
     timesheets.navigate_to_timesheets_form()
     timesheets.fill_employee_id("12345")
     timesheets.fill_from_date("2023-01-01")

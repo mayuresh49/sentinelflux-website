@@ -1,15 +1,13 @@
 import pytest
 from pages.web.login_page import LoginPage
 
-_BASE = "https://opensource-demo.orangehrmlive.com"
-
 
 @pytest.mark.web
 @pytest.mark.a11y
-def test_OH_A11Y_001_login_inputs_have_placeholders_as_labels(page):
+def test_OH_A11Y_001_login_inputs_have_placeholders_as_labels(page, orangehrm_base_url):
     # OrangeHRM is a Vue SPA — inputs use placeholder text as visible labels, no <label for>
     # navigate() waits for domcontentloaded; networkidle ensures Vue components are rendered
-    LoginPage(page).navigate_to_login()
+    LoginPage(page, orangehrm_base_url).navigate_to_login()
     page.wait_for_load_state("networkidle")
     for placeholder in ("Username", "Password"):
         inp = page.get_by_placeholder(placeholder)
@@ -18,8 +16,8 @@ def test_OH_A11Y_001_login_inputs_have_placeholders_as_labels(page):
 
 @pytest.mark.web
 @pytest.mark.a11y
-def test_OH_A11Y_002_login_page_has_brand_or_title(page):
-    LoginPage(page).navigate_to_login()
+def test_OH_A11Y_002_login_page_has_brand_or_title(page, orangehrm_base_url):
+    LoginPage(page, orangehrm_base_url).navigate_to_login()
     page.wait_for_load_state("networkidle")
     # OrangeHRM login uses an img logo — no standard <h1>
     has_title = page.title() != ""
@@ -29,8 +27,8 @@ def test_OH_A11Y_002_login_page_has_brand_or_title(page):
 
 @pytest.mark.web
 @pytest.mark.a11y
-def test_OH_A11Y_003_login_form_reachable_by_keyboard(page):
-    LoginPage(page).navigate_to_login()
+def test_OH_A11Y_003_login_form_reachable_by_keyboard(page, orangehrm_base_url):
+    LoginPage(page, orangehrm_base_url).navigate_to_login()
     page.wait_for_load_state("networkidle")
     page.locator("body").click()  # trigger browser focus on the document before tabbing
     page.keyboard.press("Tab")
@@ -41,8 +39,8 @@ def test_OH_A11Y_003_login_form_reachable_by_keyboard(page):
 
 @pytest.mark.web
 @pytest.mark.a11y
-def test_OH_A11Y_004_login_page_images_have_alt_text(page):
-    LoginPage(page).navigate_to_login()
+def test_OH_A11Y_004_login_page_images_have_alt_text(page, orangehrm_base_url):
+    LoginPage(page, orangehrm_base_url).navigate_to_login()
     page.wait_for_load_state("networkidle")
     images = page.locator("img")
     count = images.count()
@@ -55,8 +53,8 @@ def test_OH_A11Y_004_login_page_images_have_alt_text(page):
 
 @pytest.mark.web
 @pytest.mark.a11y
-def test_OH_A11Y_005_login_error_is_visible_when_credentials_invalid(page):
-    lp = LoginPage(page)
+def test_OH_A11Y_005_login_error_is_visible_when_credentials_invalid(page, orangehrm_base_url):
+    lp = LoginPage(page, orangehrm_base_url)
     lp.navigate_to_login()
     page.wait_for_load_state("networkidle")
     lp.login("baduser", "badpass")
@@ -67,10 +65,10 @@ def test_OH_A11Y_005_login_error_is_visible_when_credentials_invalid(page):
 
 @pytest.mark.web
 @pytest.mark.a11y
-def test_OH_A11Y_006_dashboard_nav_items_have_text(page):
-    lp = LoginPage(page)
+def test_OH_A11Y_006_dashboard_nav_items_have_text(page, orangehrm_base_url, orangehrm_credentials):
+    lp = LoginPage(page, orangehrm_base_url)
     lp.navigate_to_login()
-    lp.login("Admin", "admin123")
+    lp.login(orangehrm_credentials["username"], orangehrm_credentials["password"])
     assert lp.is_on_dashboard()
     page.wait_for_load_state("networkidle")
     # OrangeHRM sidebar uses .oxd-main-menu-item elements

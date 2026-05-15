@@ -42,40 +42,58 @@ Example test function:
 Imports:
     import pytest
     from pages.web.<page_module> import <PageClass>
+    from pages.web.login_page import LoginPage
 
 Marker: @pytest.mark.web
 
-Fixtures:
-    page          — Playwright Page, injected by pytest-playwright
-    logged_in_page — authenticated page (defined locally in each test file, falls back to session_authed_page)
+Fixtures (all from conftest — never hardcode URLs or credentials):
+    page                     — Playwright Page, injected by pytest-playwright
+    {product}_base_url       — web base URL from config/env_{env}.yaml, e.g. orangehrm_base_url, rb_web_base
+    {product}_credentials    — {"username": ..., "password": ...} from config, e.g. orangehrm_credentials, rb_web_credentials
+    session_authed_page      — optional shared authenticated page (session-scoped)
+    logged_in_page           — defined locally in each test file (see pattern below)
 
 Step tracking (automatic — do NOT import or call step() manually):
     Page object action methods are decorated with @step_method("description").
     Every call to a page object method is automatically recorded as a step.
     Steps appear in the HTML report and ReportPortal without any extra code in tests.
 
+IMPORTANT — constructor signatures:
+    All page objects require base_url as the second argument: PageClass(page, base_url)
+    Never instantiate a page object without passing base_url from the fixture.
+
 Pattern:
     @pytest.fixture(scope="function")
-    def logged_in_page(page, session_authed_page):
+    def logged_in_page(page, session_authed_page, {product}_base_url, {product}_credentials):
         if session_authed_page is not None:
             return session_authed_page
-        lp = LoginPage(page)
+        lp = LoginPage(page, {product}_base_url)
         lp.navigate_to_login()
-        lp.login("Admin", "admin123")
+        lp.login({product}_credentials["username"], {product}_credentials["password"])
         assert lp.is_on_dashboard()
         return page
 
     @pytest.mark.web
-    def test_something(logged_in_page):
-        po = SomePage(logged_in_page)
+    def test_something(logged_in_page, {product}_base_url):
+        po = SomePage(logged_in_page, {product}_base_url)
         po.navigate_to_list()        # recorded as step automatically
         po.search_by_name("Alice")   # recorded as step automatically
         assert po.get_record_count_text() != ""
 
-Example test function:
+Example test function (OrangeHRM):
+    @pytest.fixture(scope="function")
+    def logged_in_page(page, session_authed_page, orangehrm_base_url, orangehrm_credentials):
+        if session_authed_page is not None:
+            return session_authed_page
+        lp = LoginPage(page, orangehrm_base_url)
+        lp.navigate_to_login()
+        lp.login(orangehrm_credentials["username"], orangehrm_credentials["password"])
+        assert lp.is_on_dashboard()
+        return page
+
     @pytest.mark.web
-    def test_user_list_loads_on_navigation(logged_in_page):
-        admin = AdminUsersPage(logged_in_page)
+    def test_user_list_loads_on_navigation(logged_in_page, orangehrm_base_url):
+        admin = AdminUsersPage(logged_in_page, orangehrm_base_url)
         admin.navigate_to_list()
         assert admin.is_on_list_page()
 """,
@@ -112,76 +130,97 @@ Imports:
 
 Markers: @pytest.mark.security  PLUS  @pytest.mark.api (API layer) or @pytest.mark.web (browser layer)
 
---- API security patterns ---
-Fixtures: product_api_client (authenticated), raw requests for unauthenticated calls
+IMPORTANT — never hardcode URLs or credentials. Use fixtures:
+    {product}_api_base_url  — API base URL from config, e.g. orangehrm_api_base_url, rb_api_base
+    {product}_base_url      — web base URL from config, e.g. orangehrm_base_url, rb_web_base
+    {product}_credentials   — {"username": ..., "password": ...} from config
 
-    # Auth bypass
-    resp = requests.get(f"{_API_BASE}/resource")
-    assert resp.status_code == 401
+--- API security patterns ---
+Fixtures: {product}_api_client (authenticated), {product}_api_base_url for raw unauthenticated requests
+
+    # Auth bypass — use fixture, not a hardcoded constant
+    def test_unauthenticated_request_returns_401({product}_api_base_url):
+        resp = requests.get(f"{{product}_api_base_url}/resource")
+        assert resp.status_code == 401
 
     # SQL injection
-    resp = product_api_client.get("/resource", params={"q": "' OR '1'='1"})
+    resp = {product}_api_client.get("/resource", params={"q": "' OR '1'='1"})
     assert resp.status_code != 500
     assert "sql" not in resp.text.lower()
 
     # IDOR
-    resp = requests.get(f"{_API_BASE}/resource/OTHER_ID")
-    assert resp.status_code in (401, 403)
+    def test_idor_rejected({product}_api_base_url):
+        resp = requests.get(f"{{product}_api_base_url}/resource/OTHER_ID")
+        assert resp.status_code in (401, 403)
 
     # Response content-type
-    resp = product_api_client.get("/resource")
+    resp = {product}_api_client.get("/resource")
     assert "application/json" in resp.headers.get("Content-Type", "")
 
     # Security headers
     assert resp.headers.get("X-Content-Type-Options", "").lower() == "nosniff"
 
-Example API test:
+Example API test (OrangeHRM):
     @pytest.mark.api
     @pytest.mark.security
-    def test_OH_SEC_001_unauthenticated_request_returns_401():
-        resp = requests.get(f"{_API_BASE}/admin/users")
+    def test_OH_SEC_001_unauthenticated_request_returns_401(orangehrm_api_base_url):
+        resp = requests.get(f"{orangehrm_api_base_url}/admin/users")
         assert resp.status_code == 401
 
 --- Web security patterns (Playwright) ---
-Fixtures: page (pytest-playwright)
+Fixtures: page (pytest-playwright), {product}_base_url, {product}_credentials
 
     # XSS non-execution
-    dialog_fired = []
-    page.on("dialog", lambda d: (dialog_fired.append(d.message), d.dismiss()))
-    page.locator("input[name='field']").fill("<script>window.__xss=true</script>")
-    assert not dialog_fired
-    assert not page.evaluate("() => window.__xss === true")
+    def test_xss_does_not_execute(page):
+        dialog_fired = []
+        page.on("dialog", lambda d: (dialog_fired.append(d.message), d.dismiss()))
+        page.locator("input[name='field']").fill("<script>window.__xss=true</script>")
+        assert not dialog_fired
+        assert not page.evaluate("() => window.__xss === true")
 
-    # Redirect to login when unauthenticated
-    page.goto(f"{_BASE}/protected-url", wait_until="networkidle")
-    assert "/login" in page.url
+    # Redirect to login when unauthenticated — use fixture, not hardcoded URL
+    def test_protected_url_redirects_to_login(page, {product}_base_url):
+        page.goto(f"{{product}_base_url}/protected-url", wait_until="networkidle")
+        assert "/login" in page.url
 
     # HttpOnly cookie check
     cookies = page.context.cookies()
     for c in [c for c in cookies if "session" in c["name"].lower()]:
         assert c.get("httpOnly"), f"Cookie {c['name']} missing HttpOnly"
 
-Example web test:
+Example web test (OrangeHRM):
     @pytest.mark.web
     @pytest.mark.security
-    def test_OH_SEC_008_xss_in_username_does_not_execute(page):
+    def test_OH_SEC_008_xss_in_username_does_not_execute(page, orangehrm_base_url):
         dialog_fired = []
         page.on("dialog", lambda d: (dialog_fired.append(d.message), d.dismiss()))
-        lp = LoginPage(page)
+        lp = LoginPage(page, orangehrm_base_url)
         lp.navigate_to_login()
         lp.login("<script>window.__xss=true</script>", "pass")
         assert not dialog_fired
         assert not page.evaluate("() => window.__xss === true")
+
+    @pytest.mark.web
+    @pytest.mark.security
+    def test_OH_SEC_009_dashboard_without_auth_redirects(page, orangehrm_base_url):
+        page.goto(f"{orangehrm_base_url}/web/index.php/dashboard/index", wait_until="networkidle")
+        assert "/auth/login" in page.url
 """,
 
     "a11y": """\
 Imports:
     import pytest
     from pages.web.<page_module> import <PageClass>
+    from pages.web.login_page import LoginPage
 
 Markers: @pytest.mark.web  @pytest.mark.a11y  (both always present)
 
-Fixtures: page (pytest-playwright)
+Fixtures (never hardcode URLs or credentials):
+    page                  — Playwright Page, injected by pytest-playwright
+    {product}_base_url    — web base URL from config, e.g. orangehrm_base_url, rb_web_base
+    {product}_credentials — {"username": ..., "password": ...} from config
+
+IMPORTANT — page objects require base_url: LoginPage(page, {product}_base_url)
 
 Patterns:
     # Labelled inputs
@@ -212,13 +251,13 @@ Patterns:
         aria = btn.get_attribute("aria-label") or ""
         assert text or aria
 
-Example test:
+Example test (OrangeHRM):
     @pytest.mark.web
     @pytest.mark.a11y
-    def test_OH_A11Y_001_login_inputs_have_labels(page):
-        LoginPage(page).navigate_to_login()
-        for field in ("username", "password"):
-            assert page.get_by_label(field, exact=False).count() >= 1
+    def test_OH_A11Y_001_login_inputs_have_labels(page, orangehrm_base_url):
+        LoginPage(page, orangehrm_base_url).navigate_to_login()
+        for field in ("Username", "Password"):
+            assert page.get_by_placeholder(field).count() >= 1
 """,
 }
 

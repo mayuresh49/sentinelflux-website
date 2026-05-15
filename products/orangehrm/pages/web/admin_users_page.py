@@ -3,19 +3,18 @@ from utils.step import step_method
 
 
 class AdminUsersPage(BasePage):
-    BASE_URL = "https://opensource-demo.orangehrmlive.com"
-
-    def __init__(self, page, locale: str = "en-US"):
+    def __init__(self, page, base_url: str, locale: str = "en-US"):
         super().__init__(page, locale)
+        self._base_url = base_url
 
     @step_method("Navigate to system users list")
     def navigate_to_list(self):
-        self.navigate(f"{self.BASE_URL}/web/index.php/admin/viewSystemUsers")
+        self.navigate(f"{self._base_url}/web/index.php/admin/viewSystemUsers")
         self.page.wait_for_load_state("domcontentloaded")
 
     @step_method("Navigate to add user form")
     def navigate_to_add(self):
-        self.navigate(f"{self.BASE_URL}/web/index.php/admin/saveSystemUser")
+        self.navigate(f"{self._base_url}/web/index.php/admin/saveSystemUser")
         self.page.wait_for_load_state("domcontentloaded")
 
     @step_method("Search by username")

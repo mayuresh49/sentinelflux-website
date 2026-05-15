@@ -30,6 +30,16 @@ def orangehrm_config(request):
 
 
 @pytest.fixture(scope="session")
+def orangehrm_base_url(orangehrm_config):
+    return orangehrm_config.get("orangehrm", {}).get("base_url")
+
+
+@pytest.fixture(scope="session")
+def orangehrm_api_base_url(orangehrm_config):
+    return orangehrm_config.get("orangehrm", {}).get("api_base_url")
+
+
+@pytest.fixture(scope="session")
 def orangehrm_credentials(orangehrm_config):
     creds = orangehrm_config.get("orangehrm", {}).get("credentials", {})
     return {
@@ -39,7 +49,7 @@ def orangehrm_credentials(orangehrm_config):
 
 
 @pytest.fixture(scope="session")
-def session_authed_page(request, browser, orangehrm_credentials):
+def session_authed_page(request, browser, orangehrm_credentials, orangehrm_base_url):
     """Session-scoped authenticated Playwright page for OrangeHRM."""
     if not request.config.getoption("--session-login", default=False):
         yield None
@@ -47,7 +57,7 @@ def session_authed_page(request, browser, orangehrm_credentials):
     from pages.web.login_page import LoginPage
     ctx = browser.new_context()
     pg = ctx.new_page()
-    lp = LoginPage(pg)
+    lp = LoginPage(pg, orangehrm_base_url)
     lp.navigate_to_login()
     lp.login(orangehrm_credentials["username"], orangehrm_credentials["password"])
     yield pg
@@ -55,14 +65,15 @@ def session_authed_page(request, browser, orangehrm_credentials):
 
 
 @pytest.fixture(scope="session")
-def orangehrm_client(browser, session_authed_page, orangehrm_credentials):
+def orangehrm_client(browser, session_authed_page, orangehrm_credentials, orangehrm_base_url, orangehrm_api_base_url):
     """Session-scoped OrangeHRM API client, reuses web session cookies when available."""
     from api.orangehrm_client import OrangeHRMClient
     from pages.web.login_page import LoginPage
 
     if session_authed_page is not None:
         client = OrangeHRMClient.from_playwright_cookies(
-            session_authed_page.context.cookies()
+            session_authed_page.context.cookies(),
+            api_base_url=orangehrm_api_base_url,
         )
         yield client
         client.close()
@@ -70,10 +81,10 @@ def orangehrm_client(browser, session_authed_page, orangehrm_credentials):
 
     ctx = browser.new_context()
     pg = ctx.new_page()
-    lp = LoginPage(pg)
+    lp = LoginPage(pg, orangehrm_base_url)
     lp.navigate_to_login()
     lp.login(orangehrm_credentials["username"], orangehrm_credentials["password"])
-    client = OrangeHRMClient.from_playwright_cookies(ctx.cookies())
+    client = OrangeHRMClient.from_playwright_cookies(ctx.cookies(), api_base_url=orangehrm_api_base_url)
     yield client
     ctx.close()
     client.close()

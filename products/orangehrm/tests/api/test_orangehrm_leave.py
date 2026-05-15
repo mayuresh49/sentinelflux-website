@@ -20,10 +20,8 @@ def test_OH_API_007_list_leave_types_data_has_id_and_name(orangehrm_client):
 
 
 @pytest.mark.api
-def test_OH_API_008_list_leave_types_without_auth_returns_401():
-    resp = requests.get(
-        "https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/leave/leave-types"
-    )
+def test_OH_API_008_list_leave_types_without_auth_returns_401(orangehrm_api_base_url):
+    resp = requests.get(f"{orangehrm_api_base_url}/leave/leave-types")
     assert resp.status_code == 401
 
 

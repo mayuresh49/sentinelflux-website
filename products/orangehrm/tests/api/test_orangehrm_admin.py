@@ -17,10 +17,8 @@ def test_OH_API_002_list_system_users_has_admin_user(orangehrm_client):
 
 
 @pytest.mark.api
-def test_OH_API_003_list_system_users_without_auth_returns_401():
-    resp = requests.get(
-        "https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users"
-    )
+def test_OH_API_003_list_system_users_without_auth_returns_401(orangehrm_api_base_url):
+    resp = requests.get(f"{orangehrm_api_base_url}/admin/users")
     assert resp.status_code == 401
 
 

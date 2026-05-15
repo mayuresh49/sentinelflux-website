@@ -134,6 +134,8 @@ Feature: {feature_name}
 - Use parametrize only when test data sets share identical steps.
 - Do not add comments unless a business rule is non-obvious.
 - Do not import anything not in the conventions or standard library.
+- NEVER hardcode URLs or credentials in test scripts. All URLs and credentials MUST come from product config fixtures (e.g. orangehrm_base_url, orangehrm_api_base_url, orangehrm_credentials, rb_api_base, rb_web_base, rb_credentials). These fixtures are loaded from config/env_{{env}}.yaml at runtime based on the --env pytest option.
+- All page object constructors require base_url as the second argument. Never instantiate a page object without passing the URL fixture: PageClass(page, {{product}}_base_url).
 {test_type_instruction}
 {categories_instruction}
 Output the complete Python file content starting with imports.

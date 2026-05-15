@@ -1,20 +1,18 @@
 import pytest
 import requests
 
-_API_BASE = "https://opensource-demo.orangehrmlive.com/web/index.php/api/v2"
-
 
 @pytest.mark.api
 @pytest.mark.security
-def test_OH_SEC_001_unauthenticated_request_to_users_returns_401():
-    resp = requests.get(f"{_API_BASE}/admin/users")
+def test_OH_SEC_001_unauthenticated_request_to_users_returns_401(orangehrm_api_base_url):
+    resp = requests.get(f"{orangehrm_api_base_url}/admin/users")
     assert resp.status_code == 401
 
 
 @pytest.mark.api
 @pytest.mark.security
-def test_OH_SEC_002_unauthenticated_request_to_employees_returns_401():
-    resp = requests.get(f"{_API_BASE}/pim/employees")
+def test_OH_SEC_002_unauthenticated_request_to_employees_returns_401(orangehrm_api_base_url):
+    resp = requests.get(f"{orangehrm_api_base_url}/pim/employees")
     assert resp.status_code == 401
 
 
@@ -47,9 +45,9 @@ def test_OH_SEC_005_x_content_type_options_header_present(orangehrm_client):
 
 @pytest.mark.api
 @pytest.mark.security
-def test_OH_SEC_006_delete_employee_without_auth_is_rejected():
+def test_OH_SEC_006_delete_employee_without_auth_is_rejected(orangehrm_api_base_url):
     # Server may return 401 (auth required) or 405 (method rejected before auth check)
-    resp = requests.delete(f"{_API_BASE}/pim/employees/1")
+    resp = requests.delete(f"{orangehrm_api_base_url}/pim/employees/1")
     assert resp.status_code in (401, 405), \
         f"Expected 401 or 405 without auth, got {resp.status_code}"
 

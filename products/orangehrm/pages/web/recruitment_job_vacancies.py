@@ -1,14 +1,15 @@
 from pages.base_page import BasePage
 from utils.step import step_method
 
-_BASE = "https://opensource-demo.orangehrmlive.com"
-
 
 class RecruitmentJobVacanciesPage(BasePage):
+    def __init__(self, page, base_url: str, locale: str = "en-US"):
+        super().__init__(page, locale)
+        self._base_url = base_url
 
     @step_method("Navigate to Job Vacancies list")
     def navigate_to_job_vacancies(self):
-        self.navigate(f"{_BASE}/web/index.php/recruitment/viewJobVacancy")
+        self.navigate(f"{self._base_url}/web/index.php/recruitment/viewJobVacancy")
         self.page.wait_for_load_state("networkidle")
 
     @step_method("Filter by job title")

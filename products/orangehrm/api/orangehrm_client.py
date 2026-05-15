@@ -4,9 +4,6 @@ import time
 
 import requests
 
-BASE_URL = "https://opensource-demo.orangehrmlive.com"
-API_V2 = "/web/index.php/api/v2"
-
 _REDACT = {"x-xsrf-token", "cookie", "authorization"}
 
 
@@ -23,7 +20,8 @@ def _to_curl(prep: requests.PreparedRequest, body) -> str:
 
 
 class OrangeHRMClient:
-    def __init__(self):
+    def __init__(self, api_base_url: str):
+        self._api_base_url = api_base_url
         self._session = requests.Session()
         self._session.headers.update({
             "Accept": "application/json",
@@ -33,8 +31,8 @@ class OrangeHRMClient:
         self._request_log: list[dict] = []
 
     @classmethod
-    def from_playwright_cookies(cls, cookies: list) -> "OrangeHRMClient":
-        instance = cls()
+    def from_playwright_cookies(cls, cookies: list, api_base_url: str) -> "OrangeHRMClient":
+        instance = cls(api_base_url)
         for c in cookies:
             instance._session.cookies.set(
                 c["name"], c["value"], domain=c.get("domain", "")
@@ -45,7 +43,7 @@ class OrangeHRMClient:
         return instance
 
     def _call(self, method: str, path: str, json_body=None, **kw) -> requests.Response:
-        url = f"{BASE_URL}{API_V2}{path}"
+        url = f"{self._api_base_url}{path}"
         t0 = time.monotonic()
         resp = getattr(self._session, method)(url, json=json_body, **kw)
         elapsed = round((time.monotonic() - t0) * 1000)

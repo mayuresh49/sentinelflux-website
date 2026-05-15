@@ -3,14 +3,13 @@ from utils.step import step_method
 
 
 class LeavePage(BasePage):
-    BASE_URL = "https://opensource-demo.orangehrmlive.com"
-
-    def __init__(self, page, locale: str = "en-US"):
+    def __init__(self, page, base_url: str, locale: str = "en-US"):
         super().__init__(page, locale)
+        self._base_url = base_url
 
     @step_method("Navigate to leave list")
     def navigate_to_list(self):
-        self.navigate(f"{self.BASE_URL}/web/index.php/leave/viewLeaveList")
+        self.navigate(f"{self._base_url}/web/index.php/leave/viewLeaveList")
         self.page.wait_for_load_state("domcontentloaded")
 
     @step_method("Fill date from")

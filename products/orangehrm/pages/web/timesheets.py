@@ -3,15 +3,13 @@ from utils.step import step_method
 
 
 class TimesheetsPage(BasePage):
-    BASE_URL = "https://opensource-demo.orangehrmlive.com"
-    _TIMESHEET_URL = f"{BASE_URL}/web/index.php/time/addTimesheet"
-
-    def __init__(self, page, locale: str = "en-US"):
+    def __init__(self, page, base_url: str, locale: str = "en-US"):
         super().__init__(page, locale)
+        self._base_url = base_url
 
     @step_method("Navigate to Add Timesheet form")
     def navigate_to_timesheets_form(self):
-        self.navigate(self._TIMESHEET_URL)
+        self.navigate(f"{self._base_url}/web/index.php/time/addTimesheet")
         self.page.wait_for_load_state("domcontentloaded")
 
     def is_on_timesheets_form(self) -> bool:

@@ -3,21 +3,20 @@ from utils.step import step_method
 
 
 class PIMEmployeePage(BasePage):
-    BASE_URL = "https://opensource-demo.orangehrmlive.com"
-
-    def __init__(self, page, locale: str = "en-US"):
+    def __init__(self, page, base_url: str, locale: str = "en-US"):
         super().__init__(page, locale)
+        self._base_url = base_url
 
     # --- navigation ---
 
     @step_method("Navigate to employee list")
     def navigate_to_list(self):
-        self.navigate(f"{self.BASE_URL}/web/index.php/pim/viewEmployeeList")
+        self.navigate(f"{self._base_url}/web/index.php/pim/viewEmployeeList")
         self.page.wait_for_load_state("domcontentloaded")
 
     @step_method("Navigate to add employee form")
     def navigate_to_add(self):
-        self.navigate(f"{self.BASE_URL}/web/index.php/pim/addEmployee")
+        self.navigate(f"{self._base_url}/web/index.php/pim/addEmployee")
         self.page.wait_for_load_state("domcontentloaded")
 
     # --- employee list page ---
