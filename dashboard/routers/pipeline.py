@@ -141,6 +141,13 @@ def _run(job_id: str, body: TriggerBody):
         _patch_job(job_id, "failed", str(exc))
 
 
+def _load_jobs() -> list[dict]:
+    rows = get_conn().execute(
+        "SELECT * FROM pipeline_jobs ORDER BY started DESC LIMIT ?", (_MAX_JOBS,)
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
 def _patch_job(job_id: str, status: str, output: str):
     conn = get_conn()
     conn.execute(
