@@ -71,6 +71,7 @@ class TestPipelineOrchestrator:
                     output_base=output_base, tc_prefix=tc_prefix, tc_start=tc_start,
                     source=source,
                 )
+                self._review_doc(out_doc, domain)
                 test_case_doc = out_doc.read_text(encoding="utf-8")
 
             if skip_script:
@@ -138,6 +139,23 @@ class TestPipelineOrchestrator:
         agent = DocGenAgent(ai_client=self.ai_client, kb_loader=self.kb_loader, context=ctx)
         result = agent.run(feature_name=feature_name, output_path=out_path)
         return result["doc_path"]
+
+    def _review_doc(self, doc_path: Path, domain: str) -> None:
+        """Run DocReviewAgent on a freshly generated doc — best-effort, never raises."""
+        try:
+            from ai.agents.base_agent import AgentContext
+            from ai.agents.doc_review_agent import DocReviewAgent
+            ctx = AgentContext(domain=domain)
+            agent = DocReviewAgent(ai_client=self.ai_client, kb_loader=self.kb_loader, context=ctx)
+            kb_context = self.kb_loader.get_all_context() if self.kb_loader else ""
+            result = agent.run(doc_path=doc_path, fix=True, kb_context=kb_context)
+            if result.get("issues"):
+                _log.info(
+                    "DocReview: %d issue(s) found in %s — %d fixed",
+                    len(result["issues"]), doc_path.name, len(result.get("fixed", [])),
+                )
+        except Exception as exc:
+            _log.warning("DocReview skipped (non-fatal): %s", exc)
 
     def _generate_script(
         self,

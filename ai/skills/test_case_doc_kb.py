@@ -52,7 +52,7 @@ class TestCaseDocumentationSkill:
             kb_context=kb_context,
             tc_id_instruction=tc_id_instruction,
         )
-        return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()
+        return self.ai_client.generate(prompt, max_tokens=6000, temperature=0.2).strip()
 
     def _build_web_context(self, feature_name: str) -> str:
         """Build rich context: matching page fields + business rules + personas + validation rules."""
@@ -163,7 +163,7 @@ class TestCaseDocumentationSkill:
             source_context=formatted_source,
             categories_instruction=get_generation_categories_instruction(product=self._product),
         )
-        return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()
+        return self.ai_client.generate(prompt, max_tokens=4000, temperature=0.2).strip()
 
     def _build_api_context(self, feature_name: str = None) -> str:
         """Build rich API context including matching endpoints + business rules."""
@@ -214,4 +214,4 @@ class TestCaseDocumentationSkill:
             ID_PREFIX=tc_prefix or "TC",
             categories_instruction=get_generation_categories_instruction(product=self._product),
         )
-        return self.ai_client.generate(prompt, max_tokens=3000, temperature=0.2).strip()
+        return self.ai_client.generate(prompt, max_tokens=6000, temperature=0.2).strip()

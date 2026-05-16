@@ -67,18 +67,31 @@ STRICT RULES — violating these will produce incorrect documentation:
 3. If a field is not in the KB context, it does not exist on this form — do not include it.
 4. Use exact test credentials and data from the KB (e.g. actual usernames, passwords, known field values).
 5. Describe expected results based only on documented business rules, not assumptions.
+6. Begin the document with a "Fields in Scope" section listing every KB-documented field, its type, whether it is required, and its validation rule.
+7. NEVER write a heading that spans multiple TCs (e.g. "### PREFIX-036 to PREFIX-043"). Each test case MUST have its own numbered heading and complete content — no placeholders, no "see index above".
+8. NEVER write a one-liner as the full test case body. Every section listed below is mandatory for each TC.
+9. Minimum 3 numbered Steps per test case. Never collapse multiple actions into a single step.
+10. Pre-conditions must list at minimum: the user role, the application URL, and any prerequisite data state.
 {tc_id_instruction}
-The document should include:
-- Fields on this form (explicit list from KB only)
-- Test case title
-- Pre-conditions
-- Test data (from KB — not invented)
-- Step-by-step actions
-- Expected results
-- Validation rules and constraints (from KB only)
-- Negative scenarios for mandatory fields
-- Input restriction checks (only for limits documented in KB)
-- Notes on optional fields and edge cases
+Format EVERY test case using EXACTLY this structure:
+
+### TC_ID — Test Case Title
+**Pre-conditions:**
+- User role (e.g. Admin, ESS)
+- Starting URL
+- Any required data state
+**Test Data:**
+| Field | Value |
+|---|---|
+| FieldName | exact value (from KB — never invented) |
+**Steps:**
+1. Navigate to the exact URL
+2. Perform the specific user action with exact input values
+3. (add more steps — minimum 3 total)
+**Expected Result:** Explicit pass criteria. Not just "Success" — state what the user sees, what persists, what message appears.
+**Validation:** List specific field-level or page-level assertions to verify.
+**Category:** positive | negative | edge | security
+**Status:** not_automated
 
 Form Description:
 {form_description}
@@ -99,19 +112,38 @@ STRICT RULES — violating these will produce incorrect documentation:
 1. If Source Context is provided above, treat it as the authoritative specification. Use exact endpoint paths, methods, parameters, schemas, and status codes from it.
 2. If no Source Context, rely solely on KB/API Context — do NOT invent fields or codes from training data.
 3. Do NOT invent request fields, error codes, or behaviors not present in any provided context.
-4. Begin the document with an explicit "Endpoint Scope" section listing only context-documented fields and codes.
+4. Begin the document with an explicit "Endpoint Scope" section listing: HTTP method, full path, all request fields (name / type / required or optional / constraints), and every documented response code with its meaning.
 5. When Source Context is an OpenAPI spec, generate one test case per documented response code.
+6. NEVER write a heading that spans multiple TCs (e.g. "### PREFIX-010 to PREFIX-015"). Each test case MUST have its own numbered heading and complete content — no placeholders, no "see index above".
+7. NEVER write a one-liner as the full test case body. Every section listed below is mandatory for each TC.
+8. Minimum 3 numbered Steps per test case: (1) setup/auth step, (2) send-request step with exact payload, (3) assertion step.
+9. Expected Result must state the exact status code AND the key fields to assert in the response body.
 {tc_id_instruction}
 {categories_instruction}
 
 Generate test cases only for the enabled categories above. Do not include excluded categories.
-Required sections (for enabled categories only):
-- Endpoint Scope (method, path, request fields, response codes from KB only)
-- Positive test cases (valid request → expected 2xx)
-- Negative test cases (invalid/missing fields → documented error codes)
-- Edge cases (boundary values, optional fields)
-- Authentication and authorization cases
-- Validation rules (from KB only)
+
+Format EVERY test case using EXACTLY this structure:
+
+### TC_ID — Test Case Title
+**Pre-conditions:**
+- Auth state (e.g. "Authenticated as Admin via POST /auth/login")
+- Any prerequisite data (e.g. "Employee ID 5 exists in the system")
+**Request:**
+- Method: HTTP_METHOD
+- Path: /api/v2/resource/{{id}}
+- Headers: key: value
+- Body: field1=value1, field2=value2 (list each field explicitly)
+**Steps:**
+1. Authenticate and obtain session token/cookie using exact credentials from KB
+2. Send METHOD /path with the exact request body and headers above
+3. Assert response status code is NNN
+**Expected Result:** HTTP NNN — describe what the response body must contain (exact fields and values where applicable).
+**Validation:**
+- Response field assertions (e.g. response.data[0].userName == "Admin")
+- Schema check (e.g. response.data is an array)
+**Category:** positive | negative | edge | security
+**Status:** not_automated
 
 Output full markdown documentation suitable for version control.
 """)
