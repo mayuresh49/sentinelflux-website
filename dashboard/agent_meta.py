@@ -7,6 +7,12 @@ AGENT_META: dict = {
         "outputs": ["products/<product>/docs/test_cases/<domain>/<feature>.md"],
         "config_params": [],
     },
+    "doc_review": {
+        "responsibility": "Post-generation quality gate for test case documents. Scans AI-generated Markdown docs for structural failures: batched TC headings (e.g. 'OH-WEB-036 to OH-WEB-043' — LLM hit token limit and collapsed multiple TCs), missing mandatory sections (Pre-conditions, Steps, Expected Result), and thin test cases with fewer than 3 numbered steps. Rewrites each failing TC individually using a targeted LLM prompt with KB context. Best-effort — never blocks the pipeline.",
+        "inputs": ["Generated test case Markdown document", "KB context string (pre-built by pipeline)"],
+        "outputs": ["Patched Markdown document (in-place rewrite)", "issues list [{tc_id, type, description}]", "fixed list (TC IDs rewritten)"],
+        "config_params": [],
+    },
     "script_gen": {
         "responsibility": "Takes a test case Markdown document and generates a fully working pytest script with correct fixtures, markers, imports, and domain-specific patterns (rest_client for API, page for web, etc.).",
         "inputs": ["Test case Markdown document", "Domain"],

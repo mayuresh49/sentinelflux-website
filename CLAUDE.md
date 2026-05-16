@@ -147,6 +147,25 @@ Use `claude-sonnet-4-6` as default; `claude-haiku-4-5-20251001` for high-volume,
 - `core/ai_factory.py` — AI client creation (use this, never instantiate directly)
 - `conftest.py` — pytest fixtures
 - `pytest.ini` — test configuration (RP key via RP_API_KEY env var)
+- `dashboard/agent_meta.py` — `AGENT_META` dict: responsibility, inputs, outputs per agent
+
+## Agent Registration Checklist
+
+When adding a new agent, touch **all four** of these:
+1. `ai/agents/<agent>.py` — implement agent class extending `BaseAgent`
+2. `ai/agents/__init__.py` — add import + `__all__` entry
+3. `dashboard/routers/agents.py` → `_AGENT_REGISTRY` — add name, description, domain, requires_ai
+4. `dashboard/agent_meta.py` → `AGENT_META` — add responsibility, inputs, outputs, config_params
+
+Missing step 4 causes blank detail panels in the `/agents` dashboard.
+
+## Multi-tenancy Architecture
+
+- **Run/schedule storage**: `data/test_runs/<product>.json` + `data/test_schedules/<product>.json` (200-run per-product rolling window)
+- **O(1) run lookup**: `data/run_product_index.json` maps `run_id → product` (FileLock on every write)
+- **Per-product run config**: `data/product_config/<product>.yaml` (lazy migration from `data/config.yaml` on first read)
+- **Remote runner**: Pull-based daemon (`sentinelflux runner`) — polls `GET /api/runner/claim`, POSTs progress/result; Bearer token auth (bcrypt hashes stored in `config.yaml runner_tokens`)
+- **Runner token admin**: `dashboard/routers/config/_runners.py` — plain token shown once at creation, only hash persisted
 
 ---
 
