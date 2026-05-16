@@ -8,6 +8,7 @@ router = APIRouter(prefix="/agents", tags=["agents"])
 
 _AGENT_REGISTRY = [
     {"name": "doc_gen", "description": "Generates test case docs from KB", "domain": "all", "requires_ai": True},
+    {"name": "doc_review", "description": "Reviews generated docs, rewrites thin or malformed test cases", "domain": "all", "requires_ai": True},
     {"name": "script_gen", "description": "Generates pytest scripts from test case docs", "domain": "all", "requires_ai": True},
     {"name": "result_analyzer", "description": "Classifies test failures using AI", "domain": "all", "requires_ai": True},
     {"name": "flaky_detector", "description": "Rule-based flaky test detection from run history", "domain": "all", "requires_ai": False},

@@ -1,6 +1,7 @@
 from ai.agents.base_agent import AgentContext, BaseAgent
 from ai.agents.coverage_gap_agent import CoverageGapAgent
 from ai.agents.doc_gen_agent import DocGenAgent
+from ai.agents.doc_review_agent import DocReviewAgent
 from ai.agents.flaky_detector_agent import FlakyDetectorAgent
 from ai.agents.locator_healer_agent import LocatorHealerAgent
 from ai.agents.quarantine_manager import QuarantineManager
@@ -13,6 +14,7 @@ __all__ = [
     "AgentContext",
     "BaseAgent",
     "DocGenAgent",
+    "DocReviewAgent",
     "ScriptGenAgent",
     "ResultAnalyzerAgent",
     "FlakyDetectorAgent",
