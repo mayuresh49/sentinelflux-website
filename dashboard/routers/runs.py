@@ -139,6 +139,26 @@ def analyze_run(run_id: str, background_tasks: BackgroundTasks, current_user: di
     return {"status": "analysis_queued", "run_id": run_id}
 
 
+@router.post("/analyze-all")
+def analyze_all(background_tasks: BackgroundTasks, current_user: dict = Depends(require_user)):
+    """Queue analysis for every completed/failed run with failures that the user can see."""
+    visible = _visible_products(current_user)
+    queued = []
+    for run in _rm.all_runs():
+        if run.get("product") not in visible:
+            continue
+        if run.get("status") not in ("completed", "failed"):
+            continue
+        if not run.get("failed", 0):
+            continue
+        report_path = _ROOT / run["report_path"]
+        if not report_path.exists():
+            continue
+        background_tasks.add_task(_analyze_failures, run["id"], run["domain"], report_path)
+        queued.append(run["id"])
+    return {"status": "analysis_queued", "queued": len(queued), "run_ids": queued}
+
+
 @router.post("/{run_id}/rerun")
 def rerun(run_id: str, background_tasks: BackgroundTasks, current_user: dict = Depends(require_user)):
     run = _rm.get_run(run_id)

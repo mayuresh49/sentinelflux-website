@@ -19,6 +19,13 @@
         </svg>
         Run Now
       </button>
+      <button @click="analyzeAll()"
+              class="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+        </svg>
+        Analyze All
+      </button>
       <button @click="showSchedule = !showSchedule"
               class="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-lg transition-colors">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -429,10 +436,10 @@
                       class="text-xs px-2 py-1 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded transition-colors">
                 Re-run
               </button>
-              {% if run.failed > 0 and not run.analyzed %}
+              {% if run.failed > 0 %}
               <button @click="analyze('{{ run.id }}')"
-                      class="text-xs px-2 py-1 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 rounded transition-colors">
-                Analyze
+                      class="text-xs px-2 py-1 {% if run.analyzed %}bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600{% else %}bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700{% endif %} rounded transition-colors">
+                {{ 'Re-analyze' if run.analyzed else 'Analyze' }}
               </button>
               {% endif %}
               {% endif %}
@@ -612,6 +619,24 @@ function runsPage() {
         setTimeout(() => location.reload(), 3000);
       } else {
         btn.textContent = 'Failed';
+        btn.disabled = false;
+      }
+    },
+
+    async analyzeAll() {
+      const btn = event.target.closest('button');
+      const orig = btn.innerHTML;
+      btn.textContent = 'Queueing…';
+      btn.disabled = true;
+      const r = await fetch('/api/runs/analyze-all', { method: 'POST' });
+      if (r.ok) {
+        const data = await r.json();
+        sfToast(`Queued analysis for ${data.queued} run(s)`, 'info');
+        if (data.queued > 0) setTimeout(() => location.reload(), 4000);
+        else { btn.innerHTML = orig; btn.disabled = false; }
+      } else {
+        sfToast('Failed to queue analysis', 'error');
+        btn.innerHTML = orig;
         btn.disabled = false;
       }
     },
