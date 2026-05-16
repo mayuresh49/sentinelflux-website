@@ -81,7 +81,7 @@ async def home(request: Request, product: str | None = None,
             "name": a["name"],
             "requires_ai": a["requires_ai"],
             "description": a["description"],
-            "status": status_map[a["name"]]["status"] if a["name"] in status_map else "never",
+            "status": status_map[a["name"]]["status"] if a["name"] in status_map else "idle",
         }
         for a in _AGENT_REGISTRY
     ]

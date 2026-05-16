@@ -30,7 +30,7 @@
   <div class="space-y-3">
     {% for agent in agents %}
     {% set last = agent.last_run %}
-    {% set status = last.status if last else 'never' %}
+    {% set status = last.status if last else 'idle' %}
     {% set meta = agent.meta %}
     {% set cfg = agent.config %}
     {% set status_colors = {
@@ -38,14 +38,14 @@
       "pending": "bg-amber-100 text-amber-700",
       "error": "bg-red-100 text-red-700",
       "skipped": "bg-slate-100 text-slate-500",
-      "never": "bg-slate-100 text-slate-400",
+      "idle": "bg-slate-100 text-slate-400",
     } %}
     {% set dot_colors = {
       "success": "bg-emerald-500",
       "pending": "bg-amber-500",
       "error": "bg-red-500",
       "skipped": "bg-slate-300",
-      "never": "bg-slate-200",
+      "idle": "bg-slate-200",
     } %}
     {% set health_colors = {
       "healthy":      "bg-emerald-100 text-emerald-700",

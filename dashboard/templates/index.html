@@ -54,7 +54,7 @@
       </div>
       <div class="flex items-center gap-3 text-[10px] text-slate-400">
         <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>success</span>
-        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span>running</span>
+        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span>pending</span>
         <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"></span>error</span>
         <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block"></span>idle</span>
       </div>
@@ -80,18 +80,18 @@
       <!-- Tier 2: Orchestrator -->
       {% set orch_list = agent_flow | selectattr("name", "equalto", "sentinel_orchestrator") | list %}
       {% set orch = orch_list[0] if orch_list else none %}
-      {% set orch_status = orch.status if orch else "never" %}
+      {% set orch_status = orch.status if orch else "idle" %}
       <div class="flex flex-col justify-center shrink-0 w-[120px]">
         <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Coordinator</p>
         <a href="/agents" class="border-2 rounded-lg px-2.5 py-3 text-center transition-shadow hover:shadow-md
           {% if orch_status == 'success' %}border-emerald-300 bg-emerald-50
-          {% elif orch_status in ('pending','running') %}border-amber-300 bg-amber-50
+          {% elif orch_status == 'pending' %}border-amber-300 bg-amber-50
           {% elif orch_status == 'error' %}border-red-300 bg-red-50
           {% else %}border-indigo-200 bg-indigo-50{% endif %}">
           <div class="flex items-center justify-center gap-1.5 mb-1">
             <span class="w-2 h-2 rounded-full
               {% if orch_status == 'success' %}bg-emerald-500
-              {% elif orch_status in ('pending','running') %}bg-amber-500 animate-pulse
+              {% elif orch_status == 'pending' %}bg-amber-500 animate-pulse
               {% elif orch_status == 'error' %}bg-red-500
               {% else %}bg-indigo-400{% endif %}"></span>
             <span class="text-[10px] font-semibold text-slate-700">Orchestrator</span>
@@ -108,8 +108,8 @@
       </div>
 
       <!-- Tier 3: Agents -->
-      {% set border_map = {"success": "border-emerald-200 bg-emerald-50 hover:border-emerald-300", "pending": "border-amber-200 bg-amber-50 hover:border-amber-300", "error": "border-red-200 bg-red-50 hover:border-red-300", "skipped": "border-slate-200 bg-slate-50", "never": "border-slate-200 bg-slate-50 hover:border-slate-300"} %}
-      {% set dot_map = {"success": "bg-emerald-500", "pending": "bg-amber-500", "error": "bg-red-500", "skipped": "bg-slate-300", "never": "bg-slate-300"} %}
+      {% set border_map = {"success": "border-emerald-200 bg-emerald-50 hover:border-emerald-300", "pending": "border-amber-200 bg-amber-50 hover:border-amber-300", "error": "border-red-200 bg-red-50 hover:border-red-300", "skipped": "border-slate-200 bg-slate-50", "idle": "border-slate-200 bg-slate-50 hover:border-slate-300"} %}
+      {% set dot_map = {"success": "bg-emerald-500", "pending": "bg-amber-500", "error": "bg-red-500", "skipped": "bg-slate-300", "idle": "bg-slate-300"} %}
       <div class="flex-1 min-w-[240px]">
         <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Agents</p>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-1.5">
