@@ -8,6 +8,7 @@ from ai.agents.quarantine_manager import QuarantineManager
 from ai.agents.regression_guard_agent import RegressionGuardAgent
 from ai.agents.result_analyzer_agent import ResultAnalyzerAgent
 from ai.agents.script_gen_agent import ScriptGenAgent
+from ai.agents.script_review_agent import ScriptReviewAgent
 from ai.agents.sentinel_orchestrator import SentinelOrchestrator
 
 __all__ = [
@@ -16,6 +17,7 @@ __all__ = [
     "DocGenAgent",
     "DocReviewAgent",
     "ScriptGenAgent",
+    "ScriptReviewAgent",
     "ResultAnalyzerAgent",
     "FlakyDetectorAgent",
     "QuarantineManager",

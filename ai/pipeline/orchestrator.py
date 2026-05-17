@@ -90,6 +90,7 @@ class TestPipelineOrchestrator:
             out_script = self._generate_script(
                 test_case_doc, feature_name, domain, output_base=output_base, tc_prefix=tc_prefix,
             )
+            self._review_script(out_script, domain)
 
             if increment_file:
                 self._log_increment(increment_file, feature_name, domain, out_doc, out_script)
@@ -156,6 +157,23 @@ class TestPipelineOrchestrator:
                 )
         except Exception as exc:
             _log.warning("DocReview skipped (non-fatal): %s", exc)
+
+    def _review_script(self, script_path: Path, domain: str) -> None:
+        """Run ScriptReviewAgent on a freshly generated script — best-effort, never raises."""
+        try:
+            from ai.agents.base_agent import AgentContext
+            from ai.agents.script_review_agent import ScriptReviewAgent
+            ctx = AgentContext(domain=domain)
+            agent = ScriptReviewAgent(ai_client=self.ai_client, kb_loader=self.kb_loader, context=ctx)
+            kb_context = self.kb_loader.get_all_context() if self.kb_loader else ""
+            result = agent.run(script_path=script_path, fix=True, kb_context=kb_context, domain=domain)
+            if result.get("issues"):
+                _log.info(
+                    "ScriptReview: %d issue(s) in %s — %d fixed",
+                    len(result["issues"]), script_path.name, len(result.get("fixed", [])),
+                )
+        except Exception as exc:
+            _log.warning("ScriptReview skipped (non-fatal): %s", exc)
 
     def _generate_script(
         self,

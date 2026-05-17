@@ -19,6 +19,29 @@ AGENT_META: dict = {
         "outputs": ["products/<product>/tests/<domain>/test_<feature>.py"],
         "config_params": [],
     },
+    "script_review": {
+        "responsibility": (
+            "Post-generation quality gate for pytest scripts. "
+            "Runs two passes: (1) static AST analysis — flags hardcoded URLs/credentials, "
+            "time.sleep() usage, POM instantiation missing base_url, duplicate test names; "
+            "(2) LLM rewrite pass — strengthens weak assertions (assert True, bare assert, "
+            "assert x is not None), adds missing assertions, adds missing domain markers, "
+            "and converts exact-equality assertions on AI-output fields "
+            "(confidence, category, prediction) into threshold or membership checks. "
+            "Best-effort — never raises; structural issues are flagged only, not auto-fixed."
+        ),
+        "inputs": [
+            "Generated pytest script (.py file)",
+            "Domain (api | web | mobile | security | a11y)",
+            "KB context string (optional — used in LLM rewrite prompts)",
+        ],
+        "outputs": [
+            "Patched pytest script (in-place rewrite for LLM-fixable issues)",
+            "issues list [{fn_name, type, description}]",
+            "fixed list (function names rewritten by LLM)",
+        ],
+        "config_params": [],
+    },
     "result_analyzer": {
         "responsibility": "Reads a pytest JSON report and classifies each failure using AI into one of five buckets: assertion (product bug), infra (server/network issue), flaky (intermittent), env (config/credentials mismatch), or locator (UI element not found). Reads domain-specific artifacts (logs, screenshots) for context.",
         "inputs": ["pytest-json-report JSON", "Failure artifacts (api_calls.log, console.log, screenshot)"],
