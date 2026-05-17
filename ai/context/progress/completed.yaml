@@ -1,5 +1,17 @@
 # Completed work items — append only, newest first
 
+- id: doc-id-conflict-fix
+  date: 2026-05-17
+  title: "TC ID conflict prevention — rulebook, pipeline auto-detection, doc fixes, new docs"
+  outcome: >
+    conventions.md: added TC ID Rules section with prefix table, 5 uniqueness rules,
+    current highest ID snapshot. orchestrator.py: _find_highest_tc_id() auto-detects
+    tc_start from existing docs; main() uses it to prevent silent ID collisions.
+    test_case_doc_kb.py: CRITICAL warning added to _build_tc_id_instruction() prompt.
+    15 existing docs: manual test IDs renumbered away from automated ID ranges
+    (OH-WEB 058-071, RB-WEB 012-014). 9 new docs created for undocumented test files
+    (security, accessibility, mobile for OH and RB). DocReviewAgent run on all 15 docs.
+
 - id: P2-04+P2-05
   date: 2026-05-17
   title: "ScriptReviewAgent + AI assertion utilities"

@@ -28,36 +28,92 @@ Client-side security checks on the Restful Booker web layer: XSS prevention in u
 ## Detailed Test Cases
 
 ### RB-SEC-006 — XSS In Contact Form Does Not Execute
-**Marks:** `web`, `security`, `regression`  
-**Pre-conditions:** Home page is accessible  
-**Test Data:** XSS payload = `<script>window.__xss_fired=true</script>`  
+**Pre-conditions:**
+- User Role: Anonymous
+- Starting URL: Home Page (https://automationintesting.online)
+- Required Data State: Contact form fields are accessible and empty
+
+**Test Data:**
+| Field | Value |
+|---|---|
+| Name | `<script>window.__xss_fired=true</script>` |
+| Email | Valid email format |
+| Phone | Not applicable (if required) |
+| Check-in Date | Not applicable (if required) |
+| Check-out Date | Not applicable (if required) |
+
 **Steps:**
 1. Navigate to home page
-2. Fill `#name` and `#message` (or equivalent contact fields) with XSS payload
-3. Fill `#email` with a valid-format email
-4. Check for JS dialog events and `window.__xss_fired`  
-**Expected:** No dialog fires; `window.__xss_fired` is not `true`
+2. Fill contact form fields with provided test data
+3. Submit the form
+4. Check for JS dialog events and `window.__xss_fired`
 
-### RB-SEC-007 — Admin Panel Requires Login
-**Marks:** `web`, `security`, `sanity`  
-**Pre-conditions:** No active admin session  
-**Steps:** Navigate directly to `/admin`  
-**Expected:** A login form (`#username`, `#password`, or `input[name='username']`) is present; admin panel content is not shown without credentials
+**Expected Result:** No dialog fires; `window.__xss_fired` is not `true`
 
-### RB-SEC-008 — XSS In Booking Firstname Does Not Execute
-**Marks:** `web`, `security`, `regression`  
-**Test Data:** XSS payload = `<script>window.__xss_fired=true</script>`  
+**Validation:** `window.__xss_fired` is checked and compared to a false value
+
+**Category:** positive
+**Status:** not_automated### RB-SEC-007 — Admin Panel Requires Login
+**Pre-conditions:**
+- User role: Anonymous
+- Starting URL: https://automationintesting.online/#/admin
+- Required data state: No active admin session
+
+**Test Data:**
+| Field | Value |
+|---|---|
+| username | admin |
+| password | password (from KB) |
+
 **Steps:**
-1. Navigate to home page
-2. Click first available Book button to open booking form
-3. Fill `input[name='firstname']` or `#firstname` with XSS payload
-4. Check for JS dialog events and `window.__xss_fired`  
-**Expected:** No dialog fires; `window.__xss_fired` is not `true`
+1. Navigate directly to `https://automationintesting.online/#/admin`
+2. Enter the credentials `admin` and `password` into the login form
+3. Submit the login form
 
-### RB-SEC-009 — Home Page Does Not Expose Server Version
-**Marks:** `web`, `security`, `regression`  
+**Expected Result:** The admin panel content is not shown; a login form is present.
+
+**Validation:** Verify that the login form is present and that the user cannot access the admin panel without entering valid credentials.
+
+**Category:** positive
+**Status:** not_automated### RB-SEC-008 — XSS In Booking Firstname Does Not Execute
+**Pre-conditions:**
+- User Role: Any
+- Starting URL: https://automationintesting.online
+- Required Data State: Booking Form open
+
+**Test Data:**
+| Field | Value |
+|---|---|
+| Firstname | `<script>window.__xss_fired=true</script>` |
+
+**Steps:**
+1. Navigate to the Booking Form by clicking the first available Book button on Home Page
+2. Enter `<script>window.__xss_fired=true</script>` in the Firstname field
+3. Submit the booking form
+4. Check for JS dialog events and `window.__xss_fired`
+
+**Expected Result:** No dialog fires; `window.__xss_fired` is not `true`
+
+**Validation:** Verify that `window.__xss_fired` is not `true` using a JavaScript assertion or console log.
+
+**Category:** positive
+**Status:** not_automated### RB-SEC-009 — Home Page Does Not Expose Server Version
+**Pre-conditions:**
+- User role: Unauthenticated
+- Starting URL: <https://automationintesting.online>
+- Required data state: No server version in response headers
+
+**Test Data:**
+| Field | Value |
+|---|---|
+| Server Header | apache/, nginx/, or iis/ (to be extracted from response headers) |
+
 **Steps:**
 1. Navigate to home page
 2. Intercept all responses via Playwright `page.on("response", ...)`
-3. Reload page and collect `Server` response headers  
-**Expected:** No `Server` header contains a version string for `apache/`, `nginx/`, or `iis/`
+3. Collect `Server` response headers
+4. Check if `Server` header contains a version string for apache/, nginx/, or iis/
+**Expected Result:** No server version found in the `Server` header
+**Validation:** Verify that the `Server` header does not contain a version string for apache/, nginx/, or iis/
+**Category:** positive
+**Status:** not_automated

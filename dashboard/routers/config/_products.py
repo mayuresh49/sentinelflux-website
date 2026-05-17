@@ -167,3 +167,17 @@ async def products_set_active(request: Request, name: str = Form(...), active: s
     _save_config(cfg)
     _audit_config(request, "Products", f"Set product '{name}' {'active' if is_active else 'inactive'}")
     return _render_products(request, cfg, flash=f"'{name}' is now {'active' if is_active else 'inactive'}.")
+
+
+@router.post("/ui/config/products/set-vapt", response_class=HTMLResponse)
+async def products_set_vapt(request: Request, name: str = Form(...), vapt: str = Form("true"),
+                            _: dict = Depends(_require_admin)):
+    cfg = _load_config()
+    enabled = vapt.lower() not in {"false", "0", "no"}
+    for p in cfg.get("products", []):
+        if p["name"] == name:
+            p["vapt_enabled"] = enabled
+            break
+    _save_config(cfg)
+    _audit_config(request, "Products", f"Set VAPT {'enabled' if enabled else 'disabled'} for '{name}'")
+    return _render_products(request, cfg, flash=f"VAPT {'enabled' if enabled else 'disabled'} for '{name}'.")

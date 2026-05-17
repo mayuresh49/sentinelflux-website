@@ -31,32 +31,101 @@
 ## Detailed Test Cases
 
 ### RB-SEC-001 — Delete Booking Without Auth Returns 401/403
-**Marks:** `api`, `security`, `sanity`  
+**Pre-conditions:**
+- User Role: Unauthenticated
+- Starting URL: https://restful-booker.herokuapp.com/auth
+- Required Data State: Auth Token is not present
+
+**Test Data:**
+| Field | Value |
+|---|---|
+| bookingId | any valid existing booking id |
+
 **Steps:**
-1. Create a booking using authenticated client
-2. `DELETE /booking/{id}` with no credentials (raw `requests` — no cookie)  
-**Expected:** `status_code in (401, 403)`
+1. Perform a POST request to `https://restful-booker.herokuapp.com/auth` with incorrect credentials (admin / invalid password)
+2. Obtain an auth token using the response from step 1
+3. Replace `{id}` in `DELETE /booking/{id}` with the obtained booking id from test data
+4. Send a DELETE request to the modified endpoint without including the auth token
 
-### RB-SEC-002 — Update Booking Without Auth Returns 401/403
-**Marks:** `api`, `security`, `regression`  
+**Expected Result:** Response status code is either 401 or 403
+
+**Validation:** Verify that the response status code is within (401, 403) range
+
+**Category:** positive
+**Status:** not_automated### RB-SEC-002 — Update Booking Without Auth Returns 401/403
+**Pre-conditions:**
+- User role: Authenticated
+- Starting URL: https://restful-booker.herokuapp.com/#/wrap
+- Required data state: Existing booking with valid ID
+**Test Data:**
+| Field | Value |
+|---|---|
+| Booking ID | (existent bookings' ID from KB) |
 **Steps:**
-1. Create a booking using authenticated client
-2. `PUT /booking/{id}` with full payload but no credentials  
-**Expected:** `status_code in (401, 403)`
+1. Send a PUT request to `/booking/{id}` with full payload but without credentials
+2. Verify the response status code is either 401 or 403
+**Expected Result:** Response status code is either 401 or 403
+**Validation:** Check the HTTP status code from the response
+**Category:** negative
+**Status:** not_automated### RB-SEC-003 — SQL Injection In Search Does Not Cause 500
+**Pre-conditions:**
+- User Role: Unauthenticated
+- Starting URL: https://restful-booker.herokuapp.com/booking?firstname=...&lastname=...
+- Required Data State: None
 
-### RB-SEC-003 — SQL Injection In Search Does Not Cause 500
-**Marks:** `api`, `security`, `regression`  
-**Test Data:** `firstname = "' OR '1'='1"`, `lastname = "' OR '1'='1"`  
-**Steps:** `GET /booking?firstname=...&lastname=...`  
-**Expected:** `status_code != 500`; response body does not contain `"sql"` (case-insensitive)
+**Test Data:**
+| Field | Value |
+|---|---|
+| firstname | "' OR '1'='1" |
+| lastname | "' OR '1'='1" |
 
-### RB-SEC-004 — API Response Content-Type Is JSON
-**Marks:** `api`, `security`, `regression`  
-**Steps:** `GET /booking`  
-**Expected:** `status_code == 200`; `Content-Type` header contains `application/json` or `json`
+**Steps:**
+1. Perform a GET request on the specified URL with the provided test data.
+2. Check the response status code.
 
-### RB-SEC-005 — Nonexistent Booking ID Returns 404
-**Marks:** `api`, `security`, `regression`  
-**Test Data:** booking ID = `999999999`  
-**Steps:** `GET /booking/999999999`  
-**Expected:** `status_code == 404`
+**Expected Result:** The response status code is not equal to 500.
+
+**Validation:** The response body does not contain "sql" (case-insensitive).
+
+**Category:** positive
+**Status:** not_automated### RB-SEC-004 — API Response Content-Type Is JSON
+**Pre-conditions:**
+- User role: None (anonymous user)
+- Starting URL: https://restful-booker.herokuapp.com/auth
+- Required data state: No authentication required for GET operations
+
+**Test Data:**
+| Field | Value |
+|---|---|
+| Endpoint | GET /booking |
+
+**Steps:**
+1. Perform the GET /booking request without authentication
+2. Check the response headers
+
+**Expected Result:** The response should contain a status code of 200 and a `Content-Type` header containing either 'application/json' or 'json'.
+
+**Validation:** Assert that the status code is 200, and that the `Content-Type` header contains either 'application/json' or 'json'.
+
+**Category:** positive
+**Status:** not_automated### RB-SEC-005 — Nonexistent Booking ID Returns 404
+**Pre-conditions:**
+- User Role: Not Applicable (API Request)
+- Starting URL: https://restful-booker.herokuapp.com/auth (for obtaining token if needed)
+- Required Data State: Auth Token (if applicable)
+
+**Test Data:**
+| Field | Value |
+|---|---|
+| Booking ID | 999999999 |
+
+**Steps:**
+1. Make a GET request to `https://restful-booker.herokuapp.com/booking/{BookingID}` with the provided Auth Token if required.
+2. Verify the response status code.
+
+**Expected Result:** Status Code: 404 Not Found
+
+**Validation:** Verify that the status code equals 404.
+
+**Category:** positive
+**Status:** not_automated

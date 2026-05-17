@@ -58,6 +58,7 @@ dashboard = [
     "python-multipart>=0.0.9",
     "markdown>=3.6",
     "bcrypt>=4.0.0",
+    "weasyprint>=62.0",
     "itsdangerous>=2.1.0",
 ]
 integration = [
