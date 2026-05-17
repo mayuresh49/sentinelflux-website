@@ -39,6 +39,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-17)
 
+- **TC ID generation hardening** (3 files): `kb_loader.py` — fixed `get_increments_context()` crash when `feature` key is a plain string (was silently skipping DocReview on every pipeline run). `test_case_doc_kb.py` — `_build_tc_id_instruction()` now emits a concrete 4-step example sequence and an explicit "NEVER start from PREFIX-001" rule. `orchestrator.py` — `_normalize_tc_ids()` post-processes every generated doc; remaps LLM-produced IDs to the correct sequential range starting at `tc_start`, providing a reliable backstop independent of model quality.
+
+## Previous: TC ID conflict prevention + DocReview pass (2026-05-17)
+
 - **TC ID conflict prevention** (`ai/context/conventions.md`): Added full "Test Case ID Rules" section — prefix table for all product/layer combos, 5 conflict-prevention rules (automated tests as source of truth, global uniqueness, auto tc_start, manual ID placement, grep-before-assign), current highest ID snapshot table.
 - **Pipeline tc_start auto-detection** (`ai/pipeline/orchestrator.py`): `_find_highest_tc_id()` scans existing docs to find the highest NNN for a given prefix. `main()` auto-computes `tc_start = highest + 1` when prefix is set and user did not override `--tc-start`, preventing silent ID collisions across pipeline runs.
 - **Stronger ID uniqueness prompt** (`ai/skills/test_case_doc_kb.py` `_build_tc_id_instruction()`): Explicit CRITICAL warning that starting below tc_start causes silent ID collisions; prohibition on range headings; TC Index table requirement.
@@ -138,6 +142,7 @@ pages/base_page.py              Base POM with self-healing locators
 sentinelflux/                   CLI commands (init, run, generate, doctor)
 utils/constants.py              All magic numbers
 utils/ai_factory.py             AI client instantiation (do not duplicate in conftest)
+core/vapt_manager.py            VAPT engagement lifecycle: CRUD, scope, scans, findings, certificate issuance
 core/db.py                      SQLite connection + schema (WAL mode). Single source of truth for all shared state.
 core/approval_manager.py        Human-in-the-loop approvals → sentinelflux.db
 core/run_manager.py             Test run records + schedules → sentinelflux.db

@@ -1,5 +1,16 @@
 # Completed work items — append only, newest first
 
+- id: tc-id-generation-hardening
+  date: 2026-05-17
+  title: "TC ID generation hardening — normalizer, stronger prompt, increments string guard"
+  outcome: >
+    orchestrator.py: _normalize_tc_ids() post-processes every generated doc,
+    remapping wrong IDs to the correct sequential range starting at tc_start.
+    test_case_doc_kb.py: _build_tc_id_instruction() now shows a concrete
+    4-step example sequence and "NEVER start from PREFIX-001" rule.
+    kb_loader.py: get_increments_context() handles string 'feature' keys
+    (was crashing and skipping DocReview silently on every pipeline run).
+
 - id: doc-id-conflict-fix
   date: 2026-05-17
   title: "TC ID conflict prevention — rulebook, pipeline auto-detection, doc fixes, new docs"

@@ -1,0 +1,989 @@
+{
+  "runs": [
+    {
+      "id": "run_26d6cb94",
+      "triggered_at": "2026-05-15T02:56:05.253309+00:00",
+      "finished_at": "2026-05-15T02:56:05.427040+00:00",
+      "product": "orangehrm",
+      "domain": "api",
+      "module": "test_orangehrm_admin",
+      "trigger": "manual",
+      "schedule_id": null,
+      "status": "failed",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "errors": 0,
+      "duration": 0.0,
+      "report_path": "data/runs/run_26d6cb94_report.json",
+      "analyzed": false,
+      "failure_categories": {},
+      "failures": [],
+      "run_config_snapshot": {
+        "environment": "",
+        "browser": "",
+        "device": "",
+        "base_url": "",
+        "api_url": "",
+        "browser_type": "",
+        "headless": true,
+        "appium_url": "",
+        "device_platform": "",
+        "device_capabilities": {}
+      }
+    },
+    {
+      "id": "run_b79398dc",
+      "triggered_at": "2026-05-15T02:58:32.015023+00:00",
+      "finished_at": "2026-05-15T02:58:44.533218+00:00",
+      "product": "orangehrm",
+      "domain": "api",
+      "module": "test_orangehrm_admin",
+      "trigger": "manual",
+      "schedule_id": null,
+      "status": "completed",
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "errors": 0,
+      "duration": 12.3,
+      "report_path": "data/runs/run_b79398dc_report.json",
+      "analyzed": false,
+      "failure_categories": {},
+      "failures": [],
+      "run_config_snapshot": {
+        "environment": "",
+        "browser": "",
+        "device": "",
+        "base_url": "",
+        "api_url": "",
+        "browser_type": "",
+        "headless": true,
+        "appium_url": "",
+        "device_platform": "",
+        "device_capabilities": {}
+      }
+    },
+    {
+      "id": "run_8e54441a",
+      "triggered_at": "2026-05-15T03:02:55.538392+00:00",
+      "finished_at": "2026-05-15T03:04:12.669459+00:00",
+      "product": "orangehrm",
+      "domain": "web",
+      "module": "",
+      "trigger": "manual",
+      "schedule_id": null,
+      "status": "completed",
+      "total": 58,
+      "passed": 11,
+      "failed": 43,
+      "skipped": 0,
+      "errors": 36,
+      "duration": 76.9,
+      "report_path": "data/runs/run_8e54441a_report.json",
+      "analyzed": true,
+      "failure_categories": {
+        "infra": 43
+      },
+      "failures": [
+        {
+          "test_id": "tests/web/test_Timesheets.py::test_user_can_access_timesheets_form[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, preventing analysis of selector timeouts, screenshots, console errors, or network traces.",
+          "suggestion": "Ensure artifact collection is enabled to capture necessary evidence for diagnosing test failures."
+        },
+        {
+          "test_id": "tests/web/test_Timesheets.py::test_valid_timesheet_submission_with_correct_data[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, making it difficult to diagnose the issue.",
+          "suggestion": "Ensure that artifact collection is enabled in the test configuration."
+        },
+        {
+          "test_id": "tests/web/test_Timesheets.py::test_mandatory_fields_validation_for_timesheet_form[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available, indicating an infrastructure issue with test execution.",
+          "suggestion": "Check the CI/CD pipeline configuration and ensure all necessary artifacts are being captured."
+        },
+        {
+          "test_id": "tests/web/test_Timesheets.py::test_input_restriction_checks_for_timesheet_hours_worked[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, unable to determine the root cause of the test failure.",
+          "suggestion": "Ensure that all necessary artifacts are captured during test execution for further analysis."
+        },
+        {
+          "test_id": "tests/web/test_Timesheets.py::test_negative_scenarios_for_timesheet_from_date_and_to_date[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, preventing analysis of test failure.",
+          "suggestion": "Ensure that artifacts are being captured and stored for failed tests."
+        },
+        {
+          "test_id": "tests/web/test_Timesheets.py::test_validate_employee_id_uniqueness[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available suggests infrastructure issues with test environment setup or execution.",
+          "suggestion": "Check the test environment configuration and ensure all dependencies are correctly set up."
+        },
+        {
+          "test_id": "tests/web/test_Timesheets.py::test_session_expiry_and_inactivity_timeout[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "No artifacts available for analysis.",
+          "suggestion": "Ensure that the test environment is correctly configured to capture and store artifacts such as screenshots, console logs, and network traces."
+        },
+        {
+          "test_id": "tests/web/test_Timesheets.py::test_password_complexity_rules[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available, making it impossible to diagnose the failure.",
+          "suggestion": "Ensure that screenshots and other diagnostic artifacts are captured during test execution."
+        },
+        {
+          "test_id": "tests/web/test_Timesheets.py::test_admin_cannot_delete_their_own_account[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available, unable to diagnose the issue.",
+          "suggestion": "Ensure artifacts are enabled for test runs and rerun the test."
+        },
+        {
+          "test_id": "tests/web/test_Timesheets.py::test_ess_users_can_only_edit_their_own_profile[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available, preventing analysis of selector timeouts, UI state, browser console errors, or network trace anomalies.",
+          "suggestion": "Ensure artifact collection is enabled for the test to capture necessary logs and screenshots for diagnosis."
+        },
+        {
+          "test_id": "tests/web/test_Timesheets.py::test_supervisor_can_view_direct_reports_timesheets[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available, preventing analysis of the failure.",
+          "suggestion": "Ensure artifact collection is enabled for test runs to capture screenshots and logs."
+        },
+        {
+          "test_id": "tests/web/test_admin_users.py::test_OH_WEB_019_user_list_loads_on_navigation[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, preventing analysis of selector timeouts, UI state, browser console errors, or network trace anomalies.",
+          "suggestion": "Ensure that artifact collection is enabled in the test configuration to gather necessary diagnostic information."
+        },
+        {
+          "test_id": "tests/web/test_admin_users.py::test_OH_WEB_020_user_list_shows_record_count[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available, preventing analysis of selector timeouts, UI state screenshots, browser console errors, and network traces.",
+          "suggestion": "Ensure artifact collection is enabled to gather necessary diagnostic data for failure analysis."
+        },
+        {
+          "test_id": "tests/web/test_admin_users.py::test_OH_WEB_021_search_by_admin_username_filters_results[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, preventing detailed analysis of the failure.",
+          "suggestion": "Ensure that artifact collection is enabled to gather necessary evidence for diagnosing future failures."
+        },
+        {
+          "test_id": "tests/web/test_admin_users.py::test_OH_WEB_022_search_with_nonexistent_username_shows_no_records[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "No artifacts available, preventing further analysis.",
+          "suggestion": "Ensure that test execution is configured to capture and save necessary artifacts for troubleshooting."
+        },
+        {
+          "test_id": "tests/web/test_admin_users.py::test_OH_WEB_023_cancel_returns_to_list[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available suggests an infrastructure issue with test execution.",
+          "suggestion": "Ensure that artifact collection is enabled and the infrastructure is properly configured to capture screenshots, browser console logs, and network traces."
+        },
+        {
+          "test_id": "tests/web/test_admin_users.py::test_OH_WEB_025_save_without_password_shows_validation_error[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available for analysis; unable to identify specific cause.",
+          "suggestion": "Ensure that all necessary artifacts, such as screenshots and logs, are captured during test execution."
+        },
+        {
+          "test_id": "tests/web/test_leave.py::test_OH_WEB_026_leave_list_loads_on_navigation[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "No artifacts available, preventing analysis.",
+          "suggestion": "Ensure artifacts are captured for future test failures."
+        },
+        {
+          "test_id": "tests/web/test_leave.py::test_OH_WEB_027_leave_list_shows_record_count[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available, preventing analysis of selector timeouts, UI state screenshots, browser console errors, and network traces.",
+          "suggestion": "Ensure artifact collection is enabled to capture necessary diagnostic information for failure analysis."
+        },
+        {
+          "test_id": "tests/web/test_leave.py::test_OH_WEB_028_filter_by_pending_status_shows_results[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available, preventing analysis of selector timeouts, UI state, browser console errors, and network traces.",
+          "suggestion": "Ensure that artifact collection is enabled in the test configuration to capture necessary data for failure analysis."
+        },
+        {
+          "test_id": "tests/web/test_leave.py::test_OH_WEB_029_search_with_future_date_range_shows_no_records[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available suggests an infrastructure issue preventing the capture of logs, screenshots or network traces necessary for further analysis.",
+          "suggestion": "Ensure that artifact collection is enabled and that the testing environment has sufficient permissions to create and access these files."
+        },
+        {
+          "test_id": "tests/web/test_login.py::test_OH_WEB_001_valid_admin_login_redirects_to_dashboard[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "TypeError indicates missing argument in LoginPage initialization.",
+          "suggestion": "Ensure 'base_url' is passed during the instantiation of LoginPage."
+        },
+        {
+          "test_id": "tests/web/test_login.py::test_OH_WEB_002_wrong_password_shows_error[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "TypeError indicates a missing argument in the LoginPage constructor.",
+          "suggestion": "Ensure that 'base_url' is passed to the LoginPage instance creation."
+        },
+        {
+          "test_id": "tests/web/test_login.py::test_OH_WEB_003_wrong_username_shows_error[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "The test case is failing due to a missing required argument in the LoginPage class constructor.",
+          "suggestion": "Ensure that the 'base_url' argument is provided when instantiating the LoginPage object."
+        },
+        {
+          "test_id": "tests/web/test_login.py::test_OH_WEB_004_empty_username_shows_error[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "The error indicates a missing positional argument in the LoginPage constructor.",
+          "suggestion": "Ensure that the 'base_url' argument is passed to the LoginPage constructor when initializing it."
+        },
+        {
+          "test_id": "tests/web/test_login.py::test_OH_WEB_005_empty_password_shows_error[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "TypeError in LoginPage initialization due to missing 'base_url' argument.",
+          "suggestion": "Ensure that the 'base_url' is correctly passed when initializing the LoginPage object."
+        },
+        {
+          "test_id": "tests/web/test_login.py::test_OH_WEB_006_both_fields_empty_shows_error[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "Test setup failure due to missing argument in LoginPage constructor.",
+          "suggestion": "Ensure 'base_url' is passed when initializing LoginPage object."
+        },
+        {
+          "test_id": "tests/web/test_login.py::test_OH_WEB_008_sql_injection_in_username_does_not_crash[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "The LoginPage constructor is missing a required positional argument 'base_url'.",
+          "suggestion": "Ensure that the 'base_url' argument is provided when instantiating the LoginPage object."
+        },
+        {
+          "test_id": "tests/web/test_pim_employee.py::test_OH_WEB_009_employee_list_loads_on_navigation[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available, indicating an infrastructure or setup issue.",
+          "suggestion": "Check the test environment and ensure all required dependencies and configurations are correctly set up."
+        },
+        {
+          "test_id": "tests/web/test_pim_employee.py::test_OH_WEB_010_add_employee_with_required_fields_only[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "No artifacts available; unable to diagnose failure.",
+          "suggestion": "Ensure artifacts are captured for analysis."
+        },
+        {
+          "test_id": "tests/web/test_pim_employee.py::test_OH_WEB_011_add_employee_with_all_fields[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available for analysis, preventing determination of failure cause.",
+          "suggestion": "Ensure artifact collection is enabled to diagnose the issue."
+        },
+        {
+          "test_id": "tests/web/test_pim_employee.py::test_OH_WEB_012_save_without_firstname_shows_validation_error[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "No artifacts available, preventing analysis of the failure.",
+          "suggestion": "Ensure that screenshots, browser console logs, and network traces are captured for future failures."
+        },
+        {
+          "test_id": "tests/web/test_pim_employee.py::test_OH_WEB_013_save_without_lastname_shows_validation_error[chromium]",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available, preventing analysis of the root cause.",
+          "suggestion": "Ensure that all required artifacts are captured during test execution for further diagnosis."
+        },
+        {
+          "test_id": "tests/web/test_pim_employee.py::test_OH_WEB_014_firstname_exceeding_30_chars_shows_validation_error[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, preventing analysis of selector timeouts, screenshots, console errors, or network traces.",
+          "suggestion": "Ensure that artifact collection is enabled in the test environment to capture necessary evidence for diagnosis."
+        },
+        {
+          "test_id": "tests/web/test_pim_employee.py::test_OH_WEB_015_cancel_returns_to_list_without_saving[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, preventing detailed analysis.",
+          "suggestion": "Ensure artifact collection is enabled to gather screenshots, console logs, and network traces for diagnosis."
+        },
+        {
+          "test_id": "tests/web/test_pim_employee.py::test_OH_WEB_016_search_by_name_filters_results[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, preventing analysis of selector timeouts, screenshots, console errors, or network traces.",
+          "suggestion": "Ensure that artifact collection is enabled to capture necessary evidence for diagnosis."
+        },
+        {
+          "test_id": "tests/web/test_pim_employee.py::test_OH_WEB_018_add_employee_parametrized[chromium-Alice-Smith]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, making it impossible to diagnose the failure.",
+          "suggestion": "Ensure that artifacts are captured and stored for future analysis."
+        },
+        {
+          "test_id": "tests/web/test_recruitment.py::test_OH_WEB_031_vacancies_list_loads_with_active_vacancies[chromium]",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "No artifacts available, making it impossible to diagnose the failure.",
+          "suggestion": "Ensure that artifacts such as screenshots, browser console logs, and network traces are captured for analysis."
+        },
+        {
+          "test_id": "tests/web/test_recruitment.py::test_OH_WEB_032_filter_by_job_title_narrows_vacancy_list[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, preventing analysis of selector timeouts, UI state, browser console errors, and network trace anomalies.",
+          "suggestion": "Ensure that artifact collection is enabled for test runs to capture necessary diagnostic information."
+        },
+        {
+          "test_id": "tests/web/test_recruitment.py::test_OH_WEB_033_filter_by_status_active_shows_only_active_vacancies[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, preventing further analysis of the failure.",
+          "suggestion": "Ensure that all necessary artifacts are captured for future failures."
+        },
+        {
+          "test_id": "tests/web/test_recruitment.py::test_OH_WEB_034_clicking_add_navigates_to_add_vacancy_form[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, preventing analysis of selector timeouts or UI state.",
+          "suggestion": "Ensure artifact collection is enabled to capture screenshots and console logs for further diagnosis."
+        },
+        {
+          "test_id": "tests/web/test_recruitment.py::test_OH_WEB_035_filter_no_matching_criteria_shows_no_records[chromium]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, preventing analysis of failure cause.",
+          "suggestion": "Ensure artifact collection is enabled in the test configuration to capture logs and screenshots for diagnosing future failures."
+        },
+        {
+          "test_id": "tests/web/test_pim_employee.py::test_OH_WEB_018_add_employee_parametrized[chromium-Bob-Jones]",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available for analysis, indicating an infrastructure issue.",
+          "suggestion": "Check the test environment setup and ensure that all necessary artifacts are being captured."
+        }
+      ],
+      "run_config_snapshot": {
+        "environment": "",
+        "browser": "",
+        "device": "",
+        "base_url": "",
+        "api_url": "",
+        "browser_type": "",
+        "headless": true,
+        "appium_url": "",
+        "device_platform": "",
+        "device_capabilities": {}
+      }
+    },
+    {
+      "id": "run_c0fcee45",
+      "triggered_at": "2026-05-15T12:41:44.297441+00:00",
+      "finished_at": "2026-05-15T12:41:59.226271+00:00",
+      "product": "orangehrm",
+      "domain": "api",
+      "module": "",
+      "trigger": "schedule",
+      "schedule_id": "sched_b6cea409",
+      "status": "completed",
+      "total": 32,
+      "passed": 17,
+      "failed": 15,
+      "skipped": 0,
+      "errors": 15,
+      "duration": 14.63,
+      "report_path": "data/runs/run_c0fcee45_report.json",
+      "analyzed": true,
+      "failure_categories": {
+        "env": 3,
+        "infra": 8,
+        "assertion": 1,
+        "flaky": 1,
+        "unknown": 2
+      },
+      "failures": [
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_returns_200",
+          "classification": "env",
+          "confidence": 0.9,
+          "summary": "No artifacts available, indicating an environment issue where necessary logs or data are not accessible.",
+          "suggestion": "Check the test environment setup and ensure that logging is correctly configured to capture all necessary artifacts."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_with_valid_data_returns_201",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available suggests an infrastructure or logging issue preventing test output.",
+          "suggestion": "Ensure that the logging and artifact collection are properly configured in your testing environment."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_timesheet_with_valid_data_returns_200",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available indicates a potential infrastructure issue or missing logs.",
+          "suggestion": "Ensure logging is properly configured and check for any infrastructure issues that may be preventing artifact generation."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_delete_timesheet_with_valid_data_returns_204",
+          "classification": "env",
+          "confidence": 0.8,
+          "summary": "No artifacts available suggests an issue with the test environment setup or logging.",
+          "suggestion": "Ensure that the test environment is correctly configured and that logs are enabled for API calls."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_unauthenticated_returns_401",
+          "classification": "assertion",
+          "confidence": 1.0,
+          "summary": "API returns no artifacts, likely due to unauthenticated access.",
+          "suggestion": "Ensure the test includes valid authentication headers before making the API call."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_insufficient_permissions_returns_403",
+          "classification": "env",
+          "confidence": 0.8,
+          "summary": "No artifacts available suggests an environmental issue with test setup or execution.",
+          "suggestion": "Verify the environment configuration and ensure all dependencies are correctly installed and accessible."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_missing_empNumber_returns_400",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, indicating a potential infrastructure issue preventing the API call from completing.",
+          "suggestion": "Check server logs for any errors or warnings that might indicate why no response was received."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_invalid_date_format_returns_400",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "No artifacts available suggests an issue with the test environment or infrastructure, preventing access to logs or responses.",
+          "suggestion": "Check the test environment setup and ensure that all necessary logging and artifact capturing mechanisms are functioning correctly."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_non_existent_timesheet_returns_404",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available indicates that the API call did not reach the server or logs were not captured, suggesting an infrastructure issue.",
+          "suggestion": "Check network connectivity and logging setup to ensure API calls are reaching the server."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_delete_non_existent_timesheet_returns_404",
+          "classification": "flaky",
+          "confidence": 0.8,
+          "summary": "The test is failing due to the absence of artifacts, which suggests a potential flaky behavior where necessary logs or data might not be consistently available.",
+          "suggestion": "Implement logging and artifact collection in the test setup to ensure all relevant information is captured for analysis."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_no_entries_returns_empty_array",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "No artifacts available indicates an issue with test execution environment or logging.",
+          "suggestion": "Check the CI/CD pipeline configuration and ensure that artifacts are correctly captured and stored."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_minimum_required_fields_returns_201",
+          "classification": "unknown",
+          "confidence": 0.0,
+          "summary": "No artifacts available for analysis.",
+          "suggestion": "Collect and provide the necessary logs and details to diagnose the issue."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_timesheet_no_changes_returns_200",
+          "classification": "unknown",
+          "confidence": 0.5,
+          "summary": "No artifacts available for analysis.",
+          "suggestion": "Provide API call logs and response details for further diagnosis."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_unique_empNumber_returns_201",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "No artifacts available, indicating an infrastructure issue preventing the test from running or capturing output.",
+          "suggestion": "Check server logs and ensure that the test environment is correctly set up and accessible."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_timesheet_invalid_hours_returns_400",
+          "classification": "infra",
+          "confidence": 0.9,
+          "summary": "No artifacts available indicates a potential issue with the testing environment or infrastructure setup.",
+          "suggestion": "Ensure that all necessary artifacts and dependencies are correctly set up in the test environment."
+        }
+      ],
+      "run_config_snapshot": {
+        "environment": "",
+        "browser": "",
+        "device": "",
+        "base_url": "",
+        "api_url": "",
+        "browser_type": "",
+        "headless": true,
+        "appium_url": "",
+        "device_platform": "",
+        "device_capabilities": {}
+      },
+      "progress_total": 32,
+      "progress_done": 32
+    },
+    {
+      "id": "run_b2fcb53b",
+      "triggered_at": "2026-05-15T12:44:16.288552+00:00",
+      "finished_at": "2026-05-15T12:44:32.752119+00:00",
+      "product": "orangehrm",
+      "domain": "api",
+      "module": "",
+      "trigger": "schedule",
+      "schedule_id": "sched_3645d9ff",
+      "status": "completed",
+      "total": 32,
+      "passed": 17,
+      "failed": 15,
+      "skipped": 0,
+      "errors": 15,
+      "duration": 16.13,
+      "report_path": "data/runs/run_b2fcb53b_report.json",
+      "analyzed": true,
+      "failure_categories": {
+        "unknown": 3,
+        "flaky": 1,
+        "infrastructure": 1,
+        "infra": 5,
+        "assertion": 4,
+        "env": 1
+      },
+      "failures": [
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_returns_200",
+          "classification": "unknown",
+          "confidence": 0.9,
+          "summary": "No artifacts available for analysis.",
+          "suggestion": "Ensure that logs and response details are captured during the test execution."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_with_valid_data_returns_201",
+          "classification": "flaky",
+          "confidence": 0.5,
+          "summary": "The test may be failing due to inconsistent network conditions or timing issues.",
+          "suggestion": "Retry the test with increased retries or adjust the timeout settings."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_timesheet_with_valid_data_returns_200",
+          "classification": "unknown",
+          "confidence": 0.5,
+          "summary": "No artifacts available, unable to determine the cause of failure.",
+          "suggestion": "Collect and review API call logs for HTTP status codes, response schemas, auth errors, and timeout patterns."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_delete_timesheet_with_valid_data_returns_204",
+          "classification": "infrastructure",
+          "confidence": 0.8,
+          "summary": "The test did not provide any artifacts, making it impossible to determine the exact cause of failure.",
+          "suggestion": "Ensure that API call logs and response data are captured for further analysis."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_unauthenticated_returns_401",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available suggests a failure in capturing or providing necessary logs for analysis.",
+          "suggestion": "Ensure that logging is enabled and configured correctly to capture all relevant API call details."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_insufficient_permissions_returns_403",
+          "classification": "assertion",
+          "confidence": 1.0,
+          "summary": "The test failed due to an HTTP 403 status code, indicating insufficient permissions.",
+          "suggestion": "Verify that the user or role used in the test has the necessary permissions to access timesheets."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_missing_empNumber_returns_400",
+          "classification": "assertion",
+          "confidence": 1.0,
+          "summary": "The API call failed with a 400 Bad Request status code, indicating an assertion error due to missing 'empNumber' field in the request.",
+          "suggestion": "Ensure that the request body includes the required 'empNumber' field when posting timesheets."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_invalid_date_format_returns_400",
+          "classification": "assertion",
+          "confidence": 0.9,
+          "summary": "The API returned a 400 Bad Request status code due to an invalid date format in the request payload.",
+          "suggestion": "Ensure that the date format in the request payload adheres to the expected format specified by the API documentation."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_non_existent_timesheet_returns_404",
+          "classification": "assertion",
+          "confidence": 1.0,
+          "summary": "The API did not return the expected 404 status code for a non-existent timesheet.",
+          "suggestion": "Ensure the API correctly handles requests for non-existent resources by returning a 404 status code."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_delete_non_existent_timesheet_returns_404",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available suggests an infrastructure issue preventing test execution.",
+          "suggestion": "Check the API server logs for any errors or downtime that could be causing the failure to produce logs."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_no_entries_returns_empty_array",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "The test did not receive any artifacts, indicating a potential infrastructure issue with artifact collection.",
+          "suggestion": "Ensure that the artifact collection mechanism is properly configured and that there are no issues with the storage or retrieval of artifacts."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_minimum_required_fields_returns_201",
+          "classification": "env",
+          "confidence": 0.9,
+          "summary": "No artifacts available, indicating an environment issue with test execution.",
+          "suggestion": "Check the test environment configuration and ensure all dependencies are correctly set up."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_timesheet_no_changes_returns_200",
+          "classification": "infra",
+          "confidence": 1.0,
+          "summary": "No artifacts available indicates a lack of diagnostic information, suggesting an infrastructure issue preventing test execution.",
+          "suggestion": "Check the CI/CD environment and ensure that all necessary logs and artifacts are being captured."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_unique_empNumber_returns_201",
+          "classification": "unknown",
+          "confidence": 0.8,
+          "summary": "No artifacts available for analysis.",
+          "suggestion": "Ensure that API call logs and response details are captured for future analysis."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_timesheet_invalid_hours_returns_400",
+          "classification": "infra",
+          "confidence": 0.8,
+          "summary": "No artifacts available, suggesting an infrastructure issue with logging or test environment setup.",
+          "suggestion": "Ensure that the test environment is properly configured to capture and log all API call details."
+        }
+      ],
+      "run_config_snapshot": {
+        "environment": "",
+        "browser": "",
+        "device": "",
+        "base_url": "",
+        "api_url": "",
+        "browser_type": "",
+        "headless": true,
+        "appium_url": "",
+        "device_platform": "",
+        "device_capabilities": {}
+      },
+      "progress_total": 32,
+      "progress_done": 32
+    },
+    {
+      "id": "run_8a6af76c",
+      "triggered_at": "2026-05-15T13:11:25.690518+00:00",
+      "finished_at": "2026-05-15T13:11:42.650870+00:00",
+      "product": "orangehrm",
+      "domain": "api",
+      "module": "",
+      "trigger": "schedule",
+      "schedule_id": "sched_b6cea409",
+      "status": "completed",
+      "total": 32,
+      "passed": 17,
+      "failed": 15,
+      "skipped": 0,
+      "errors": 15,
+      "duration": 16.67,
+      "report_path": "data/runs/run_8a6af76c_report.json",
+      "analyzed": true,
+      "failure_categories": {
+        "env": 15
+      },
+      "failures": [
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_returns_200",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The fixture 'rest_client' is not found, indicating an environment setup issue.",
+          "suggestion": "Ensure that the 'rest_client' fixture is properly defined and imported in your test environment."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_with_valid_data_returns_201",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The test setup failed due to a missing 'rest_client' fixture.",
+          "suggestion": "Ensure the 'rest_client' fixture is defined in your pytest configuration or conftest.py file."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_timesheet_with_valid_data_returns_200",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The test setup failed due to a missing 'rest_client' fixture.",
+          "suggestion": "Ensure the 'rest_client' fixture is defined and available in the pytest configuration."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_delete_timesheet_with_valid_data_returns_204",
+          "classification": "env",
+          "confidence": 0.9,
+          "summary": "The fixture 'rest_client' is not found in the available fixtures.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined and available in your pytest configuration or test module."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_unauthenticated_returns_401",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The 'rest_client' fixture is not available, causing a setup failure.",
+          "suggestion": "Ensure the 'rest_client' fixture is correctly defined and imported in the test environment."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_insufficient_permissions_returns_403",
+          "classification": "env",
+          "confidence": 0.9,
+          "summary": "The test setup failed due to the 'rest_client' fixture not being found.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined and available in your pytest configuration or conftest.py file."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_missing_empNumber_returns_400",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The test setup failed due to the 'rest_client' fixture not being found.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined in your conftest.py or the appropriate fixtures module."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_invalid_date_format_returns_400",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The 'rest_client' fixture is not available in the test setup.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined and imported in the appropriate conftest.py file."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_non_existent_timesheet_returns_404",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The fixture 'rest_client' is not found in the available fixtures list.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined or imported correctly in the test environment."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_delete_non_existent_timesheet_returns_404",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "Setup failure due to missing 'rest_client' fixture.",
+          "suggestion": "Ensure the 'rest_client' fixture is defined in your test configuration or pytest fixtures module."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_no_entries_returns_empty_array",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The 'rest_client' fixture is not available, preventing the test from running.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined in your conftest.py or provide an alternative setup for initializing the API client."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_minimum_required_fields_returns_201",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The 'rest_client' fixture is not available in the test environment.",
+          "suggestion": "Ensure that the 'rest_client' fixture is correctly defined and included in the pytest configuration."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_timesheet_no_changes_returns_200",
+          "classification": "env",
+          "confidence": 0.9,
+          "summary": "The test setup failed due to a missing fixture 'rest_client'.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined and available in your pytest configuration or conftest.py file."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_unique_empNumber_returns_201",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The 'rest_client' fixture is missing in the test environment.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined and available in the pytest configuration or conftest.py."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_timesheet_invalid_hours_returns_400",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The 'rest_client' fixture is missing, causing the test setup to fail.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined and available in your pytest configuration or conftest.py file."
+        }
+      ],
+      "run_config_snapshot": {
+        "environment": "staging",
+        "browser": "Chrome",
+        "device": "Realme",
+        "base_url": "",
+        "api_url": "https://opensource-demo.orangehrmlive.com",
+        "browser_type": "chromium",
+        "headless": true,
+        "appium_url": "http://localhost:4723",
+        "device_platform": "android",
+        "device_capabilities": {}
+      },
+      "progress_total": 32,
+      "progress_done": 32
+    },
+    {
+      "id": "run_76ac74af",
+      "triggered_at": "2026-05-15T13:33:49.267624+00:00",
+      "finished_at": "2026-05-15T13:34:05.517304+00:00",
+      "product": "orangehrm",
+      "domain": "api",
+      "module": "",
+      "trigger": "schedule",
+      "schedule_id": "sched_b6cea409",
+      "status": "completed",
+      "total": 32,
+      "passed": 17,
+      "failed": 15,
+      "skipped": 0,
+      "errors": 15,
+      "duration": 15.97,
+      "report_path": "data/runs/run_76ac74af_report.json",
+      "analyzed": true,
+      "failure_categories": {
+        "env": 13,
+        "setup": 2
+      },
+      "failures": [
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_returns_200",
+          "classification": "env",
+          "confidence": 0.9,
+          "summary": "The test setup failed because the 'rest_client' fixture is missing.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined in your pytest configuration or conftest.py file."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_with_valid_data_returns_201",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The 'rest_client' fixture is not found, preventing the test setup.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined in a conftest.py file or is available in the scope of the test."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_timesheet_with_valid_data_returns_200",
+          "classification": "setup",
+          "confidence": 1.0,
+          "summary": "The fixture 'rest_client' is not defined or available for the test.",
+          "suggestion": "Ensure that the 'rest_client' fixture is properly defined and imported in your test setup."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_delete_timesheet_with_valid_data_returns_204",
+          "classification": "env",
+          "confidence": 0.9,
+          "summary": "The 'rest_client' fixture is not available in the test environment.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined and properly registered in your pytest configuration or conftest.py file."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_unauthenticated_returns_401",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The test setup failed because the 'rest_client' fixture is not available.",
+          "suggestion": "Ensure that the 'rest_client' fixture is correctly defined and imported in your test environment."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_insufficient_permissions_returns_403",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The 'rest_client' fixture is not found in the available fixtures, causing a setup failure.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined or imported correctly in the test environment."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_missing_empNumber_returns_400",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The test setup failed because the 'rest_client' fixture is missing.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined and available in your pytest configuration."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_invalid_date_format_returns_400",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The 'rest_client' fixture is not found in the available fixtures list.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined or properly imported in your test setup."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_non_existent_timesheet_returns_404",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The 'rest_client' fixture is not available, causing the test setup to fail.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined and correctly imported in the test environment."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_delete_non_existent_timesheet_returns_404",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The 'rest_client' fixture is not available in the test environment.",
+          "suggestion": "Ensure that the 'rest_client' fixture is correctly defined and imported in the pytest configuration or the test module."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_get_timesheets_no_entries_returns_empty_array",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The fixture 'rest_client' is not found, indicating an environment or setup issue.",
+          "suggestion": "Ensure that the 'rest_client' fixture is correctly defined and imported in your test environment."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_minimum_required_fields_returns_201",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The fixture 'rest_client' is not available, leading to a setup failure.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined and registered in your pytest configuration."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_timesheet_no_changes_returns_200",
+          "classification": "env",
+          "confidence": 1.0,
+          "summary": "The 'rest_client' fixture is not found, indicating an environment configuration issue.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined and properly imported in your test setup."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_post_timesheets_unique_empNumber_returns_201",
+          "classification": "env",
+          "confidence": 0.9,
+          "summary": "The 'rest_client' fixture is missing, preventing the test from running.",
+          "suggestion": "Ensure that the 'rest_client' fixture is defined and available in your pytest configuration."
+        },
+        {
+          "test_id": "tests/api/test_Timesheets.py::test_put_timesheet_invalid_hours_returns_400",
+          "classification": "setup",
+          "confidence": 1.0,
+          "summary": "The fixture 'rest_client' is not found in the available fixtures list.",
+          "suggestion": "Ensure that the 'rest_client' fixture is correctly defined and imported in your test environment."
+        }
+      ],
+      "run_config_snapshot": {
+        "environment": "staging",
+        "browser": "Chrome",
+        "device": "Realme",
+        "base_url": "",
+        "api_url": "https://opensource-demo.orangehrmlive.com",
+        "browser_type": "chromium",
+        "headless": true,
+        "appium_url": "http://localhost:4723",
+        "device_platform": "android",
+        "device_capabilities": {}
+      },
+      "progress_total": 32,
+      "progress_done": 32
+    }
+  ]
+}

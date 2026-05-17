@@ -12,6 +12,18 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
   tests/unit/test_utils.py::TestActivityLog::test_append_returns_id:
   - status: passed
     date: '2026-05-14'
@@ -24,6 +36,18 @@ tests:
     duration: 0.0
   - status: passed
     date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
     duration: 0.0
   tests/unit/test_utils.py::TestActivityLog::test_filter_by_agent:
   - status: passed
@@ -38,6 +62,18 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
   tests/unit/test_utils.py::TestActivityLog::test_filter_by_product:
   - status: passed
     date: '2026-05-14'
@@ -50,6 +86,18 @@ tests:
     duration: 0.001
   - status: passed
     date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
     duration: 0.001
   tests/unit/test_utils.py::TestActivityLog::test_max_entries_trim:
   - status: passed
@@ -64,6 +112,18 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 2.639
+  - status: passed
+    date: '2026-05-15'
+    duration: 2.626
+  - status: passed
+    date: '2026-05-15'
+    duration: 2.689
+  - status: passed
+    date: '2026-05-15'
+    duration: 2.598
+  - status: passed
+    date: '2026-05-15'
+    duration: 2.631
   tests/unit/test_utils.py::TestActivityLog::test_empty_path_returns_empty:
   - status: passed
     date: '2026-05-14'
@@ -76,6 +136,18 @@ tests:
     duration: 0.0
   - status: passed
     date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
     duration: 0.0
   tests/unit/test_utils.py::TestActivityLog::test_get_by_id:
   - status: passed
@@ -90,6 +162,18 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
   tests/unit/test_utils.py::TestActivityLog::test_requires_human_filter:
   - status: passed
     date: '2026-05-14'
@@ -102,6 +186,18 @@ tests:
     duration: 0.001
   - status: passed
     date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
     duration: 0.001
   tests/unit/test_utils.py::TestApprovalManager::test_submit_and_pending:
   - status: passed
@@ -116,6 +212,18 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
   tests/unit/test_utils.py::TestApprovalManager::test_resolve_approve:
   - status: passed
     date: '2026-05-14'
@@ -129,6 +237,18 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.002
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.002
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
   tests/unit/test_utils.py::TestApprovalManager::test_resolve_not_found:
   - status: passed
     date: '2026-05-14'
@@ -141,6 +261,18 @@ tests:
     duration: 0.0
   - status: passed
     date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
     duration: 0.0
   tests/unit/test_utils.py::TestApprovalManager::test_pending_type_filter:
   - status: passed
@@ -155,6 +287,18 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.002
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.002
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.002
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.002
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.002
   tests/unit/test_utils.py::TestApprovalManager::test_get:
   - status: passed
     date: '2026-05-14'
@@ -168,6 +312,18 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
   tests/unit/test_utils.py::TestApprovalManager::test_empty_path_returns_empty:
   - status: passed
     date: '2026-05-14'
@@ -180,6 +336,18 @@ tests:
     duration: 0.0
   - status: passed
     date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
     duration: 0.0
   tests/unit/test_utils.py::TestRunManager::test_create_and_get_run:
   - status: passed
@@ -200,6 +368,21 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.001
+  - status: failed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: failed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.002
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
   tests/unit/test_utils.py::TestRunManager::test_patch_run:
   - status: passed
     date: '2026-05-14'
@@ -212,6 +395,15 @@ tests:
     duration: 0.0
   - status: passed
     date: '2026-05-14'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
     duration: 0.001
   tests/unit/test_utils.py::TestRunManager::test_create_and_delete_schedule:
   - status: passed
@@ -226,6 +418,15 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.001
   tests/unit/test_utils.py::TestRunManager::test_max_runs_cap:
   - status: passed
     date: '2026-05-14'
@@ -239,6 +440,15 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.191
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.251
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.241
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.243
   tests/unit/test_utils.py::TestRunManagerIsDue::test_due_when_conditions_match:
   - status: passed
     date: '2026-05-14'
@@ -251,6 +461,15 @@ tests:
     duration: 0.0
   - status: passed
     date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
     duration: 0.0
   tests/unit/test_utils.py::TestRunManagerIsDue::test_not_due_wrong_day:
   - status: passed
@@ -265,6 +484,15 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
   tests/unit/test_utils.py::TestRunManagerIsDue::test_not_due_wrong_hour:
   - status: passed
     date: '2026-05-14'
@@ -277,6 +505,15 @@ tests:
     duration: 0.0
   - status: passed
     date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
     duration: 0.0
   tests/unit/test_utils.py::TestRunManagerIsDue::test_not_due_already_ran_today:
   - status: passed
@@ -291,6 +528,15 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
   tests/unit/test_utils.py::TestRunManagerIsDue::test_not_due_when_disabled:
   - status: passed
     date: '2026-05-14'
@@ -304,6 +550,15 @@ tests:
   - status: passed
     date: '2026-05-14'
     duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
   tests/unit/test_utils.py::TestRunManagerIsDue::test_due_ran_yesterday:
   - status: passed
     date: '2026-05-14'
@@ -316,6 +571,15 @@ tests:
     duration: 0.0
   - status: passed
     date: '2026-05-14'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
+    duration: 0.0
+  - status: passed
+    date: '2026-05-15'
     duration: 0.0
   tests/api/test_graphql_api.py::test_countries_query:
   - status: passed

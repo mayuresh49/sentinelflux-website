@@ -1,0 +1,18 @@
+reportportal:
+  base_url: "http://localhost:8080"
+  api_token: "default_project_initial_api_key"
+  project: "default_project"
+
+browser:
+  timeout: 12000
+
+logging:
+  level: "INFO"
+  file: "logs/sentinelflux.log"
+
+sentinelflux:
+  ai:
+    enabled: false
+    mode: mistral
+    self_healing: false
+    api_key: ""
