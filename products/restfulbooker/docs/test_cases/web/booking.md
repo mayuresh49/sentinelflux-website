@@ -15,8 +15,8 @@
 | RB-WEB-003 | Clicking Book Room opens booking form | positive | automated | test_booking_web.py |
 | RB-WEB-004 | Submit booking form with valid data shows confirmation or error | positive | automated | test_booking_web.py |
 | RB-WEB-005 | Submit booking form with no fields filled shows validation error | negative | automated | test_booking_web.py |
-| RB-WEB-006 | Booking form date picker prevents checkout before checkin | edge | not_automated | — |
-| RB-WEB-007 | Booking confirmation email is sent after successful booking | positive | not_automatable | — |
+| RB-WEB-010 | Booking form date picker prevents checkout before checkin | edge | not_automated | — |
+| RB-WEB-011 | Booking confirmation email is sent after successful booking | positive | not_automatable | — |
 
 > **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
@@ -51,9 +51,9 @@
 **Steps:** Open booking form, click Book without filling anything  
 **Expected:** Validation error is shown
 
-### RB-WEB-006 — Date Picker Prevents Checkout Before Checkin
+### RB-WEB-010 — Date Picker Prevents Checkout Before Checkin
 **Steps:** Set checkout date earlier than checkin date in calendar picker  
 **Expected:** Checkout date is constrained; cannot select a date before checkin
 
-### RB-WEB-007 — Confirmation Email Sent (not_automatable)
+### RB-WEB-011 — Confirmation Email Sent (not_automatable)
 **Note:** Requires email inbox verification. Cannot be automated without email testing tooling (e.g., Mailhog, SendGrid API access).

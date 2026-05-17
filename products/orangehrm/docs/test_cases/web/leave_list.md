@@ -15,8 +15,8 @@
 | OH-WEB-028 | Filter by "Pending Approval" status shows results | positive | automated | test_leave.py |
 | OH-WEB-029 | Searching a future date range (2099) shows No Records Found | negative | automated | test_leave.py |
 | OH-WEB-030 | Date To before Date From returns empty results or zero records | negative | automated | test_leave.py |
-| OH-WEB-031 | Filter by leave type narrows results | positive | not_automated | — |
-| OH-WEB-032 | Export leave list results to CSV | positive | not_automatable | — |
+| OH-WEB-070 | Filter by leave type narrows results | positive | not_automated | — |
+| OH-WEB-071 | Export leave list results to CSV | positive | not_automatable | — |
 
 > **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
@@ -61,9 +61,9 @@
 **Expected:** No Records Found or zero count  
 **Note:** xfail on demo — demo does not enforce date-range order
 
-### OH-WEB-031 — Filter By Leave Type (not_automated)
+### OH-WEB-070 — Filter By Leave Type (not_automated)
 **Steps:** Select a specific leave type from filter, search  
 **Expected:** Only records matching that leave type are shown
 
-### OH-WEB-032 — Export To CSV (not_automatable)
+### OH-WEB-071 — Export To CSV (not_automatable)
 **Note:** Requires verifying downloaded file contents. Browser download handling is environment-specific and unreliable in headless CI.

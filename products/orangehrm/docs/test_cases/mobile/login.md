@@ -1,216 +1,124 @@
-# Test Case Document for Login Page (/web/index.php/auth/login)
+# Test Case Document — Mobile Login
 
-## Overview
-This document outlines the test scenarios for the login page of the application. The form includes two required fields: Username and Password, and an optional field for the Login button. Error messages are also displayed as needed.
+**Product:** OrangeHRM  
+**Layer:** Mobile  
+**Module:** Login
 
-### Fields on this Form:
-1. **Username**
-2. **Password**
-3. **Login** (optional)
-4. **Error message** (optional)
+---
 
-## Test Cases
+## Test Case Index
 
-### Positive Scenarios
-1. **Test Case Title:** Admin User Logs In with Valid Credentials and Lands on Dashboard  
-   **Pre-conditions:**
-     - The admin user credentials are known (username=Admin, password=admin123).  
-   **Test Data:**
-     - Username = Admin  
-     - Password = admin123  
-   **Step-by-step Actions:**
-     1. Navigate to the login page.
-     2. Enter 'Admin' in the username field.
-     3. Enter 'admin123' in the password field.
-     4. Click on the Login button.
-   **Expected Results:**
-     - The user should be redirected to the dashboard.
-   **Validation Rules and Constraints:**
-     - Username is case-sensitive.
-     - Password must meet complexity requirements (min 8 chars, uppercase, lowercase, number, special char).
-   **Notes:**
-     - Ensure that the session cookie has the HttpOnly flag set for security.
+| ID | Scenario | Type | Status | Script |
+|---|---|---|---|---|
+| OH-MOB-001 | Admin user logs in with valid credentials and lands on dashboard | positive | automated | test_login.py |
+| OH-MOB-002 | ESS user logs in and sees limited navigation menu | positive | automated | test_login.py |
+| OH-MOB-003 | Wrong password shows invalid credentials error | negative | automated | test_login.py |
+| OH-MOB-004 | Empty username shows validation error | negative | automated | test_login.py |
+| OH-MOB-005 | Empty password shows validation error | negative | automated | test_login.py |
+| OH-MOB-006 | Both fields empty shows validation error | negative | automated | test_login.py |
+| OH-MOB-007 | SQL injection in username shows error, not 500 | negative | automated | test_login.py |
+| OH-MOB-008 | Username is case-sensitive (Admin != admin) | edge | automated | test_login.py |
+| OH-MOB-009 | Browser back button after login does not expose session | edge | automated | test_login.py |
+| OH-MOB-010 | Session expires after inactivity | edge | automated | test_login.py |
+| OH-MOB-011 | Valid login navigates to dashboard (test_login_mobile.py) | positive | automated | test_login_mobile.py |
+| OH-MOB-012 | Invalid password shows error message | negative | automated | test_login_mobile.py |
+| OH-MOB-013 | Invalid username shows error message | negative | automated | test_login_mobile.py |
+| OH-MOB-014 | Empty username field shows validation error | negative | automated | test_login_mobile.py |
+| OH-MOB-015 | Empty password field shows validation error | negative | automated | test_login_mobile.py |
+| OH-MOB-016 | Both credentials empty shows validation error | negative | automated | test_login_mobile.py |
 
-2. **Test Case Title:** ESS User Logs In and Sees Limited Navigation Menu  
-   **Pre-conditions:**
-     - The ESS user credentials are known (username=Kris.Chapman, password=Admin123).  
-   **Test Data:**
-     - Username = Kris.Chapman
-     - Password = Admin123
-   **Step-by-step Actions:**
-     1. Navigate to the login page.
-     2. Enter 'Kris.Chapman' in the username field.
-     3. Enter 'Admin123' in the password field.
-     4. Click on the Login button.
-   **Expected Results:**
-     - The user should be redirected to a limited navigation menu with options like 'My Info', 'Apply for leave', and 'View own leave balance'.
-   **Validation Rules and Constraints:**
-     - Username is case-sensitive.
-     - Password must meet complexity requirements (min 8 chars, uppercase, lowercase, number, special char).
-   **Notes:**
-     - Ensure that the session cookie has the HttpOnly flag set for security.
+> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
-### Negative Scenarios
-3. **Test Case Title:** Wrong Password Shows 'Invalid Credentials' Error  
-   **Pre-conditions:**
-     - The admin user credentials are known (username=Admin, password=admin123).  
-   **Test Data:**
-     - Username = Admin
-     - Password = wrongpassword
-   **Step-by-step Actions:**
-     1. Navigate to the login page.
-     2. Enter 'Admin' in the username field.
-     3. Enter 'wrongpassword' in the password field.
-     4. Click on the Login button.
-   **Expected Results:**
-     - The error message 'Invalid credentials' should be displayed.
-   **Validation Rules and Constraints:**
-     - Username is case-sensitive.
-     - Password must meet complexity requirements (min 8 chars, uppercase, lowercase, number, special char).
-   **Notes:**
-     - Ensure that no sensitive information is exposed in the error message.
+---
 
-4. **Test Case Title:** Empty Username Shows Validation Error  
-   **Pre-conditions:**
-     - The admin user credentials are known (username=Admin, password=admin123).  
-   **Test Data:**
-     - Username = (empty)
-     - Password = admin123
-   **Step-by-step Actions:**
-     1. Navigate to the login page.
-     2. Leave the username field empty.
-     3. Enter 'admin123' in the password field.
-     4. Click on the Login button.
-   **Expected Results:**
-     - A validation error message should be displayed indicating that the username is required.
-   **Validation Rules and Constraints:**
-     - Username must not be empty.
-     - Password must meet complexity requirements (min 8 chars, uppercase, lowercase, number, special char).
-   **Notes:**
-     - Ensure that no sensitive information is exposed in the error message.
+## Screen Details
+- **Screen:** Login screen
+- **Fields:** Username, Password, Login button
+- **Credentials (demo):** Admin / admin123, ESS: Kris.Chapman / Admin123
 
-5. **Test Case Title:** Empty Password Shows Validation Error  
-   **Pre-conditions:**
-     - The admin user credentials are known (username=Admin, password=admin123).  
-   **Test Data:**
-     - Username = Admin
-     - Password = (empty)
-   **Step-by-step Actions:**
-     1. Navigate to the login page.
-     2. Enter 'Admin' in the username field.
-     3. Leave the password field empty.
-     4. Click on the Login button.
-   **Expected Results:**
-     - A validation error message should be displayed indicating that the password is required.
-   **Validation Rules and Constraints:**
-     - Password must not be empty.
-     - Username must meet complexity requirements (min 5 chars, alphanumeric and underscores only).
-   **Notes:**
-     - Ensure that no sensitive information is exposed in the error message.
+---
 
-6. **Test Case Title:** Both Fields Empty Shows Validation Error  
-   **Pre-conditions:**
-     - The admin user credentials are known (username=Admin, password=admin123).  
-   **Test Data:**
-     - Username = (empty)
-     - Password = (empty)
-   **Step-by-step Actions:**
-     1. Navigate to the login page.
-     2. Leave both username and password fields empty.
-     3. Click on the Login button.
-   **Expected Results:**
-     - A validation error message should be displayed indicating that both fields are required.
-   **Validation Rules and Constraints:**
-     - Username must not be empty.
-     - Password must not be empty.
-   **Notes:**
-     - Ensure that no sensitive information is exposed in the error message.
+## Notes
 
-7. **Test Case Title:** SQL Injection in Username Shows Error, Not 500  
-   **Pre-conditions:**
-     - The admin user credentials are known (username=Admin, password=admin123).  
-   **Test Data:**
-     - Username = ' OR '1'='1
-     - Password = admin123
-   **Step-by-step Actions:**
-     1. Navigate to the login page.
-     2. Enter "' OR '1'='1" in the username field.
-     3. Enter 'admin123' in the password field.
-     4. Click on the Login button.
-   **Expected Results:**
-     - An error message should be displayed, but not a server error (500).
-   **Validation Rules and Constraints:**
-     - Username is case-sensitive.
-     - Password must meet complexity requirements (min 8 chars, uppercase, lowercase, number, special char).
-   **Notes:**
-     - Ensure that the application does not expose sensitive information or database errors.
+- `test_login.py` uses the Appium page object model (`appium_driver` fixture)
+- `test_login_mobile.py` uses a `login_screen` fixture with separate implementation; covers a subset of the same scenarios
 
-### Edge Cases
-8. **Test Case Title:** Username is Case-Sensitive (Admin != admin)  
-   **Pre-conditions:**
-     - The admin user credentials are known (username=Admin, password=admin123).  
-   **Test Data:**
-     - Username = admin
-     - Password = admin123
-   **Step-by-step Actions:**
-     1. Navigate to the login page.
-     2. Enter 'admin' in the username field.
-     3. Enter 'admin123' in the password field.
-     4. Click on the Login button.
-   **Expected Results:**
-     - An error message should be displayed indicating that the credentials are invalid.
-   **Validation Rules and Constraints:**
-     - Username is case-sensitive.
-   **Notes:**
-     - Ensure that case sensitivity is correctly enforced.
+---
 
-9. **Test Case Title:** Browser Back Button After Login Does Not Expose Session  
-   **Pre-conditions:**
-     - The admin user credentials are known (username=Admin, password=admin123).  
-   **Test Data:**
-     - Username = Admin
-     - Password = admin123
-   **Step-by-step Actions:**
-     1. Navigate to the login page.
-     2. Enter 'Admin' in the username field.
-     3. Enter 'admin123' in the password field.
-     4. Click on the Login button and land on the dashboard.
-     5. Press the browser back button.
-   **Expected Results:**
-     - The login page should not be accessible, or a session expired message should appear if attempting to log in again.
-   **Validation Rules and Constraints:**
-     - Session management rules apply.
-   **Notes:**
-     - Ensure that session cookies are properly managed.
+## Detailed Test Cases
 
-10. **Test Case Title:** Session Expires After Inactivity  
-    **Pre-conditions:**
-      - The admin user credentials are known (username=Admin, password=admin123).  
-    **Test Data:**
-      - Username = Admin
-      - Password = admin123
-    **Step-by-step Actions:**
-      1. Navigate to the login page.
-      2. Enter 'Admin' in the username field.
-      3. Enter 'admin123' in the password field.
-      4. Click on the Login button and land on the dashboard.
-      5. Wait for the configured inactivity timeout period (e.g., 30 minutes).
-    **Expected Results:**
-      - The user should be automatically logged out, or a session expired message should appear if attempting to perform any action.
-    **Validation Rules and Constraints:**
-      - Session management rules apply.
-    **Notes:**
-      - Ensure that session expiration is correctly enforced.
+### OH-MOB-001 — Admin Valid Login Lands On Dashboard
+**Test Data:** username=Admin, password=admin123  
+**Steps:** Launch app; fill credentials; tap Login  
+**Expected:** Dashboard is visible; navigation elements present
 
-## Known Issues
-- **[medium]** Session cookie not marked HttpOnly in some configurations  
-  **Hint:** Check response headers for Set-Cookie: HttpOnly flag
+### OH-MOB-002 — ESS User Sees Limited Menu
+**Test Data:** username=Kris.Chapman, password=Admin123  
+**Steps:** Launch app; fill ESS credentials; tap Login  
+**Expected:** Navigation menu shows only ESS-relevant links (limited compared to Admin)
 
-- **[high]** IDOR possible if empNumber is guessable — ESS users may access other records via direct URL  
-  **Hint:** ESS user accessing /pim/employees/{other_empNumber} should return 403
+### OH-MOB-003 — Wrong Password Shows Error
+**Test Data:** username=Admin, password=wrongpassword  
+**Steps:** Fill valid username and wrong password; tap Login  
+**Expected:** Error message displayed; login fails
 
-- **[low]** Username enumeration possible via login error message timing difference  
-  **Hint:** Time login responses for valid vs invalid usernames
+### OH-MOB-004 — Empty Username Shows Validation Error
+**Steps:** Leave username blank; fill password; tap Login  
+**Expected:** Validation error for username field
 
-## Conclusion
-This test case document covers the necessary scenarios to ensure that the login page functions correctly, adhering to business rules and security guidelines. It includes positive, negative, and edge-case scenarios to validate user authentication and access control mechanisms.
+### OH-MOB-005 — Empty Password Shows Validation Error
+**Steps:** Fill username; leave password blank; tap Login  
+**Expected:** Validation error for password field
+
+### OH-MOB-006 — Both Fields Empty Shows Validation Error
+**Steps:** Tap Login without entering anything  
+**Expected:** Validation error displayed
+
+### OH-MOB-007 — SQL Injection In Username Shows Error Not 500
+**Test Data:** username = `' OR '1'='1`  
+**Steps:** Fill injection string in username; fill any password; tap Login  
+**Expected:** Error message shown; no server crash or unhandled exception
+
+### OH-MOB-008 — Username Is Case-Sensitive
+**Test Data:** username=admin (lowercase)  
+**Steps:** Enter lowercase "admin" with valid password  
+**Expected:** Login fails; error shown  
+**Note:** May xfail if demo has a separate lowercase admin account
+
+### OH-MOB-009 — Back Button Does Not Expose Session
+**Steps:** Log in as Admin; press device back button  
+**Expected:** Session not exposed; login page shown or app returns to safe state
+
+### OH-MOB-010 — Session Expires After Inactivity
+**Steps:** Log in; leave app idle past the configured timeout  
+**Expected:** User is automatically logged out; session expired state shown
+
+### OH-MOB-011 — Valid Login Navigates To Dashboard
+**Fixture:** `login_screen`, `orangehrm_credentials`  
+**Steps:** `login_screen.login(username, password)`  
+**Expected:** Dashboard/home screen is visible
+
+### OH-MOB-012 — Invalid Password Shows Error
+**Fixture:** `login_screen`, `orangehrm_credentials`  
+**Steps:** `login_screen.login(username, wrong_password)`  
+**Expected:** Error message visible
+
+### OH-MOB-013 — Invalid Username Shows Error
+**Fixture:** `login_screen`  
+**Steps:** `login_screen.login("nonexistentuser", "anypassword")`  
+**Expected:** Error message visible
+
+### OH-MOB-014 — Empty Username Shows Validation Error
+**Fixture:** `login_screen`, `orangehrm_credentials`  
+**Steps:** Submit with empty username and valid password  
+**Expected:** Validation error for username
+
+### OH-MOB-015 — Empty Password Shows Validation Error
+**Fixture:** `login_screen`, `orangehrm_credentials`  
+**Steps:** Submit with valid username and empty password  
+**Expected:** Validation error for password
+
+### OH-MOB-016 — Both Credentials Empty Shows Validation Error
+**Fixture:** `login_screen`  
+**Steps:** Submit with both fields empty  
+**Expected:** Validation error displayed

@@ -20,11 +20,11 @@
 | OH-WEB-016 | Search by name "Admin" filters results | positive | automated | test_pim_employee.py |
 | OH-WEB-017 | Search with non-existent name shows No Records Found | negative | automated | test_pim_employee.py |
 | OH-WEB-018 | Add employee with parametrized names (Alice/Smith, Bob/Jones) | positive | automated | test_pim_employee.py |
-| OH-WEB-019 | Search by Employee ID filters to exact match | positive | not_automated | — |
-| OH-WEB-020 | Record count updates after search | positive | not_automated | — |
-| OH-WEB-021 | Search is case-insensitive | edge | not_automated | — |
-| OH-WEB-022 | Partial name search returns all matching employees | edge | not_automated | — |
-| OH-WEB-023 | Duplicate Employee ID shows validation error | negative | not_automatable | — |
+| OH-WEB-062 | Search by Employee ID filters to exact match | positive | not_automated | — |
+| OH-WEB-063 | Record count updates after search | positive | not_automated | — |
+| OH-WEB-064 | Search is case-insensitive | edge | not_automated | — |
+| OH-WEB-065 | Partial name search returns all matching employees | edge | not_automated | — |
+| OH-WEB-066 | Duplicate Employee ID shows validation error | negative | not_automatable | — |
 
 > **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
@@ -101,5 +101,5 @@
 **Steps:** Add each employee, save  
 **Expected:** Success for each data set
 
-### OH-WEB-023 — Duplicate Employee ID (not_automatable)
+### OH-WEB-066 — Duplicate Employee ID (not_automatable)
 **Note:** Requires knowing a pre-existing Employee ID on the demo system, which changes between test runs. Recommend manual verification.

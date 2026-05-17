@@ -14,9 +14,9 @@
 | RB-WEB-007 | Admin login with invalid credentials does not show panel | negative | automated | test_admin_web.py |
 | RB-WEB-008 | Admin panel shows Rooms navigation link after login | positive | automated | test_admin_web.py |
 | RB-WEB-009 | Admin logout returns to login/home page | positive | automated | test_admin_web.py |
-| RB-WEB-010 | Create new room with valid data appears in rooms list | positive | not_automated | — |
-| RB-WEB-011 | Delete room removes it from rooms list | negative | not_automated | — |
-| RB-WEB-012 | Session persists across page refresh | edge | not_automatable | — |
+| RB-WEB-012 | Create new room with valid data appears in rooms list | positive | not_automated | — |
+| RB-WEB-013 | Delete room removes it from rooms list | negative | not_automated | — |
+| RB-WEB-014 | Session persists across page refresh | edge | not_automatable | — |
 
 > **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
@@ -51,13 +51,13 @@
 **Steps:** Click logout  
 **Expected:** Redirected to home/login; admin panel no longer accessible
 
-### RB-WEB-010 — Create Room
+### RB-WEB-012 — Create Room
 **Steps:** Navigate to Rooms, fill room details, save  
 **Expected:** New room appears in rooms list
 
-### RB-WEB-011 — Delete Room
+### RB-WEB-013 — Delete Room
 **Steps:** Select a room, delete  
 **Expected:** Room is removed from list
 
-### RB-WEB-012 — Session Persists Across Refresh (not_automatable)
+### RB-WEB-014 — Session Persists Across Refresh (not_automatable)
 **Note:** Requires verifying browser session state across hard refresh. Behavior differs by browser and cannot be reliably automated in all CI environments without specific session mocking.

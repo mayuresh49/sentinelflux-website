@@ -18,10 +18,10 @@
 | OH-WEB-006 | Both fields empty shows validation error | negative | automated | test_login.py |
 | OH-WEB-007 | Username is case-sensitive (Admin != admin) | edge | automated | test_login.py |
 | OH-WEB-008 | SQL injection in username shows error, not 500 | negative | automated | test_login.py |
-| OH-WEB-009 | ESS user logs in and sees limited navigation menu | positive | not_automated | — |
-| OH-WEB-010 | Browser back button after login does not expose session | edge | not_automatable | — |
-| OH-WEB-011 | Session expires after inactivity timeout | edge | not_automatable | — |
-| OH-WEB-012 | Account locks after 5 consecutive failed login attempts | edge | not_automatable | — |
+| OH-WEB-058 | ESS user logs in and sees limited navigation menu | positive | not_automated | — |
+| OH-WEB-059 | Browser back button after login does not expose session | edge | not_automatable | — |
+| OH-WEB-060 | Session expires after inactivity timeout | edge | not_automatable | — |
+| OH-WEB-061 | Account locks after 5 consecutive failed login attempts | edge | not_automatable | — |
 
 > **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
@@ -96,15 +96,15 @@
 **Steps:** Enter injection string, click Login  
 **Expected:** Error displayed; no 500 or unhandled exception
 
-### OH-WEB-009 — ESS User Limited Menu (not_automated)
+### OH-WEB-058 — ESS User Limited Menu (not_automated)
 **Pre-conditions:** ESS user account exists  
 **Expected:** After login, navigation shows only ESS-relevant links
 
-### OH-WEB-010 — Back Button Does Not Expose Session (not_automatable)
+### OH-WEB-059 — Back Button Does Not Expose Session (not_automatable)
 **Note:** Requires browser-level session verification. Complex to automate reliably across all browsers; recommended as manual exploratory test.
 
-### OH-WEB-011 — Session Expiry (not_automatable)
+### OH-WEB-060 — Session Expiry (not_automatable)
 **Note:** Requires waiting for the configured inactivity timeout (typically 30+ minutes). Not suitable for automated regression runs; verify manually or with time-mocking.
 
-### OH-WEB-012 — Account Lock After 5 Failures (not_automatable)
+### OH-WEB-061 — Account Lock After 5 Failures (not_automatable)
 **Note:** Demo site may not have account lockout configured; this destructive test can lock out the shared demo account. Run only on isolated environments.

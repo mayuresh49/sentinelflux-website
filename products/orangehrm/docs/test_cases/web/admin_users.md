@@ -17,9 +17,9 @@
 | OH-WEB-023 | Cancel on add-user form returns to users list without saving | positive | automated | test_admin_users.py |
 | OH-WEB-024 | Save add-user form without username shows required field error | negative | automated | test_admin_users.py |
 | OH-WEB-025 | Save add-user form without password shows required field error | negative | automated | test_admin_users.py |
-| OH-WEB-026 | Create user with weak password shows password policy error | negative | not_automated | — |
-| OH-WEB-027 | Create user with duplicate username shows conflict error | negative | not_automatable | — |
-| OH-WEB-028 | Delete user removes them from list | positive | not_automatable | — |
+| OH-WEB-067 | Create user with weak password shows password policy error | negative | not_automated | — |
+| OH-WEB-068 | Create user with duplicate username shows conflict error | negative | not_automatable | — |
+| OH-WEB-069 | Delete user removes them from list | positive | not_automatable | — |
 
 > **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
@@ -85,12 +85,12 @@
 **Steps:** Fill all add-user fields except Password, click Save  
 **Expected:** Validation error for Password field
 
-### OH-WEB-026 — Weak Password (not_automated)
+### OH-WEB-067 — Weak Password (not_automated)
 **Steps:** Fill all fields with password = "weak", click Save  
 **Expected:** Password policy error shown
 
-### OH-WEB-027 — Duplicate Username (not_automatable)
+### OH-WEB-068 — Duplicate Username (not_automatable)
 **Note:** Creates a real user on the demo system. Risk of polluting shared state. Run only on isolated environments with cleanup.
 
-### OH-WEB-028 — Delete User (not_automatable)
+### OH-WEB-069 — Delete User (not_automatable)
 **Note:** Destructive; deleting the Admin user on demo would break all tests. Run only on isolated environments with a known test user.
