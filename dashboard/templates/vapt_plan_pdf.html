@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 2cm 2.5cm; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10pt; color: #1e293b; line-height: 1.5; }
+  h1 { font-size: 22pt; color: #1e3a5f; border-bottom: 3px solid #3b82f6; padding-bottom: 6pt; margin-top: 0; }
+  h2 { font-size: 14pt; color: #1e3a5f; border-left: 4px solid #3b82f6; padding-left: 8pt; margin-top: 24pt; }
+  h3 { font-size: 11pt; color: #334155; margin-top: 14pt; }
+  .cover { text-align: center; padding: 60pt 0; page-break-after: always; }
+  .cover h1 { font-size: 28pt; border: none; padding: 0; }
+  .cover .subtitle { font-size: 14pt; color: #64748b; margin-top: 8pt; }
+  .cover .meta { margin-top: 40pt; font-size: 10pt; color: #475569; line-height: 2; }
+  .cover .logo { font-size: 24pt; font-weight: 800; color: #3b82f6; letter-spacing: -1pt; margin-bottom: 40pt; }
+  .cover .confidential { margin-top: 30pt; font-size: 9pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10pt; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10pt; font-size: 9pt; }
+  th { background: #1e3a5f; color: white; padding: 6pt 8pt; text-align: left; font-weight: 600; }
+  td { padding: 5pt 8pt; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  .badge { display: inline-block; padding: 2pt 6pt; border-radius: 3pt; font-size: 8pt; font-weight: 600; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .owasp-item { margin-bottom: 10pt; padding: 8pt; background: #f8fafc; border-left: 3px solid #3b82f6; }
+  .owasp-item strong { color: #1e3a5f; }
+  ul { margin: 6pt 0; padding-left: 16pt; }
+  li { margin-bottom: 3pt; }
+  .section-note { background: #eff6ff; border: 1px solid #bfdbfe; padding: 8pt; border-radius: 4pt; font-size: 9pt; color: #1e40af; margin-top: 8pt; }
+  .footer { position: fixed; bottom: 0; left: 0; right: 0; font-size: 8pt; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding: 4pt 0; }
+</style>
+</head>
+<body>
+
+<div class="footer">{{ eng.assessor_org }} — VAPT Plan — {{ eng.name }} — CONFIDENTIAL</div>
+
+<!-- Cover Page -->
+<div class="cover">
+  <div class="logo">SentinelFlux</div>
+  <h1>Vulnerability Assessment &amp;<br>Penetration Testing Plan</h1>
+  <div class="subtitle">{{ eng.name }}</div>
+  <div class="meta">
+    <strong>Client:</strong> {{ eng.client_name }}<br>
+    <strong>Assessor:</strong> {{ eng.assessor_org }}<br>
+    <strong>Engagement ID:</strong> {{ eng.id }}<br>
+    {% if eng.scope.start_date %}<strong>Assessment Period:</strong> {{ eng.scope.start_date }}{% if eng.scope.end_date %} to {{ eng.scope.end_date }}{% endif %}<br>{% endif %}
+    {% if eng.scope.environment %}<strong>Environment:</strong> {{ eng.scope.environment }}<br>{% endif %}
+    <strong>Document Date:</strong> {{ now.strftime('%d %B %Y') }}<br>
+    <strong>Methodology:</strong> {{ eng.scope.methodology }}
+  </div>
+  <div class="confidential">CONFIDENTIAL — This document contains sensitive security assessment information.<br>Distribution is restricted to authorized personnel only.</div>
+</div>
+
+<!-- 1. Executive Summary -->
+<h2>1. Executive Summary</h2>
+<p>This document defines the scope, methodology, and approach for the Vulnerability Assessment and Penetration Testing (VAPT) engagement for <strong>{{ eng.client_name }}</strong>. The assessment is conducted by <strong>{{ eng.assessor_org }}</strong> against the <strong>{{ eng.product }}</strong> application.</p>
+{% if eng.scope.objectives %}
+<h3>Objectives</h3>
+<p>{{ eng.scope.objectives }}</p>
+{% endif %}
+<div class="section-note">This plan has been prepared based on the agreed scope. Changes to scope must be formally approved and documented before testing commences.</div>
+
+<!-- 2. Scope -->
+<h2>2. Scope of Assessment</h2>
+{% if eng.scope.in_scope %}
+<h3>In-Scope Items</h3>
+<ul>
+{% for item in eng.scope.in_scope %}
+  <li>{{ item }}</li>
+{% endfor %}
+</ul>
+{% else %}
+<p><em>All application endpoints and functionality of the {{ eng.product }} product.</em></p>
+{% endif %}
+{% if eng.scope.out_of_scope %}
+<h3>Out-of-Scope Items</h3>
+<ul>
+{% for item in eng.scope.out_of_scope %}
+  <li>{{ item }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+{% if eng.scope.test_types %}
+<h3>Test Domains</h3>
+{% for t in eng.scope.test_types %}<span class="badge badge-blue">{{ t.upper() }}</span> {% endfor %}
+{% endif %}
+
+<!-- 3. Methodology -->
+<h2>3. Methodology</h2>
+<p>The assessment follows <strong>{{ eng.scope.methodology }}</strong>. Testing is conducted in a structured, phased approach covering reconnaissance, enumeration, exploitation, and reporting.</p>
+<table>
+  <tr><th>Phase</th><th>Activity</th><th>Description</th></tr>
+  <tr><td>1</td><td>Reconnaissance</td><td>Information gathering and attack surface mapping</td></tr>
+  <tr><td>2</td><td>Vulnerability Assessment</td><td>Automated and manual scanning for known vulnerabilities</td></tr>
+  <tr><td>3</td><td>Penetration Testing</td><td>Active exploitation of identified vulnerabilities</td></tr>
+  <tr><td>4</td><td>Analysis</td><td>Risk analysis, CVSS scoring, and remediation guidance</td></tr>
+  <tr><td>5</td><td>Reporting</td><td>Delivery of findings report and executive summary</td></tr>
+  <tr><td>6</td><td>Re-validation</td><td>Verification of remediated findings</td></tr>
+</table>
+
+<!-- 4. OWASP Test Categories -->
+{% if eng.scope.owasp_categories %}
+<h2>4. OWASP Test Categories</h2>
+{% for cat in eng.scope.owasp_categories %}
+  <div class="owasp-item">
+    <strong>{{ cat }}</strong>{% if owasp_desc.get(cat) %} — {{ owasp_desc[cat] }}{% endif %}
+  </div>
+{% endfor %}
+{% endif %}
+
+<!-- 5. Environment -->
+<h2>5. Test Environment</h2>
+<table>
+  <tr><th>Attribute</th><th>Value</th></tr>
+  <tr><td>Product</td><td>{{ eng.product }}</td></tr>
+  {% if eng.scope.environment %}<tr><td>Environment</td><td>{{ eng.scope.environment }}</td></tr>{% endif %}
+  {% if eng.scope.start_date %}<tr><td>Start Date</td><td>{{ eng.scope.start_date }}</td></tr>{% endif %}
+  {% if eng.scope.end_date %}<tr><td>End Date</td><td>{{ eng.scope.end_date }}</td></tr>{% endif %}
+</table>
+
+<!-- 6. Deliverables -->
+<h2>6. Deliverables</h2>
+<ul>
+  <li>VAPT Plan Document (this document)</li>
+  <li>Findings Report with CVSS scoring and evidence</li>
+  <li>Executive Summary</li>
+  <li>Re-validation Report (post-remediation)</li>
+  <li>VAPT Completion Certificate (upon passing threshold)</li>
+</ul>
+
+<!-- 7. Authorization -->
+<h2>7. Rules of Engagement</h2>
+<ul>
+  <li>Testing is authorized only against the in-scope systems listed above</li>
+  <li>No denial-of-service or destructive tests will be performed</li>
+  <li>All critical findings will be communicated immediately upon discovery</li>
+  <li>All data accessed during testing will be handled confidentially</li>
+  <li>Testing will be conducted during agreed windows to minimize business impact</li>
+</ul>
+
+</body>
+</html>

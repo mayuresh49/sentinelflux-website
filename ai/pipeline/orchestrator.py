@@ -25,6 +25,26 @@ _log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
 
+def _find_highest_tc_id(docs_dir: Path, prefix: str) -> int:
+    """Scan existing doc files and return the highest NNN found for the given prefix.
+
+    Prevents ID conflicts: callers use this to compute tc_start = result + 1.
+    Returns 0 if no IDs are found (so tc_start = 1).
+    """
+    import re
+    pattern = re.compile(rf"\b{re.escape(prefix)}-(\d+)\b")
+    highest = 0
+    if docs_dir.exists():
+        for md_file in docs_dir.glob("*.md"):
+            try:
+                text = md_file.read_text(encoding="utf-8", errors="ignore")
+                for m in pattern.finditer(text):
+                    highest = max(highest, int(m.group(1)))
+            except OSError:
+                pass
+    return highest
+
+
 class TestPipelineOrchestrator:
     def __init__(self, ai_client, kb_loader=None):
         from ai.knowledge_base.kb_loader import KnowledgeBaseLoader
@@ -329,8 +349,18 @@ def main(argv=None):
     skip_script = args.skip_script
     output_base = Path(args.output_base).resolve() if args.output_base else None
     tc_prefix = args.tc_prefix or ""
-    tc_start = args.tc_start
     source = args.source or ""
+
+    # Auto-detect tc_start from existing docs when prefix is known and user did not
+    # explicitly override the default (1).  This prevents ID collisions across modules.
+    tc_start = args.tc_start
+    if tc_prefix and tc_start == 1 and output_base:
+        docs_dir = output_base / "docs" / "test_cases" / args.domain
+        detected = _find_highest_tc_id(docs_dir, tc_prefix)
+        if detected > 0:
+            tc_start = detected + 1
+            _log.info("Auto-detected tc_start=%d for prefix %s (highest existing: %d)",
+                      tc_start, tc_prefix, detected)
 
     if args.doc:
         doc_path = Path(args.doc)

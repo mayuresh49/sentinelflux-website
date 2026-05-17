@@ -1,5 +1,36 @@
 # ── Completed ────────────────────────────────────────────────────────────────
 
+- id: P2-05
+  phase: 2
+  title: "AI assertion utilities — non-deterministic output validation"
+  files:
+    - utils/ai_assertions.py
+    - utils/constants.py
+  priority: high
+  status: done
+  notes: >
+    Hard assertions: assert_confidence_above/below, assert_category_in,
+    assert_text_contains_any/all, assert_text_similarity (difflib, no extra dep),
+    assert_response_within, assert_field_present. SoftAssertions context manager
+    collects all failures and raises one combined AssertionError at block exit.
+    Thresholds centralised in constants.py (AI_CONFIDENCE_THRESHOLD=0.70,
+    AI_TEXT_SIMILARITY_RATIO=0.75, AI_RESPONSE_TIMEOUT_S=30.0).
+    ScriptReviewAgent rewrite prompt updated to emit these helpers instead of raw comparisons.
+
+- id: P2-04
+  phase: 2
+  title: "ScriptReviewAgent — post-generation quality gate for pytest scripts"
+  file: ai/agents/script_review_agent.py
+  priority: high
+  status: done
+  notes: >
+    Static AST pass: hardcoded URLs/credentials, time.sleep(), POM missing base_url,
+    duplicate test names. LLM rewrite pass: weak/missing assertions, missing domain
+    markers, missing status-code checks on API tests, AI-output exact-equality
+    assertions → threshold/membership checks. Integrated into
+    TestPipelineOrchestrator after _generate_script(). Registered in __init__,
+    _AGENT_REGISTRY, AGENT_META, and orchestrator.
+
 - id: P2-01
   phase: 2
   title: "TestScriptGenSkill — generate pytest code from test case doc"
@@ -34,47 +65,40 @@
     - utils/run_manager.py
     - dashboard/routers/pipeline.py
   priority: high
-  status: todo
+  status: done
   notes: >
-    All writers do read-modify-write without locks. Concurrent pytest-xdist runs
-    + dashboard triggers will corrupt data/ files.
-    Use filelock.FileLock wrapping each _save() / _write() call.
-    Add filelock to requirements.txt.
+    Superseded by SQLite migration (d9a2203, 2026-05-15). All shared state now
+    in data/sentinelflux.db (WAL mode) via core/db.py. No FileLock needed.
 
 - id: D-02
   phase: debt
   title: "Cap run_history.yaml with rolling 90-day window"
   file: ai/agents/quarantine_manager.py
   priority: high
-  status: todo
+  status: done
   notes: >
-    run_history.yaml grows unbounded. FlakyDetectorAgent reads the whole file.
-    With 100+ tests × 30 runs/day this gets slow in weeks.
-    Add trim logic in QuarantineManager.record_run() — drop entries older than 90 days.
+    Resolved via SQLite migration — run history stored in DB with indexed timestamps.
+    Unbounded growth no longer an issue.
 
 - id: D-03
   phase: debt
   title: "Centralize ROOT_DIR into utils/paths.py"
   files: "11 files each computing Path(__file__).resolve().parent.parent[.parent]"
   priority: medium
-  status: todo
+  status: done
   notes: >
-    ROOT_DIR, _ROOT_DIR, _ROOT, PROJECT_ROOT, BASE_DIR — all computing the same
-    root path independently with inconsistent naming and depth.
-    Create utils/paths.py with ROOT = Path(__file__).resolve().parent.parent
-    and import it everywhere. Prevents silent wrong-directory bugs.
+    utils/paths.py created with canonical ROOT. All modules now import from it.
 
 - id: D-04
   phase: debt
   title: "Split config_router.py into sub-modules"
   file: dashboard/routers/config_router.py
   priority: medium
-  status: todo
+  status: done
   notes: >
-    908 lines handling env configs, users, assignments, labels, priorities,
-    products, generation categories. Extract into dashboard/routers/config/
-    subpackage: users.py, env.py, assignments.py, labels.py.
-    Register each sub-router in app.py under /api/config prefix.
+    Extracted into dashboard/routers/config/ subpackage: _helpers, _meta, _users,
+    _products, _assignments, _run_config, _runners. config_router.py is now a
+    thin re-export shim for backward compat.
 
 - id: D-05
   phase: debt
@@ -85,23 +109,18 @@
     - utils/run_manager.py
     - ai/knowledge_base/kb_loader.py
   priority: medium
-  status: todo
+  status: done
   notes: >
-    Zero unit tests for any of these. All are pure-logic classes safe to test
-    with a tmp_path fixture. Cost ~2 hours; saves hours per future refactor.
-    Add to tests/unit/ (new dir). Use pytest tmp_path for file isolation.
+    Core utility unit tests added to tests/unit/. Used pytest tmp_path fixture.
 
 - id: D-06
   phase: debt
   title: "Wire non-Mistral providers to agent analysis in runs router"
   file: dashboard/routers/runs.py (_build_ai_client)
   priority: medium
-  status: todo
+  status: done
   notes: >
-    _build_ai_client() only handles Ollama provider from chat_config.json.
-    If user configures OpenAI/Anthropic/Gemini in the chat widget, failure
-    analysis on the Runs page silently does nothing.
-    Extend _build_ai_client() to support openai and anthropic providers
+    _build_ai_client() extended to support openai and anthropic providers
     using the same clients as the chat router.
 
 # --- Feature backlog ---

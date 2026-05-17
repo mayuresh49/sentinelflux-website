@@ -13,6 +13,10 @@ agents:
     save_as_baseline: false
   quarantine_manager:
     auto_apply: false
+  doc_review_agent:
+    enabled: true
+  script_review_agent:
+    enabled: true
   sentinel_orchestrator:
     enabled: true
     run_result_analyzer: true

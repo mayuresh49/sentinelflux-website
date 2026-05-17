@@ -1,5 +1,55 @@
 # SentinelFlux — Code & File Conventions
 
+## Test Case ID Rules
+
+Test case IDs follow the pattern `{PRODUCT}-{LAYER}-{NNN}` where NNN is a zero-padded 3-digit number.
+
+**Prefixes in use:**
+
+| Product | Layer | Prefix | Example |
+|---|---|---|---|
+| OrangeHRM | Web functional | OH-WEB | OH-WEB-009 |
+| OrangeHRM | API | OH-API | OH-API-001 |
+| OrangeHRM | Mobile | OH-MOB | OH-MOB-001 |
+| OrangeHRM | Web security | OH-SEC | OH-SEC-008 |
+| OrangeHRM | Web accessibility | OH-A11Y | OH-A11Y-001 |
+| RestfulBooker | Web | RB-WEB | RB-WEB-001 |
+| RestfulBooker | API | RB-API | RB-API-001 |
+| RestfulBooker | Mobile | RB-MOB | RB-MOB-001 |
+| RestfulBooker | Security | RB-SEC | RB-SEC-001 |
+| RestfulBooker | Accessibility | RB-A11Y | RB-A11Y-001 |
+
+**ID assignment rules — MUST be followed to prevent conflicts:**
+
+1. **Automated tests are the source of truth.** If a test function is named `test_OH_WEB_009_...`, that ID belongs to that test permanently. No other test case — automated or manual — may use OH-WEB-009.
+
+2. **IDs must be globally unique within a product+layer prefix across ALL doc files.** OH-WEB-009 means the same thing whether it appears in `login.md`, `pim_employee.md`, or anywhere else. Duplicates cause the DocReview agent and any ID-lookup tool to return wrong results.
+
+3. **When running the pipeline, always set `--tc-start` to one past the highest ID already in use.** The orchestrator auto-detects this by scanning existing docs — do NOT override it with 1 unless starting a brand-new prefix.
+
+4. **Manual (not_automated / not_automatable) tests in a module doc must use IDs that follow the last automated test in the global sequence, not repeat IDs reserved for the next module.** Example: login automated ends at OH-WEB-008, pim automated starts at OH-WEB-009 — login's manual tests must not use 009+ until all automated module IDs are allocated.
+
+5. **Do not create a doc that reuses any ID visible in another `.md` file for the same prefix.** Before assigning a range, grep the `docs/test_cases/{domain}/` directory for existing IDs.
+
+**Current highest IDs (as of 2026-05-17):**
+
+| Prefix | Highest allocated | Next available |
+|---|---|---|
+| OH-WEB | 071 (leave_list manual) | 072 |
+| OH-API | 013 | 014 |
+| OH-MOB | 016 | 017 |
+| OH-SEC | 012 | 013 |
+| OH-A11Y | 006 | 007 |
+| RB-WEB | 014 (admin manual) | 015 |
+| RB-API | 022 | 023 |
+| RB-MOB | 006 | 007 |
+| RB-SEC | 009 | 010 |
+| RB-A11Y | 004 | 005 |
+
+> Update this table whenever new IDs are allocated.
+
+---
+
 ## File Naming
 
 | Type | Pattern | Example |

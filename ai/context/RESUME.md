@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-16  
+Last updated: 2026-05-17  
 Framework version: 0.1.0
 
 ---
@@ -26,7 +26,7 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 | AI Agents (post-suite) | Working | ResultAnalyzer, FlakyDetector, RegressionGuard, CoverageGap, LocatorHealer, QuarantineManager via `ai/agents/sentinel_orchestrator.py` |
 | DocReviewAgent | Working | Post-generation quality gate — audits batched headings, missing sections, thin steps; rewrites via LLM. Auto-runs after DocGenAgent in pipeline. `ai/agents/doc_review_agent.py` |
 | Remote Runner | Working | Pull-based runner daemon (`sentinelflux runner`) polls `/api/runner/claim`, executes pytest, POSTs JSON report back. Bearer token auth. Decouples test execution from app server. |
-| Multi-tenant Storage | Working | Per-product run/schedule sharding (`data/test_runs/<product>.json`), per-product run config YAML (`data/product_config/<product>.yaml`), O(1) run→product index at `data/run_product_index.json` |
+| Storage | Working | SQLite WAL mode (`data/sentinelflux.db` via `core/db.py`). Runs, schedules, approvals, pipeline jobs, activity log, quarantine all in DB. Per-product run config YAML still at `data/product_config/<product>.yaml`. |
 | Dashboard | Working | FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind. 16 pages/routers. Start: `uvicorn dashboard.app:app --reload` |
 | Runs | Working | Trigger/schedule pytest runs from dashboard, parse JSON reports, auto-analyze failures. `/runs` page |
 | CLI | Working | `sentinelflux init/run/generate/doctor` via typer |
@@ -36,23 +36,29 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ---
 
-## What Was Just Done (2026-05-16)
+## What Was Just Done (2026-05-17)
 
-- **DocReviewAgent** (`ai/agents/doc_review_agent.py`): Post-generation quality gate. Detects batched TC headings (e.g. `OH-WEB-036 to OH-WEB-043`), missing mandatory sections (Pre-conditions, Steps, Expected Result), and thin TCs (<3 steps). Rewrites each failing TC via targeted LLM prompt + KB context. Integrated into `TestPipelineOrchestrator._review_doc()` (best-effort, never raises). Visible in `/agents` dashboard with full responsibility/inputs/outputs metadata.
-- **DocGenAgent prompt hardening**: `TEST_CASE_DOC_PROMPT` and `API_TEST_CASE_DOC_PROMPT` upgraded with mandatory Fields-in-Scope rule, prohibition on range headings, min-3-steps rule, and per-TC format block. max_tokens raised: web/feature 3000→6000, API 3000→4000.
-- **Multi-tenant run storage**: `core/run_manager.py` rewritten — per-product sharding to `data/test_runs/<product>.json` and `data/test_schedules/<product>.json`. O(1) run→product lookup via `data/run_product_index.json` (FileLock protected). Lazy migration from legacy flat files on first access. Global 200-run cap is now per-product.
-- **Per-product run config YAML**: `dashboard/routers/config/_run_config.py` reads/writes `data/product_config/<product>.yaml`. Lazy migration fallback reads from `data/config.yaml` on first access.
-- **Remote runner** (`dashboard/routers/runner.py`): Pull-based execution — `GET /api/runner/claim` returns next queued run, `POST /api/runner/{id}/progress` streams progress, `POST /api/runner/{id}/result` ingests JSON report and triggers AI analysis. Bearer token auth (bcrypt hashed) via `dashboard/routers/auth.py:require_runner_token`.
+- **ScriptReviewAgent** (`ai/agents/script_review_agent.py`): Post-generation quality gate for pytest scripts. Static AST pass detects hardcoded URLs/credentials, `time.sleep()`, duplicate test names, POM missing `base_url`. LLM rewrite pass fixes weak/missing assertions, missing domain markers, missing status-code checks on API tests, and exact-equality checks on AI output. Integrated into `TestPipelineOrchestrator` after `_generate_script()`. Registered in `__init__`, `_AGENT_REGISTRY`, `AGENT_META`.
+- **AI assertion utilities** (`utils/ai_assertions.py`): Hard assertions for non-deterministic AI output — `assert_confidence_above/below`, `assert_category_in`, `assert_text_contains_any/all`, `assert_text_similarity` (difflib, no extra dep), `assert_response_within`, `assert_field_present`. `SoftAssertions` context manager collects all failures and raises one combined `AssertionError` at block exit. Thresholds centralised in `constants.py` (`AI_CONFIDENCE_THRESHOLD=0.70`, `AI_TEXT_SIMILARITY_RATIO=0.75`, `AI_RESPONSE_TIMEOUT_S=30.0`). ScriptReviewAgent rewrite prompt updated to emit these helpers instead of raw comparisons.
+
+## Previous: SQLite migration + DocReviewAgent + Hetzner (2026-05-15–16)
+
+- **SQLite storage** (`core/db.py`): Replaced FileLock+JSON/YAML with SQLite WAL mode (`data/sentinelflux.db`). All shared state — runs, schedules, approvals, pipeline jobs, activity log, quarantine, run history — now in DB. Supersedes D-01/D-02.
+- **DocReviewAgent** (`ai/agents/doc_review_agent.py`): Post-generation quality gate. Detects batched TC headings, missing mandatory sections (Pre-conditions, Steps, Expected Result), and thin TCs (<3 steps). Rewrites each failing TC via targeted LLM prompt + KB context. Integrated into `TestPipelineOrchestrator._review_doc()` (best-effort, never raises). Visible in `/agents` dashboard.
+- **DocGenAgent prompt hardening**: `TEST_CASE_DOC_PROMPT` and `API_TEST_CASE_DOC_PROMPT` upgraded with mandatory Fields-in-Scope rule, prohibition on range headings, min-3-steps rule. max_tokens raised: web/feature 3000→6000, API 3000→4000.
+- **Analyze All bulk endpoint** + Re-analyze button for already-analyzed runs on `/runs` page.
+- **Hetzner deployment**: Server setup and deployment scripts added (`scripts/`).
+- **Remote runner** (`dashboard/routers/runner.py`): Pull-based execution — `GET /api/runner/claim` returns next queued run, `POST /api/runner/{id}/progress` streams progress, `POST /api/runner/{id}/result` ingests JSON report and triggers AI analysis. Bearer token auth (bcrypt hashed).
 - **Runner token admin** (`dashboard/routers/config/_runners.py`): Admin CRUD for runner tokens. `POST` returns plain token once; only bcrypt hash stored.
-- **`sentinelflux runner` CLI daemon** (`sentinelflux/commands/runner_cmd.py`): Polls claim endpoint, resolves test path from product/domain/module, builds env overrides from `run_config_snapshot`, runs pytest subprocess, streams progress every 5s, posts JSON report.
+- **`sentinelflux runner` CLI daemon** (`sentinelflux/commands/runner_cmd.py`): Polls claim endpoint, resolves test path from product/domain/module, runs pytest subprocess, streams progress every 5s, posts JSON report.
+- **Debt D-01–D-06 resolved**: `utils/paths.py` centralisation, config_router split into subpackage (`dashboard/routers/config/`), unit tests for core utils, OpenAI/Anthropic wired to AI client (all later subsumed by SQLite migration).
 
 ## Previous: Per-product Run Config + Env Injection (2026-05-15)
 
-- **Per-product Run Config** (`/config` → Run Config tab): CRUD for environment profiles (name, base URL, API URL), browser profiles (chromium/firefox/webkit, headless), device profiles (platform, appium URL, capabilities JSON), credentials (username + password env var ref), and saved defaults per product. Data stored in `data/config.yaml` under each product's `run_config` key.
-- **Run trigger with config**: Trigger panel and schedule form now load the product's run config profiles on product selection (Alpine.js fetch to `GET /api/config/run-config/{product}`); browser shown only for web/all, device only for mobile/all; defaults pre-selected.
+- **Per-product Run Config** (`/config` → Run Config tab): CRUD for environment profiles (name, base URL, API URL), browser profiles (chromium/firefox/webkit, headless), device profiles (platform, appium URL, capabilities JSON), credentials (username + password env var ref), and saved defaults per product.
+- **Run trigger with config**: Trigger panel and schedule form now load the product's run config profiles on product selection; browser shown only for web/all, device only for mobile/all; defaults pre-selected.
 - **Env injection into pytest**: `_execute_run` resolves the chosen profiles and injects `SF_ENV`, `SF_BASE_URL`, `SF_API_URL`, `SF_BROWSER`, `SF_HEADLESS`, `SF_APPIUM_URL`, `SF_DEVICE_PLATFORM`, `SF_DEVICE_CAPABILITIES` into the subprocess environment.
 - **Run history snapshot**: Each run record stores `run_config_snapshot`; shown as monospace pills in run history cards. Reruns inherit the original config.
-- **Debt D-01–D-06 resolved** (prior session): file locking (FileLock), 90-day run_history cap, `utils/paths.py` centralisation, config_router split into subpackage, unit tests for core utils, OpenAI/Anthropic wired to AI client.
 
 ## Previous: Dashboard Build (2026-05-14)
 
@@ -109,9 +115,9 @@ ai/knowledge_base/<product>/    Per-product KB (application, api_specs, ui_pages
 ai/knowledge_base/increments/   Feature drop YAMLs
 ai/knowledge_base/kb_loader.py  Loads base + increments, formats context for prompts
 ai/clients/mistral_client.py    LLM client (cloud + local Ollama)
-ai/agents/                      10 agents: ResultAnalyzer, FlakyDetector, RegressionGuard,
+ai/agents/                      11 agents: ResultAnalyzer, FlakyDetector, RegressionGuard,
                                   CoverageGap, LocatorHealer, QuarantineManager, DocGen,
-                                  DocReview, ScriptGen, SentinelOrchestrator
+                                  DocReview, ScriptGen, ScriptReview, SentinelOrchestrator
 ai/agents/doc_review_agent.py   Post-generation quality gate (regex audit + LLM rewrite)
 ai/agents/sentinel_orchestrator.py  Post-suite monitoring pipeline (chains all agents)
 ai/pipeline/orchestrator.py     End-to-end KB → doc → script (supports --output-base)
@@ -121,13 +127,14 @@ pages/base_page.py              Base POM with self-healing locators
 sentinelflux/                   CLI commands (init, run, generate, doctor)
 utils/constants.py              All magic numbers
 utils/ai_factory.py             AI client instantiation (do not duplicate in conftest)
-utils/activity_log.py           Append-only event store → data/activity_log.json
-utils/approval_manager.py       Human-in-the-loop approvals → data/pending_approvals.yaml
-utils/run_manager.py            Test run records + schedules → data/test_runs.json
+core/db.py                      SQLite connection + schema (WAL mode). Single source of truth for all shared state.
+core/approval_manager.py        Human-in-the-loop approvals → sentinelflux.db
+core/run_manager.py             Test run records + schedules → sentinelflux.db
 conftest.py                     Generic fixtures — NO product references
 products/orangehrm/             OrangeHRM example (web + API + KB)
 products/restfulbooker/         Restful Booker example (API + KB)
-data/            Runtime data (activity log, approvals, runs, quarantine, KB log)
+data/sentinelflux.db            SQLite database — runs, schedules, approvals, pipeline jobs, activity log, quarantine
+data/product_config/<product>.yaml  Per-product run config (envs, browsers, devices, credentials, defaults)
 dashboard/app.py                FastAPI app entry point — registers all routers
 dashboard/routers/pages.py      All UI page routes (/, /runs, /agents, /activities, /kb, etc.)
 dashboard/routers/runs.py       Test run API + trigger + schedule endpoints; env injection
@@ -137,10 +144,6 @@ dashboard/routers/config/_run_config.py  Per-product run config CRUD — reads/w
 dashboard/routers/config/_runners.py     Admin CRUD for runner tokens (bcrypt-hashed in config.yaml runner_tokens)
 dashboard/routers/runner.py     Remote runner API: /api/runner/claim, /progress, /result (Bearer token auth)
 sentinelflux/commands/runner_cmd.py  `sentinelflux runner` daemon — polls claim, runs pytest, posts report
-data/test_runs/<product>.json   Per-product sharded run records (200-run rolling window each)
-data/test_schedules/<product>.json  Per-product sharded schedules
-data/run_product_index.json     O(1) run_id → product mapping (FileLock protected)
-data/product_config/<product>.yaml  Per-product run config (envs, browsers, devices, credentials, defaults)
 dashboard/routers/config_router.py  Thin re-export shim for backward compat
 dashboard/templates/            Jinja2 templates (one per page + partials/ subdir)
 dashboard/templates/partials/config_run_config.html  Run config UI partial (4 sections + defaults)
@@ -179,7 +182,7 @@ dashboard/templates/partials/config_run_config.html  Run config UI partial (4 se
 - Do not add magic numbers inline — add to `utils/constants.py`
 - Do not put product-specific imports in root `conftest.py`
 - Do not put `booking_client.py` inside `api/` subdir in examples — namespace collision under pytest
-- Do not write to `data/` files without checking for concurrent access — use FileLock (already in place for run_manager, run_product_index, product_config)
+- Do not write shared state to raw JSON/YAML files — use `core/db.py` (`get_conn()`) which handles SQLite WAL concurrency automatically
 - Do not add new agents to `_AGENT_REGISTRY` in `agents.py` without also adding metadata to `dashboard/agent_meta.py`
 
 ---

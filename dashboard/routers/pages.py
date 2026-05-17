@@ -29,6 +29,18 @@ def _require_auth(request: Request) -> dict:
     return user
 
 
+def _vapt_access(current_user: dict) -> bool:
+    try:
+        from dashboard.routers.config._helpers import _load_config
+        cfg = _load_config()
+        if current_user.get("admin"):
+            return True
+        user_prods = set(current_user.get("products", []))
+        return any(p.get("vapt_enabled") and p["name"] in user_prods for p in cfg.get("products", []))
+    except Exception:
+        return bool(current_user.get("admin"))
+
+
 def _ctx(request: Request, current_user: dict, **kwargs) -> dict:
     all_prods = _list_products()
     visible = user_products(current_user, all_prods)
@@ -36,6 +48,7 @@ def _ctx(request: Request, current_user: dict, **kwargs) -> dict:
         "pending_count": len(_am.pending()),
         "all_products": visible,
         "current_user": current_user,
+        "vapt_access": _vapt_access(current_user),
         **kwargs,
     }
 
@@ -545,3 +558,25 @@ async def change_password_submit(
     _save_config(cfg)
     ctx["saved"] = True
     return templates.TemplateResponse(request, "change_password.html", context=ctx)
+
+
+@router.get("/vapt", response_class=HTMLResponse)
+async def vapt_page(request: Request, product: str | None = None,
+                    current_user: dict = Depends(_require_auth)):
+    from dashboard.routers.config._helpers import _load_config
+    if not _vapt_access(current_user):
+        return RedirectResponse("/", status_code=302)
+    cfg = _load_config()
+    all_prods = user_products(current_user, _list_products())
+    if current_user.get("admin"):
+        vapt_prods = [p["name"] for p in cfg.get("products", [])
+                      if p.get("active", True) and p.get("vapt_enabled")]
+    else:
+        user_prod_set = set(current_user.get("products", []))
+        vapt_prods = [p["name"] for p in cfg.get("products", [])
+                      if p.get("vapt_enabled") and p["name"] in user_prod_set]
+    return templates.TemplateResponse(request, "vapt.html", context=_ctx(
+        request, current_user,
+        vapt_products=vapt_prods,
+        vapt_access=True,
+    ))

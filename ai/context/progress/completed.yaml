@@ -1,5 +1,53 @@
 # Completed work items — append only, newest first
 
+- id: P2-04+P2-05
+  date: 2026-05-17
+  title: "ScriptReviewAgent + AI assertion utilities"
+  outcome: >
+    ai/agents/script_review_agent.py: Post-generation quality gate for pytest scripts.
+    Static AST pass detects hardcoded URLs/credentials, time.sleep(), duplicate test
+    names, POM base_url issues. LLM rewrite pass fixes weak/missing assertions, missing
+    domain markers, missing status-code checks on API tests, and exact-equality checks
+    on AI output. Integrated into TestPipelineOrchestrator after _generate_script().
+    Registered in __init__, _AGENT_REGISTRY, AGENT_META.
+    utils/ai_assertions.py: Hard assertion helpers for non-deterministic AI output —
+    assert_confidence_above/below, assert_category_in, assert_text_contains_any/all,
+    assert_text_similarity (difflib), assert_response_within, assert_field_present.
+    SoftAssertions context manager collects all failures into one combined AssertionError.
+    Thresholds (AI_CONFIDENCE_THRESHOLD=0.70, AI_TEXT_SIMILARITY_RATIO=0.75,
+    AI_RESPONSE_TIMEOUT_S=30.0) centralised in utils/constants.py.
+
+- id: SQLite-migration+Hetzner+DocReviewAgent
+  date: 2026-05-16
+  title: "SQLite storage migration, Hetzner deploy, DocReviewAgent, Analyze All"
+  outcome: >
+    Storage: replaced FileLock+JSON/YAML with SQLite WAL mode (data/sentinelflux.db)
+    via core/db.py. All shared state (runs, schedules, approvals, pipeline jobs,
+    activity log, quarantine, run history) now in DB. Superseded D-01/D-02.
+    pipeline_jobs migrated to SQLite (separate pass, 6e25c71).
+    Hetzner: server setup and deployment scripts added (4510522).
+    DocReviewAgent (b94dfa3): post-generation quality gate for test case docs.
+    Detects batched TC headings, missing mandatory sections, thin TCs (<3 steps).
+    Rewrites failing TCs via LLM. Auto-runs after DocGenAgent. Visible in /agents.
+    DocGenAgent prompt hardening: mandatory Fields-in-Scope rule, no range headings,
+    min-3-steps rule. max_tokens raised (web 3000→6000, API 3000→4000).
+    Analyze All bulk endpoint + Re-analyze button for runs page (d8f431e).
+
+- id: D-01-through-D-06+multi-tenant+remote-runner
+  date: 2026-05-15
+  title: "Debt D-01..D-06 resolution + multi-tenancy + remote runner"
+  outcome: >
+    D-01: FileLock added to all data writers (later superseded by SQLite migration).
+    D-02: QuarantineManager.record_run() trims entries older than 90 days.
+    D-03: utils/paths.py created; ROOT imported across all modules.
+    D-04: config_router.py split into dashboard/routers/config/ subpackage
+    (_helpers, _meta, _users, _products, _assignments, _run_config, _runners).
+    D-05: Unit tests added to tests/unit/ for core utilities.
+    D-06: _build_ai_client() extended to support openai/anthropic providers.
+    Multi-tenancy: per-product run/schedule sharding → later migrated to SQLite.
+    Remote runner: pull-based daemon (sentinelflux runner), Bearer token auth,
+    per-product run config YAML, runner token admin UI.
+
 - id: P2-01+P2-02+P2-03
   date: 2026-05-06
   title: "Phase 2 — AI Pipeline: TestScriptGenSkill + Orchestrator + KB increments"
