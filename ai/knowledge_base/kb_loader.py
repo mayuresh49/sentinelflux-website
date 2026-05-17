@@ -176,6 +176,8 @@ class KnowledgeBaseLoader:
         ctx = ["\n=== FEATURE INCREMENTS ==="]
         for inc in increments:
             feature = inc.get("feature", {})
+            if isinstance(feature, str):
+                feature = {"name": feature}
             ctx.append(f"\n- {feature.get('name', 'Unnamed')} (v{feature.get('version', '?')})")
             ctx.append(f"  Status: {feature.get('status', 'unknown')}")
             for scenario in inc.get("test_scenarios", {}).get("api", [])[:3]:

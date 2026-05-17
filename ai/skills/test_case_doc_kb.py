@@ -11,15 +11,18 @@ from dashboard.routers.config_router import get_generation_categories_instructio
 
 
 def _build_tc_id_instruction(tc_prefix: str, tc_start: int) -> str:
+    seq = ", ".join(f"{tc_prefix}-{tc_start + i:03d}" for i in range(4))
     return (
         f"\nTest Case ID Rules:\n"
-        f"- Use the prefix '{tc_prefix}' for all test case IDs.\n"
-        f"- Number IDs sequentially starting from {tc_prefix}-{tc_start:03d}.\n"
-        f"- Format each ID as: {tc_prefix}-NNN (e.g. {tc_prefix}-{tc_start:03d})\n"
+        f"- ALL test case IDs in this document MUST use the prefix '{tc_prefix}'.\n"
+        f"- The FIRST test case ID MUST be exactly: {tc_prefix}-{tc_start:03d}\n"
+        f"- Number IDs sequentially: {seq}, ...\n"
+        f"- NEVER start from {tc_prefix}-001 or any number other than {tc_start}.\n"
+        f"  IDs {tc_prefix}-001 through {tc_prefix}-{tc_start - 1:03d} are already allocated "
+        f"  to other modules and must NOT appear in this document.\n"
         f"- CRITICAL: IDs must be globally unique across ALL documents that share this prefix.\n"
-        f"  Never assign an ID below {tc_prefix}-{tc_start:03d} — those are already in use by\n"
-        f"  other modules or automated test function names. Starting below {tc_start} will cause\n"
-        f"  silent ID collisions that break doc lookup and agent analysis.\n"
+        f"  Starting below {tc_prefix}-{tc_start:03d} will cause silent ID collisions that\n"
+        f"  break doc lookup and automated test function name resolution.\n"
         f"- Each test case must have its own ### heading. Never collapse multiple TCs into\n"
         f"  a single heading (e.g. '### {tc_prefix}-{tc_start:03d} to {tc_prefix}-{tc_start+5:03d}') —\n"
         f"  write each TC individually with full Pre-conditions, Steps, and Expected Result.\n"

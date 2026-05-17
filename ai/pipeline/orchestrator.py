@@ -159,7 +159,37 @@ class TestPipelineOrchestrator:
         )
         agent = DocGenAgent(ai_client=self.ai_client, kb_loader=self.kb_loader, context=ctx)
         result = agent.run(feature_name=feature_name, output_path=out_path)
-        return result["doc_path"]
+        doc_path = result["doc_path"]
+        if tc_prefix:
+            self._normalize_tc_ids(doc_path, tc_prefix, tc_start)
+        return doc_path
+
+    def _normalize_tc_ids(self, doc_path: Path, tc_prefix: str, tc_start: int) -> None:
+        """Renumber any wrong TC IDs the LLM generated, preserving relative order.
+
+        Scans the doc for all PREFIX-NNN occurrences, sorts them, and remaps them
+        to the correct sequential range starting at tc_start. Writes back only if
+        any IDs needed correction.
+        """
+        import re
+        text = doc_path.read_text(encoding="utf-8")
+        pattern = re.compile(rf"\b{re.escape(tc_prefix)}-(\d+)\b")
+        found = sorted({int(m.group(1)) for m in pattern.finditer(text)})
+        if not found:
+            return
+        correct_start = tc_start
+        correct_seq = list(range(correct_start, correct_start + len(found)))
+        if list(found) == correct_seq:
+            return
+        mapping = {old: new for old, new in zip(found, correct_seq)}
+
+        def _replace(m: re.Match) -> str:
+            return f"{tc_prefix}-{mapping[int(m.group(1))]:03d}"
+
+        fixed = pattern.sub(_replace, text)
+        doc_path.write_text(fixed, encoding="utf-8")
+        _log.info("Normalized TC IDs in %s: %s → %s..%s",
+                  doc_path.name, found[0], correct_seq[0], correct_seq[-1])
 
     def _review_doc(self, doc_path: Path, domain: str) -> None:
         """Run DocReviewAgent on a freshly generated doc — best-effort, never raises."""
