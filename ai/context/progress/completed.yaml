@@ -1,5 +1,18 @@
 # Completed work items — append only, newest first
 
+- id: docs-manual-tc-creation
+  date: 2026-05-18
+  title: "Docs: manual test case creation from the dashboard"
+  outcome: >
+    Add Test Case button on Docs page loads a form (HTMX → #tc-viewer).
+    TC ID auto-generated from highest existing ID in product+domain.
+    Feature dropdown shows existing modules; "Add new module" reveals text input.
+    Script restricted to actual test_*.py files; warns if already linked elsewhere.
+    Owner dropdown from config.yaml users. On save: appends to existing .md or
+    creates new file with full header. Duplicate ID rejected. HX-Redirect refreshes
+    left panel. Fixed Alpine | safe bug (raw JSON in double-quoted attribute) and
+    moved <script> to top of partial (before MutationObserver fires).
+
 - id: quality-vapt-exclusion-coverage-signal
   date: 2026-05-18
   title: "Quality metrics: exclude VAPT tests; low-coverage doc-gen signal"

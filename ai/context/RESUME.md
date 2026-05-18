@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (12)  
+Last updated: 2026-05-18 (13)  
 Framework version: 0.1.0
 
 ---
@@ -38,6 +38,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **Docs: manual test case creation** (`dashboard/routers/partials.py`, `dashboard/templates/docs.html`, `dashboard/templates/partials/doc_tc_create.html`): Added "Add Test Case" button to the Docs page header. Clicking it loads a structured form into the right-panel viewer (via HTMX). TC ID is auto-generated from the highest existing ID in the selected product+domain (scans all feature .md files at form load). Product abbreviation is derived from existing TC IDs. Feature/module is a dropdown of existing modules for the selected product+domain with an "Add new module" fallback text input. Script is restricted to actual `test_*.py` files on disk; selecting one that's already referenced in any TC shows an amber inline warning (allowed but flagged). Owner is a dropdown from `config.yaml` users. On save: appends a new index row (matching existing column count) and detail block to an existing .md, or creates the file from scratch with full header. Duplicate TC ID is rejected. On success, `HX-Redirect` to `/docs?product=X` so the left panel refreshes. Alpine `| safe` bug fixed: JSON was placed raw into a double-quoted HTML attribute, breaking HTML parsing — Jinja2 auto-escaping now handles `"` → `&#34;` correctly. Script `<script>` block moved to top of partial so it executes before Alpine's MutationObserver fires.
+
+## Previous: VAPT report PDF fix + historical test log backfill (2026-05-18)
 
 - **VAPT report: PDF fix + historical test log backfill** (`dashboard/routers/vapt.py`, `dashboard/templates/vapt_report_pdf.html`): WeasyPrint 68.1 installed (was not present, causing 500 on PDF download). For scans that predate `test_log` persistence, added `_infer_test_log_from_files(product, scan_id, findings)` — walks `products/{product}/tests/vapt/test_*.py`, parses `def test_` declarations, extracts the OWASP ref from the embedded prefix (e.g. `test_A01_...`) using a `_`-delimited regex (word-boundary `\b` fails inside underscore-joined identifiers), falls back to keyword inference only if no prefix found. `_make_title()` updated to strip the leading OWASP prefix from human-readable titles. `_render_report_html` calls the fallback for any completed scan missing `test_log`. Template adds a disclaimer footnote on inferred scans. Section 6 Scan History gains Skipped and Duration columns.
 
