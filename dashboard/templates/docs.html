@@ -14,6 +14,15 @@
       <span class="text-sm text-slate-400" id="tc-total-badge">
         {{ modules | map(attribute='test_cases') | map('length') | sum }} test cases across {{ modules | length }} module{{ 's' if modules | length != 1 else '' }}
       </span>
+      <!-- Add Test Case -->
+      <button hx-get="/ui/docs/test-case/new"
+              hx-target="#tc-viewer" hx-swap="innerHTML"
+              class="flex items-center gap-1.5 text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg px-3 py-1.5 transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+        Add Test Case
+      </button>
       <!-- Export dropdown -->
       <div x-data="{ exportOpen: false }" class="relative">
         <button @click="exportOpen = !exportOpen"

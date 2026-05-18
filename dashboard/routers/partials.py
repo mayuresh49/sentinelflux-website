@@ -187,6 +187,231 @@ async def tc_delete(
     return HTMLResponse("", headers={"HX-Redirect": f"/docs{prod_param}"})
 
 
+@router.get("/docs/test-case/placeholder", response_class=HTMLResponse)
+async def tc_placeholder():
+    return HTMLResponse("""
+        <div class="h-full flex flex-col items-center justify-center text-center gap-3">
+          <svg class="w-10 h-10 text-slate-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <p class="text-slate-400 text-sm">Select a test case from the list to view its details.</p>
+        </div>
+    """)
+
+
+@router.get("/docs/test-case/new", response_class=HTMLResponse)
+async def tc_new(request: Request):
+    import json as _json
+    import yaml as _yaml
+    from dashboard.routers.docs import _find_docs, _parse_tc_index
+
+    products = _list_products()
+
+    # Users from config
+    cfg_path = _ROOT_DIR / "data" / "config.yaml"
+    users: list[str] = []
+    if cfg_path.exists():
+        cfg = _yaml.safe_load(cfg_path.read_text()) or {}
+        users = sorted(u["name"] for u in cfg.get("users", []) if u.get("name"))
+
+    # All docs for visible products (one scan)
+    all_docs = [d for d in _find_docs() if d["product"] in products]
+
+    # Features per product/domain
+    features_by_pd: dict = {p: {} for p in products}
+    for d in all_docs:
+        features_by_pd[d["product"]].setdefault(d["domain"], [])
+        if d["feature"] not in features_by_pd[d["product"]][d["domain"]]:
+            features_by_pd[d["product"]][d["domain"]].append(d["feature"])
+    for p in features_by_pd:
+        for dom in features_by_pd[p]:
+            features_by_pd[p][dom].sort()
+
+    # Product abbreviations from first existing TC ID
+    prod_abbrs: dict[str, str] = {}
+    for prod in products:
+        abbr = prod[:2].upper()
+        for d in (x for x in all_docs if x["product"] == prod):
+            path = _ROOT_DIR / "products" / prod / "docs" / "test_cases" / d["domain"] / f"{d['feature']}.md"
+            if not path.exists():
+                continue
+            for tc in _parse_tc_index(path.read_text()):
+                parts = tc["id"].split("-")
+                if len(parts) >= 3:
+                    abbr = parts[0]
+                    break
+            else:
+                continue
+            break
+        prod_abbrs[prod] = abbr
+
+    # Next TC ID per product/domain (scans all IDs across all features)
+    dom_abbr = {"web": "WEB", "api": "API", "mobile": "MOB"}
+    next_ids: dict = {}
+    for prod in products:
+        pa = prod_abbrs[prod]
+        next_ids[prod] = {}
+        for dom, da in dom_abbr.items():
+            prefix = f"{pa}-{da}-"
+            max_num = 0
+            for d in (x for x in all_docs if x["product"] == prod and x["domain"] == dom):
+                path = _ROOT_DIR / "products" / prod / "docs" / "test_cases" / dom / f"{d['feature']}.md"
+                if not path.exists():
+                    continue
+                for tc in _parse_tc_index(path.read_text()):
+                    if tc["id"].startswith(prefix):
+                        num = tc["id"][len(prefix):]
+                        if num.isdigit():
+                            max_num = max(max_num, int(num))
+            next_ids[prod][dom] = f"{prefix}{str(max_num + 1).zfill(3)}"
+
+    # Scripts per product/domain (actual test files only)
+    scripts_by_pd: dict = {}
+    for prod in products:
+        scripts_by_pd[prod] = {}
+        for dom in dom_abbr:
+            test_dir = _ROOT_DIR / "products" / prod / "tests" / dom
+            scripts_by_pd[prod][dom] = sorted(
+                f.name for f in test_dir.iterdir()
+                if f.name.startswith("test_") and f.suffix == ".py"
+            ) if test_dir.is_dir() else []
+
+    # Script usage: which TCs already reference each script
+    script_usage: dict = {}
+    for d in all_docs:
+        prod, dom = d["product"], d["domain"]
+        path = _ROOT_DIR / "products" / prod / "docs" / "test_cases" / dom / f"{d['feature']}.md"
+        if not path.exists():
+            continue
+        for tc in _parse_tc_index(path.read_text()):
+            s = tc.get("script", "").strip()
+            if s and s not in ("—", "-"):
+                script_usage.setdefault(f"{prod}/{dom}/{s}", []).append(tc["id"])
+
+    return templates.TemplateResponse(request, "partials/doc_tc_create.html", context={
+        "request": request,
+        "form_data_json": _json.dumps({
+            "products": products,
+            "users": users,
+            "featuresByProdDomain": features_by_pd,
+            "scriptsByProdDomain": scripts_by_pd,
+            "nextIds": next_ids,
+            "scriptUsage": script_usage,
+        }),
+    })
+
+
+@router.post("/docs/test-case/create", response_class=HTMLResponse)
+async def tc_create(
+    product: str = Form(...), domain: str = Form(...),
+    feature: str = Form(...), tc_id: str = Form(...),
+    title: str = Form(...), heuristic: str = Form(...),
+    test_type: str = Form(""), status: str = Form(...),
+    script: str = Form(""), priority: str = Form(""),
+    owner: str = Form(""), body_md: str = Form(""),
+):
+    import re as _re
+    from dashboard.routers.docs import _parse_tc_index
+
+    feature = feature.strip().lower().replace(" ", "_")
+    tc_id = tc_id.strip().upper()
+    script = script.strip() or "—"
+
+    path = _ROOT_DIR / "products" / product / "docs" / "test_cases" / domain / f"{feature}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Build detail block: metadata header + user-supplied body
+    meta_lines: list[str] = []
+    if priority:  meta_lines.append(f"**Priority:** {priority}")
+    if test_type: meta_lines.append(f"**Test Type:** {test_type}")
+    if owner:     meta_lines.append(f"**Owner:** {owner}")
+    full_body = ("\n".join(meta_lines) + "\n\n" if meta_lines else "") + body_md.strip()
+    detail_block = f"### {tc_id} — {title}\n\n{full_body}\n\n"
+
+    if not path.exists():
+        if test_type:
+            header_row = "| ID | Scenario | Type | Test Type | Status | Script |"
+            sep_row    = "|---|---|---|---|---|---|"
+            index_row  = f"| {tc_id} | {title} | {heuristic} | {test_type} | {status} | {script} |"
+        else:
+            header_row = "| ID | Scenario | Type | Status | Script |"
+            sep_row    = "|---|---|---|---|---|"
+            index_row  = f"| {tc_id} | {title} | {heuristic} | {status} | {script} |"
+
+        feature_title = feature.replace("_", " ").title()
+        content = (
+            f"# Test Case Document — {feature_title}\n\n"
+            f"**Product:** {product}\n"
+            f"**Layer:** {domain.upper()}\n"
+            f"**Module:** {feature_title}\n\n"
+            "---\n\n"
+            "## Test Case Index\n\n"
+            f"{header_row}\n{sep_row}\n{index_row}\n\n"
+            "---\n\n"
+            f"## Detailed Test Cases\n\n{detail_block}"
+        )
+        path.write_text(content, encoding="utf-8")
+    else:
+        content = path.read_text(encoding="utf-8")
+
+        # Reject duplicate IDs
+        existing_ids = {tc["id"] for tc in _parse_tc_index(content)}
+        if tc_id in existing_ids:
+            return HTMLResponse(
+                f'<p class="text-red-500 text-sm p-4">TC ID <strong>{tc_id}</strong> already exists in {feature}.md — choose a different ID.</p>'
+            )
+
+        # Detect column count from the separator line that follows the ID header
+        lines = content.splitlines()
+        in_header = False
+        ncols = 5
+        for ln in lines:
+            s = ln.strip()
+            if _re.match(r'\|\s*ID\s*\|', s, _re.IGNORECASE):
+                in_header = True
+                continue
+            if in_header and (s.startswith("|---") or s.startswith("| ---")):
+                ncols = s.count("|") - 1
+                break
+
+        if ncols >= 6:
+            new_row = f"| {tc_id} | {title} | {heuristic} | {test_type} | {status} | {script} |"
+        else:
+            new_row = f"| {tc_id} | {title} | {heuristic} | {status} | {script} |"
+
+        # Insert row after the last table row in the index
+        in_table = False
+        last_row_idx = -1
+        for i, ln in enumerate(lines):
+            s = ln.strip()
+            if _re.match(r'\|\s*ID\s*\|', s, _re.IGNORECASE):
+                in_table = True
+                continue
+            if not in_table:
+                continue
+            if s.startswith("|---") or s.startswith("| ---"):
+                continue
+            if s.startswith("|"):
+                last_row_idx = i
+            else:
+                break
+
+        if last_row_idx >= 0:
+            lines.insert(last_row_idx + 1, new_row)
+        content = "\n".join(lines) + "\n"
+
+        # Append detail block (create section if missing)
+        if _re.search(r'^##\s+(Detailed\s+)?Test Cases', content, _re.MULTILINE | _re.IGNORECASE):
+            content = content.rstrip() + "\n\n" + detail_block
+        else:
+            content += "\n\n## Detailed Test Cases\n\n" + detail_block
+
+        path.write_text(content, encoding="utf-8")
+
+    prod_param = f"?product={product}" if product else ""
+    return HTMLResponse("", headers={"HX-Redirect": f"/docs{prod_param}"})
+
+
 @router.get("/docs/export")
 async def docs_export(
     product: str | None = None, domain: str | None = None,
