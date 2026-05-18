@@ -1,5 +1,19 @@
 # Completed work items — append only, newest first
 
+- id: coverage-gap-pipeline-orangehrm
+  date: 2026-05-18
+  title: "Coverage gap pipeline: orangehrm 67% → 100% doc coverage + pipeline hardening"
+  outcome: >
+    CoverageGapAgent run across api/web/mobile: 96 untested KB scenarios logged to activity.
+    Full pipeline (DocGen→DocReview→ScriptGen→ScriptReview) for 4 undocumented scripts:
+    security_api.md (OH-API-029..039), security_web.md (OH-WEB-083..125),
+    leave.md (OH-WEB-124..128), login_mobile.md (OH-MOB-017..026).
+    Pipeline bugs fixed: normalizer regex now excludes not_automated + not_automatable;
+    max_tokens 3000→5000; mobile CRITICAL — no base_url in mobile POM constructors.
+    Credential hardcoding eliminated: api convention rewritten with {product}_client /
+    {product}_api_base_url / {product}_credentials patterns; two NEVER rules added to
+    prompt_templates.py. orangehrm_ess_credentials fixture + env_qa.yaml ess keys added.
+
 - id: docs-manual-tc-creation
   date: 2026-05-18
   title: "Docs: manual test case creation from the dashboard"
