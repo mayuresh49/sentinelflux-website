@@ -1,5 +1,18 @@
 # Completed work items — append only, newest first
 
+- id: vapt-exhaustive-suite-template-viewer
+  date: 2026-05-18
+  title: "VAPT: exhaustive A01-A10 test suite, template viewer, dedup product filter"
+  outcome: >
+    core/vapt_test_generator.py: 9 test files / 31 tests. New: test_vapt_injection
+    (A03 — SQL/XSS/path traversal/SSTI), test_vapt_session (A07 — cookie flags),
+    test_vapt_web (A01/A05 — clickjacking/open redirect/referrer/HTML comments),
+    test_vapt_ssrf (A10 — IMDS/RFC-1918 probes). OWASP inference: clickjack A03→A05,
+    new keywords path_traversal/httponly/samesite/dns_rebinding. vapt.py: test-templates
+    endpoint. vapt.html: collapsible template viewer (file tabs + OWASP context + code).
+    pages.py: vapt_page() calls vapt._vapt_products() — no more duplicated filter logic.
+    RP: 25 passed, 3 skipped, 3 xfailed.
+
 - id: script-fn-id-normalizer
   date: 2026-05-18
   title: "Orchestrator: _normalize_script_fn_ids() — code-level TC ID backstop for scripts"

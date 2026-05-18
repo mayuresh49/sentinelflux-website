@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (6)  
+Last updated: 2026-05-18 (7)  
 Framework version: 0.1.0
 
 ---
@@ -38,6 +38,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **VAPT exhaustive test suite + template viewer** (`core/vapt_test_generator.py`, `dashboard/routers/vapt.py`, `vapt.html`): Expanded from 5 to 9 test files (31 tests) covering full OWASP A01–A10. New files: `test_vapt_injection.py` (A03 — SQL, XSS, path traversal, SSTI), `test_vapt_session.py` (A07 — HttpOnly/Secure/SameSite cookie flags, session not in URL), `test_vapt_web.py` (A01/A05 — clickjacking, open redirect, referrer policy, HTML comments), `test_vapt_ssrf.py` (A10 — IMDS probes, RFC-1918 rebinding). OWASP inference fixed: `clickjack` moved A03→A05, added `path_traversal`, `httponly`, `samesite`, `dns_rebinding` keywords. Template viewer panel in Scans tab — "View Standard Test Templates" collapsible with per-file OWASP context and code. `vapt._vapt_products()` is now the single source of truth — `pages.py` `vapt_page()` no longer duplicates the filtering logic. RP result: 25 passed, 3 skipped, 3 xfailed.
+
+## Previous: Script TC ID normalizer (2026-05-18)
 
 - **Script TC ID normalizer** (`ai/pipeline/orchestrator.py`): Added `_normalize_script_fn_ids()` — code-level backstop that runs after `ScriptGenAgent` and before `ScriptReview`. Reads TC IDs from the doc index table (skipping `not_automatable` rows) in order, matches them to test function declarations in order, renames any function whose embedded ID doesn't match (e.g. `test_OH_API_001_x` → `test_OH_API_014_x`). Also handles functions with no ID prefix at all by prepending it. Silently skips if function count ≠ doc ID count (mismatch = human review needed). Closes the gap where models consistently ignored the TC IDs in the doc and numbered from 001.
 
