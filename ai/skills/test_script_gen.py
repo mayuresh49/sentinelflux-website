@@ -11,15 +11,21 @@ _CONVENTIONS: dict[str, str] = {
     "api": """\
 Imports:
     import pytest
+    import requests  # only for unauthenticated raw calls
     from utils.assertions import assert_status_code
 
 Marker: @pytest.mark.api
 
-REST fixture — rest_client:
-    response = rest_client.post(endpoint_name="create_booking", payload_name="create_booking", schema_name="booking_schema")
-    response = rest_client.get(endpoint_name="get_booking", path_params={"booking_id": booking_id})
-    response = rest_client.put(endpoint_name="update_booking", payload_name="update_booking", path_params={"booking_id": booking_id})
-    response = rest_client.delete(endpoint_name="delete_booking", path_params={"booking_id": booking_id})
+FIXTURE RULES — read before choosing a fixture:
+  {product}_client           — use for all AUTHENTICATED product API calls (e.g. orangehrm_client, rb_api_client)
+                               calls: resp = {product}_client.get("/resource")  resp = {product}_client.post("/resource", json={{}})
+  {product}_api_base_url     — use for UNAUTHENTICATED raw calls (testing 401/403 enforcement)
+                               calls: requests.get(f"{{product_api_base_url}}/resource")
+  {product}_credentials      — use when credentials are required as test INPUT (e.g. testing login endpoint directly)
+                               value: {{"username": ..., "password": ...}} — loaded from config, never hardcoded
+  rest_client / graphql_client — ONLY for framework-level non-product tests (e.g. Restful Booker generic REST)
+
+NEVER write an authenticate() helper with hardcoded strings. NEVER pass literal username/password strings.
 
 GraphQL fixture — graphql_client:
     response = graphql_client.execute(query_name="countries_list", variables={"filter": {"code": {"eq": "AU"}}})
@@ -30,13 +36,26 @@ Assertions:
     assert "bookingid" in body
     assert body["booking"]["firstname"] == "John"
 
-Example test function:
+Example — authenticated product call:
     @pytest.mark.api
-    def test_create_booking_returns_booking_id(rest_client):
-        response = rest_client.post("create_booking", payload_name="create_booking", schema_name="booking_schema")
-        assert_status_code(response, 200)
-        body = response.json()
-        assert "bookingid" in body
+    def test_OH_API_001_list_users_returns_200(orangehrm_client):
+        resp = orangehrm_client.get("/admin/users")
+        assert_status_code(resp, 200)
+        assert isinstance(resp.json().get("data"), list)
+
+Example — unauthenticated enforcement:
+    @pytest.mark.api
+    def test_OH_API_003_list_users_without_auth_returns_401(orangehrm_api_base_url):
+        resp = requests.get(f"{orangehrm_api_base_url}/admin/users")
+        assert resp.status_code == 401
+
+Example — credentials as test input:
+    @pytest.mark.api
+    def test_OH_API_029_valid_login_returns_200(orangehrm_api_base_url, orangehrm_credentials):
+        resp = requests.post(f"{orangehrm_api_base_url}/auth/login",
+                             json={{"username": orangehrm_credentials["username"],
+                                    "password": orangehrm_credentials["password"]}})
+        assert resp.status_code in (200, 302)
 """,
 
     "web": """\
@@ -107,6 +126,11 @@ Imports:
 Marker: @pytest.mark.mobile
 
 Fixture: appium_driver (injected by conftest)
+
+CRITICAL — Mobile POM constructors signature: __init__(self, driver, platform="android")
+  - NEVER pass base_url or any URL to a mobile POM constructor.
+  - NEVER add {product}_base_url as a fixture parameter in mobile tests.
+  - Mobile navigation is driven by the Appium driver, not URLs.
 
 Pattern:
     screen = BookingScreen(appium_driver)
@@ -337,7 +361,7 @@ class TestScriptGenSkill:
             categories_instruction=categories_instruction,
             page_catalog=page_catalog,
         )
-        code = self.ai_client.generate(prompt, max_tokens=3000, temperature=0.1).strip()
+        code = self.ai_client.generate(prompt, max_tokens=5000, temperature=0.1).strip()
         return _clean_code_output(code)
 
     def generate_script_from_file(

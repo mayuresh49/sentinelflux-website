@@ -62,7 +62,7 @@
     }
   ],
   "findings": [],
-  "report_generated_at": "2026-05-18T06:43:18.620122+00:00",
+  "report_generated_at": "2026-05-18T07:03:01.410722+00:00",
   "certificate_threshold": {
     "Critical": 0,
     "High": 1

@@ -270,13 +270,22 @@
           <!-- ── SCANS TAB ─────────────────────────────────────────── -->
           <div x-show="activeTab === 'scans'" class="space-y-4">
 
-            <!-- Test suite status card -->
+            <!-- Scan type selector -->
+            <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-1 w-fit">
+              <template x-for="[st, label] in [['web','Web App'],['infra','Infrastructure'],['mobile','Mobile App']]" :key="st">
+                <button @click="setScanType(st)"
+                        :class="scanTypeSel === st ? 'bg-white shadow text-slate-800 font-medium' : 'text-slate-500 hover:text-slate-700'"
+                        class="text-xs px-3 py-1.5 rounded-md transition-all" x-text="label"></button>
+              </template>
+            </div>
+
+            <!-- Test suite status for selected scan type -->
             <div class="border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3">
               <div class="flex items-center gap-2 text-xs">
                 <template x-if="testInfo?.exists">
                   <span class="flex items-center gap-1.5 text-emerald-700">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Standard test suite ready —
+                    <span x-text="scanTypeSel.charAt(0).toUpperCase() + scanTypeSel.slice(1)"></span> test suite ready —
                     <span x-text="testInfo.test_count"></span> tests across
                     <span x-text="testInfo.files.length"></span> files
                   </span>
@@ -284,7 +293,7 @@
                 <template x-if="!testInfo?.exists">
                   <span class="flex items-center gap-1.5 text-amber-700">
                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    No standard tests generated yet
+                    No <span x-text="scanTypeSel"></span> tests generated yet
                   </span>
                 </template>
               </div>
@@ -316,12 +325,12 @@
                               ? 'bg-indigo-600 text-white'
                               : 'bg-white text-slate-600 border border-slate-200 hover:border-indigo-300 hover:text-indigo-600'"
                             class="text-xs px-2 py-1 rounded transition-colors">
-                      <span x-text="tpl.filename.replace('test_vapt_','').replace('.py','')"></span>
+                      <span x-text="tpl.filename.replace(/test_vapt_(infra_|mobile_)?/,'').replace('.py','')"></span>
                       <span class="opacity-60 ml-1" x-text="'(' + tpl.test_count + ')'"></span>
                     </button>
                   </template>
                 </div>
-                <!-- OWASP label + content -->
+                <!-- OWASP/MASVS label + content -->
                 <template x-if="activeTemplateObj">
                   <div>
                     <div class="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border-t border-b border-indigo-100">
@@ -340,11 +349,11 @@
             <div x-show="selectedEng?.status === 'scoping'" class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700">
               Finalize scope before running a scan.
             </div>
-            <div x-show="selectedEng?.status !== 'scoping'" class="flex items-center gap-2">
+            <div x-show="selectedEng?.status !== 'scoping'" class="flex items-center gap-2 flex-wrap">
               <button @click="triggerScan(false)" :disabled="scanning"
                       class="flex items-center gap-1.5 text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg disabled:opacity-40 transition-colors">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Run Passive Scan
+                Run <span x-text="{'web':'Web App','infra':'Infra','mobile':'Mobile'}[scanTypeSel]"></span> Scan
               </button>
               <button @click="triggerScan(true)" :disabled="scanning || !hasOpenFindings"
                       class="flex items-center gap-1.5 text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded-lg disabled:opacity-40 transition-colors">
@@ -358,8 +367,9 @@
               <template x-for="s in (selectedEng?.scans||[]).slice().reverse()" :key="s.scan_id">
                 <div class="border border-slate-200 rounded-lg p-3 text-xs">
                   <div class="flex items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                       <span :class="s.is_revalidation ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'" class="px-1.5 py-0.5 rounded font-medium" x-text="s.is_revalidation ? 'Re-validation' : 'Initial'"></span>
+                      <span :class="scanTypeClass(s.scan_type||'web')" class="px-1.5 py-0.5 rounded font-medium capitalize" x-text="{'web':'Web App','infra':'Infrastructure','mobile':'Mobile'}[s.scan_type||'web'] || s.scan_type"></span>
                       <span :class="scanStatusClass(s.status)" class="px-1.5 py-0.5 rounded font-medium" x-text="s.status"></span>
                     </div>
                     <div class="flex items-center gap-3 text-slate-500">
@@ -588,6 +598,7 @@ function vaptApp() {
     showCreate: false,
     activeTab: 'scope',
     scanning: false,
+    scanTypeSel: 'web',
     testInfo: null,
     testTemplates: [],
     showTemplates: false,
@@ -655,13 +666,21 @@ function vaptApp() {
     },
 
     async loadTestInfo() {
-      const r = await fetch('/api/vapt/products/' + this.product + '/test-info');
+      const r = await fetch('/api/vapt/products/' + this.product + '/test-info?scan_type=' + this.scanTypeSel);
       if (r.ok) this.testInfo = await r.json();
     },
 
+    async setScanType(st) {
+      this.scanTypeSel = st;
+      this.testTemplates = [];
+      this.activeTemplate = null;
+      this.showTemplates = false;
+      await this.loadTestInfo();
+    },
+
     async loadTemplates() {
-      if (this.testTemplates.length) return;
-      const r = await fetch('/api/vapt/products/' + this.product + '/test-templates');
+      this.testTemplates = [];
+      const r = await fetch('/api/vapt/products/' + this.product + '/test-templates?scan_type=' + this.scanTypeSel);
       if (r.ok) {
         this.testTemplates = await r.json();
         if (this.testTemplates.length) this.activeTemplate = this.testTemplates[0].filename;
@@ -678,12 +697,13 @@ function vaptApp() {
     },
 
     async regenerateTests() {
-      const ok = await sfConfirm('Regenerate the standard test suite for ' + this.product + '? Existing vapt/ test files will be overwritten.');
+      const label = {'web':'Web App','infra':'Infrastructure','mobile':'Mobile App'}[this.scanTypeSel] || this.scanTypeSel;
+      const ok = await sfConfirm('Regenerate the ' + label + ' test suite for ' + this.product + '? Existing test files will be overwritten.');
       if (!ok) return;
-      const r = await fetch('/api/vapt/products/' + this.product + '/generate-tests?force=true', { method: 'POST' });
+      const r = await fetch('/api/vapt/products/' + this.product + '/generate-tests?force=true&scan_type=' + this.scanTypeSel, { method: 'POST' });
       if (!r.ok) { sfToast('Failed to regenerate tests: ' + (await r.json()).detail, 'error'); return; }
       await this.loadTestInfo();
-      sfToast('Standard test suite regenerated.', 'info');
+      sfToast(label + ' test suite regenerated.', 'info');
     },
 
     async createEngagement() {
@@ -753,13 +773,14 @@ function vaptApp() {
     },
 
     async triggerScan(isRevalidation) {
-      const label = isRevalidation ? 're-validation scan' : 'passive security scan';
+      const typeLabel = {'web':'Web App','infra':'Infrastructure','mobile':'Mobile App'}[this.scanTypeSel] || this.scanTypeSel;
+      const label = isRevalidation ? typeLabel + ' re-validation scan' : typeLabel + ' security scan';
       const ok = await sfConfirm('Start a ' + label + ' for ' + this.product + '?');
       if (!ok) return;
       this.scanning = true;
       const endpoint = isRevalidation ? 'revalidate' : 'scan';
       try {
-        const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/' + endpoint + '?product=' + this.product, { method: 'POST' });
+        const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/' + endpoint + '?product=' + this.product + '&scan_type=' + this.scanTypeSel, { method: 'POST' });
         if (!r.ok) { sfToast((await r.json()).detail, 'error'); return; }
         sfToast('Scan queued.', 'info');
         await this.loadEngagements();
@@ -853,6 +874,10 @@ function vaptApp() {
       const m = { queued:'bg-slate-100 text-slate-600', running:'bg-blue-100 text-blue-700 animate-pulse',
                   completed:'bg-emerald-100 text-emerald-700', failed:'bg-red-100 text-red-700' };
       return m[s] || 'bg-slate-100 text-slate-600';
+    },
+    scanTypeClass(st) {
+      const m = { web:'bg-violet-100 text-violet-700', infra:'bg-teal-100 text-teal-700', mobile:'bg-cyan-100 text-cyan-700' };
+      return m[st] || 'bg-slate-100 text-slate-600';
     },
     sevClass(sev) {
       const m = { Critical:'bg-red-600 text-white', High:'bg-orange-500 text-white',

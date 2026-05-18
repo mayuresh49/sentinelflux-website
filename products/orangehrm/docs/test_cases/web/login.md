@@ -22,6 +22,7 @@
 | OH-WEB-059 | Browser back button after login does not expose session | edge | not_automatable | — |
 | OH-WEB-060 | Session expires after inactivity timeout | edge | not_automatable | — |
 | OH-WEB-061 | Account locks after 5 consecutive failed login attempts | edge | not_automatable | — |
+| OH-WEB-129 | Forgot password flow | positive | not_automated | — |
 
 > 
 **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
@@ -362,3 +363,25 @@
 **Category:** positive
 
 **Status:** not_automated
+
+### OH-WEB-129 — Forgot password flow
+
+**Priority:** High
+**Test Type:** regression
+**Owner:** Mayuresh Kulkarni
+
+**Pre-conditions:**
+Have a ESS login created for a end user
+
+**Steps:**
+1. Navigate to the OrgangeHRM login page
+2. Perform forgot password operation
+3. Verify the email for reset password link
+4. Navigate o the link and reset the password
+
+**Expected Result:**
+User should be able to reset the password
+
+**Validation:**
+Login with new password set should work fine.
+

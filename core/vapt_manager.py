@@ -132,12 +132,13 @@ class VaptManager:
     # ── scan lifecycle ────────────────────────────────────────────────────────
 
     def add_scan(self, product: str, eng_id: str, triggered_by: str,
-                 is_revalidation: bool = False) -> dict | None:
+                 is_revalidation: bool = False, scan_type: str = "web") -> dict | None:
         eng = self._load(product, eng_id)
         if eng is None:
             return None
         scan = {
             "scan_id": f"scan-{uuid.uuid4().hex[:12]}",
+            "scan_type": scan_type,
             "triggered_at": datetime.now(timezone.utc).isoformat(),
             "triggered_by": triggered_by,
             "status": "queued",

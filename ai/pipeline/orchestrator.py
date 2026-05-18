@@ -255,7 +255,7 @@ class TestPipelineOrchestrator:
         # Table format: | OH-API-014 | description | type | automated | script.py |
         row_re = re.compile(
             rf"^\|\s*({re.escape(tc_prefix)}-(\d{{3}}))\s*\|"
-            r"[^|]*\|[^|]*\|\s*(?!not_automatable)(\w+)\s*\|",
+            r"[^|]*\|[^|]*\|\s*(?!not_automat)(\w+)\s*\|",
             re.MULTILINE | re.IGNORECASE,
         )
         doc_ids = [m.group(1) for m in row_re.finditer(doc_text)]

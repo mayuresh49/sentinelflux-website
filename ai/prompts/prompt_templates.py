@@ -191,6 +191,8 @@ Feature: {feature_name}
 - Do not add comments unless a business rule is non-obvious.
 - Do not import anything not in the conventions, AVAILABLE PAGE OBJECTS, or standard library.
 - NEVER hardcode URLs or credentials in test scripts. All URLs and credentials MUST come from product config fixtures (e.g. orangehrm_base_url, orangehrm_api_base_url, orangehrm_credentials, rb_api_base, rb_web_base, rb_credentials). These fixtures are loaded from config/env_{{env}}.yaml at runtime based on the --env pytest option.
+- NEVER write an authenticate() helper that takes hardcoded username/password strings. For authenticated API calls use the {{product}}_client fixture (e.g. orangehrm_client). For unauthenticated API calls use {{product}}_api_base_url + requests. Pass {{product}}_credentials fixture when credentials are needed as test input.
+- NEVER use rest_client for product-specific tests — it reads a generic config. Use {{product}}_client for authenticated calls and {{product}}_api_base_url for raw requests.
 - All page object constructors require base_url as the second argument. Never instantiate a page object without passing the URL fixture: PageClass(page, {{product}}_base_url).
 {test_type_instruction}
 {categories_instruction}

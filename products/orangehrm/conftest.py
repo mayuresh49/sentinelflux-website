@@ -49,6 +49,15 @@ def orangehrm_credentials(orangehrm_config):
 
 
 @pytest.fixture(scope="session")
+def orangehrm_ess_credentials(orangehrm_config):
+    creds = orangehrm_config.get("orangehrm", {}).get("credentials", {})
+    return {
+        "username": creds.get("ess_username", "Kris.Chapman"),
+        "password": creds.get("ess_password", "Admin123"),
+    }
+
+
+@pytest.fixture(scope="session")
 def session_authed_page(request, browser, orangehrm_credentials, orangehrm_base_url):
     """Session-scoped authenticated Playwright page for OrangeHRM."""
     if not request.config.getoption("--session-login", default=False):

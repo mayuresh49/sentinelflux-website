@@ -24,13 +24,21 @@ router = APIRouter(tags=["vapt"])
 _ROOT = Path(__file__).resolve().parent.parent.parent
 _vm = VaptManager()
 
+_VAPT_SUBDIRS: dict[str, str] = {
+    "web": "vapt",
+    "infra": "vapt_infra",
+    "mobile": "vapt_mobile",
+}
+
 # ── OWASP inference ───────────────────────────────────────────────────────────
 
 _OWASP_RULES: list[tuple[list[str], str, str]] = [
     # A07 — auth + session (checked first; session keywords shouldn't bleed into A05)
     (["without_auth", "no_auth", "unauthenticated", "requires_login", "requires_auth",
       "admin_requires", "session_cookie", "httponly", "samesite", "secure_flag",
-      "session_token", "cookie_flag", "session_mgmt"],
+      "session_token", "cookie_flag", "session_mgmt",
+      # Mobile M4 / MASVS-AUTH
+      "m4_auth", "m4_login", "m4_weak", "weak_credential", "brute_force_protection"],
      "A07", "Identification and Authentication Failures"),
     # A03 — injection (XSS listed here; clickjack moved to A05)
     (["xss", "script_execute", "cross_site_script", "reflected_unescaped"],
@@ -43,19 +51,31 @@ _OWASP_RULES: list[tuple[list[str], str, str]] = [
      "A01", "Broken Access Control"),
     (["delete_without", "update_without", "write_without", "admin_panel"],
      "A01", "Broken Access Control"),
-    (["csrf", "open_redirect", "forged_request"],
+    (["csrf", "open_redirect", "forged_request",
+      # Mobile M1/M6 — platform issues
+      "m1_mobile", "m1_error", "m6_cors", "m6_http_method", "method_override"],
      "A01", "Broken Access Control"),
-    # A05 — misconfiguration incl. clickjacking and referrer
+    # A05 — misconfiguration incl. clickjacking, referrer, infra misconfig, mobile storage
     (["cors", "x_frame", "hsts", "csp", "content_type_options", "server_version",
       "expose", "info_disclosure", "server_header", "header", "clickjack",
-      "referrer_policy", "html_comment"],
+      "referrer_policy", "html_comment",
+      # Infra
+      "default_server", "debug_endpoint", "backup_file",
+      "spf_record", "dmarc_record", "zone_transfer",
+      "sensitive_port", "service_port", "no_telnet", "no_ftp",
+      # Mobile M2 — storage
+      "m2_sensitive", "m2_login", "m2_session", "m2_no_sensitive", "cache_control",
+      "no_cacheable", "not_cacheable"],
      "A05", "Security Misconfiguration"),
     # A04, A10, A02, A06
     (["rate_limit", "throttle", "flood", "brute_force", "mass_request"],
      "A04", "Unrestricted Resource Consumption"),
     (["ssrf", "server_side_request", "dns_rebinding"],
      "A10", "Server-Side Request Forgery"),
-    (["tls", "https_only", "ssl", "cert", "cipher", "encrypt", "plaintext", "cleartext"],
+    (["tls", "https_only", "ssl", "cert", "cipher", "encrypt", "plaintext", "cleartext",
+      # Infra TLS + Mobile M3 — network
+      "m3_https", "m3_tls", "m3_hsts", "m3_api_cert", "certificate_not_expired",
+      "certificate_hostname", "tls_1_0", "tls_1_1", "minimum_version"],
      "A02", "Cryptographic Failures"),
     (["outdated", "vulnerable_component", "dependency", "cve", "version_disclosure"],
      "A06", "Vulnerable and Outdated Components"),
@@ -219,24 +239,34 @@ def set_cert_threshold(eng_id: str, product: str, body: CertThresholdBody,
 # ── test-suite management ─────────────────────────────────────────────────────
 
 @router.get("/vapt/products/{product}/test-info")
-def get_test_info(product: str, current_user: dict = Depends(require_user)) -> dict:
+def get_test_info(product: str, scan_type: str = "web",
+                  current_user: dict = Depends(require_user)) -> dict:
     _check_product_access(product, current_user)
     from core.vapt_test_generator import VaptTestGenerator
-    return VaptTestGenerator.test_info(product)
+    return VaptTestGenerator.test_info(product, scan_type)
+
+
+@router.get("/vapt/products/{product}/test-info-all")
+def get_all_test_info(product: str,
+                      current_user: dict = Depends(require_user)) -> dict:
+    _check_product_access(product, current_user)
+    from core.vapt_test_generator import VaptTestGenerator
+    return VaptTestGenerator.all_test_info(product)
 
 
 @router.get("/vapt/products/{product}/test-templates")
-def get_test_templates(product: str, current_user: dict = Depends(require_user)) -> list[dict]:
+def get_test_templates(product: str, scan_type: str = "web",
+                       current_user: dict = Depends(require_user)) -> list[dict]:
     _check_product_access(product, current_user)
     from core.vapt_test_generator import VaptTestGenerator
-    return VaptTestGenerator.template_contents(product)
+    return VaptTestGenerator.template_contents(product, scan_type)
 
 
 @router.post("/vapt/products/{product}/generate-tests")
-def generate_tests(product: str, force: bool = False,
+def generate_tests(product: str, scan_type: str = "web", force: bool = False,
                    _: dict = Depends(_require_admin)) -> dict:
     from core.vapt_test_generator import VaptTestGenerator
-    return VaptTestGenerator.generate(product, force=force)
+    return VaptTestGenerator.generate(product, scan_type=scan_type, force=force)
 
 
 # ── scan endpoints ────────────────────────────────────────────────────────────
@@ -244,6 +274,7 @@ def generate_tests(product: str, force: bool = False,
 @router.post("/vapt/engagement/{eng_id}/scan")
 def trigger_scan(eng_id: str, product: str,
                  background_tasks: BackgroundTasks,
+                 scan_type: str = "web",
                  current_user: dict = Depends(require_user)) -> dict:
     _check_product_access(product, current_user)
     eng = _vm.get(product, eng_id)
@@ -251,16 +282,20 @@ def trigger_scan(eng_id: str, product: str,
         raise HTTPException(404, detail="Engagement not found")
     if eng["status"] == "scoping":
         raise HTTPException(400, detail="Finalize scope before running a scan")
-    scan = _vm.add_scan(product, eng_id, current_user.get("name", "unknown"), is_revalidation=False)
+    if scan_type not in _VAPT_SUBDIRS:
+        raise HTTPException(400, detail=f"Invalid scan_type '{scan_type}' — must be one of: {list(_VAPT_SUBDIRS)}")
+    scan = _vm.add_scan(product, eng_id, current_user.get("name", "unknown"),
+                        is_revalidation=False, scan_type=scan_type)
     if not scan:
         raise HTTPException(500, detail="Failed to create scan record")
-    background_tasks.add_task(_execute_vapt_scan, product, eng_id, scan["scan_id"], False)
+    background_tasks.add_task(_execute_vapt_scan, product, eng_id, scan["scan_id"], False, scan_type)
     return scan
 
 
 @router.post("/vapt/engagement/{eng_id}/revalidate")
 def trigger_revalidation(eng_id: str, product: str,
                           background_tasks: BackgroundTasks,
+                          scan_type: str = "web",
                           current_user: dict = Depends(require_user)) -> dict:
     _check_product_access(product, current_user)
     eng = _vm.get(product, eng_id)
@@ -269,10 +304,13 @@ def trigger_revalidation(eng_id: str, product: str,
     open_findings = [f for f in eng["findings"] if f["status"] in ("open", "still_open")]
     if not open_findings:
         raise HTTPException(400, detail="No open findings to revalidate")
-    scan = _vm.add_scan(product, eng_id, current_user.get("name", "unknown"), is_revalidation=True)
+    if scan_type not in _VAPT_SUBDIRS:
+        raise HTTPException(400, detail=f"Invalid scan_type '{scan_type}' — must be one of: {list(_VAPT_SUBDIRS)}")
+    scan = _vm.add_scan(product, eng_id, current_user.get("name", "unknown"),
+                        is_revalidation=True, scan_type=scan_type)
     if not scan:
         raise HTTPException(500, detail="Failed to create scan record")
-    background_tasks.add_task(_execute_vapt_scan, product, eng_id, scan["scan_id"], True)
+    background_tasks.add_task(_execute_vapt_scan, product, eng_id, scan["scan_id"], True, scan_type)
     return scan
 
 
@@ -391,18 +429,20 @@ def download_certificate(eng_id: str, product: str, format: str = "pdf",
 
 # ── scan execution ────────────────────────────────────────────────────────────
 
-def _execute_vapt_scan(product: str, eng_id: str, scan_id: str, is_revalidation: bool) -> None:
+def _execute_vapt_scan(product: str, eng_id: str, scan_id: str,
+                       is_revalidation: bool, scan_type: str = "web") -> None:
     _vm.patch_scan(product, eng_id, scan_id, status="running")
 
     tmp_report = _ROOT / "data" / "vapt_findings" / product / f"{scan_id}_pytest.json"
     tmp_report.parent.mkdir(parents=True, exist_ok=True)
 
-    test_path = _ROOT / "products" / product / "tests"
+    subdir = _VAPT_SUBDIRS.get(scan_type, "vapt")
+    test_path = _ROOT / "products" / product / "tests" / subdir
     if not test_path.exists():
         _vm.patch_scan(product, eng_id, scan_id,
                        status="failed",
                        finished_at=datetime.now(timezone.utc).isoformat(),
-                       summary_error=f"No tests directory for product '{product}'")
+                       summary_error=f"No {scan_type} test suite for '{product}' — generate tests first")
         return
 
     cmd = [
@@ -413,8 +453,10 @@ def _execute_vapt_scan(product: str, eng_id: str, scan_id: str, is_revalidation:
         f"--json-report-file={tmp_report}",
         "-v", "--tb=short", "--no-header",
         "--override-ini=addopts=",
-        "--screenshot=only-on-failure",
     ]
+    # Screenshot capture only makes sense for browser-based web scans
+    if scan_type == "web":
+        cmd.append("--screenshot=only-on-failure")
 
     _collected_re = re.compile(r"collected (\d+) item")
     _result_re = re.compile(r"\s(PASSED|FAILED|ERROR|SKIPPED)\s")
@@ -572,9 +614,11 @@ def _render_template(tpl_name: str, **ctx: Any) -> str:
 _OWASP_EMBEDDED = re.compile(r"(?:^|_)(A0[1-9]|A10)(?:_|$)", re.IGNORECASE)
 _OWASP_CAT_MAP = {r: cat for _, r, cat in _OWASP_RULES}  # built once at import
 
-def _infer_test_log_from_files(product: str, scan_id: str, findings: list[dict]) -> list[dict]:
+def _infer_test_log_from_files(product: str, scan_id: str, findings: list[dict],
+                               scan_type: str = "web") -> list[dict]:
     """Reconstruct a test log from vapt test files for scans that predate test_log persistence."""
-    vapt_dir = _ROOT / "products" / product / "tests" / "vapt"
+    subdir = _VAPT_SUBDIRS.get(scan_type, "vapt")
+    vapt_dir = _ROOT / "products" / product / "tests" / subdir
     if not vapt_dir.exists():
         return []
     finding_ids = {f["test_id"] for f in findings if f.get("scan_id") == scan_id}
@@ -625,7 +669,9 @@ def _render_report_html(eng: dict) -> str:
     for s in eng.get("scans", []):
         if s.get("status") != "completed":
             continue
-        tests = s.get("test_log") or _infer_test_log_from_files(eng["product"], s["scan_id"], eng.get("findings", []))
+        tests = s.get("test_log") or _infer_test_log_from_files(
+            eng["product"], s["scan_id"], eng.get("findings", []), s.get("scan_type", "web")
+        )
         scan_test_logs.append({"scan": s, "tests": tests})
     return _render_template("vapt_report_pdf.html", eng=eng,
                              by_sev=by_sev, by_owasp=dict(by_owasp),

@@ -4,6 +4,8 @@ orangehrm:
   credentials:
     admin_username: "Admin"
     admin_password: "admin123"
+    ess_username: "Kris.Chapman"
+    ess_password: "Admin123"
 
 browser:
   timeout: 12000
