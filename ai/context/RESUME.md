@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (26)  
+Last updated: 2026-05-18 (27)  
 Framework version: 0.1.0
 
 ---
@@ -42,6 +42,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **Test Plans: report export + latest runs on top** (`dashboard/routers/test_plans.py`, `dashboard/templates/test_plan_report_pdf.html`, `dashboard/templates/test_plans.html`): New `GET /{plan_id}/report?format=pdf|html` endpoint renders a full execution report — cover page with plan metadata, milestones table, progress metric cards with stacked colour bar, TC execution status table grouped by domain (with colour-coded status badges), automated run history table, scope summary. WeasyPrint PDF via `_to_pdf()` helper; HTML preview served directly. "Preview Report" (new tab) and "Export PDF" (download) buttons added to the Execution tab. Linked runs now sorted latest-first in both API (`sorted(...reverse=True)`) and client (`localeCompare` sort after fetch).
+
+## Previous: Nav access flags fix (2026-05-18)
 
 - **Fix: nav access flags missing from /config page** (`dashboard/routers/config/__init__.py`): `config_page` was building its own context dict and only included `vapt_access`; the 4 new module flags (`perf_access`, `a11y_access`, `contract_access`, `visual_access`) were undefined (falsy) there, causing those nav items to disappear when navigating to /config. Replaced duplicated `vapt_access` inline logic with a shared `_has_flag(flag)` helper that covers all 5 flags consistently. Nav items now show/hide correctly on every page.
 

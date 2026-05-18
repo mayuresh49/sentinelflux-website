@@ -1,5 +1,19 @@
 # Completed work items — append only, newest first
 
+- id: test-plans-report-export
+  date: 2026-05-18
+  title: "Test Plans: execution report (PDF/HTML export) + latest runs on top"
+  outcome: >
+    GET /{plan_id}/report?format=pdf|html endpoint added to test_plans router.
+    test_plan_report_pdf.html template: cover page (plan name, product, owner,
+    status, generated_at), plan overview table with milestones, progress metric
+    cards (total/pass/fail/blocked/pass_rate) with stacked colour bar, TC
+    execution status table grouped by domain with colour-coded badges, automated
+    run history table, scope summary. _to_pdf() helper using WeasyPrint.
+    "Preview Report" (opens in new tab) and "Export PDF" (download) buttons
+    added to the Execution tab. Linked runs sorted latest-first in both API
+    (sorted by triggered_at desc) and client (localeCompare sort after fetch).
+
 - id: nav-access-flags-config-page
   date: 2026-05-18
   title: "Fix: perf/a11y/contract/visual nav items invisible on /config page"
