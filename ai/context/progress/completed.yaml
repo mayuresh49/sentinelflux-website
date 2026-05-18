@@ -1,5 +1,25 @@
 # Completed work items — append only, newest first
 
+- id: four-new-testing-modules
+  date: 2026-05-18
+  title: "4 new modules: Performance Testing, Accessibility Testing, API Contract Validation, Visual Regression"
+  outcome: >
+    All 4 modules follow VAPT pattern: FileLock JSON storage, FastAPI router,
+    Alpine.js dashboard (modals + polling), WeasyPrint PDF report, nav items in sidebar.
+    Feature flags per product config. _module_access() helper in pages.py.
+    Performance: httpx+asyncio load engine; profiles (load/stress/spike/soak);
+    VUs/duration/ramp-up/endpoints; p50/p75/p95/p99/throughput/error-rate metrics;
+    configurable thresholds; PDF report. Accessibility: Playwright + axe-core CDN;
+    WCAG 2.1 A/AA/AAA; per-page violations by impact (critical/serious/moderate/minor);
+    multi-scan history; PDF report. API Contract: OpenAPI spec from URL or file path;
+    validates status codes + jsonschema per endpoint; skips required path-param routes;
+    PDF report. Visual Regression: Playwright full-page screenshots; Pillow pixel diff
+    via ImageChops.difference; configurable threshold %; baseline management per page;
+    comparison scan shows diff_pct per page; PDF report. Pillow>=10.0.0 added to
+    requirements.txt. Files: core/perf_manager.py, core/a11y_manager.py,
+    core/contract_manager.py, core/visual_manager.py; 4 routers; 4 main HTML templates;
+    4 PDF report templates. 20 total dashboard pages/routers.
+
 - id: vapt-apk-static-analysis
   date: 2026-05-18
   title: "VAPT: APK static analysis + infra/mobile scope inputs + scan delete + per-type reports/certs"

@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (21)  
+Last updated: 2026-05-18 (22)  
 Framework version: 0.1.0
 
 ---
@@ -27,8 +27,12 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 | DocReviewAgent | Working | Post-generation quality gate — audits batched headings, missing sections, thin steps; rewrites via LLM. Auto-runs after DocGenAgent in pipeline. `ai/agents/doc_review_agent.py` |
 | Remote Runner | Working | Pull-based runner daemon (`sentinelflux runner`) polls `/api/runner/claim`, executes pytest, POSTs JSON report back. Bearer token auth. Decouples test execution from app server. |
 | VAPT | Working | Full engagement lifecycle: scope → scan → findings → PDF report/certificate, per scan type (web/infra/mobile). Infra targets and mobile APK path in scope. APK static analysis via androguard. `core/vapt_manager.py`, `/vapt` dashboard page. |
+| Performance Testing | Working | Load/stress/spike/soak profiles, httpx+asyncio engine, VUs/duration/ramp-up/endpoints, p50/p75/p95/p99/throughput/error-rate metrics, threshold checks, PDF report. `core/perf_manager.py`, `/perf` page. |
+| Accessibility Testing | Working | Playwright + axe-core CDN injection, WCAG 2.1 A/AA/AAA, per-page violations by impact, multi-scan history, PDF report. `core/a11y_manager.py`, `/a11y` page. |
+| API Contract Validation | Working | Loads OpenAPI spec (URL or file), validates status codes + jsonschema per endpoint, skips path-param routes, PDF report. `core/contract_manager.py`, `/contract` page. |
+| Visual Regression | Working | Playwright screenshot capture, Pillow pixel diff, configurable threshold %, baseline management, PDF report. `core/visual_manager.py`, `/visual` page. |
 | Storage | Working | SQLite WAL mode (`data/sentinelflux.db` via `core/db.py`). Runs, schedules, approvals, pipeline jobs, activity log, quarantine all in DB. Per-product run config YAML still at `data/product_config/<product>.yaml`. |
-| Dashboard | Working | FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind. 16 pages/routers. Start: `uvicorn dashboard.app:app --reload` |
+| Dashboard | Working | FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind. 20 pages/routers. Start: `uvicorn dashboard.app:app --reload` |
 | Runs | Working | Trigger/schedule pytest runs from dashboard, parse JSON reports, auto-analyze failures. `/runs` page |
 | CLI | Working | `sentinelflux init/run/generate/doctor` via typer |
 | Examples | Working | OrangeHRM (web+api), Restful Booker (13 API tests passing) |
@@ -38,6 +42,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **4 new testing modules: Performance, Accessibility, API Contract, Visual Regression** (`core/perf_manager.py`, `core/a11y_manager.py`, `core/contract_manager.py`, `core/visual_manager.py`, `dashboard/routers/perf.py`, `dashboard/routers/a11y.py`, `dashboard/routers/contract.py`, `dashboard/routers/visual.py`, 8 HTML templates, `dashboard/app.py`, `dashboard/routers/pages.py`, `dashboard/templates/base.html`, `requirements.txt`): All 4 modules follow the VAPT pattern — FileLock JSON storage under `data/{module}/{product}/`, FastAPI router, Alpine.js dashboard with modals + polling, WeasyPrint PDF report. Feature flags `perf_enabled`/`a11y_enabled`/`contract_enabled`/`visual_enabled` in product config. Nav items in sidebar, access guards via `_module_access()` in pages.py. (1) **Performance**: engagement holds profiles (load/stress/spike/soak, VUs, duration, ramp-up, endpoints, thresholds) + runs; `_run_load_test()` spawns N async httpx workers with ramp-up stagger, collects p50/p75/p95/p99, throughput, error rate, per-threshold pass/fail. (2) **Accessibility**: engagement holds base_url, pages, WCAG level; scan opens each page in headless Playwright, injects axe-core from CDN, calls `axe.run()`, collects violations by impact. (3) **API Contract**: loads OpenAPI spec from URL or file (YAML/JSON), iterates paths+methods, skips required path-param routes, makes real requests, validates actual status vs expected and response body vs jsonschema. (4) **Visual Regression**: `capture-baseline` scan takes Playwright full-page screenshots per page and stores to `data/visual/{product}/screenshots/`; comparison scan diffs current screenshot against stored baseline using Pillow `ImageChops.difference`, pixel diff % vs configurable threshold. `Pillow>=10.0.0` added to requirements.txt.
+
+## Previous: Test Plan feature + filter fix (2026-05-18)
 
 - **Test Plan feature + filter fix** (`core/db.py`, `core/test_plan_manager.py`, `dashboard/routers/test_plans.py`, `dashboard/templates/test_plans.html`, `dashboard/routers/pages.py`, `dashboard/templates/base.html`, `dashboard/app.py`, `CLAUDE.md`): Full test plan lifecycle for product release readiness. Four new SQLite tables: `test_plans` (metadata: name, product, owner, dates, milestones, risks, exit/pass criteria, status), `test_plan_scope` (module-level in-scope items per domain with per-TC exclusion list), `test_plan_tc_status` (per-TC execution status: not_run/pass/fail/blocked, synced from TC docs on scope save), `test_plan_run_links` (automated runs triggered from a plan). `TestPlanManager` (SQLite, same pattern as RunManager): CRUD, `set_scope()` (replace + re-sync), `upsert_tc_statuses()` (ON CONFLICT preserves existing status), `remove_tc_statuses_not_in_scope()`, `update_tc_status()`, `link_run()`, `get_progress()` (counters + pass_rate). API router at `/api/test-plans/` (12 endpoints): plan CRUD, scope GET/PUT, available-modules, module-tcs (per-module TC list from docs), tc-status GET/PATCH, execute (triggers runs per scope item via `_execute_run` background task + links them), progress, runs. Dashboard page at `/test-plans`: left panel plan list with inline progress bar; right panel 3-tab detail — Overview (metadata + inline milestone/risk editors), Scope (domain tabs → module checkboxes → expandable TC exclusion list loaded from docs), Execution (progress counters + bar, TC table with inline status dropdowns + notes, "Run Automated Tests" button, linked runs table). TC sync: scope save calls `_tcs_for_module()` which strips `test_` prefix from module stem to find doc file, parses TC index via `_parse_tc_index()`, upserts in-scope TCs, removes de-scoped ones. Filter fix: removed duplicate product `<select>` from page content (global filter bar in `base.html` owns this via `?product=` + `applyProductFilter()`); rule added to `CLAUDE.md` § Dashboard UI Conventions → Global Product Filter.
 
