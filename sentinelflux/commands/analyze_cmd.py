@@ -36,7 +36,7 @@ def run(
     """
     from ai.agents import AgentContext, FlakyDetectorAgent, ResultAnalyzerAgent
     from ai.agents.quarantine_manager import QuarantineManager
-    from core.ai_factory import create_ai_client
+    from core.ai_factory import create_ai_client_from_dashboard
 
     # ── 1. Resolve report ─────────────────────────────────────────────────
     report_path = Path(report) if report else _ROOT_DIR / ".sentinelflux_report.json"
@@ -54,9 +54,7 @@ def run(
         raise typer.Exit(1)
 
     # ── 2. Load AI client ─────────────────────────────────────────────────
-    config = _load_config(env)
-    ai_cfg = config.get("sentinelflux", {}).get("ai", {})
-    ai_client = create_ai_client(ai_cfg) if ai_cfg.get("enabled") else None
+    ai_client = create_ai_client_from_dashboard()
 
     ctx = AgentContext(domain=domain, product=product, env=env)
 

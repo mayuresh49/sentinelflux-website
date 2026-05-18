@@ -1,9 +1,9 @@
-from ai.clients.mistral_client import MistralClient
+from ai.clients.base_client import AIClient
 from ai.prompts.prompt_templates import TEST_CASE_DOC_PROMPT
 
 
 class TestCaseDocumentationSkill:
-    def __init__(self, ai_client: MistralClient):
+    def __init__(self, ai_client: AIClient):
         self.ai_client = ai_client
 
     def generate_document(self, page_url: str, form_description: str) -> str:

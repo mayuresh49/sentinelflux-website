@@ -404,34 +404,8 @@ def _resolve_test_path(product: str, domain: str, module: str = "") -> Path | No
 
 
 def _build_ai_client():
-    """Build an AI client from the dashboard chat config, or return None."""
-    try:
-        cfg_path = _ROOT / "dashboard" / "chat_config.json"
-        if not cfg_path.exists():
-            return None
-        cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
-        provider = cfg.get("provider", "ollama")
-        model = cfg.get("model", "")
-        if provider == "ollama":
-            from ai.clients.mistral_client import MistralClient
-            return MistralClient(model=model, local_url=cfg.get("base_url", "http://localhost:11434"))
-        if provider == "openai":
-            import os
-            api_key = os.environ.get("OPENAI_API_KEY", "")
-            if not api_key:
-                return None
-            from ai.clients.openai_client import OpenAIClient
-            return OpenAIClient(api_key=api_key, model=model or "gpt-4o-mini")
-        if provider == "anthropic":
-            import os
-            api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-            if not api_key:
-                return None
-            from ai.clients.anthropic_client import AnthropicClient
-            return AnthropicClient(api_key=api_key, model=model or "claude-haiku-4-5-20251001")
-        return None
-    except Exception:
-        return None
+    from core.ai_factory import create_ai_client_from_dashboard
+    return create_ai_client_from_dashboard()
 
 
 # ── run config resolution ─────────────────────────────────────────────────────

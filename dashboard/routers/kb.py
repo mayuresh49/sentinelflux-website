@@ -225,15 +225,9 @@ async def upload_docx(
 
     try:
         from ai.skills.docx_converter import DocxConverter
-        from core.ai_factory import create_ai_client
+        from core.ai_factory import create_ai_client_from_dashboard
 
-        ai_client = create_ai_client({
-            "enabled": True,
-            "mode": "mistral",
-            "local": True,
-            "local_url": local_url,
-            "model": model,
-        })
+        ai_client = create_ai_client_from_dashboard()
         converter = DocxConverter(ai_client=ai_client)
         yaml_content = converter.convert_file(tmp_path)
     except Exception as exc:

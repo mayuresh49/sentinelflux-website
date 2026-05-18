@@ -12,19 +12,12 @@ Usage:
 import argparse
 from pathlib import Path
 
-import yaml
-
-from ai.clients.mistral_client import MistralClient
 from ai.knowledge_base.kb_loader import KnowledgeBaseLoader
 from ai.skills.test_case_doc_kb import TestCaseDocumentationSkill
+from core.ai_factory import create_ai_client_from_dashboard
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
-
-def load_config(config_path: Path):
-    """Load configuration from YAML file."""
-    with config_path.open("r", encoding="utf-8") as stream:
-        return yaml.safe_load(stream)
 
 
 def get_endpoint_info(endpoint: str, method: str, kb_loader: KnowledgeBaseLoader):
@@ -59,11 +52,6 @@ def main():
         help="HTTP method or GraphQL operation type"
     )
     parser.add_argument(
-        "--config",
-        default=str(ROOT_DIR / "config" / "env_qa.yaml"),
-        help="Path to environment YAML config"
-    )
-    parser.add_argument(
         "--output",
         default=str(ROOT_DIR / "docs" / "test_cases" / "api" / "generated_test_doc.md"),
         help="Output markdown file path"
@@ -80,19 +68,9 @@ def main():
 
     args = parser.parse_args()
 
-    # Load configuration
-    config = load_config(Path(args.config))
-    ai_config = config.get("sentinelflux", {}).get("ai", {})
-
-    if not ai_config.get("enabled", False):
-        raise SystemExit("AI integration is disabled in the configuration.")
-
-    api_key = ai_config.get("api_key")
-    if not api_key:
-        raise SystemExit("AI api_key is not set in configuration.")
-
-    # Initialize AI client and knowledge base
-    client = MistralClient(api_key=api_key, model=ai_config.get("mode", "mistral-medium"))
+    client = create_ai_client_from_dashboard()
+    if client is None:
+        raise SystemExit("AI provider not configured — set up a provider in the dashboard AI Assistant settings.")
     kb_dir = Path(args.kb_dir) if args.kb_dir else None
     kb_loader = KnowledgeBaseLoader(kb_dir=kb_dir)
     skill = TestCaseDocumentationSkill(client, kb_loader)

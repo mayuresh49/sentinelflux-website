@@ -332,7 +332,8 @@ def ai_config(config):
 
 @pytest.fixture(scope="session")
 def ai_client(ai_config):
-    client = create_ai_client(ai_config)
+    from core.ai_factory import create_ai_client_from_dashboard
+    client = create_ai_client_from_dashboard()
     from core.ai_registry import set_ai_client
     set_ai_client(client)
     return client

@@ -1,6 +1,40 @@
+import json
+from pathlib import Path
 from typing import Optional
 
 from ai.clients.base_client import AIClient
+
+_CHAT_CONFIG = Path(__file__).resolve().parent.parent / "dashboard" / "chat_config.json"
+
+
+def create_ai_client_from_dashboard() -> Optional[AIClient]:
+    """Build an AI client from dashboard/chat_config.json (the global provider setting)."""
+    try:
+        if not _CHAT_CONFIG.exists():
+            return None
+        cfg = json.loads(_CHAT_CONFIG.read_text(encoding="utf-8"))
+        provider = cfg.get("provider", "ollama")
+        model = cfg.get("model", "")
+        if provider == "ollama":
+            from ai.clients.mistral_client import MistralClient
+            return MistralClient(model=model, local_url=cfg.get("base_url", "http://localhost:11434"), local=True)
+        if provider == "openai":
+            import os
+            api_key = os.environ.get("OPENAI_API_KEY", "")
+            if not api_key:
+                return None
+            from ai.clients.openai_client import OpenAIClient
+            return OpenAIClient(api_key=api_key, model=model or "gpt-4o-mini")
+        if provider == "anthropic":
+            import os
+            api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+            if not api_key:
+                return None
+            from ai.clients.anthropic_client import AnthropicClient
+            return AnthropicClient(api_key=api_key, model=model or "claude-haiku-4-5-20251001")
+        return None
+    except Exception:
+        return None
 
 
 def create_ai_client(ai_config: dict) -> Optional[AIClient]:
