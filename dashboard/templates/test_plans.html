@@ -415,7 +415,7 @@
             </template>
 
             <!-- Actions row -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 flex-wrap">
               <button @click="runAutomated()"
                       class="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -424,6 +424,22 @@
                 </svg>
                 Run Automated Tests
               </button>
+              <!-- Report actions -->
+              <a :href="`/api/test-plans/${selectedPlan.id}/report?format=html`" target="_blank"
+                 class="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-lg transition-colors">
+                <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                Preview Report
+              </a>
+              <a :href="`/api/test-plans/${selectedPlan.id}/report?format=pdf`"
+                 class="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-medium rounded-lg transition-colors">
+                <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                Export PDF
+              </a>
               <div class="ml-auto flex items-center gap-2">
                 <select x-model="execFilterDomain"
                         class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
@@ -850,7 +866,11 @@ function testPlansApp() {
           fetch(`/api/test-plans/${this.selectedPlan.id}/progress`),
         ]);
         if (tcR.ok) this.tcStatuses = (await tcR.json()).tc_statuses || [];
-        if (runR.ok) this.linkedRuns = (await runR.json()).runs || [];
+        if (runR.ok) {
+          const runs = (await runR.json()).runs || [];
+          this.linkedRuns = runs.sort((a, b) =>
+            (b.triggered_at || '').localeCompare(a.triggered_at || ''));
+        }
         if (progR.ok) this.progress = await progR.json();
       } catch(e) {}
     },

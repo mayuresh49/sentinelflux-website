@@ -1,10 +1,11 @@
 """Test plan CRUD, scope management, TC execution tracking, and run linking."""
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response
 from pydantic import BaseModel
 
 from core.run_manager import RunManager
@@ -328,4 +329,71 @@ def get_linked_runs(plan_id: str, current_user: dict = Depends(require_user)):
     _check_product(plan["product"], current_user)
     run_ids = _tpm.get_linked_run_ids(plan_id)
     runs = [_rm.get_run(rid) for rid in run_ids]
-    return {"runs": [r for r in runs if r], "total": len(run_ids)}
+    ordered = sorted(
+        (r for r in runs if r),
+        key=lambda r: r.get("triggered_at") or "",
+        reverse=True,
+    )
+    return {"runs": ordered, "total": len(run_ids)}
+
+
+# ── report ────────────────────────────────────────────────────────────────────
+
+def _to_pdf(html: str) -> bytes | None:
+    try:
+        from weasyprint import HTML
+        return HTML(string=html).write_pdf()
+    except Exception:
+        return None
+
+
+def _render_plan_report_html(plan_id: str) -> str:
+    from jinja2 import Environment, FileSystemLoader
+    plan = _tpm.get_plan(plan_id)
+    scope = _tpm.get_scope(plan_id)
+    tc_statuses = _tpm.get_tc_statuses(plan_id)
+    progress = _tpm.get_progress(plan_id)
+    run_ids = _tpm.get_linked_run_ids(plan_id)
+    runs = sorted(
+        (r for r in (_rm.get_run(rid) for rid in run_ids) if r),
+        key=lambda r: r.get("triggered_at") or "",
+        reverse=True,
+    )
+    # group TCs by domain for template rendering
+    domains_seen: list[str] = []
+    tcs_by_domain: dict[str, list[dict]] = {}
+    for tc in tc_statuses:
+        d = tc["domain"]
+        if d not in tcs_by_domain:
+            domains_seen.append(d)
+            tcs_by_domain[d] = []
+        tcs_by_domain[d].append(tc)
+
+    env = Environment(autoescape=True,
+                      loader=FileSystemLoader(str(_ROOT / "dashboard" / "templates")))
+    tpl = env.get_template("test_plan_report_pdf.html")
+    return tpl.render(
+        plan=plan,
+        scope=scope,
+        progress=progress,
+        domains=domains_seen,
+        tcs_by_domain=tcs_by_domain,
+        runs=runs,
+        generated_at=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+    )
+
+
+@router.get("/{plan_id}/report")
+def plan_report(plan_id: str, format: str = "pdf",
+                current_user: dict = Depends(require_user)):
+    plan = _get_plan_or_404(plan_id)
+    _check_product(plan["product"], current_user)
+    html = _render_plan_report_html(plan_id)
+    if format == "pdf":
+        pdf = _to_pdf(html)
+        if pdf is None:
+            raise HTTPException(500, detail="WeasyPrint not available")
+        filename = f"test_plan_{plan['product']}_{plan_id}.pdf"
+        return Response(pdf, media_type="application/pdf",
+                        headers={"Content-Disposition": f'attachment; filename="{filename}"'})
+    return Response(html, media_type="text/html")
