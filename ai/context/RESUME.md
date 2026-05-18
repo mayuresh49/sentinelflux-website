@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (10)  
+Last updated: 2026-05-18 (11)  
 Framework version: 0.1.0
 
 ---
@@ -38,6 +38,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **VAPT report: per-test execution detail section** (`dashboard/routers/vapt.py`, `dashboard/templates/vapt_report_pdf.html`): Report previously showed only failed tests (findings) and aggregate scan counts — passed/skipped tests were thrown away after scan. Fix: `_execute_vapt_scan` now stores a slim `test_log` list (test_id, title, owasp_ref, owasp_category, severity, status) on each completed scan record before deleting the raw pytest JSON. `_render_report_html` collects `test_log` from all completed scans and passes `scan_test_logs` to the template. Added section 7 "Test Execution Details" to `vapt_report_pdf.html` — a per-scan table of all 31 tests showing OWASP ref, severity, and ✓ Secure / ✗ Finding / — Skipped result. Section 6 Scan History gains Skipped and Duration columns. Note: `test_log` is only populated on scans run after this change; historical scans will have no section 7 output.
+
+## Previous: VAPT bug fixes (2026-05-18)
 
 - **VAPT bug fixes** (`dashboard/routers/config/__init__.py`, `dashboard/routers/vapt.py`, `dashboard/templates/vapt.html`): Three bugs fixed. (1) VAPT nav link invisible on config page — `config_page()` built its own context dict without `vapt_access`; `base.html` gated the nav link on that key so it was always hidden. Added inline admin-or-vapt-enabled-product check directly in the config route. (2) Scope save data lost on re-select — `saveScope()` updated `this.selectedEng` but not the `this.engagements` array; clicking another engagement then back re-populated the form from the stale list entry. Fixed with `engagements.splice(idx, 1, updated)` after each successful PUT. Same fix applied to `updateFinding`. (3) Report generation blocked with zero findings — backend raised 400 if `eng.findings` was empty; UI hid the report form behind a findings-count gate. Both guards removed; reports generate regardless of findings count.
 
