@@ -1,5 +1,15 @@
 # Completed work items — append only, newest first
 
+- id: config-module-feature-flags
+  date: 2026-05-18
+  title: "Config: Perf/A11y/Contract/Visual feature flag toggles in product settings"
+  outcome: >
+    Added On/Off toggle buttons for all 4 new modules in Configurations → Products.
+    Backend: _set_flag() helper + 4 POST endpoints (set-perf, set-a11y, set-contract,
+    set-visual) writing to config.yaml. Template: coloured pill buttons matching VAPT
+    toggle pattern (blue/sky/emerald/pink). Fixed missing module enable path that caused
+    "No X-enabled products" message on all 4 new module pages.
+
 - id: four-new-testing-modules
   date: 2026-05-18
   title: "4 new modules: Performance Testing, Accessibility Testing, API Contract Validation, Visual Regression"

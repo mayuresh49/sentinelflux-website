@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (23)  
+Last updated: 2026-05-18 (24)  
 Framework version: 0.1.0
 
 ---
@@ -42,6 +42,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **Config: feature flag toggles for new modules** (`dashboard/routers/config/_products.py`, `dashboard/templates/partials/config_products.html`): Added On/Off toggle buttons for Performance Testing, Accessibility Testing, API Contract Validation, and Visual Regression in Configurations → Products, matching the VAPT toggle pattern. Backend: shared `_set_flag()` helper + 4 POST endpoints (`/ui/config/products/set-perf|a11y|contract|visual`) that write `perf_enabled`/`a11y_enabled`/`contract_enabled`/`visual_enabled` to `config.yaml`. Template: coloured pill buttons (blue/sky/emerald/pink) per module, active state shows filled colour, inactive shows greyed-out "Off" label.
+
+## Previous: 4 new testing modules (2026-05-18)
 
 - **4 new testing modules: Performance, Accessibility, API Contract, Visual Regression** (`core/perf_manager.py`, `core/a11y_manager.py`, `core/contract_manager.py`, `core/visual_manager.py`, `dashboard/routers/perf.py`, `dashboard/routers/a11y.py`, `dashboard/routers/contract.py`, `dashboard/routers/visual.py`, 8 HTML templates, `dashboard/app.py`, `dashboard/routers/pages.py`, `dashboard/templates/base.html`, `requirements.txt`): All 4 modules follow the VAPT pattern — FileLock JSON storage under `data/{module}/{product}/`, FastAPI router, Alpine.js dashboard with modals + polling, WeasyPrint PDF report. Feature flags `perf_enabled`/`a11y_enabled`/`contract_enabled`/`visual_enabled` in product config. Nav items in sidebar, access guards via `_module_access()` in pages.py. (1) **Performance**: engagement holds profiles (load/stress/spike/soak, VUs, duration, ramp-up, endpoints, thresholds) + runs; `_run_load_test()` spawns N async httpx workers with ramp-up stagger, collects p50/p75/p95/p99, throughput, error rate, per-threshold pass/fail. (2) **Accessibility**: engagement holds base_url, pages, WCAG level; scan opens each page in headless Playwright, injects axe-core from CDN, calls `axe.run()`, collects violations by impact. (3) **API Contract**: loads OpenAPI spec from URL or file (YAML/JSON), iterates paths+methods, skips required path-param routes, makes real requests, validates actual status vs expected and response body vs jsonschema. (4) **Visual Regression**: `capture-baseline` scan takes Playwright full-page screenshots per page and stores to `data/visual/{product}/screenshots/`; comparison scan diffs current screenshot against stored baseline using Pillow `ImageChops.difference`, pixel diff % vs configurable threshold. `Pillow>=10.0.0` added to requirements.txt.
 
