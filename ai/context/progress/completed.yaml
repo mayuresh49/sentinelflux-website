@@ -1,5 +1,16 @@
 # Completed work items — append only, newest first
 
+- id: test-plans-empty-modules-ux
+  date: 2026-05-18
+  title: "Test Plans: empty-modules empty state UX fix and API error surfacing"
+  outcome: >
+    Empty state in Scope tab now shows the expected file path
+    (products/{product}/tests/{domain}/) and test_*.py pattern so users know
+    where to add scripts. loadAvailableModules now triggers sfToast on API
+    failure (!r.ok or network error) instead of silently leaving the list blank.
+    Added scopeLoadError flag to distinguish API failure from legitimately empty
+    directory. scopeLoadError reset on plan change and at start of each load.
+
 - id: config-module-feature-flags
   date: 2026-05-18
   title: "Config: Perf/A11y/Contract/Visual feature flag toggles in product settings"

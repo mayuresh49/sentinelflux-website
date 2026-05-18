@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (24)  
+Last updated: 2026-05-18 (25)  
 Framework version: 0.1.0
 
 ---
@@ -42,6 +42,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **Test Plans: empty-modules UX fix** (`dashboard/templates/test_plans.html`): Empty state for Scope tab now shows the expected path (`products/{product}/tests/{domain}/`) and the file pattern (`test_*.py`) so users know where to add scripts. API failures in `loadAvailableModules` now trigger `sfToast` instead of silently leaving the list blank. Added `scopeLoadError` state flag to distinguish "API call failed" from "legitimately no test scripts". `scopeLoadError` is reset on plan change and at start of each load.
+
+## Previous: Config feature flag toggles (2026-05-18)
 
 - **Config: feature flag toggles for new modules** (`dashboard/routers/config/_products.py`, `dashboard/templates/partials/config_products.html`): Added On/Off toggle buttons for Performance Testing, Accessibility Testing, API Contract Validation, and Visual Regression in Configurations → Products, matching the VAPT toggle pattern. Backend: shared `_set_flag()` helper + 4 POST endpoints (`/ui/config/products/set-perf|a11y|contract|visual`) that write `perf_enabled`/`a11y_enabled`/`contract_enabled`/`visual_enabled` to `config.yaml`. Template: coloured pill buttons (blue/sky/emerald/pink) per module, active state shows filled colour, inactive shows greyed-out "Off" label.
 
