@@ -144,6 +144,18 @@
           </div>
         </div>
 
+        <!-- Scan type selector (global — applies to Scans, Report, and Certificate tabs) -->
+        <div class="px-5 py-2.5 border-b border-slate-100 flex items-center gap-2">
+          <span class="text-xs text-slate-400 font-medium mr-1">Scan Type:</span>
+          <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+            <template x-for="[st, label] in [['web','Web App'],['infra','Infrastructure'],['mobile','Mobile App']]" :key="st">
+              <button @click="setScanType(st)"
+                      :class="scanTypeSel === st ? 'bg-white shadow text-slate-800 font-medium' : 'text-slate-500 hover:text-slate-700'"
+                      class="text-xs px-3 py-1.5 rounded-md transition-all" x-text="label"></button>
+            </template>
+          </div>
+        </div>
+
         <!-- Sub-tabs -->
         <div class="border-b border-slate-100 flex overflow-x-auto">
           <template x-for="t in tabs" :key="t.id">
@@ -270,15 +282,6 @@
           <!-- ── SCANS TAB ─────────────────────────────────────────── -->
           <div x-show="activeTab === 'scans'" class="space-y-4">
 
-            <!-- Scan type selector -->
-            <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-1 w-fit">
-              <template x-for="[st, label] in [['web','Web App'],['infra','Infrastructure'],['mobile','Mobile App']]" :key="st">
-                <button @click="setScanType(st)"
-                        :class="scanTypeSel === st ? 'bg-white shadow text-slate-800 font-medium' : 'text-slate-500 hover:text-slate-700'"
-                        class="text-xs px-3 py-1.5 rounded-md transition-all" x-text="label"></button>
-              </template>
-            </div>
-
             <!-- Test suite status for selected scan type -->
             <div class="border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3">
               <div class="flex items-center gap-2 text-xs">
@@ -362,9 +365,10 @@
               </button>
               <span x-show="scanning" class="text-xs text-slate-500 animate-pulse">Scan in progress…</span>
             </div>
-            <div x-show="!selectedEng?.scans?.length" class="text-sm text-slate-400 py-4">No scans run yet.</div>
+            <div x-show="!(selectedEng?.scans||[]).some(s => (s.scan_type || 'web') === scanTypeSel)"
+                 class="text-sm text-slate-400 py-4">No scans run yet for this scan type.</div>
             <div class="space-y-2">
-              <template x-for="s in (selectedEng?.scans||[]).slice().reverse()" :key="s.scan_id">
+              <template x-for="s in (selectedEng?.scans||[]).slice().reverse().filter(s => (s.scan_type || 'web') === scanTypeSel)" :key="s.scan_id">
                 <div class="border border-slate-200 rounded-lg p-3 text-xs">
                   <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2 flex-wrap">
@@ -483,15 +487,15 @@
             <div class="space-y-4">
               <div class="flex items-start justify-between gap-4">
                 <div class="text-sm text-slate-600">
-                  <p>The VAPT findings report documents all security checks, findings, evidence, and remediation guidance for the client.</p>
-                  <p x-show="selectedEng?.report_generated_at" class="mt-1 text-xs text-emerald-600 font-medium" x-text="'Report generated: ' + (selectedEng?.report_generated_at?.slice(0,10)||'')"></p>
+                  <p>The VAPT findings report documents all security checks, findings, evidence, and remediation guidance for the selected scan type.</p>
+                  <p x-show="selectedEng?.report_generated_at" class="mt-1 text-xs text-emerald-600 font-medium" x-text="'Last generated: ' + (selectedEng?.report_generated_at?.slice(0,10)||'')"></p>
                 </div>
                 <button @click="generateReport()" class="shrink-0 text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors">
                   <span x-text="selectedEng?.report_generated_at ? 'Regenerate Report' : 'Generate Report'"></span>
                 </button>
               </div>
               <div x-show="selectedEng?.report_generated_at" class="flex items-center gap-2">
-                <a :href="'/api/vapt/engagement/' + selectedEng?.id + '/report?product=' + product + '&format=pdf'"
+                <a :href="'/api/vapt/engagement/' + selectedEng?.id + '/report?product=' + product + '&format=pdf&scan_type=' + scanTypeSel"
                    target="_blank"
                    class="flex items-center gap-1.5 text-sm font-medium bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -499,15 +503,16 @@
                   </svg>
                   Download PDF Report
                 </a>
-                <a :href="'/api/vapt/engagement/' + selectedEng?.id + '/report?product=' + product + '&format=html'"
+                <a :href="'/api/vapt/engagement/' + selectedEng?.id + '/report?product=' + product + '&format=html&scan_type=' + scanTypeSel"
                    target="_blank"
                    class="text-sm text-slate-600 hover:text-slate-800 px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">Preview HTML</a>
               </div>
-              <!-- Quick findings summary -->
+              <!-- Quick findings summary for current scan type -->
               <div class="grid grid-cols-4 gap-3">
                 <template x-for="[sev, color] in [['Critical','red'],['High','orange'],['Medium','yellow'],['Low','green']]" :key="sev">
                   <div :class="'bg-' + color + '-50 border border-' + color + '-200 rounded-lg p-3 text-center'">
-                    <div class="text-lg font-bold" :class="'text-' + color + '-600'" x-text="(selectedEng?.findings||[]).filter(f=>f.severity===sev&&['open','still_open'].includes(f.status)).length"></div>
+                    <div class="text-lg font-bold" :class="'text-' + color + '-600'"
+                         x-text="scanTypeFindings().filter(f => f.severity===sev && ['open','still_open'].includes(f.status)).length"></div>
                     <div class="text-xs" :class="'text-' + color + '-700'" x-text="sev + ' (open)'"></div>
                   </div>
                 </template>
@@ -557,23 +562,23 @@
                 Issue VAPT Certificate
               </button>
               {% endif %}
-              <div x-show="selectedEng?.certificate_id" class="space-y-3">
+              <div x-show="currentCertInfo()" class="space-y-3">
                 <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
                   <div class="flex items-center gap-2 text-emerald-700 mb-2">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
                     <span class="font-semibold text-sm">Certificate Issued</span>
                   </div>
-                  <p class="text-xs text-emerald-600 font-mono" x-text="selectedEng?.certificate_id"></p>
-                  <p class="text-xs text-emerald-600 mt-1" x-text="'Issued: ' + (selectedEng?.certificate_issued_at?.slice(0,10)||'') + ' by ' + (selectedEng?.certificate_issued_by||'')"></p>
+                  <p class="text-xs text-emerald-600 font-mono" x-text="currentCertInfo()?.cert_id"></p>
+                  <p class="text-xs text-emerald-600 mt-1" x-text="'Issued: ' + (currentCertInfo()?.issued_at?.slice(0,10)||'') + ' by ' + (currentCertInfo()?.issued_by||'')"></p>
                 </div>
                 <div class="flex items-center gap-2">
-                  <a :href="'/api/vapt/engagement/' + selectedEng?.id + '/certificate?product=' + product + '&format=pdf'"
+                  <a :href="'/api/vapt/engagement/' + selectedEng?.id + '/certificate?product=' + product + '&format=pdf&scan_type=' + scanTypeSel"
                      target="_blank"
                      class="flex items-center gap-1.5 text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition-colors">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     Download Certificate PDF
                   </a>
-                  <a :href="'/api/vapt/engagement/' + selectedEng?.id + '/certificate?product=' + product + '&format=html'"
+                  <a :href="'/api/vapt/engagement/' + selectedEng?.id + '/certificate?product=' + product + '&format=html&scan_type=' + scanTypeSel"
                      target="_blank" class="text-sm text-slate-600 hover:text-slate-800 px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">Preview</a>
                 </div>
               </div>
@@ -672,10 +677,28 @@ function vaptApp() {
 
     async setScanType(st) {
       this.scanTypeSel = st;
+      this.testInfo = null;
       this.testTemplates = [];
       this.activeTemplate = null;
       this.showTemplates = false;
+      this.certCheck = null;
       await this.loadTestInfo();
+    },
+
+    scanTypeFindings() {
+      const scans = (this.selectedEng?.scans || []).filter(s => (s.scan_type || 'web') === this.scanTypeSel);
+      const ids = new Set(scans.map(s => s.scan_id));
+      return (this.selectedEng?.findings || []).filter(f => ids.has(f.scan_id));
+    },
+
+    currentCertInfo() {
+      const certs = this.selectedEng?.certificates || {};
+      if (certs[this.scanTypeSel]) return certs[this.scanTypeSel];
+      // Backward compat: web cert stored in legacy fields
+      if (this.scanTypeSel === 'web' && this.selectedEng?.certificate_id) {
+        return { cert_id: this.selectedEng.certificate_id, issued_at: this.selectedEng.certificate_issued_at, issued_by: this.selectedEng.certificate_issued_by };
+      }
+      return null;
     },
 
     async loadTemplates() {
@@ -698,12 +721,19 @@ function vaptApp() {
 
     async regenerateTests() {
       const label = {'web':'Web App','infra':'Infrastructure','mobile':'Mobile App'}[this.scanTypeSel] || this.scanTypeSel;
-      const ok = await sfConfirm('Regenerate the ' + label + ' test suite for ' + this.product + '? Existing test files will be overwritten.');
+      const isRegen = !!this.testInfo?.exists;
+      const msg = isRegen
+        ? 'Regenerate the ' + label + ' test suite for ' + this.product + '? Existing test files will be overwritten.'
+        : 'Generate the standard ' + label + ' test suite for ' + this.product + '?';
+      const ok = await sfConfirm(msg);
       if (!ok) return;
-      const r = await fetch('/api/vapt/products/' + this.product + '/generate-tests?force=true&scan_type=' + this.scanTypeSel, { method: 'POST' });
-      if (!r.ok) { sfToast('Failed to regenerate tests: ' + (await r.json()).detail, 'error'); return; }
+      const r = await fetch(
+        '/api/vapt/products/' + this.product + '/generate-tests?scan_type=' + this.scanTypeSel + (isRegen ? '&force=true' : ''),
+        { method: 'POST' }
+      );
+      if (!r.ok) { sfToast('Failed to generate tests: ' + (await r.json()).detail, 'error'); return; }
       await this.loadTestInfo();
-      sfToast(label + ' test suite regenerated.', 'info');
+      sfToast(label + ' test suite ' + (isRegen ? 'regenerated' : 'generated') + '.', 'info');
     },
 
     async createEngagement() {
@@ -805,14 +835,14 @@ function vaptApp() {
     },
 
     async generateReport() {
-      const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/report?product=' + this.product, { method: 'POST' });
+      const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/report?product=' + this.product + '&scan_type=' + this.scanTypeSel, { method: 'POST' });
       if (!r.ok) { sfToast((await r.json()).detail, 'error'); return; }
       this.selectedEng = await r.json();
       sfToast('Report generated.', 'info');
     },
 
     async checkCertifiable() {
-      const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/certifiable?product=' + this.product);
+      const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/certifiable?product=' + this.product + '&scan_type=' + this.scanTypeSel);
       this.certCheck = await r.json();
     },
 
@@ -827,13 +857,15 @@ function vaptApp() {
     },
 
     async issueCertificate() {
-      const ok = await sfConfirm('Issue the VAPT certificate for this engagement? This action is permanent.');
+      const label = {'web':'Web App','infra':'Infrastructure','mobile':'Mobile App'}[this.scanTypeSel] || this.scanTypeSel;
+      const ok = await sfConfirm('Issue the ' + label + ' VAPT certificate for this engagement? This action is permanent.');
       if (!ok) return;
-      const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/certificate?product=' + this.product, { method: 'POST' });
+      const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/certificate?product=' + this.product + '&scan_type=' + this.scanTypeSel, { method: 'POST' });
       if (!r.ok) { sfToast((await r.json()).detail, 'error'); return; }
       this.selectedEng = await r.json();
       await this.loadEngagements();
-      sfToast('Certificate issued: ' + this.selectedEng.certificate_id, 'info');
+      const cert = this.currentCertInfo();
+      sfToast('Certificate issued: ' + (cert?.cert_id || ''), 'info');
     },
 
     async deleteEngagement() {

@@ -30,6 +30,28 @@ _VAPT_SUBDIRS: dict[str, str] = {
     "mobile": "vapt_mobile",
 }
 
+_SCAN_TYPE_LABELS: dict[str, str] = {
+    "web": "Web Application",
+    "infra": "Infrastructure",
+    "mobile": "Mobile Application",
+}
+
+_METHODOLOGY_LABELS: dict[str, str] = {
+    "web": "OWASP WSTG v4.2",
+    "infra": "OWASP Top 10 / CIS Benchmarks",
+    "mobile": "OWASP MASVS / MASTG",
+}
+
+
+def _scan_ids_for_type(eng: dict, scan_type: str) -> set[str]:
+    return {s["scan_id"] for s in eng.get("scans", []) if s.get("scan_type", "web") == scan_type}
+
+
+def _findings_for_type(eng: dict, scan_type: str) -> list[dict]:
+    ids = _scan_ids_for_type(eng, scan_type)
+    return [f for f in eng.get("findings", []) if f.get("scan_id") in ids]
+
+
 # ── OWASP inference ───────────────────────────────────────────────────────────
 
 _OWASP_RULES: list[tuple[list[str], str, str]] = [
@@ -353,7 +375,7 @@ def get_plan(eng_id: str, product: str, format: str = "html",
 # ── report ────────────────────────────────────────────────────────────────────
 
 @router.post("/vapt/engagement/{eng_id}/report")
-def generate_report(eng_id: str, product: str,
+def generate_report(eng_id: str, product: str, scan_type: str = "web",
                     current_user: dict = Depends(require_user)) -> dict:
     _check_product_access(product, current_user)
     eng = _vm.get(product, eng_id)
@@ -367,6 +389,7 @@ def generate_report(eng_id: str, product: str,
 
 @router.get("/vapt/engagement/{eng_id}/report")
 def download_report(eng_id: str, product: str, format: str = "pdf",
+                    scan_type: str = "web",
                     current_user: dict = Depends(require_user)) -> Response:
     _check_product_access(product, current_user)
     eng = _vm.get(product, eng_id)
@@ -375,12 +398,12 @@ def download_report(eng_id: str, product: str, format: str = "pdf",
     if not eng.get("report_generated_at"):
         raise HTTPException(400, detail="Generate the report first")
 
-    html = _render_report_html(eng)
+    html = _render_report_html(eng, scan_type)
     if format == "pdf":
         pdf = _to_pdf(html)
         if pdf is None:
             raise HTTPException(500, detail="WeasyPrint not installed. Run: pip install weasyprint")
-        filename = f"vapt_report_{product}_{eng_id}.pdf"
+        filename = f"vapt_report_{product}_{eng_id}_{scan_type}.pdf"
         return Response(pdf, media_type="application/pdf",
                         headers={"Content-Disposition": f'attachment; filename="{filename}"'})
     return Response(html, media_type="text/html")
@@ -389,39 +412,44 @@ def download_report(eng_id: str, product: str, format: str = "pdf",
 # ── certificate ───────────────────────────────────────────────────────────────
 
 @router.get("/vapt/engagement/{eng_id}/certifiable")
-def check_certifiable(eng_id: str, product: str,
+def check_certifiable(eng_id: str, product: str, scan_type: str = "web",
                       current_user: dict = Depends(require_user)) -> dict:
     _check_product_access(product, current_user)
-    can, reason = _vm.check_certifiable(product, eng_id)
+    can, reason = _vm.check_certifiable(product, eng_id, scan_type)
     return {"can_certify": can, "reason": reason}
 
 
 @router.post("/vapt/engagement/{eng_id}/certificate")
-def issue_certificate(eng_id: str, product: str,
+def issue_certificate(eng_id: str, product: str, scan_type: str = "web",
                       current_user: dict = Depends(_require_admin)) -> dict:
-    eng = _vm.issue_certificate(product, eng_id, current_user.get("name", "unknown"))
+    eng = _vm.issue_certificate(product, eng_id, current_user.get("name", "unknown"), scan_type)
     if not eng:
-        can, reason = _vm.check_certifiable(product, eng_id)
+        can, reason = _vm.check_certifiable(product, eng_id, scan_type)
         raise HTTPException(400, detail=reason)
     return eng
 
 
 @router.get("/vapt/engagement/{eng_id}/certificate")
 def download_certificate(eng_id: str, product: str, format: str = "pdf",
+                          scan_type: str = "web",
                           current_user: dict = Depends(require_user)) -> Response:
     _check_product_access(product, current_user)
     eng = _vm.get(product, eng_id)
     if not eng:
         raise HTTPException(404, detail="Engagement not found")
-    if not eng.get("certificate_id"):
-        raise HTTPException(400, detail="Certificate has not been issued for this engagement")
+    certs = eng.get("certificates", {})
+    has_cert = scan_type in certs or (scan_type == "web" and eng.get("certificate_id"))
+    if not has_cert:
+        raise HTTPException(400, detail=f"No {scan_type} certificate has been issued for this engagement")
 
-    html = _render_certificate_html(eng)
+    html = _render_certificate_html(eng, scan_type)
     if format == "pdf":
         pdf = _to_pdf(html)
         if pdf is None:
             raise HTTPException(500, detail="WeasyPrint not installed. Run: pip install weasyprint")
-        filename = f"vapt_certificate_{eng['certificate_id']}.pdf"
+        cert_info = certs.get(scan_type) or {}
+        cert_id = cert_info.get("cert_id") or eng.get("certificate_id", "cert")
+        filename = f"vapt_certificate_{cert_id}.pdf"
         return Response(pdf, media_type="application/pdf",
                         headers={"Content-Disposition": f'attachment; filename="{filename}"'})
     return Response(html, media_type="text/html")
@@ -656,33 +684,54 @@ def _render_plan_html(eng: dict) -> str:
                              now=datetime.now(timezone.utc))
 
 
-def _render_report_html(eng: dict) -> str:
+def _render_report_html(eng: dict, scan_type: str = "web") -> str:
     from collections import defaultdict
+    scan_type_label = _SCAN_TYPE_LABELS.get(scan_type, scan_type.title())
+    findings = _findings_for_type(eng, scan_type)
+    scans = [s for s in eng.get("scans", []) if s.get("scan_type", "web") == scan_type]
     by_sev: dict[str, int] = {"Critical": 0, "High": 0, "Medium": 0, "Low": 0}
     by_owasp: dict[str, list] = defaultdict(list)
-    for f in eng.get("findings", []):
+    for f in findings:
         if f["status"] in ("open", "still_open"):
             by_sev[f["severity"]] = by_sev.get(f["severity"], 0) + 1
         cat = f"{f['owasp_ref']} — {f['owasp_category']}"
         by_owasp[cat].append(f)
     scan_test_logs = []
-    for s in eng.get("scans", []):
+    for s in scans:
         if s.get("status") != "completed":
             continue
         tests = s.get("test_log") or _infer_test_log_from_files(
-            eng["product"], s["scan_id"], eng.get("findings", []), s.get("scan_type", "web")
+            eng["product"], s["scan_id"], findings, scan_type
         )
         scan_test_logs.append({"scan": s, "tests": tests})
-    return _render_template("vapt_report_pdf.html", eng=eng,
+    eng_view = dict(eng)
+    eng_view["findings"] = findings
+    eng_view["scans"] = scans
+    return _render_template("vapt_report_pdf.html", eng=eng_view,
                              by_sev=by_sev, by_owasp=dict(by_owasp),
                              scan_test_logs=scan_test_logs,
+                             scan_type_label=scan_type_label,
                              now=datetime.now(timezone.utc))
 
 
-def _render_certificate_html(eng: dict) -> str:
-    total = len(eng.get("findings", []))
-    fixed = sum(1 for f in eng.get("findings", []) if f["status"] == "fixed")
-    open_c = sum(1 for f in eng.get("findings", []) if f["status"] in ("open", "still_open"))
+def _render_certificate_html(eng: dict, scan_type: str = "web") -> str:
+    scan_type_label = _SCAN_TYPE_LABELS.get(scan_type, scan_type.title())
+    methodology_label = _METHODOLOGY_LABELS.get(scan_type, "OWASP")
+    certs = eng.get("certificates", {})
+    cert_info = certs.get(scan_type)
+    if cert_info is None and scan_type == "web" and eng.get("certificate_id"):
+        cert_info = {
+            "cert_id": eng["certificate_id"],
+            "issued_at": eng.get("certificate_issued_at"),
+            "issued_by": eng.get("certificate_issued_by"),
+        }
+    findings = _findings_for_type(eng, scan_type)
+    total = len(findings)
+    fixed = sum(1 for f in findings if f["status"] == "fixed")
+    open_c = sum(1 for f in findings if f["status"] in ("open", "still_open"))
     return _render_template("vapt_certificate_pdf.html", eng=eng,
+                             cert_info=cert_info,
                              total_findings=total, fixed=fixed, open_count=open_c,
+                             scan_type_label=scan_type_label,
+                             methodology_label=methodology_label,
                              now=datetime.now(timezone.utc))

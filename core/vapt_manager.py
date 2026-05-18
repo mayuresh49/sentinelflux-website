@@ -70,6 +70,7 @@ class VaptManager:
             "scans": [],
             "findings": [],
             "report_generated_at": None,
+            "certificates": {},
             "certificate_threshold": {"Critical": 0, "High": 0},
             "certificate_issued_at": None,
             "certificate_id": None,
@@ -232,19 +233,22 @@ class VaptManager:
 
     # ── certification ─────────────────────────────────────────────────────────
 
-    def check_certifiable(self, product: str, eng_id: str) -> tuple[bool, str]:
+    def check_certifiable(self, product: str, eng_id: str,
+                          scan_type: str = "web") -> tuple[bool, str]:
         eng = self._load(product, eng_id)
         if eng is None:
             return False, "Engagement not found"
         if eng["status"] == "scoping":
             return False, "Scope has not been finalized"
-        completed_scans = [s for s in eng.get("scans", []) if s.get("status") == "completed"]
-        if not completed_scans:
-            return False, "No scans have been completed yet"
+        type_scans = [s for s in eng.get("scans", [])
+                      if s.get("status") == "completed" and s.get("scan_type", "web") == scan_type]
+        if not type_scans:
+            return False, f"No completed {scan_type} scans yet"
+        scan_ids = {s["scan_id"] for s in type_scans}
         threshold = eng.get("certificate_threshold", {"Critical": 0, "High": 0})
         open_by_sev: dict[str, int] = {}
         for f in eng["findings"]:
-            if f["status"] in ("open", "still_open"):
+            if f.get("scan_id") in scan_ids and f["status"] in ("open", "still_open"):
                 open_by_sev[f["severity"]] = open_by_sev.get(f["severity"], 0) + 1
         for sev, limit in threshold.items():
             count = open_by_sev.get(sev, 0)
@@ -252,13 +256,27 @@ class VaptManager:
                 return False, f"{count} open {sev} finding(s) exceed threshold of {limit}"
         return True, "All threshold criteria met"
 
-    def issue_certificate(self, product: str, eng_id: str, issued_by: str) -> dict | None:
-        can, _ = self.check_certifiable(product, eng_id)
+    def issue_certificate(self, product: str, eng_id: str, issued_by: str,
+                          scan_type: str = "web") -> dict | None:
+        can, _ = self.check_certifiable(product, eng_id, scan_type)
         if not can:
             return None
+        eng = self._load(product, eng_id)
+        if eng is None:
+            return None
         cert_id = f"SF-CERT-{uuid.uuid4().hex[:8].upper()}"
-        return self.patch(product, eng_id,
-                          status="certified",
-                          certificate_id=cert_id,
-                          certificate_issued_at=datetime.now(timezone.utc).isoformat(),
-                          certificate_issued_by=issued_by)
+        now = datetime.now(timezone.utc).isoformat()
+        if "certificates" not in eng:
+            eng["certificates"] = {}
+        eng["certificates"][scan_type] = {
+            "cert_id": cert_id,
+            "issued_at": now,
+            "issued_by": issued_by,
+        }
+        if scan_type == "web":
+            eng["certificate_id"] = cert_id
+            eng["certificate_issued_at"] = now
+            eng["certificate_issued_by"] = issued_by
+        eng["status"] = "certified"
+        self._save(product, eng_id, eng)
+        return eng
