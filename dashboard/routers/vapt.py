@@ -173,6 +173,7 @@ class UpdateScopeBody(BaseModel):
     in_scope: list[str] = []
     out_of_scope: list[str] = []
     infra_targets: list[str] = []
+    mobile_app_path: str = ""
     environment: str = ""
     start_date: str = ""
     end_date: str = ""
@@ -504,11 +505,17 @@ def _execute_vapt_scan(product: str, eng_id: str, scan_id: str,
         cmd.append("--screenshot=only-on-failure")
 
     run_env = {**os.environ}
-    if scan_type == "infra":
+    if scan_type in ("infra", "mobile"):
         eng = _vm.get(product, eng_id)
-        targets = (eng or {}).get("scope", {}).get("infra_targets", [])
-        if targets:
-            run_env["VAPT_INFRA_TARGETS"] = ",".join(str(t) for t in targets)
+        scope = (eng or {}).get("scope", {})
+        if scan_type == "infra":
+            targets = scope.get("infra_targets", [])
+            if targets:
+                run_env["VAPT_INFRA_TARGETS"] = ",".join(str(t) for t in targets)
+        elif scan_type == "mobile":
+            app_path = scope.get("mobile_app_path", "")
+            if app_path:
+                run_env["VAPT_MOBILE_APP_PATH"] = app_path
 
     _collected_re = re.compile(r"collected (\d+) item")
     _result_re = re.compile(r"\s(PASSED|FAILED|ERROR|SKIPPED)\s")

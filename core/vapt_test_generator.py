@@ -1012,7 +1012,10 @@ def test_INFRA_zone_transfer_blocked(vapt_host, vapt_domain):
 # ── mobile test content ───────────────────────────────────────────────────────
 
 _MOBILE_CONFTEST = '''\
-"""VAPT mobile security fixture set — auto-detected from products/<product>/config/env_*.yaml."""
+"""VAPT mobile security fixture set — auto-detected from products/<product>/config/env_*.yaml.
+VAPT_MOBILE_APP_PATH env var (set by the scan runner) points to the APK/IPA for static analysis.
+"""
+import os
 import re
 from pathlib import Path
 import pytest
@@ -1062,6 +1065,18 @@ def vapt_https_port(vapt_base_url) -> "int | None":
         m = re.match(r"https://[^/:]+:(\d+)", vapt_base_url)
         return int(m.group(1)) if m else 443
     return None
+
+
+@pytest.fixture(scope="session")
+def vapt_mobile_app_path() -> "Path | None":
+    """Path to the APK/IPA for static analysis; None if not provided.
+    Tests that require the app binary should call pytest.skip() when this is None.
+    """
+    raw = os.environ.get("VAPT_MOBILE_APP_PATH", "").strip()
+    if not raw:
+        return None
+    p = Path(raw)
+    return p if p.exists() else None
 '''
 
 _MOBILE_NETWORK_TESTS = '''\

@@ -63,6 +63,7 @@ class VaptManager:
                 "in_scope": [],
                 "out_of_scope": [],
                 "infra_targets": [],
+                "mobile_app_path": "",
                 "environment": "",
                 "start_date": "",
                 "end_date": "",

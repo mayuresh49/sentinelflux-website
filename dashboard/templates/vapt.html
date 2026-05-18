@@ -244,6 +244,15 @@
                           class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-400"
                           placeholder="192.168.1.10&#10;10.0.0.5&#10;app.internal.example.com"></textarea>
               </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-slate-600 mb-1">
+                  Mobile App File Path
+                  <span class="ml-1 text-slate-400 font-normal">(APK or IPA path on the server — used by Mobile App scans for static analysis)</span>
+                </label>
+                <input x-model="scopeMobileAppPath" type="text" :disabled="!!selectedEng?.scope?.finalized_at"
+                       class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-400"
+                       placeholder="/path/to/app.apk  or  /path/to/app.ipa"/>
+              </div>
             </div>
             <div x-show="!selectedEng?.scope?.finalized_at" class="flex items-center gap-2 pt-2">
               <button @click="saveScope()" class="text-sm font-medium bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg transition-colors">Save Scope</button>
@@ -633,6 +642,7 @@ function vaptApp() {
     scopeInScope: '',
     scopeOutOfScope: '',
     scopeInfraTargets: '',
+    scopeMobileAppPath: '',
     certThreshold: { Critical: 0, High: 0 },
     tabs: [
       { id: 'scope', label: 'Scope' },
@@ -789,6 +799,7 @@ function vaptApp() {
       this.scopeInScope = (s.in_scope || []).join('\n');
       this.scopeOutOfScope = (s.out_of_scope || []).join('\n');
       this.scopeInfraTargets = (s.infra_targets || []).join('\n');
+      this.scopeMobileAppPath = s.mobile_app_path || '';
     },
 
     async saveScope() {
@@ -797,6 +808,7 @@ function vaptApp() {
         in_scope: this.scopeInScope.split('\n').map(s => s.trim()).filter(Boolean),
         out_of_scope: this.scopeOutOfScope.split('\n').map(s => s.trim()).filter(Boolean),
         infra_targets: this.scopeInfraTargets.split('\n').map(s => s.trim()).filter(Boolean),
+        mobile_app_path: this.scopeMobileAppPath.trim(),
       };
       const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/scope?product=' + this.product, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
