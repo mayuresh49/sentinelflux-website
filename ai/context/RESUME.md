@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (14)  
+Last updated: 2026-05-18 (15)  
 Framework version: 0.1.0
 
 ---
@@ -38,6 +38,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **Docs TC create/delete UX fixes** (`dashboard/routers/partials.py`, `dashboard/templates/docs.html`, `dashboard/templates/partials/doc_tc_view.html`): (1) Success toast: `tc_create` redirect now appends `?created=TC_ID`; `docsPage.init()` reads the param, fires `sfToast("Test case X created successfully.", 'info')`, then removes the param via `history.replaceState` so a page refresh doesn't re-fire it. (2) Delete confirm: replaced inline Alpine Yes/No confirm div with `sfConfirm` modal — Delete button calls `await sfConfirm(...)` and only submits the hidden form via `htmx.trigger($refs.deleteForm, 'submit')` on confirmation. (3) Alpine timing fix: `tcCreateForm` function moved from partial `<script>` tag to `docs.html` `{% block scripts %}` so it's defined at page load before any HTMX swap, eliminating the race where Alpine's MutationObserver fired before HTMX re-executed the inline script.
+
+## Previous: Coverage gap pipeline + pipeline hardening (2026-05-18)
 
 - **Coverage gap pipeline + pipeline hardening** (`ai/pipeline/orchestrator.py`, `ai/skills/test_script_gen.py`, `ai/prompts/prompt_templates.py`, 4 new docs, 4 updated scripts): Ran CoverageGapAgent for orangehrm across all domains — found 96 untested KB scenarios (43 api, 12 web, 41 mobile), all logged to activity. Ran full pipeline (DocGen → DocReview → ScriptGen → ScriptReview) for 4 undocumented scripts, bringing doc coverage from 67% → 100%: `security_api.md` (OH-API-029..039), `security_web.md` (OH-WEB-083..125), `leave.md` (OH-WEB-124..128), `login_mobile.md` (OH-MOB-017..026). Three systemic pipeline bugs fixed: (1) normalizer regex `(?!not_automatable)` → `(?!not_automat)` to also skip `not_automated` rows; (2) `max_tokens` 3000→5000 in script gen to prevent truncation on 10+ TC docs; (3) mobile convention CRITICAL block — model was passing `base_url` to mobile POM constructors which take `(driver, platform)` only. Hardcoded credentials eliminated: api convention rewritten with `{product}_client` / `{product}_api_base_url` / `{product}_credentials` patterns + two new NEVER rules in prompt template. `test_security_api.py` rewritten (was using wrong `rest_client` + `authenticate()` helper with hardcoded creds). `test_login_mobile.py` rewritten with `orangehrm_credentials` / `orangehrm_ess_credentials` fixtures and OH-MOB TC IDs. Added `orangehrm_ess_credentials` fixture to `products/orangehrm/conftest.py` and `ess_username`/`ess_password` to `env_qa.yaml`.
 

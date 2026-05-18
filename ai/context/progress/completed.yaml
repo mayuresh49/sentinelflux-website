@@ -1,5 +1,15 @@
 # Completed work items — append only, newest first
 
+- id: docs-tc-create-delete-ux
+  date: 2026-05-18
+  title: "Docs: TC create success toast + sfConfirm delete + Alpine timing fix"
+  outcome: >
+    tc_create redirect appends ?created=TC_ID; docsPage.init() shows sfToast
+    then cleans param via history.replaceState. Delete inline confirm replaced
+    with sfConfirm modal + hidden x-ref form triggered via htmx.trigger.
+    tcCreateForm moved to docs.html block scripts (page-load scope) — fixes
+    Alpine MutationObserver race where function was undefined on first HTMX swap.
+
 - id: coverage-gap-pipeline-orangehrm
   date: 2026-05-18
   title: "Coverage gap pipeline: orangehrm 67% → 100% doc coverage + pipeline hardening"
