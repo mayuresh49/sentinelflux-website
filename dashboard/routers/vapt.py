@@ -27,24 +27,33 @@ _vm = VaptManager()
 # ── OWASP inference ───────────────────────────────────────────────────────────
 
 _OWASP_RULES: list[tuple[list[str], str, str]] = [
-    (["without_auth", "no_auth", "unauthenticated", "requires_login", "requires_auth", "admin_requires"],
+    # A07 — auth + session (checked first; session keywords shouldn't bleed into A05)
+    (["without_auth", "no_auth", "unauthenticated", "requires_login", "requires_auth",
+      "admin_requires", "session_cookie", "httponly", "samesite", "secure_flag",
+      "session_token", "cookie_flag", "session_mgmt"],
      "A07", "Identification and Authentication Failures"),
-    (["xss", "script_execute", "cross_site_script", "clickjack"],
+    # A03 — injection (XSS listed here; clickjack moved to A05)
+    (["xss", "script_execute", "cross_site_script", "reflected_unescaped"],
      "A03", "Injection — Cross-Site Scripting"),
-    (["sql", "sqli", "nosql", "injection", "ldap", "ssti", "command_inject"],
+    (["sql", "sqli", "nosql", "injection", "ldap", "ssti", "command_inject",
+      "path_traversal", "traversal", "directory_traversal"],
      "A03", "Injection"),
+    # A01 — access control + open redirect (redirect is an A01 finding)
     (["idor", "bola", "unauthorized_access", "other_user", "another_user", "another_booking"],
      "A01", "Broken Access Control"),
     (["delete_without", "update_without", "write_without", "admin_panel"],
      "A01", "Broken Access Control"),
     (["csrf", "open_redirect", "forged_request"],
      "A01", "Broken Access Control"),
+    # A05 — misconfiguration incl. clickjacking and referrer
     (["cors", "x_frame", "hsts", "csp", "content_type_options", "server_version",
-      "expose", "info_disclosure", "server_header", "header"],
+      "expose", "info_disclosure", "server_header", "header", "clickjack",
+      "referrer_policy", "html_comment"],
      "A05", "Security Misconfiguration"),
+    # A04, A10, A02, A06
     (["rate_limit", "throttle", "flood", "brute_force", "mass_request"],
      "A04", "Unrestricted Resource Consumption"),
-    (["ssrf", "server_side_request"],
+    (["ssrf", "server_side_request", "dns_rebinding"],
      "A10", "Server-Side Request Forgery"),
     (["tls", "https_only", "ssl", "cert", "cipher", "encrypt", "plaintext", "cleartext"],
      "A02", "Cryptographic Failures"),
@@ -213,6 +222,13 @@ def get_test_info(product: str, current_user: dict = Depends(require_user)) -> d
     _check_product_access(product, current_user)
     from core.vapt_test_generator import VaptTestGenerator
     return VaptTestGenerator.test_info(product)
+
+
+@router.get("/vapt/products/{product}/test-templates")
+def get_test_templates(product: str, current_user: dict = Depends(require_user)) -> list[dict]:
+    _check_product_access(product, current_user)
+    from core.vapt_test_generator import VaptTestGenerator
+    return VaptTestGenerator.template_contents(product)
 
 
 @router.post("/vapt/products/{product}/generate-tests")

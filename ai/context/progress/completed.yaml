@@ -1,5 +1,19 @@
 # Completed work items — append only, newest first
 
+- id: quality-dashboard-metrics
+  date: 2026-05-18
+  title: "Quality dashboard: real pass rate, automated test count, execution stats, risk score"
+  outcome: >
+    quality.py: pass rate now from test_runs table (actual pytest results), not activity_log.
+    Added _count_test_functions() (def test_ grep per product), _run_stats_from_db() (aggregates
+    total/passed/failed/duration), _daily_pass_rate_from_runs() (7-day daily trend from test_runs),
+    _risk_score() (composite 0–100: pass gap 50pt + quarantine rate 20pt + doc gap 20pt + flaky 10pt).
+    quality.html: expanded from 5 to 6 summary cards (Automated Tests, Pass Rate, Executions,
+    Doc Coverage, Quarantined, Risk Score). Each card has Alpine ⓘ tooltip with formula.
+    Per-product table: auto test function count, real pass rate, execution breakdown (passed✓/failed✗),
+    risk badge (Low/Med/High + score). Live data: 169 test functions, 44% pass rate, 191 executions,
+    risk 43 (Medium).
+
 - id: timesheets-pipeline-fixes
   date: 2026-05-18
   title: "Timesheets pipeline: ScriptReview KeyError fix, orchestrator fixes, correct test scripts"

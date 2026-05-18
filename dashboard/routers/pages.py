@@ -566,15 +566,8 @@ async def vapt_page(request: Request, product: str | None = None,
     from dashboard.routers.config._helpers import _load_config
     if not _vapt_access(current_user):
         return RedirectResponse("/", status_code=302)
-    cfg = _load_config()
-    all_prods = user_products(current_user, _list_products())
-    if current_user.get("admin"):
-        vapt_prods = [p["name"] for p in cfg.get("products", [])
-                      if p.get("active", True) and p.get("vapt_enabled")]
-    else:
-        user_prod_set = set(current_user.get("products", []))
-        vapt_prods = [p["name"] for p in cfg.get("products", [])
-                      if p.get("vapt_enabled") and p["name"] in user_prod_set]
+    from dashboard.routers.vapt import _vapt_products
+    vapt_prods = _vapt_products(current_user)
     return templates.TemplateResponse(request, "vapt.html", context=_ctx(
         request, current_user,
         vapt_products=vapt_prods,

@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (4)  
+Last updated: 2026-05-18 (5)  
 Framework version: 0.1.0
 
 ---
@@ -38,6 +38,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **Quality dashboard metrics overhaul** (`dashboard/routers/quality.py`, `dashboard/templates/quality.html`): Pass rate now computed from actual pytest results in `test_runs` table (was incorrectly using `activity_log` agent status). Added: automated test function count (`def test_` grep, not file count — 169 functions vs 25 scripts), execution stats card (total/passed/failed from real runs), 7-day pass rate trend from `test_runs` daily aggregates, composite risk score 0–100 (pass rate gap 50pt + quarantine rate 20pt + doc gap 20pt + flaky 10pt). Template expanded from 5 to 6 summary cards; each card has an `ⓘ` Alpine tooltip explaining its formula. Per-product table updated: automated test count, real pass rate, execution breakdown, risk badge.
+
+## Previous: ScriptReview fix + Timesheets pipeline (2026-05-18)
 
 - **ScriptReview KeyError fix** (`ai/agents/script_review_agent.py`): `_REWRITE_PROMPT` template had unescaped `{"positive", "negative", "edge"}` set literals — Python's `str.format()` raised `KeyError` silently caught by the orchestrator, skipping ALL ScriptReview passes. Fixed by doubling the braces (`{{...}}`).
 - **Orchestrator fixes** (`ai/pipeline/orchestrator.py`): (1) DocReview now always runs even when `--doc` (skip_doc=True) is used — was only running on freshly generated docs. (2) `--doc` path now resolved to absolute so `relative_to(ROOT_DIR)` never fails. (3) Default doc-model changed from `mistral:7b-instruct-v0.3-q4_K_M` to `qwen2.5-coder:14b-instruct-q4_K_M`.
