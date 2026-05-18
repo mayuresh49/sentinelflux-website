@@ -563,7 +563,6 @@ async def change_password_submit(
 @router.get("/vapt", response_class=HTMLResponse)
 async def vapt_page(request: Request, product: str | None = None,
                     current_user: dict = Depends(_require_auth)):
-    from dashboard.routers.config._helpers import _load_config
     if not _vapt_access(current_user):
         return RedirectResponse("/", status_code=302)
     from dashboard.routers.vapt import _vapt_products
