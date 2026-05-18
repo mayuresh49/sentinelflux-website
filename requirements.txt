@@ -23,6 +23,7 @@ anthropic>=0.25.0
 
 # Mobile (optional — comment out if not needed)
 appium-python-client>=2.11.0
+androguard>=3.3.5  # APK/IPA static analysis for mobile VAPT scans
 
 # Dashboard (API + UI)
 bcrypt>=4.0.0
