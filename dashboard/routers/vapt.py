@@ -320,8 +320,6 @@ def generate_report(eng_id: str, product: str,
     eng = _vm.get(product, eng_id)
     if not eng:
         raise HTTPException(404, detail="Engagement not found")
-    if not eng.get("findings"):
-        raise HTTPException(400, detail="No findings yet — run a scan first")
     now = datetime.now(timezone.utc).isoformat()
     updated = _vm.patch(product, eng_id, report_generated_at=now,
                         status="reported" if eng["status"] == "in_progress" else eng["status"])

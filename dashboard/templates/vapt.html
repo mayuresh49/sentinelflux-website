@@ -470,8 +470,7 @@
 
           <!-- ── REPORT TAB ────────────────────────────────────────── -->
           <div x-show="activeTab === 'report'" class="space-y-4">
-            <div x-show="!selectedEng?.findings?.length" class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700">Run a scan first to populate findings before generating the report.</div>
-            <div x-show="selectedEng?.findings?.length" class="space-y-4">
+            <div class="space-y-4">
               <div class="flex items-start justify-between gap-4">
                 <div class="text-sm text-slate-600">
                   <p>The VAPT findings report documents all security checks, findings, evidence, and remediation guidance for the client.</p>
@@ -736,7 +735,10 @@ function vaptApp() {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
       });
       if (!r.ok) { sfToast('Failed to save scope.', 'error'); return; }
-      this.selectedEng = await r.json();
+      const updated = await r.json();
+      this.selectedEng = updated;
+      const idx = this.engagements.findIndex(e => e.id === updated.id);
+      if (idx !== -1) this.engagements.splice(idx, 1, updated);
       sfToast('Scope saved.', 'info');
     },
 
@@ -774,7 +776,10 @@ function vaptApp() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
       });
       if (!r.ok) { sfToast('Failed to update finding.', 'error'); return; }
-      this.selectedEng = await r.json();
+      const updated = await r.json();
+      this.selectedEng = updated;
+      const idx = this.engagements.findIndex(e => e.id === updated.id);
+      if (idx !== -1) this.engagements.splice(idx, 1, updated);
       sfToast('Finding updated.', 'info');
     },
 

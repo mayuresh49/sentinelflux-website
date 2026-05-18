@@ -4,7 +4,7 @@
   "name": "Q2 Security Assesment",
   "client_name": "Report Portal",
   "assessor_org": "SentinelFlux",
-  "status": "in_progress",
+  "status": "certified",
   "created_at": "2026-05-17T16:22:35.745500+00:00",
   "created_by": "Mayuresh Kulkarni",
   "scope": {
@@ -91,7 +91,7 @@
     "Critical": 0,
     "High": 0
   },
-  "certificate_issued_at": null,
-  "certificate_id": null,
-  "certificate_issued_by": null
+  "certificate_issued_at": "2026-05-17T16:46:19.606658+00:00",
+  "certificate_id": "SF-CERT-5673FC91",
+  "certificate_issued_by": "claude-automation"
 }

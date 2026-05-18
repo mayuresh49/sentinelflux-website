@@ -40,10 +40,16 @@ async def config_page(request: Request, product: Optional[str] = None,
         tc = _products._product_test_count(_p["name"])
         enriched_products.append({**_p, "has_tests": tc > 0, "test_count": tc})
     from core.audit_logger import recent as _audit_recent
+    user_prod_set = set(current_user.get("products", []))
+    vapt_access = current_user.get("admin") or any(
+        p.get("vapt_enabled") and p["name"] in user_prod_set
+        for p in cfg.get("products", [])
+    )
     return templates.TemplateResponse(request, "config.html", context={
         "pending_count": len(_am.pending()),
         "all_products": visible_products,
         "current_user": current_user,
+        "vapt_access": vapt_access,
         "products": enriched_products,
         "cfg": cfg,
         "labels": cfg.get("labels", []),
