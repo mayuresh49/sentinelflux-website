@@ -314,9 +314,12 @@
 
             <!-- Module checkboxes -->
             <div x-show="scopeLoadingModules" class="text-sm text-slate-400">Loading modules…</div>
-            <div x-show="!scopeLoadingModules && scopeAvailableModules.length === 0 && scopeDomain"
-                 class="text-sm text-slate-400 py-4 text-center">
-              No test modules found for <span class="font-medium" x-text="scopeDomain"></span> domain.
+            <div x-show="!scopeLoadingModules && !scopeLoadError && scopeAvailableModules.length === 0 && scopeDomain"
+                 class="py-6 text-center space-y-1">
+              <p class="text-sm text-slate-500">No test modules found for the <span class="font-medium" x-text="scopeDomain"></span> domain.</p>
+              <p class="text-xs text-slate-400">Add <code class="bg-slate-100 px-1 rounded">test_*.py</code> files under
+                <code class="bg-slate-100 px-1 rounded" x-text="`products/${selectedPlan?.product}/tests/${scopeDomain}/`"></code>
+              </p>
             </div>
             <div x-show="!scopeLoadingModules && scopeAvailableModules.length > 0" class="space-y-3">
               <p class="text-xs text-slate-500">Select modules to include. Expand a module to exclude individual test cases.</p>
@@ -560,6 +563,7 @@ function testPlansApp() {
     scopeDomain: 'api',
     scopeAvailableModules: [],
     scopeLoadingModules: false,
+    scopeLoadError: false,
     scopeChecked: {},        // {domain_module: true}
     scopeExpanded: {},       // {domain_module: true}
     scopeModuleTCs: {},      // {domain_module: [{tc_id, tc_title, automation_status}]}
@@ -599,6 +603,8 @@ function testPlansApp() {
       this.scopeExpanded = {};
       this.scopeModuleTCs = {};
       this.scopeExcluded = {};
+      this.scopeAvailableModules = [];
+      this.scopeLoadError = false;
       this.tcStatuses = [];
       this.linkedRuns = [];
       this.progress = plan.progress || {};
@@ -725,13 +731,20 @@ function testPlansApp() {
       if (!this.selectedPlan) return;
       this.scopeDomain = domain;
       this.scopeLoadingModules = true;
+      this.scopeLoadError = false;
       this.scopeAvailableModules = [];
       try {
         const r = await fetch(`/api/test-plans/${this.selectedPlan.id}/scope/available-modules?domain=${domain}`);
-        if (!r.ok) return;
+        if (!r.ok) {
+          this.scopeLoadError = true;
+          sfToast('Failed to load modules — check server logs.', 'error');
+          return;
+        }
         const d = await r.json();
         this.scopeAvailableModules = d.modules || [];
       } catch(e) {
+        this.scopeLoadError = true;
+        sfToast('Failed to load modules — network error.', 'error');
       } finally {
         this.scopeLoadingModules = false;
       }
