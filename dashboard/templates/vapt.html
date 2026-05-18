@@ -261,6 +261,33 @@
 
           <!-- ── SCANS TAB ─────────────────────────────────────────── -->
           <div x-show="activeTab === 'scans'" class="space-y-4">
+
+            <!-- Test suite status card -->
+            <div class="border border-slate-200 rounded-lg p-3 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2 text-xs">
+                <template x-if="testInfo?.exists">
+                  <span class="flex items-center gap-1.5 text-emerald-700">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Standard test suite ready —
+                    <span x-text="testInfo.test_count"></span> tests across
+                    <span x-text="testInfo.files.length"></span> files
+                  </span>
+                </template>
+                <template x-if="!testInfo?.exists">
+                  <span class="flex items-center gap-1.5 text-amber-700">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    No standard tests generated yet
+                  </span>
+                </template>
+              </div>
+              {% if current_user.admin %}
+              <button @click="regenerateTests()"
+                      class="text-xs text-slate-500 hover:text-indigo-600 border border-slate-200 hover:border-indigo-300 px-2 py-1 rounded transition-colors"
+                      x-text="testInfo?.exists ? 'Regenerate Tests' : 'Generate Tests'">
+              </button>
+              {% endif %}
+            </div>
+
             <div x-show="selectedEng?.status === 'scoping'" class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700">
               Finalize scope before running a scan.
             </div>
@@ -513,6 +540,7 @@ function vaptApp() {
     showCreate: false,
     activeTab: 'scope',
     scanning: false,
+    testInfo: null,
     pollTimer: null,
     filterSev: '',
     filterStatus: '',
@@ -559,8 +587,9 @@ function vaptApp() {
     async onProductChange() {
       this.engagements = [];
       this.selectedEng = null;
+      this.testInfo = null;
       if (!this.product) return;
-      await this.loadEngagements();
+      await Promise.all([this.loadEngagements(), this.loadTestInfo()]);
     },
 
     async loadEngagements() {
@@ -572,6 +601,20 @@ function vaptApp() {
       } finally {
         this.engLoading = false;
       }
+    },
+
+    async loadTestInfo() {
+      const r = await fetch('/api/vapt/products/' + this.product + '/test-info');
+      if (r.ok) this.testInfo = await r.json();
+    },
+
+    async regenerateTests() {
+      const ok = await sfConfirm('Regenerate the standard test suite for ' + this.product + '? Existing vapt/ test files will be overwritten.');
+      if (!ok) return;
+      const r = await fetch('/api/vapt/products/' + this.product + '/generate-tests?force=true', { method: 'POST' });
+      if (!r.ok) { sfToast('Failed to regenerate tests: ' + (await r.json()).detail, 'error'); return; }
+      await this.loadTestInfo();
+      sfToast('Standard test suite regenerated.', 'info');
     },
 
     async createEngagement() {

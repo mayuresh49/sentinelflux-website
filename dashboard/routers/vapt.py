@@ -206,6 +206,22 @@ def set_cert_threshold(eng_id: str, product: str, body: CertThresholdBody,
     return eng
 
 
+# ── test-suite management ─────────────────────────────────────────────────────
+
+@router.get("/vapt/products/{product}/test-info")
+def get_test_info(product: str, current_user: dict = Depends(require_user)) -> dict:
+    _check_product_access(product, current_user)
+    from core.vapt_test_generator import VaptTestGenerator
+    return VaptTestGenerator.test_info(product)
+
+
+@router.post("/vapt/products/{product}/generate-tests")
+def generate_tests(product: str, force: bool = False,
+                   _: dict = Depends(_require_admin)) -> dict:
+    from core.vapt_test_generator import VaptTestGenerator
+    return VaptTestGenerator.generate(product, force=force)
+
+
 # ── scan endpoints ────────────────────────────────────────────────────────────
 
 @router.post("/vapt/engagement/{eng_id}/scan")

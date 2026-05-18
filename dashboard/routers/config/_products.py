@@ -180,4 +180,13 @@ async def products_set_vapt(request: Request, name: str = Form(...), vapt: str =
             break
     _save_config(cfg)
     _audit_config(request, "Products", f"Set VAPT {'enabled' if enabled else 'disabled'} for '{name}'")
-    return _render_products(request, cfg, flash=f"VAPT {'enabled' if enabled else 'disabled'} for '{name}'.")
+    flash = f"VAPT {'enabled' if enabled else 'disabled'} for '{name}'."
+    if enabled:
+        try:
+            from core.vapt_test_generator import VaptTestGenerator
+            result = VaptTestGenerator.generate(name)
+            if result["status"] == "generated":
+                flash += f" Standard test suite generated ({len(result['files']) - 2} test files)."
+        except Exception:
+            pass
+    return _render_products(request, cfg, flash=flash)
