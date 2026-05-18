@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (11)  
+Last updated: 2026-05-18 (12)  
 Framework version: 0.1.0
 
 ---
@@ -39,7 +39,11 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-18)
 
-- **VAPT report: per-test execution detail section** (`dashboard/routers/vapt.py`, `dashboard/templates/vapt_report_pdf.html`): Report previously showed only failed tests (findings) and aggregate scan counts — passed/skipped tests were thrown away after scan. Fix: `_execute_vapt_scan` now stores a slim `test_log` list (test_id, title, owasp_ref, owasp_category, severity, status) on each completed scan record before deleting the raw pytest JSON. `_render_report_html` collects `test_log` from all completed scans and passes `scan_test_logs` to the template. Added section 7 "Test Execution Details" to `vapt_report_pdf.html` — a per-scan table of all 31 tests showing OWASP ref, severity, and ✓ Secure / ✗ Finding / — Skipped result. Section 6 Scan History gains Skipped and Duration columns. Note: `test_log` is only populated on scans run after this change; historical scans will have no section 7 output.
+- **VAPT report: PDF fix + historical test log backfill** (`dashboard/routers/vapt.py`, `dashboard/templates/vapt_report_pdf.html`): WeasyPrint 68.1 installed (was not present, causing 500 on PDF download). For scans that predate `test_log` persistence, added `_infer_test_log_from_files(product, scan_id, findings)` — walks `products/{product}/tests/vapt/test_*.py`, parses `def test_` declarations, extracts the OWASP ref from the embedded prefix (e.g. `test_A01_...`) using a `_`-delimited regex (word-boundary `\b` fails inside underscore-joined identifiers), falls back to keyword inference only if no prefix found. `_make_title()` updated to strip the leading OWASP prefix from human-readable titles. `_render_report_html` calls the fallback for any completed scan missing `test_log`. Template adds a disclaimer footnote on inferred scans. Section 6 Scan History gains Skipped and Duration columns.
+
+## Previous: VAPT report per-test execution detail section (2026-05-18)
+
+- **VAPT report: per-test execution detail section** (`dashboard/routers/vapt.py`, `dashboard/templates/vapt_report_pdf.html`): Report previously showed only failed tests (findings) and aggregate scan counts — passed/skipped tests were thrown away after scan. Fix: `_execute_vapt_scan` now stores a slim `test_log` list (test_id, title, owasp_ref, owasp_category, severity, status) on each completed scan record before deleting the raw pytest JSON. `_render_report_html` collects `test_log` from all completed scans and passes `scan_test_logs` to the template. Added section 7 "Test Execution Details" to `vapt_report_pdf.html` — a per-scan table of all 31 tests showing OWASP ref, severity, and ✓ Secure / ✗ Finding / — Skipped result. Section 6 Scan History gains Skipped and Duration columns.
 
 ## Previous: VAPT bug fixes (2026-05-18)
 
