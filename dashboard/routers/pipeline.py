@@ -141,6 +141,28 @@ def _run(job_id: str, body: TriggerBody):
         _patch_job(job_id, "failed", str(exc))
 
 
+def queue_pipeline_for_increment(product: str, domain: str, increment_file: str) -> str:
+    """Fire a pipeline job in a background thread; returns job_id."""
+    import threading
+    body = TriggerBody(product=product, feature="", domain=domain, increment_file=increment_file)
+    job_id = str(uuid.uuid4())
+    conn = get_conn()
+    conn.execute(
+        """INSERT INTO pipeline_jobs
+           (id, started, finished, product, feature, domain, increment_file, status, output)
+           VALUES (?, ?, NULL, ?, ?, ?, ?, 'running', '')""",
+        (job_id, datetime.now(timezone.utc).isoformat(), product, "", domain, increment_file),
+    )
+    conn.execute(
+        "DELETE FROM pipeline_jobs WHERE id NOT IN "
+        "(SELECT id FROM pipeline_jobs ORDER BY started DESC LIMIT ?)",
+        (_MAX_JOBS,),
+    )
+    conn.commit()
+    threading.Thread(target=_run, args=(job_id, body), daemon=True).start()
+    return job_id
+
+
 def _load_jobs() -> list[dict]:
     rows = get_conn().execute(
         "SELECT * FROM pipeline_jobs ORDER BY started DESC LIMIT ?", (_MAX_JOBS,)

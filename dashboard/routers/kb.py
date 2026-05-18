@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 
 import yaml
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from dashboard.routers.auth import require_user, user_products
@@ -152,16 +152,23 @@ def save_file(product: str, filename: str, body: SaveBody, current_user: dict = 
 class IncrementBody(BaseModel):
     filename: str
     content: str
+    product: str = ""
+    domain: str = "api"
 
 
 @router.post("/increments")
-def create_increment(body: IncrementBody, current_user: dict = Depends(require_user)):
+def create_increment(body: IncrementBody, background_tasks: BackgroundTasks, current_user: dict = Depends(require_user)):
     if not body.filename.endswith((".yaml", ".yml")):
         raise HTTPException(400, "Filename must end with .yaml")
     _INCREMENTS_DIR.mkdir(parents=True, exist_ok=True)
     path = _INCREMENTS_DIR / body.filename
     path.write_text(body.content, encoding="utf-8")
-    return {"status": "created", "filename": body.filename}
+    result: dict = {"status": "created", "filename": body.filename}
+    if body.product and body.domain:
+        from dashboard.routers.pipeline import queue_pipeline_for_increment
+        job_id = queue_pipeline_for_increment(body.product, body.domain, body.filename)
+        result["pipeline_job_id"] = job_id
+    return result
 
 
 _SAFE_NAME_RE = __import__("re").compile(r"^[a-zA-Z0-9_\-]+$")
@@ -208,6 +215,8 @@ async def upload_docx(
     output_filename: str = Form(""),
     local_url: str = Form("http://localhost:11434"),
     model: str = Form("mistral:7b-instruct-v0.3-q4_K_M"),
+    product: str = Form(""),
+    domain: str = Form("api"),
     current_user: dict = Depends(require_user),
 ):
     """Accept a .docx upload, extract text, convert to KB YAML via LLM, save to increments/."""
@@ -245,4 +254,9 @@ async def upload_docx(
     out_path = _INCREMENTS_DIR / filename
     out_path.write_text(yaml_content, encoding="utf-8")
 
-    return {"status": "converted", "filename": filename, "yaml": yaml_content}
+    result: dict = {"status": "converted", "filename": filename, "yaml": yaml_content}
+    if product and domain:
+        from dashboard.routers.pipeline import queue_pipeline_for_increment
+        job_id = queue_pipeline_for_increment(product, domain, filename)
+        result["pipeline_job_id"] = job_id
+    return result

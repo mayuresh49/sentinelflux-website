@@ -100,8 +100,7 @@ def post_result(
         **stats,
     )
 
-    if stats.get("failed", 0) > 0:
-        _trigger_analysis(run_id, run.get("domain", "api"), report_path)
+    _trigger_analysis(run_id, run.get("product", ""), run.get("domain", "api"), report_path)
 
     return {"ok": True, "stats": stats}
 
@@ -147,14 +146,14 @@ def _parse_report(report_path: Path) -> dict[str, Any]:
         return {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0, "duration": 0.0, "failures": []}
 
 
-def _trigger_analysis(run_id: str, domain: str, report_path: Path) -> None:
+def _trigger_analysis(run_id: str, product: str, domain: str, report_path: Path) -> None:
     import threading
-    threading.Thread(target=_analyze, args=(run_id, domain, report_path), daemon=True).start()
+    threading.Thread(target=_analyze, args=(run_id, product, domain, report_path), daemon=True).start()
 
 
-def _analyze(run_id: str, domain: str, report_path: Path) -> None:
+def _analyze(run_id: str, product: str, domain: str, report_path: Path) -> None:
     try:
-        from dashboard.routers.runs import _build_ai_client, _analyze_failures
-        _analyze_failures(run_id, domain, report_path)
+        from dashboard.routers.runs import _run_post_suite
+        _run_post_suite(run_id, product, domain, report_path)
     except Exception:
         pass

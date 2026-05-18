@@ -135,13 +135,13 @@ def analyze_run(run_id: str, background_tasks: BackgroundTasks, current_user: di
     report_path = _ROOT / run["report_path"]
     if not report_path.exists():
         raise HTTPException(404, "Report file not found — re-run to regenerate")
-    background_tasks.add_task(_analyze_failures, run_id, run["domain"], report_path)
+    background_tasks.add_task(_run_post_suite, run_id, run["product"], run["domain"], report_path)
     return {"status": "analysis_queued", "run_id": run_id}
 
 
 @router.post("/analyze-all")
 def analyze_all(background_tasks: BackgroundTasks, current_user: dict = Depends(require_user)):
-    """Queue analysis for every completed/failed run with failures that the user can see."""
+    """Queue full post-suite chain for every completed/failed run the user can see."""
     visible = _visible_products(current_user)
     queued = []
     for run in _rm.all_runs():
@@ -149,12 +149,10 @@ def analyze_all(background_tasks: BackgroundTasks, current_user: dict = Depends(
             continue
         if run.get("status") not in ("completed", "failed"):
             continue
-        if not run.get("failed", 0):
-            continue
         report_path = _ROOT / run["report_path"]
         if not report_path.exists():
             continue
-        background_tasks.add_task(_analyze_failures, run["id"], run["domain"], report_path)
+        background_tasks.add_task(_run_post_suite, run["id"], run["product"], run["domain"], report_path)
         queued.append(run["id"])
     return {"status": "analysis_queued", "queued": len(queued), "run_ids": queued}
 
@@ -316,33 +314,45 @@ def _execute_run(run_id: str, product: str, domain: str, module: str, extra_args
             progress_done=stats.get("total", progress_done),
             **stats,
         )
-        if stats.get("failed", 0) > 0 and report_path.exists():
-            _analyze_failures(run_id, domain, report_path)
+        if report_path.exists():
+            _run_post_suite(run_id, product, domain, report_path)
     except Exception as exc:
         _rm.patch_run(run_id, status="failed",
                       finished_at=datetime.now(timezone.utc).isoformat(),
                       summary_error=str(exc))
 
 
-def _analyze_failures(run_id: str, domain: str, report_path: Path) -> None:
-    """Run ResultAnalyzerAgent if an AI client is available; update run record."""
+def _run_post_suite(run_id: str, product: str, domain: str, report_path: Path) -> None:
+    """Run full SentinelOrchestrator chain after suite completion; best-effort."""
     try:
-        from ai.agents.base_agent import AgentContext
-        from ai.agents.result_analyzer_agent import ResultAnalyzerAgent
+        from ai.agents.sentinel_orchestrator import SentinelOrchestrator
         client = _build_ai_client()
-        if not client:
-            return
-        ctx = AgentContext(domain=domain or "api")
-        agent = ResultAnalyzerAgent(ai_client=client, context=ctx)
-        result = agent.run(report_path=report_path, artifacts_dir=_ARTIFACTS_DIR)
+        tests_dir = _ROOT / "products" / product / "tests"
+        orch = SentinelOrchestrator(ai_client=client)
+        summary = orch.run_post_suite(
+            current_report=report_path,
+            domain=domain or "api",
+            product=product,
+            artifacts_dir=_ARTIFACTS_DIR,
+            tests_dir=tests_dir if tests_dir.exists() else None,
+        )
         _rm.patch_run(
             run_id,
             analyzed=True,
-            failure_categories=result.get("by_classification", {}),
-            failures=result.get("failures", []),
+            failure_categories=summary.get("blockers", []),
+            post_suite_summary={
+                "blockers_count": summary.get("blockers_count", 0),
+                "failure_count": summary.get("failure_count", 0),
+                "regression_count": summary.get("regression_count", 0),
+                "flaky_candidates": summary.get("flaky_candidates", 0),
+                "coverage_gaps": summary.get("coverage_gaps", 0),
+                "locator_heals": summary.get("locator_heals", 0),
+                "requires_human": summary.get("requires_human", False),
+            },
         )
     except Exception:
         pass  # analysis is best-effort; raw failures already stored from report parse
+
 
 
 def _parse_report(report_path: Path) -> dict[str, Any]:
