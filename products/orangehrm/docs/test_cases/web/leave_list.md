@@ -18,7 +18,8 @@
 | OH-WEB-070 | Filter by leave type narrows results | positive | not_automated | — |
 | OH-WEB-071 | Export leave list results to CSV | positive | not_automatable | — |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
@@ -37,23 +38,31 @@
 
 ## Detailed Test Cases
 
-```
 ### OH-WEB-026 — Leave List Loads
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: /web/index.php/dashboard/index
 - Required Data State: Authenticated as Admin
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | None | N/A |
+
 **Steps:**
 1. Navigate to Leave - Leave List from the Dashboard
+
 **Expected Result:** Page loads; record count element present
+
 **Validation:** Verify that the Leave List page loads successfully and a record count is displayed
+
 **Category:** positive
+
 **Status:** not_automated
-```### OH-WEB-027 — Record Count After Search
+
+### OH-WEB-027 — Record Count After Search
+
 **Pre-conditions:**
 - User Role: Admin/Supervisor/ESS
 - Starting URL: /web/index.php/dashboard/index
@@ -73,7 +82,11 @@
 **Validation:** Verify that the displayed record count corresponds to the actual count of records matching the search criteria.
 
 **Category:** positive
-**Status:** not_automated### OH-WEB-028 — Filter By Pending Status
+
+**Status:** not_automated
+
+### OH-WEB-028 — Filter By Pending Status
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: /web/index.php/admin/viewSystemUsers
@@ -94,7 +107,11 @@
 **Validation:** Verify that the number of displayed users matches the filtered state
 
 **Category:** positive
-**Status:** not_automated### OH-WEB-029 — Future Date Range Shows No Records
+
+**Status:** not_automated
+
+### OH-WEB-029 — Future Date Range Shows No Records
+
 **Pre-conditions:**
 - Role: Admin
 - Starting URL: /web/index.php/api/v2/admin/users (Login and navigate to Admin dashboard if needed)
@@ -115,23 +132,36 @@
 **Validation:** Check that the API response contains no records matching the specified date range
 
 **Category:** positive
-**Status:** not_automated### OH-WEB-030 — Date To Before Date From
+
+**Status:** not_automated
+
+### OH-WEB-030 — Date To Before Date From
+
 **Pre-conditions:**
 - Role: Admin/Supervisor, URL: /web/index.php/leave/viewLeaveList
 - Leave Request with Date From and Date To values present in database
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Date From | 2024-01-01 |
 | Date To | 2024-06-30 |
+
 **Steps:**
 1. Navigate to Leave List page
 2. Filter leave requests with the specified date range
 3. Check for records in the filtered list
+
 **Expected Result:** No Records Found or zero count
+
 **Validation:** Verify that no leave request with the specified date range is found
+
 **Category:** positive
-**Status:** not_automated### OH-WEB-070 — Filter By Leave Type (not_automated)
+
+**Status:** not_automated
+
+### OH-WEB-070 — Filter By Leave Type (not_automated)
+
 **Pre-conditions:**
 - User Role: Admin or HR Manager
 - Starting URL: /web/index.php/leave/viewLeaveList
@@ -150,22 +180,33 @@
 **Expected Result:** Only records for the "Recreational Leave" type are displayed on the Leave List page
 
 **Validation:** Verify that all displayed records have "Recreational Leave" as their leave type
+
 **Category:** positive
-**Status:** not_automated### OH-WEB-071 — Export To CSV (not_automatable)
+
+**Status:** not_automated
+
+### OH-WEB-071 — Export To CSV (not_automatable)
+
 **Pre-conditions:**
 - Admin role, URL: /web/index.php/dashboard/index
 - Employees present in the system
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | EmpNumber | Any existing employee's empNumber from the KB |
+
 **Steps:**
 1. Navigate to PIM - Employee List: /web/index.php/pim/viewEmployeeList
 2. Click on the "Export To CSV" button for the selected employee (EmpNumber)
 3. Download and save the CSV file
+
 **Expected Result:**
 - The downloaded CSV file contains correct information about the selected employee
+
 **Validation:**
 - Verify the contents of the CSV file against the expected data for the specific employee
+
 **Category:** positive
+
 **Status:** not_automated

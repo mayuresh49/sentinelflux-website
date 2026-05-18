@@ -33,14 +33,16 @@
 | RB-API-021 | Authenticate with invalid credentials returns null/bad response | negative | automated | test_auth_api.py |
 | RB-API-022 | Delete booking without auth token is rejected (401/403) | negative | automated | test_auth_api.py |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
 ## Endpoint Scope
 
 ### POST /booking
-- **Request Fields:** `firstname`, `lastname`, `totalprice` (number), `depositpaid` (boolean), `bookingdates.checkin`, `bookingdates.checkout`, `additionalneeds` (optional)
+- 
+**Request Fields:** `firstname`, `lastname`, `totalprice` (number), `depositpaid` (boolean), `bookingdates.checkin`, `bookingdates.checkout`, `additionalneeds` (optional)
 - **Success:** `200 OK` with `{"bookingid": <int>, "booking": {...}}`
 
 ### GET /booking
@@ -67,6 +69,7 @@
 ## Detailed Test Cases
 
 ### RB-API-001 — Get All Bookings
+
 **Pre-conditions:**
 - User Role: None (GET request does not require authentication)
 - Starting URL: https://restful-booker.herokuapp.com/booking
@@ -90,7 +93,11 @@
 **Validation:** Check HTTP status code, presence of a list in the response body, existence of the key "bookingid" in the first element of the list
 
 **Category:** positive
-**Status:** not_automated### RB-API-002 — Create Booking Returns ID
+
+**Status:** not_automated
+
+### RB-API-002 — Create Booking Returns ID
+
 **Pre-conditions:**
 - User: Unauthenticated
 - Starting URL: https://restful-booker.herokuapp.com
@@ -118,7 +125,11 @@
 **Validation:** Assert response status code is 200, assert bookingid is an integer, assert booking.firstname == "James"
 
 **Category:** positive
-**Status:** not_automated### RB-API-003 — Get Booking By ID
+
+**Status:** not_automated
+
+### RB-API-003 — Get Booking By ID
+
 **Pre-conditions:**
 - User Role: Admin or Guest
 - Starting URL: https://restful-booker.herokuapp.com
@@ -139,16 +150,22 @@
 **Validation:** Assert that response status code is 200 and that all response fields match the creation payload
 
 **Category:** positive
-**Status:** not_automated### RB-API-004 — Update Booking
+
+**Status:** not_automated
+
+### RB-API-004 — Update Booking
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: https://automationintesting.online/#/admin
 - Required Data State: Auth Token
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Firstname | Updated |
 | Totalprice | 200 |
+
 **Steps:**
 1. Log in with credentials admin / password
 2. Get auth token using POST /auth
@@ -156,10 +173,17 @@
 4. Use PUT /booking/{id} with input values from Test Data
 5. Check response status code is 200
 6. Verify response body has updated values
+
 **Expected Result:** Response body has updated values
+
 **Validation:** Response status code is 200 and response body reflects updated values
+
 **Category:** positive
-**Status:** not_automated### RB-API-005 — Partial Update Booking
+
+**Status:** not_automated
+
+### RB-API-005 — Partial Update Booking
+
 **Pre-conditions:**
 - User role: Authenticated user
 - Starting URL: https://restful-booker.herokuapp.com
@@ -177,9 +201,15 @@
 3. Send a PATCH request to `/booking/{id}` with body `{"additionalneeds": "Lunch"}`
 
 **Expected Result:** Response status code 200
+
 **Validation:** Check response body contains field additionalneeds equal to "Lunch"
+
 **Category:** positive
-**Status:** not_automated### RB-API-006 — Delete Booking
+
+**Status:** not_automated
+
+### RB-API-006 — Delete Booking
+
 **Pre-conditions:**
 - User Role: Authenticated
 - Starting URL: https://restful-booker.herokuapp.com/auth
@@ -196,10 +226,17 @@
 2. Store the received auth token in a cookie header
 3. Send DELETE request to `/booking/{id}` with the appropriate booking ID and auth token included in the cookie header
 4. Send GET request to `/booking/{id}` with the same ID as in step 3, but without including the auth token
+
 **Expected Result:** DELETE returns 200 or 201; subsequent GET returns 404
+
 **Validation:** Verify that the booking is deleted and not found by checking the response codes
+
 **Category:** positive
-**Status:** not_automated### RB-API-007 — Get Nonexistent Booking Returns 404
+
+**Status:** not_automated
+
+### RB-API-007 — Get Nonexistent Booking Returns 404
+
 **Pre-conditions:**
 - User role: Not applicable (no authentication required)
 - Starting URL: https://restful-booker.herokuapp.com/booking/{id}
@@ -220,23 +257,36 @@
 **Validation:** Verify that the server responds with HTTP 404 status code.
 
 **Category:** positive
-**Status:** not_automated### RB-API-008 — Filter Bookings By Name
+
+**Status:** not_automated
+
+### RB-API-008 — Filter Bookings By Name
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: https://automationintesting.online/#/admin
 - Required Data State: Token obtained via POST /auth using credentials admin / password
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Firstname | FilterTest |
+
 **Steps:**
 1. Access Admin Panel
 2. Enter token in Cookie header
 3. Use API GET /booking?firstname=FilterTest
+
 **Expected Result:** HTTP status code 200 and a list length >= 1
+
 **Validation:** Verify that the list contains at least one booking with firstname FilterTest
+
 **Category:** positive
-**Status:** not_automated### RB-API-009 — Create Booking Missing Required Field
+
+**Status:** not_automated
+
+### RB-API-009 — Create Booking Missing Required Field
+
 **Pre-conditions:**
 - User Role: None
 - Starting URL: https://restful-booker.herokuapp.com
@@ -263,7 +313,11 @@
 - Verify that the response status code matches the expected values
 
 **Category:** positive
-**Status:** not_automated### RB-API-010 — Create Booking Without Optional Field
+
+**Status:** not_automated
+
+### RB-API-010 — Create Booking Without Optional Field
+
 **Pre-conditions:**
 - User role: Not Applicable (REST API)
 - Starting URL: https://restful-booker.herokuapp.com/auth
@@ -288,7 +342,11 @@
 **Validation:** Check that status code is 200, that the response contains a 'bookingid' field
 
 **Category:** positive
-**Status:** not_automated### RB-API-011 — Create Booking Returns OK (alt dataset)
+
+**Status:** not_automated
+
+### RB-API-011 — Create Booking Returns OK (alt dataset)
+
 **Pre-conditions:**
 - User Role: Anonymous
 - Starting URL: https://restful-booker.herokuapp.com
@@ -314,7 +372,11 @@
 **Validation:** Check the server's response for the correct status code and the presence of a booking id.
 
 **Category:** positive
-**Status:** not_automated### RB-API-012 — Get Booking Returns Details
+
+**Status:** not_automated
+
+### RB-API-012 — Get Booking Returns Details
+
 **Pre-conditions:**
 - User Role: None (as GET does not require authentication)
 - Starting URL: https://restful-booker.herokuapp.com/booking/{id}
@@ -343,45 +405,67 @@
 - Verify the returned booking details match the expected values (firstname, lastname, totalprice, depositpaid, checkin, checkout)
 
 **Category:** positive
-**Status:** not_automated### RB-API-013 — Update Booking Returns Updated
+
+**Status:** not_automated
+
+### RB-API-013 — Update Booking Returns Updated
+
 **Pre-conditions:**
 - User Role: Authenticated
 - Starting URL: https://restful-booker.herokuapp.com/#/auth
 - Required Data State: Auth token obtained
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | id | {relevant ID from KB} |
 | firstname | Jane |
 | totalprice | 350 |
+
 **Steps:**
 1. Send POST request to `/auth` with valid credentials (admin / password)
 2. Store the obtained token for later use in Cookie header
 3. Update booking details using PUT request to `/booking/{id}` with provided data
 4. Check response status code: 200 OK
 5. Verify updated fields in response: firstname=Jane, totalprice=350
+
 **Expected Result:** No error message, valid response body
+
 **Validation:** Response contains expected values for the updated fields
+
 **Category:** positive
-**Status:** not_automated### RB-API-014 — Delete Booking Returns 201
+
+**Status:** not_automated
+
+### RB-API-014 — Delete Booking Returns 201
+
 **Pre-conditions:**
 - User Role: Authenticated Admin
 - URL: https://restful-booker.herokuapp.com/auth
 - Token: returned auth token
 - Starting URL: https://restful-booker.herokuapp.com/booking/{id} (replace {id} with a specific booking ID)
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Token | Authenticated Admin's token |
 | ID | Specific Booking ID |
+
 **Steps:**
 1. Send POST request to /auth endpoint with admin credentials and receive auth token.
 2. Set the Authorization header with the received token in the HTTP headers.
 3. Send DELETE request to the specified booking URL.
+
 **Expected Result:** Response status code: 201 Created
+
 **Validation:** Check if response status code is equal to 201.
+
 **Category:** positive
-**Status:** not_automated### RB-API-015 — Get Booking IDs Returns List
+
+**Status:** not_automated
+
+### RB-API-015 — Get Booking IDs Returns List
+
 **Pre-conditions:**
 - User Role: Not Applicable (REST API)
 - Starting URL: https://restful-booker.herokuapp.com/booking
@@ -403,7 +487,11 @@
 - Verify that the response body is a JSON array with a minimum of 5 objects, each containing a `bookingid` key
 
 **Category:** positive
-**Status:** not_automated### RB-API-016 — Get Nonexistent Booking Returns Not Found
+
+**Status:** not_automated
+
+### RB-API-016 — Get Nonexistent Booking Returns Not Found
+
 **Pre-conditions:**
 - User role: None (anonymous)
 - Starting URL: https://restful-booker.herokuapp.com/booking/{id}
@@ -424,7 +512,11 @@
 **Validation:** Verify that the response status code equals 404
 
 **Category:** positive
-**Status:** not_automated### RB-API-017 — Partial Update Returns OK
+
+**Status:** not_automated
+
+### RB-API-017 — Partial Update Returns OK
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: https://restful-booker.herokuapp.com/#/auth
@@ -448,7 +540,11 @@
 **Validation:** Check that the booking record has been updated in the database and the API returns the expected response
 
 **Category:** positive
-**Status:** not_automated### RB-API-018 — Create Booking With Min Names Returns OK
+
+**Status:** not_automated
+
+### RB-API-018 — Create Booking With Min Names Returns OK
+
 **Pre-conditions:**
 - User Role: Unauthenticated
 - Starting URL: https://restful-booker.herokuapp.com/auth
@@ -471,24 +567,37 @@
 **Validation:** Verify that bookingid is a valid numeric value.
 
 **Category:** positive
-**Status:** not_automated### RB-API-019 — Filter By Name Returns Subset
+
+**Status:** not_automated
+
+### RB-API-019 — Filter By Name Returns Subset
+
 **Pre-conditions:**
 - User Role: Unspecified
 - Starting URL: https://restful-booker.herokuapp.com
 - Required Data State: A valid auth token (if required for the specific endpoint)
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | firstname | UniqueFilterTest |
+
 **Steps:**
 1. Perform authentication using admin credentials if needed
 2. Send GET request to `/booking` with query parameter `firstname=UniqueFilterTest`
 3. Check the response status code is 200
 4. Verify that the response is a list containing at least one booking where the firstname field matches 'UniqueFilterTest'
+
 **Expected Result:** The requested bookings are returned as a list in the response body
+
 **Validation:** Assert the number of bookings in the list and check if the 'UniqueFilterTest' appears in the list of firstnames
+
 **Category:** positive
-**Status:** not_automated### RB-API-020 — Authenticate With Valid Credentials
+
+**Status:** not_automated
+
+### RB-API-020 — Authenticate With Valid Credentials
+
 **Pre-conditions:**
 - User role: Admin
 - Starting URL: https://restful-booker.herokuapp.com/auth
@@ -510,7 +619,11 @@
 **Validation:** Check that the extracted auth token matches the expected format.
 
 **Category:** positive
-**Status:** not_automated### RB-API-021 — Authenticate With Invalid Credentials
+
+**Status:** not_automated
+
+### RB-API-021 — Authenticate With Invalid Credentials
+
 **Pre-conditions:**
 - User role: Admin
 - Starting URL: https://restful-booker.herokuapp.com/#/auth
@@ -533,18 +646,28 @@
 **Validation:** Check the HTTP response status, response body content, and absence of the `token` key
 
 **Category:** positive
-**Status:** not_automated### RB-API-022 — Delete Without Auth Token Is Rejected
+
+**Status:** not_automated
+
+### RB-API-022 — Delete Without Auth Token Is Rejected
+
 **Pre-conditions:**
 - User Role: Unauthenticated Client
 - Starting URL: https://restful-booker.herokuapp.com/booking/{id}
 - Required Data State: A booking exists
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | id | (Existing booking ID) |
+
 **Steps:**
 1. Send a DELETE request to the provided endpoint without authentication
+
 **Expected Result:** HTTP status code 401 or 403
+
 **Validation:** Check the response status code
+
 **Category:** positive
+
 **Status:** not_automated

@@ -19,7 +19,8 @@
 | OH-API-007 | GET /admin/users with pagination parameters returns correct page | positive | not_automated | — |
 | OH-API-008 | DELETE /admin/users/{id} removes user from list | positive | not_automatable | — |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
@@ -43,14 +44,17 @@
 ## Detailed Test Cases
 
 ### OH-API-001 — List System Users Returns 200
+
 **Steps:** GET /admin/users with valid session cookie  
 **Expected:** 200, body has `data` array
 
 ### OH-API-002 — Response Includes Admin User
+
 **Steps:** GET /admin/users  
 **Expected:** At least one user in `data` has `userName == "Admin"`
 
 ### OH-API-003 — List Without Auth Returns 401
+
 **Steps:** GET /admin/users without any auth cookie  
 **Expected:** 401 Unauthorized
 
@@ -59,6 +63,7 @@
 **Expected:** 400 or 422
 
 ### OH-API-005 — Create With Duplicate Username
+
 **Pre-conditions:** Username "Admin" exists  
 **Payload:** `{"username": "Admin", "password": "Admin1234!", "status": 1, "userRoleId": 2, "empNumber": 1}`  
 **Expected:** 400 or 422
@@ -68,8 +73,10 @@
 **Expected:** 400 or 422 with field-specific error
 
 ### OH-API-007 — Paginated List (not_automated)
+
 **Steps:** GET /admin/users?limit=5&offset=0  
 **Expected:** Response limited to 5 records; meta contains total count
 
 ### OH-API-008 — Delete User (not_automatable)
+
 **Note:** Destructive on shared demo environment. Deleting the Admin user would break all subsequent tests. Run only on isolated environments with explicit teardown.

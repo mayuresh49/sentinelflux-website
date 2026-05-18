@@ -167,17 +167,32 @@ class TestPipelineOrchestrator:
 
     @staticmethod
     def _clean_doc(doc_path: Path) -> None:
-        """Strip markdown code-fence wrappers that some models add around their output."""
+        """Strip code-fence wrappers and normalize blank lines around TC section headers."""
+        import re
         text = doc_path.read_text(encoding="utf-8")
         stripped = text.strip()
+
+        # Remove leading/trailing markdown code fences
         if stripped.startswith("```"):
-            # Remove leading fence (with optional language tag) and trailing fence
             lines = stripped.splitlines()
             if lines[0].startswith("```"):
                 lines = lines[1:]
             if lines and lines[-1].strip() == "```":
                 lines = lines[:-1]
-            doc_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            stripped = "\n".join(lines)
+
+        # Ensure a blank line before every bold section header inside TC detail blocks.
+        # Headers use the form **Pre-conditions:** where the colon is inside the bold markers.
+        _TC_HEADERS = re.compile(
+            r"(?<!\n\n)"
+            r"(\*\*(?:Pre-conditions|Test Data|Request|Steps|Expected Result|Validation|Category|Status|Note)[^*]*\*\*)",
+        )
+        normalized = _TC_HEADERS.sub(r"\n\1", stripped)
+
+        # Collapse any triple+ blank lines introduced by the above pass
+        normalized = re.sub(r"\n{3,}", "\n\n", normalized)
+
+        doc_path.write_text(normalized.strip() + "\n", encoding="utf-8")
 
     def _normalize_tc_ids(self, doc_path: Path, tc_prefix: str, tc_start: int) -> None:
         """Renumber any wrong TC IDs the LLM generated, preserving relative order.

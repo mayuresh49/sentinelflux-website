@@ -26,7 +26,8 @@
 | OH-WEB-065 | Partial name search returns all matching employees | edge | not_automated | — |
 | OH-WEB-066 | Duplicate Employee ID shows validation error | negative | not_automatable | — |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
@@ -57,6 +58,7 @@
 ## Detailed Test Cases
 
 ### OH-WEB-009 — Employee List Loads
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: /web/index.php/dashboard/index
@@ -77,7 +79,10 @@
 
 **Validation:**
 - Verify that the page loads without any errors
-- Verify that the "Records Found" text is displayed on the UI### OH-WEB-010 — Add Employee Required Fields Only
+- Verify that the "Records Found" text is displayed on the UI
+
+### OH-WEB-010 — Add Employee Required Fields Only
+
 **Pre-conditions:**
 - User Role: Admin/Supervisor, Starting URL: /web/index.php/pim/addEmployee, Required Data State: None
 
@@ -97,23 +102,36 @@
 **Validation:** Verify that the employee record is saved with the provided First Name and Last Name
 
 **Category:** positive
-**Status:** not_automated### OH-WEB-011 — Add Employee All Fields
+
+**Status:** not_automated
+
+### OH-WEB-011 — Add Employee All Fields
+
 **Pre-conditions:**
 - User Role: Admin, Starting URL: /web/index.php/pim/addEmployee, Required Data State: No data required
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | First Name | John |
 | Middle Name | Robert |
 | Last Name | Doe |
+
 **Steps:**
 1. Navigate to PIM - Add Employee page
 2. Fill in the First Name, Middle Name, and Last Name fields with the provided values
 3. Click the Save button
+
 **Expected Result:** Success toast or profile page shown
+
 **Validation:** Verify that the employee record is saved correctly with the provided values
+
 **Category:** positive
-**Status:** not_automated### OH-WEB-012 — Save Without Firstname
+
+**Status:** not_automated
+
+### OH-WEB-012 — Save Without Firstname
+
 **Pre-conditions:**
 - User Role: Admin/ESS
 - Starting URL: /web/index.php/pim/addEmployee
@@ -134,7 +152,11 @@
 **Validation:** First Name field is not empty after saving
 
 **Category:** positive
-**Status:** not_automated### OH-WEB-013 — Save Without Lastname
+
+**Status:** not_automated
+
+### OH-WEB-013 — Save Without Lastname
+
 **Pre-conditions:**
 - User Role: Admin/ESS
 - Starting URL: /web/index.php/pim/addEmployee
@@ -156,7 +178,11 @@
 **Validation:** Check that an error message appears for the Last Name field
 
 **Category:** positive
-**Status:** not_automated### OH-WEB-014 — Firstname Exceeding 30 Characters
+
+**Status:** not_automated
+
+### OH-WEB-014 — Firstname Exceeding 30 Characters
+
 **Pre-conditions:**
 - Role: Admin/ESS, URL: /web/index.php/pim/addEmployee, Required Data State: None
 
@@ -176,7 +202,11 @@
 **Validation:** Verify that the validation error message is displayed
 
 **Category:** positive
-**Status:** not_automated### OH-WEB-015 — Cancel Returns To List
+
+**Status:** not_automated
+
+### OH-WEB-015 — Cancel Returns To List
+
 **Pre-conditions:**
 - User Role: Admin/ESS
 - Starting URL: /web/index.php/recruitment/addJobVacancy
@@ -194,7 +224,10 @@
 
 **Expected Result:** The user is returned to the Employee List; no new vacancy was created
 
-**Validation:** Check that the Recruitment - Add Vacancy page is not displayed anymore and the employee list is visible, indicating that the cancel action worked as intended.### OH-WEB-016 — Search By Name
+**Validation:** Check that the Recruitment - Add Vacancy page is not displayed anymore and the employee list is visible, indicating that the cancel action worked as intended.
+
+### OH-WEB-016 — Search By Name
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: /web/index.php/dashboard/index
@@ -215,8 +248,11 @@
 **Validation:** Check if the list contains at least one job vacancy where the hiring manager is an Admin user
 
 **Category:** positive
-**Status:** not_automated```
+
+**Status:** not_automated
+
 ### OH-WEB-017 — Search Non-Existent Name
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: /web/index.php/recruitment/viewCandidates
@@ -237,8 +273,11 @@
 **Validation:** Check that the search results do not contain any candidates with name "ZZZnonexistentXXX".
 
 **Category:** positive
+
 **Status:** not_automated
-```### OH-WEB-018 — Add Employee Parametrized
+
+### OH-WEB-018 — Add Employee Parametrized
+
 **Pre-conditions:**
 - (ESS or Admin role, /web/index.php/auth/login, authenticated session)
 - (Admin role, /web/index.php/pim/addEmployee, empty employee list)
@@ -260,7 +299,11 @@
 **Validation:** Check that the employee record exists with correct data in the PIM - Employee List (/web/index.php/pim/viewEmployeeList).
 
 **Category:** positive
-**Status:** not_automated### OH-WEB-066 — Duplicate Employee ID (not_automatable)
+
+**Status:** not_automated
+
+### OH-WEB-066 — Duplicate Employee ID (not_automatable)
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: /web/index.php/pim/addEmployee
@@ -281,4 +324,5 @@
 **Validation:** Verify that the error message appears and the employee record remains unchanged
 
 **Category:** positive
+
 **Status:** not_automated

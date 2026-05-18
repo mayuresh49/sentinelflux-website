@@ -18,7 +18,8 @@
 | OH-SEC-006 | DELETE /pim/employees/{id} without auth is rejected (401 or 405) | negative | automated | test_security_api.py |
 | OH-SEC-007 | Arbitrary Origin header is not reflected in CORS response | negative | automated | test_security_api.py |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
@@ -33,6 +34,7 @@
 ## Detailed Test Cases
 
 ### OH-SEC-001 — Unauthenticated Request To Users Returns 401
+
 **Pre-conditions:**
 - User Role: None (Unauthenticated)
 - Starting URL: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/admin/users
@@ -54,7 +56,11 @@
 **Validation:** Assert that the HTTP status code is equal to 401.
 
 **Category:** Positive
-**Status:** Not Automated### OH-SEC-002 — Unauthenticated Request To Employees Returns 401
+
+**Status:** Not Automated
+
+### OH-SEC-002 — Unauthenticated Request To Employees Returns 401
+
 **Pre-conditions:**
 - User Role: None, Starting URL: REST API Base URL, Required Data State: No credentials provided
 
@@ -73,7 +79,11 @@
 **Validation:** Verify that the HTTP status code received equals 401.
 
 **Category:** positive
-**Status:** not_automated### OH-SEC-003 — SQL Injection In Search Does Not Return 500
+
+**Status:** not_automated
+
+### OH-SEC-003 — SQL Injection In Search Does Not Return 500
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2
@@ -94,36 +104,56 @@
 **Validation:** Verify response status code and response body content
 
 **Category:** positive
-**Status:** not_automated### OH-SEC-004 — API Response Content-Type Is JSON
+
+**Status:** not_automated
+
+### OH-SEC-004 — API Response Content-Type Is JSON
+
 **Pre-conditions:**
 - User Role: Admin, Starting URL: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2, Required Data State: Authenticated Session
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Endpoint | GET /pim/employees |
+
 **Steps:**
 1. Send a GET request to the provided endpoint
 2. Check if the response status code is 200
 3. Verify that the Content-Type header contains application/json
+
 **Expected Result:** Response contains expected data in JSON format
+
 **Validation:** status_code == 200; Content-Type header contains application/json
+
 **Category:** positive
-**Status:** not_automated```
+
+**Status:** not_automated
+
 ### OH-SEC-005 — X-Content-Type-Options Header Present
+
 **Pre-conditions:**
 - User Role: Admin, Starting URL: /web/index.php/api/v2, Required Data State: Authenticated session
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | API Endpoint | GET /pim/employees |
+
 **Steps:**
 1. Send GET request to the specified endpoint
 2. Verify response headers
+
 **Expected Result:** The 'X-Content-Type-Options' header value is 'nosniff' (case-insensitive)
+
 **Validation:** Check if the 'X-Content-Type-Options' header exists and its value matches the expected one
+
 **Category:** positive
+
 **Status:** not_automated
-```### OH-SEC-006 — Delete Employee Without Auth Is Rejected
+
+### OH-SEC-006 — Delete Employee Without Auth Is Rejected
+
 **Pre-conditions:**
 - User Role: Admin or ESS
 - Starting URL: /web/index.php/api/v2
@@ -142,7 +172,11 @@
 **Validation:** Check the HTTP response status code
 
 **Category:** positive
-**Status:** not_automated### OH-SEC-007 — Arbitrary Origin Not Reflected In CORS
+
+**Status:** not_automated
+
+### OH-SEC-007 — Arbitrary Origin Not Reflected In CORS
+
 **Pre-conditions:**
 - User Role: Admin/API Tester
 - Starting URL: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2
@@ -163,4 +197,5 @@
 **Validation:** Check if the response headers contain the correct `Access-Control-Allow-Origin` value, not the provided origin.
 
 **Category:** positive
+
 **Status:** not_automated

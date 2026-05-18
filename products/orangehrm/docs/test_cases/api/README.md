@@ -11,6 +11,5 @@ To generate API docs:
 ```bash
 python3 -m ai.generate_api_test_doc --endpoint /booking --method POST \
     --output docs/test_cases/api/booking_create.md
-```
 
 See [API Test Generation Guide](../../api_test_generation.md) for full options.

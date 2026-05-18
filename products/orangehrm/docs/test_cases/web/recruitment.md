@@ -38,7 +38,8 @@
 | OH-WEB-056 | ESS user cannot access vacancies or candidates (access denied) | negative | not_automatable | — |
 | OH-WEB-057 | Candidate status transitions through full hiring pipeline | positive | async_dependent | — |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator · `async_dependent` = requires running workflow/scheduler
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator · `async_dependent` = requires running workflow/scheduler
 
 ---
 
@@ -68,25 +69,33 @@
 - Vacancies table
 
 ### OH-WEB-031 — Vacancies List Loads
+
 **Pre-conditions:** Authenticated as Admin  
+
 **Steps:** Navigate to `/recruitment/viewJobVacancy`  
 **Expected:** Vacancies table is visible with active vacancies
 
 ### OH-WEB-032 — Filter By Job Title
+
 **Test Data:** Job Title = "Software Engineer"  
+
 **Steps:** Enter job title in filter, click Search  
 **Expected:** Only vacancies matching that title are shown
 
 ### OH-WEB-033 — Filter By Status Active
+
 **Steps:** Select "Active" from Status dropdown, click Search  
 **Expected:** Only active vacancies displayed
 
 ### OH-WEB-034 — Add Button Navigates To Form
+
 **Steps:** Click Add  
 **Expected:** Redirected to Add Vacancy form
 
 ### OH-WEB-035 — No Match Shows No Records Found
+
 **Test Data:** Job Title = "NonExistentJobTitle"  
+
 **Steps:** Enter non-existent job title, click Search  
 **Expected:** "No Records Found" displayed
 
@@ -163,7 +172,9 @@
 ## 5. Special Cases
 
 ### OH-WEB-056 — ESS Access Denied (not_automatable)
+
 **Note:** Requires a separate ESS user session on the demo. The demo's ESS test user (`Kris.Chapman / Admin123`) may have different access depending on demo state. Run manually against a controlled environment.
 
 ### OH-WEB-057 — Full Hiring Pipeline Status Transitions (async_dependent)
+
 **Note:** Requires triggering multiple workflow steps (shortlist → schedule interview → record outcome → make offer → hire). Each step has a human or scheduled trigger. Use `wait_for()` with `WORKFLOW_STEP_TIMEOUT` between transitions.

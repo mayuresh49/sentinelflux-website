@@ -15,7 +15,8 @@
 | RB-SEC-008 | XSS payload in booking firstname field does not execute | negative | automated | test_security_web.py |
 | RB-SEC-009 | Home page does not expose web server version in headers | negative | automated | test_security_web.py |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
@@ -28,6 +29,7 @@ Client-side security checks on the Restful Booker web layer: XSS prevention in u
 ## Detailed Test Cases
 
 ### RB-SEC-006 — XSS In Contact Form Does Not Execute
+
 **Pre-conditions:**
 - User Role: Anonymous
 - Starting URL: Home Page (https://automationintesting.online)
@@ -53,7 +55,11 @@ Client-side security checks on the Restful Booker web layer: XSS prevention in u
 **Validation:** `window.__xss_fired` is checked and compared to a false value
 
 **Category:** positive
-**Status:** not_automated### RB-SEC-007 — Admin Panel Requires Login
+
+**Status:** not_automated
+
+### RB-SEC-007 — Admin Panel Requires Login
+
 **Pre-conditions:**
 - User role: Anonymous
 - Starting URL: https://automationintesting.online/#/admin
@@ -75,7 +81,11 @@ Client-side security checks on the Restful Booker web layer: XSS prevention in u
 **Validation:** Verify that the login form is present and that the user cannot access the admin panel without entering valid credentials.
 
 **Category:** positive
-**Status:** not_automated### RB-SEC-008 — XSS In Booking Firstname Does Not Execute
+
+**Status:** not_automated
+
+### RB-SEC-008 — XSS In Booking Firstname Does Not Execute
+
 **Pre-conditions:**
 - User Role: Any
 - Starting URL: https://automationintesting.online
@@ -97,7 +107,11 @@ Client-side security checks on the Restful Booker web layer: XSS prevention in u
 **Validation:** Verify that `window.__xss_fired` is not `true` using a JavaScript assertion or console log.
 
 **Category:** positive
-**Status:** not_automated### RB-SEC-009 — Home Page Does Not Expose Server Version
+
+**Status:** not_automated
+
+### RB-SEC-009 — Home Page Does Not Expose Server Version
+
 **Pre-conditions:**
 - User role: Unauthenticated
 - Starting URL: <https://automationintesting.online>
@@ -113,7 +127,11 @@ Client-side security checks on the Restful Booker web layer: XSS prevention in u
 2. Intercept all responses via Playwright `page.on("response", ...)`
 3. Collect `Server` response headers
 4. Check if `Server` header contains a version string for apache/, nginx/, or iis/
+
 **Expected Result:** No server version found in the `Server` header
+
 **Validation:** Verify that the `Server` header does not contain a version string for apache/, nginx/, or iis/
+
 **Category:** positive
+
 **Status:** not_automated

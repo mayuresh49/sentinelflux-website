@@ -13,6 +13,5 @@ To regenerate a doc from the KB:
 ```bash
 python3 -m ai.generate_test_case_doc --config config/env_qa.yaml \
     --output docs/test_cases/web/<page>.md
-```
 
 See [Web Test Generation Guide](../../web_test_generation.md) for full options.

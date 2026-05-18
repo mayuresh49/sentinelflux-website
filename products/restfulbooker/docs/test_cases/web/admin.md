@@ -18,7 +18,8 @@
 | RB-WEB-013 | Delete room removes it from rooms list | negative | not_automated | — |
 | RB-WEB-014 | Session persists across page refresh | edge | not_automatable | — |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
@@ -31,8 +32,8 @@
 
 ## Test Cases
 
-```
 ### RB-WEB-006 — Admin Login Valid
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: https://automationintesting.online/#/admin
@@ -54,7 +55,11 @@
 **Validation:** Check if the Admin Panel UI is rendered with the user logged in.
 
 **Category:** positive
-**Status:** not_automated### RB-WEB-007 — Admin Login Invalid
+
+**Status:** not_automated
+
+### RB-WEB-007 — Admin Login Invalid
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: https://automationintesting.online/#/admin
@@ -76,7 +81,11 @@
 **Validation:** Verify that the error message "Bad Credentials" is displayed
 
 **Category:** positive
-**Status:** not_automated### RB-WEB-008 — Admin Panel Shows Rooms Menu
+
+**Status:** not_automated
+
+### RB-WEB-008 — Admin Panel Shows Rooms Menu
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: https://automationintesting.online/#/admin
@@ -97,24 +106,37 @@
 **Validation:** Verify that the "Rooms" link is present in the navigation bar.
 
 **Category:** positive
-**Status:** not_automated### RB-WEB-009 — Admin Logout
+
+**Status:** not_automated
+
+### RB-WEB-009 — Admin Logout
+
 **Pre-conditions:**
 - User role: admin
 - Starting URL: https://automationintesting.online/#/admin (Admin Panel)
 - Required data state: logged in as admin
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Credentials | admin / password |
+
 **Steps:**
 1. Navigate to Admin Panel and log in with provided credentials.
 2. Click on the 'Logout' button.
 3. Verify that the user is redirected to the Home Page (https://automationintesting.online).
 4. Attempt to access Admin Panel and ensure it is no longer accessible.
+
 **Expected Result:** User is redirected to the Home Page and Admin Panel becomes inaccessible.
+
 **Validation:** User is on Home Page, Admin Panel URL returns a 401 error.
+
 **Category:** positive
-**Status:** not_automated### RB-WEB-012 — Create Room
+
+**Status:** not_automated
+
+### RB-WEB-012 — Create Room
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: https://automationintesting.online/#/admin
@@ -140,7 +162,11 @@
 **Validation:** Verify that the room appears in the rooms list and matches the entered values.
 
 **Category:** positive
-**Status:** not_automated### RB-WEB-013 — Delete Room
+
+**Status:** not_automated
+
+### RB-WEB-013 — Delete Room
+
 **Pre-conditions:**
 - User Role: Logged in Admin
 - Starting URL: https://automationintesting.online/#/admin
@@ -163,7 +189,11 @@
 **Validation:** The deleted room no longer appears in the list of available rooms
 
 **Category:** positive
-**Status:** not_automated### RB-WEB-014 — Session Persists Across Refresh (not_automatable)
+
+**Status:** not_automated
+
+### RB-WEB-014 — Session Persists Across Refresh (not_automatable)
+
 **Pre-conditions:**
 - User role: Authenticated user
 - Starting URL: https://automationintesting.online
@@ -186,4 +216,5 @@
 **Validation:** Verify that the user is still logged in by checking for the presence of the auth token in the Cookie header.
 
 **Category:** positive
+
 **Status:** not_automated

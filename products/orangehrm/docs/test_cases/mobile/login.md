@@ -27,7 +27,8 @@
 | OH-MOB-015 | Empty password field shows validation error | negative | automated | test_login_mobile.py |
 | OH-MOB-016 | Both credentials empty shows validation error | negative | automated | test_login_mobile.py |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
@@ -47,8 +48,8 @@
 
 ## Detailed Test Cases
 
-```
 ### OH-MOB-001 — Admin Valid Login Lands On Dashboard
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: /web/index.php/auth/login
@@ -69,7 +70,11 @@
 **Validation:** The displayed page is the Dashboard.
 
 **Category:** positive
-**Status:** not_automated### OH-MOB-002 — ESS User Sees Limited Menu
+
+**Status:** not_automated
+
+### OH-MOB-002 — ESS User Sees Limited Menu
+
 **Pre-conditions:**
 - Role: ESS
 - Starting URL: /web/index.php/auth/login
@@ -91,78 +96,116 @@
 **Validation:** The displayed links match those specified for an ESS user in the UI Pages Context of the Knowledge Base.
 
 **Category:** positive
-**Status:** not_automated### OH-MOB-003 — Wrong Password Shows Error
+
+**Status:** not_automated
+
+### OH-MOB-003 — Wrong Password Shows Error
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2 (for REST API tests) or /web/index.php/auth/login (for UI tests)
 - Required Data State: Session is logged out
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Username | Admin |
 | Password | wrongpassword |
+
 **Steps:**
 1. Navigate to login page or authenticate user and create session (for UI tests) or POST request to /auth/login endpoint with provided credentials (for REST API tests)
 2. Fill in the username and password fields with the test data values and submit the form
 3. Check for error message display (for UI tests) or examine the response status code and body (for REST API tests)
+
 **Expected Result:** Error message displayed (for UI tests) or HTTP 401 Unauthorized status code and appropriate error message in response body (for REST API tests)
+
 **Validation:** Verify that the error message is correctly displayed (for UI tests) or verify that the response status code and error message match expectations (for REST API tests)
+
 **Category:** positive
-**Status:** not_automated### OH-MOB-004 — Empty Username Shows Validation Error
+
+**Status:** not_automated
+
+### OH-MOB-004 — Empty Username Shows Validation Error
+
 **Pre-conditions:**
 - Role: Admin
 - Starting URL: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2
 - Version: v2
 - Base URL: https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Username | (empty) |
 | Password | any valid password meeting complexity requirements |
+
 **Steps:**
 1. Navigate to the authentication endpoint: POST /auth/login
 2. Send a request with empty username and valid password
 3. Check for response status code
 4. Verify if validation error appears for the username field
+
 **Expected Result:** HTTP response with status 400 Bad Request and validation error message for the username field
+
 **Validation:** Response status code is 400, and error message contains "Username is required"
+
 **Category:** positive
-**Status:** not_automated```
+
+**Status:** not_automated
+
 ### OH-MOB-005 — Empty Password Shows Validation Error
+
 **Pre-conditions:**
 - Role: Admin/ESS
 - Starting URL: /web/index.php/auth/login
 - Required data state: Username filled
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Password | (empty) |
+
 **Steps:**
 1. Navigate to Login Page
 2. Fill username and leave password blank
 3. Tap on Login button
+
 **Expected Result:** Validation error for password field appears
+
 **Validation:** Error message "Password must meet complexity: min 8 chars, uppercase, lowercase, number, special char" is displayed
+
 **Category:** positive
+
 **Status:** not_automated
-```### OH-MOB-006 — Both Fields Empty Shows Validation Error
+
+### OH-MOB-006 — Both Fields Empty Shows Validation Error
+
 **Pre-conditions:**
 - Role: Admin/User
 - Starting URL: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/auth/login
 - Username and Password are blank
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Username |  |
 | Password |  |
+
 **Steps:**
 1. Send a POST request to the provided starting URL with empty username and password
 2. Check if the response contains an error message related to the empty fields
 3. Check if the session is not created
+
 **Expected Result:** The server responds with an error message for both empty fields
+
 **Validation:** Check the error message displayed on the response and verify that the session remains inactive
+
 **Category:** positive
-**Status:** not_automated### OH-MOB-007 — SQL Injection In Username Shows Error Not 500
+
+**Status:** not_automated
+
+### OH-MOB-007 — SQL Injection In Username Shows Error Not 500
+
 **Pre-conditions:**
 - Admin role, Login Page: /web/index.php/auth/login
 - Required data state: Invalid username with SQL injection
@@ -183,21 +226,34 @@
 **Validation:** Verify that an error message is displayed, and there is no indication of a server crash or unhandled exception.
 
 **Category:** positive
-**Status:** not_automated### OH-MOB-008 — Username Is Case-Sensitive
+
+**Status:** not_automated
+
+### OH-MOB-008 — Username Is Case-Sensitive
+
 **Pre-conditions:**
 - User Role: Admin, Starting URL: /web/index.php/auth/login, Required Data State: Valid Password
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Username | admin (lowercase) |
+
 **Steps:**
 1. Navigate to the login page at /web/index.php/auth/login
 2. Enter "admin" as the username and valid password
 3. Attempt to log in
+
 **Expected Result:** Login fails; error shown
+
 **Validation:** Error message displays: "Invalid username or password."
+
 **Category:** positive
-**Status:** not_automated### OH-MOB-009 — Back Button Does Not Expose Session
+
+**Status:** not_automated
+
+### OH-MOB-009 — Back Button Does Not Expose Session
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: /web/index.php/auth/login (Login Page)
@@ -219,8 +275,11 @@
 **Validation:** Verify that the user is not automatically logged in when navigating back.
 
 **Category:** positive
-**Status:** not_automated```
+
+**Status:** not_automated
+
 ### OH-MOB-010 — Session Expires After Inactivity
+
 **Pre-conditions:**
 - User Role: Admin/ESS
 - Starting URL: /web/index.php/auth/login
@@ -242,7 +301,11 @@
 **Validation:** Check if the user is redirected to login page.
 
 **Category:** positive
-**Status:** not_automated### OH-MOB-011 — Valid Login Navigates To Dashboard
+
+**Status:** not_automated
+
+### OH-MOB-011 — Valid Login Navigates To Dashboard
+
 **Pre-conditions:**
 - User Role: Admin/ESS, Starting URL: /web/index.php/auth/login, Required Data State: orangehrm_credentials present
 
@@ -262,22 +325,35 @@
 **Validation:** Verify that the user is navigated to the dashboard after a successful login
 
 **Category:** positive
-**Status:** not_automated### OH-MOB-012 — Invalid Password Shows Error
+
+**Status:** not_automated
+
+### OH-MOB-012 — Invalid Password Shows Error
+
 **Pre-conditions:**
 - Role: Admin/ESS, Starting URL: /web/index.php/auth/login, Required Data State: Authenticated user
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Username | exact value from KB |
 | Password | incorrect password (must meet complexity: min 8 chars, uppercase, lowercase, number, special char) |
+
 **Steps:**
 1. Navigate to the login page
 2. Enter incorrect credentials and submit the form
 3. Check for error message visibility
+
 **Expected Result:** Error message visible
+
 **Validation:** Verify that the error message is displayed correctly
+
 **Category:** positive
-**Status:** not_automated### OH-MOB-013 — Invalid Username Shows Error
+
+**Status:** not_automated
+
+### OH-MOB-013 — Invalid Username Shows Error
+
 **Pre-conditions:**
 - Role: Admin or ESS
 - Starting URL: /web/index.php/auth/login
@@ -300,7 +376,11 @@
 **Validation:** Error message correctly displays for invalid username
 
 **Category:** positive
-**Status:** not_automated### OH-MOB-014 — Empty Username Shows Validation Error
+
+**Status:** not_automated
+
+### OH-MOB-014 — Empty Username Shows Validation Error
+
 **Pre-conditions:**
 - Role: Admin or ESS, Starting URL: /web/index.php/auth/login, Required Data State: Valid Password
 
@@ -321,7 +401,11 @@
 **Validation:** The error message should indicate that the username is required
 
 **Category:** positive
-**Status:** not_automated### OH-MOB-015 — Empty Password Shows Validation Error
+
+**Status:** not_automated
+
+### OH-MOB-015 — Empty Password Shows Validation Error
+
 **Pre-conditions:**
 - User Role: Admin/ESS, Starting URL: /web/index.php/auth/login, Required Data State: orangehrm_credentials with valid username and empty password
 
@@ -341,7 +425,11 @@
 **Validation:** Verify that a validation error message is displayed for the password field.
 
 **Category:** positive
-**Status:** not_automated### OH-MOB-016 — Both Credentials Empty Shows Validation Error
+
+**Status:** not_automated
+
+### OH-MOB-016 — Both Credentials Empty Shows Validation Error
+
 **Pre-conditions:**
 - User Role: Admin/ESS
 - Starting URL: /web/index.php/auth/login
@@ -363,4 +451,5 @@
 **Validation:** The error message should indicate that both username and password are required fields
 
 **Category:** positive
+
 **Status:** not_automated

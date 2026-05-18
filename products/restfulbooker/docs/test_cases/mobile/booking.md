@@ -17,7 +17,8 @@
 | RB-MOB-005 | Booking list is visible on home screen | positive | automated | test_booking_mobile.py |
 | RB-MOB-006 | Create booking parametrized (Alice/Smith, Bob/Jones) | positive | automated | test_booking_mobile.py |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
@@ -32,8 +33,10 @@
 ## Detailed Test Cases
 
 ### RB-MOB-001 — Create Booking Shows Confirmation
+
 **Pre-conditions:**
 - User role: anonymous, Starting URL: Home Page, Required data state: None
+
 **Test Data:**
 | Field | Value |
 |---|---|
@@ -43,15 +46,23 @@
 | checkin | 2026-06-01 |
 | checkout | 2026-06-05 |
 | depositpaid | True |
+
 **Steps:**
 1. Navigate to Home Page and access the Booking Form
 2. Fill out the booking form with provided test data
 3. Click on 'Submit' button
 4. Verify that the booking confirmation message appears
+
 **Expected Result:** Booking confirmation message is displayed
+
 **Validation:** The submitted booking can be retrieved using its ID
+
 **Category:** positive
-**Status:** not_automated### RB-MOB-002 — Create Booking Without Firstname Shows Error
+
+**Status:** not_automated
+
+### RB-MOB-002 — Create Booking Without Firstname Shows Error
+
 **Pre-conditions:**
 - User Role: Anonymous
 - Starting URL: https://automationintesting.online/booking-form
@@ -76,7 +87,11 @@
 **Validation:** Verify that the error message related to missing firstname is displayed
 
 **Category:** positive
-**Status:** not_automated### RB-MOB-003 — Create Booking Without Lastname Shows Error
+
+**Status:** not_automated
+
+### RB-MOB-003 — Create Booking Without Lastname Shows Error
+
 **Pre-conditions:**
 - User role: regular user
 - Starting URL: https://automationintesting.online/booking-form
@@ -102,7 +117,11 @@
 **Validation:** Verify that an error message is displayed regarding the missing last name.
 
 **Category:** positive
-**Status:** not_automated### RB-MOB-004 — Checkout Before Checkin Shows Error
+
+**Status:** not_automated
+
+### RB-MOB-004 — Checkout Before Checkin Shows Error
+
 **Pre-conditions:**
 - User Role: Anonymous (not logged in)
 - Starting URL: <https://automationintesting.online>
@@ -125,7 +144,11 @@
 **Validation:** Check that the error message is displayed and no booking is created in the REST API.
 
 **Category:** positive
-**Status:** not_automated### RB-MOB-005 — Booking List Visible On Home
+
+**Status:** not_automated
+
+### RB-MOB-005 — Booking List Visible On Home
+
 **Pre-conditions:**
 - User role: Anonymous
 - Starting URL: https://automationintesting.online
@@ -145,8 +168,11 @@
 **Validation:** Assert that the booking list is present and visible on the home page.
 
 **Category:** positive
-**Status:** not_automated```
+
+**Status:** not_automated
+
 ### RB-MOB-006 — Create Booking Parametrized
+
 **Pre-conditions:**
 - (User Role: unauthenticated, Starting URL: Home Page, Required Data State: none)
 
@@ -169,7 +195,9 @@
 6. Verify that `is_confirmed()` returns True
 
 **Expected Result:** Confirmation message appears and `is_confirmed()` returns True
+
 **Validation:** Confirmation message is displayed and the correct booking details are returned by GET /booking/{id}
+
 **Category:** positive
+
 **Status:** not_automated
-```

@@ -21,7 +21,8 @@
 | OH-WEB-068 | Create user with duplicate username shows conflict error | negative | not_automatable | — |
 | OH-WEB-069 | Delete user removes them from list | positive | not_automatable | — |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
@@ -54,6 +55,7 @@
 ## Detailed Test Cases
 
 ### OH-WEB-019 — User List Loads
+
 **Pre-conditions:**
 - Role: Admin
 - Starting URL: /web/index.php/admin/viewSystemUsers
@@ -73,7 +75,11 @@
 **Validation:** Assert that the User List is displayed without any errors
 
 **Category:** positive
-**Status:** not_automated### OH-WEB-020 — Record Count Shown
+
+**Status:** not_automated
+
+### OH-WEB-020 — Record Count Shown
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: /web/index.php/admin/viewSystemUsers
@@ -94,23 +100,36 @@
 **Validation:** Verify that the displayed count matches the actual number of system users in the system
 
 **Category:** positive
-**Status:** not_automated### OH-WEB-021 — Search By Username
+
+**Status:** not_automated
+
+### OH-WEB-021 — Search By Username
+
 **Pre-conditions:**
 - Role: Admin
 - Starting URL: /web/index.php/auth/login (Login Page)
 - Session created and logged in as an Admin
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Filter | "Admin" |
+
 **Steps:**
 1. Navigate to Recruitment - Job Vacancies: /web/index.php/recruitment/viewJobVacancy
 2. Click on the Search Bar and enter "Admin"
 3. Click on the Search Button
+
 **Expected Result:** Record count text visible; at least one result displayed
+
 **Validation:** Verify that the search results contain at least one record with username equal to "Admin"
+
 **Category:** positive
-**Status:** not_automated### OH-WEB-022 — Search Non-Existent Username
+
+**Status:** not_automated
+
+### OH-WEB-022 — Search Non-Existent Username
+
 **Pre-conditions:**
 - User Role: Admin or ESS user with appropriate privileges
 - Starting URL: /web/index.php/auth/login (assuming the user is not already logged in)
@@ -131,7 +150,11 @@
 **Validation:** Verify that no records are shown with the entered username
 
 **Category:** positive
-**Status:** not_automated### OH-WEB-023 — Cancel Returns To List
+
+**Status:** not_automated
+
+### OH-WEB-023 — Cancel Returns To List
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: /web/index.php/admin/viewSystemUsers
@@ -151,9 +174,14 @@
 **Validation:** Verify that the System Users list is displayed, and the cancelled user is not present in the list
 
 **Category:** positive
-**Status:** not_automated### OH-WEB-024 — Save Without Username
+
+**Status:** not_automated
+
+### OH-WEB-024 — Save Without Username
+
 **Pre-conditions:**
 - Role: Admin, Starting URL: /web/index.php/admin/viewSystemUsers, Required Data State: Username not provided
+
 **Test Data:**
 | Field | Value |
 |---|---|
@@ -162,63 +190,96 @@
 | Middle Name | optional value (max 30 chars) |
 | Employee ID | optional value |
 | Password | any complex password (min 8 chars, uppercase, lowercase, number, special char) |
+
 **Steps:**
 1. Navigate to /web/index.php/admin/viewSystemUsers
 2. Click "Add New User"
 3. Fill all fields except Username and click "Save"
+
 **Expected Result:** Validation error for the Username field
+
 **Validation:** Check that an error message appears for the Username field
+
 **Category:** positive
-**Status:** not_automated### OH-WEB-025 — Save Without Password
+
+**Status:** not_automated
+
+### OH-WEB-025 — Save Without Password
+
 **Pre-conditions:**
 - Role: Admin, Starting URL: /web/index.php/admin/viewSystemUsers, Required data state: First Name, Last Name, Middle Name, Employee ID (optional), Username, Email
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Password | left blank |
+
 **Steps:**
 1. Navigate to Admin - System Users page
 2. Click Add New User
 3. Fill in all required fields except for Password
 4. Click Save
+
 **Expected Result:** Validation error for Password field appears
+
 **Validation:** Error message displayed for Password field
+
 **Category:** positive
-**Status:** not_automated```
+
+**Status:** not_automated
+
 ### OH-WEB-067 — Weak Password (not_automated)
+
 **Pre-conditions:**
 - Role: Admin/ESS
 - Starting URL: https://opensource-demo.orangehrmlive.com/web/index.php/api/v2
 - Account created with password complexity met
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Password | weak |
+
 **Steps:**
 1. Navigate to POST /auth/login endpoint and authenticate user
 2. Call PUT /pim/employees/{empNumber}/personal-details endpoint with new password field set to "weak"
 3. Check response for password policy error
+
 **Expected Result:** Password policy error shown
+
 **Validation:** Check response status code (4xx) and error message contains "Weak Password"
+
 **Category:** positive
+
 **Status:** not_automated
-```### OH-WEB-068 — Duplicate Username (not_automatable)
+
+### OH-WEB-068 — Duplicate Username (not_automatable)
+
 **Pre-conditions:**
 - Role: Admin, Starting URL: /web/index.php/admin/viewSystemUsers, Required Data State: Existing unique username
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | Username | Existing unique username |
+
 **Steps:**
 1. Navigate to Admin - System Users page
 2. Click on "Add New User" button
 3. Enter the existing unique username in the "Username" field
 4. Fill out other required fields with valid values
 5. Click on "Save" button
+
 **Expected Result:** An error message is displayed indicating that the username already exists.
+
 **Validation:** Verify that the error message appears and the new user is not created.
+
 **Category:** positive
-**Status:** not_automated### OH-WEB-069 — Delete User (not_automatable)
+
+**Status:** not_automated
+
+### OH-WEB-069 — Delete User (not_automatable)
+
 **Pre-conditions:**
 - Role: Admin
 - Starting URL: /web/index.php/admin/viewSystemUsers
@@ -242,4 +303,5 @@
 **Validation:** Verify that the test user no longer exists in the system and the list does not contain the deleted user.
 
 **Category:** positive
+
 **Status:** not_automated

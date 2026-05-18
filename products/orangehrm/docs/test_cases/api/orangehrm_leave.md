@@ -19,7 +19,8 @@
 | OH-API-012 | POST /leave/leave-requests missing required field returns 400 | negative | not_automated | — |
 | OH-API-013 | GET /leave/leave-requests lists submitted requests | positive | not_automatable | — |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
@@ -42,14 +43,17 @@
 ## Detailed Test Cases
 
 ### OH-API-006 — List Leave Types Returns 200
+
 **Steps:** GET /leave/leave-types with valid session  
 **Expected:** 200, body has `data` array
 
 ### OH-API-007 — Leave Type Items Have id and name
+
 **Steps:** GET /leave/leave-types, inspect first item  
 **Expected:** `id` and `name` keys present, at least 1 item
 
 ### OH-API-008 — List Leave Types Without Auth Returns 401
+
 **Steps:** GET /leave/leave-types without any auth cookie  
 **Expected:** 401 Unauthorized
 
@@ -58,11 +62,14 @@
 **Expected:** 400 or 422
 
 ### OH-API-010 — Leave Request With Invalid Date Range
+
 **Pre-conditions:** At least one leave type exists  
+
 **Steps:** GET leave types, extract first id; POST request with fromDate > toDate  
 **Expected:** 400 or 422
 
 ### OH-API-011 — Create Leave Request With Valid Data (not_automated)
+
 **Pre-conditions:** Valid leaveTypeId obtained from GET /leave/leave-types  
 **Payload:** `{"leaveTypeId": <valid_id>, "fromDate": "2099-03-01", "toDate": "2099-03-02"}`  
 **Expected:** 200 or 201; created request reflected in list
@@ -72,4 +79,5 @@
 **Expected:** 400 with field-specific error
 
 ### OH-API-013 — List Leave Requests (not_automatable)
+
 **Note:** GET /leave/leave-requests may require specific employee context and may not return data on the shared demo unless a request was submitted in the same session. State-dependent; difficult to automate reliably.

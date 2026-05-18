@@ -16,7 +16,8 @@
 | OH-SEC-011 | Session cookie has HttpOnly flag after login | negative | automated | test_security_web.py |
 | OH-SEC-012 | PIM URL without auth redirects to login | negative | automated | test_security_web.py |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
@@ -29,6 +30,7 @@ These tests verify client-side security controls on the OrangeHRM web layer: XSS
 ## Detailed Test Cases
 
 ### OH-SEC-008 — XSS Payload In Username Does Not Execute
+
 **Pre-conditions:**
 - Role: Standard User
 - Starting URL: /web/index.php/auth/login
@@ -52,7 +54,11 @@ These tests verify client-side security controls on the OrangeHRM web layer: XSS
 **Validation:** Script execution does not occur, `window.__xss_fired` remains false.
 
 **Category:** positive
-**Status:** not_automated### OH-SEC-009 — Dashboard Without Auth Redirects To Login
+
+**Status:** not_automated
+
+### OH-SEC-009 — Dashboard Without Auth Redirects To Login
+
 **Pre-conditions:**
 - User Role: Anonymous
 - Starting URL: /web/index.php/dashboard/index
@@ -72,7 +78,10 @@ These tests verify client-side security controls on the OrangeHRM web layer: XSS
 
 **Expected Result:** The user is redirected to the login page (`/web/index.php/auth/login`). No dashboard content is displayed.
 
-**Validation:** Verify that the URL contains `/auth/login`. Verify that no dashboard content is visible.### OH-SEC-010 — Admin URL Without Auth Redirects To Login
+**Validation:** Verify that the URL contains `/auth/login`. Verify that no dashboard content is visible.
+
+### OH-SEC-010 — Admin URL Without Auth Redirects To Login
+
 **Pre-conditions:**
 - User Role: Admin
 - Starting URL: <https://opensource-demo.orangehrmlive.com/web/index.php/api/v2>
@@ -93,7 +102,11 @@ These tests verify client-side security controls on the OrangeHRM web layer: XSS
 **Validation:** Check if the URL contains `/auth/login` after attempting to access the system users page without authentication
 
 **Category:** positive
-**Status:** not_automated### OH-SEC-011 — Session Cookie Has HttpOnly Flag
+
+**Status:** not_automated
+
+### OH-SEC-011 — Session Cookie Has HttpOnly Flag
+
 **Pre-conditions:**
 - Role: Admin
 - Starting URL: /web/index.php/auth/login
@@ -114,7 +127,11 @@ These tests verify client-side security controls on the OrangeHRM web layer: XSS
 **Validation:** Verify that the session, orangehrm, and csrf cookies have the HttpOnly flag set to true.
 
 **Category:** positive
-**Status:** not_automated### OH-SEC-012 — PIM URL Without Auth Redirects To Login
+
+**Status:** not_automated
+
+### OH-SEC-012 — PIM URL Without Auth Redirects To Login
+
 **Pre-conditions:**
 - User Role: Anonymous
 - Starting URL: /web/index.php/pim/viewEmployeeList
@@ -135,4 +152,5 @@ These tests verify client-side security controls on the OrangeHRM web layer: XSS
 **Validation:** Verify that the system redirects to the login page when accessing a PIM-related URL without an active session.
 
 **Category:** positive
+
 **Status:** not_automated

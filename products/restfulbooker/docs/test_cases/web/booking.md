@@ -18,7 +18,8 @@
 | RB-WEB-010 | Booking form date picker prevents checkout before checkin | edge | not_automated | — |
 | RB-WEB-011 | Booking confirmation email is sent after successful booking | positive | not_automatable | — |
 
-> **Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
+> 
+**Status values:** `automated` = script exists · `not_automated` = not yet scripted · `not_automatable` = human must mark; skipped by script generator
 
 ---
 
@@ -31,6 +32,7 @@
 ## Test Cases
 
 ### RB-WEB-001 — Home Page Shows Rooms
+
 **Pre-conditions:**
 - User Role: Not Specified
 - Starting URL: https://automationintesting.online
@@ -50,7 +52,11 @@
 **Validation:** Count of visible room cards is greater than zero
 
 **Category:** positive
-**Status:** not_automated### RB-WEB-002 — Room Count Is Positive
+
+**Status:** not_automated
+
+### RB-WEB-002 — Room Count Is Positive
+
 **Pre-conditions:**
 - User Role: Anonymous (Unauthenticated)
 - Starting URL: Home Page (https://automationintesting.online)
@@ -71,7 +77,11 @@
 **Validation:** Assert that the retrieved room count is greater than zero
 
 **Category:** positive
-**Status:** not_automated### RB-WEB-003 — Booking Form Opens On Click
+
+**Status:** not_automated
+
+### RB-WEB-003 — Booking Form Opens On Click
+
 **Pre-conditions:**
 - User role: regular user
 - Starting URL: https://automationintesting.online
@@ -92,9 +102,14 @@
 **Validation:** Check if the Firstname input field is present and editable.
 
 **Category:** positive
-**Status:** not_automated### RB-WEB-004 — Submit With Valid Data
+
+**Status:** not_automated
+
+### RB-WEB-004 — Submit With Valid Data
+
 **Pre-conditions:**
 - User role: anonymous, Starting URL: https://automationintesting.online, Required data state: Firstname=John, Lastname=Smith, Email=john.smith@example.com, Phone=01234567890
+
 **Test Data:**
 | Field | Value |
 |---|---|
@@ -102,15 +117,23 @@
 | lastname | Smith |
 | email | john.smith@example.com |
 | phone | 01234567890 |
+
 **Steps:**
 1. Navigate to Home Page
 2. Access the Booking Form
 3. Fill in all fields with provided data
 4. Click on "Book" button
+
 **Expected Result:** Booking confirmed OR validation error displayed (demo site may have date restrictions)
+
 **Validation:** Check if booking is successfully created or validation error message is displayed
+
 **Category:** positive
-**Status:** not_automated### RB-WEB-005 — Submit With No Fields
+
+**Status:** not_automated
+
+### RB-WEB-005 — Submit With No Fields
+
 **Pre-conditions:**
 - User role: anonymous
 - Starting URL: https://automationintesting.online
@@ -135,7 +158,11 @@
 **Validation:** The validation error message matches the expected validation rules for Web Booking
 
 **Category:** positive
-**Status:** not_automated### RB-WEB-010 — Date Picker Prevents Checkout Before Checkin
+
+**Status:** not_automated
+
+### RB-WEB-010 — Date Picker Prevents Checkout Before Checkin
+
 **Pre-conditions:**
 - User role: Regular user
 - Starting URL: Home Page (https://automationintesting.online)
@@ -159,9 +186,14 @@
 **Validation:** Check that the checkout date input field is disabled when selecting a date before the check-in date.
 
 **Category:** positive
-**Status:** not_automated### RB-WEB-011 — Confirmation Email Sent (not_automatable)
+
+**Status:** not_automated
+
+### RB-WEB-011 — Confirmation Email Sent (not_automatable)
+
 **Pre-conditions:**
 - User role: Any registered user, Starting URL: Home Page, Required data state: Firstname, Lastname, Email, Phone, Check-in date, Check-out date
+
 **Test Data:**
 | Field | Value |
 |---|---|
@@ -171,11 +203,16 @@
 | Phone | 11+ characters phone number from KB |
 | Check-in date | valid check-in date from KB |
 | Check-out date | valid check-out date (after check-in date) from KB |
+
 **Steps:**
 1. Navigate to Home Page and fill out the booking form with provided test data.
 2. Submit the booking form.
 3. Verify a confirmation email is sent to the provided email address.
+
 **Expected Result:** Email is received in the user's inbox.
+
 **Validation:** Confirmation email subject contains "Booking Confirmation".
+
 **Category:** positive
+
 **Status:** not_automated

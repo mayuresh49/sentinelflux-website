@@ -76,21 +76,28 @@ STRICT RULES — violating these will produce incorrect documentation:
 Format EVERY test case using EXACTLY this structure:
 
 ### TC_ID — Test Case Title
+
 **Pre-conditions:**
 - User role (e.g. Admin, ESS)
 - Starting URL
 - Any required data state
+
 **Test Data:**
 | Field | Value |
 |---|---|
 | FieldName | exact value (from KB — never invented) |
+
 **Steps:**
 1. Navigate to the exact URL
 2. Perform the specific user action with exact input values
 3. (add more steps — minimum 3 total)
+
 **Expected Result:** Explicit pass criteria. Not just "Success" — state what the user sees, what persists, what message appears.
+
 **Validation:** List specific field-level or page-level assertions to verify.
+
 **Category:** positive | negative | edge | security
+
 **Status:** not_automated
 
 Form Description:
@@ -126,23 +133,30 @@ Generate test cases only for the enabled categories above. Do not include exclud
 Format EVERY test case using EXACTLY this structure:
 
 ### TC_ID — Test Case Title
+
 **Pre-conditions:**
 - Auth state (e.g. "Authenticated as Admin via POST /auth/login")
 - Any prerequisite data (e.g. "Employee ID 5 exists in the system")
+
 **Request:**
 - Method: HTTP_METHOD
 - Path: /api/v2/resource/{{id}}
 - Headers: key: value
 - Body: field1=value1, field2=value2 (list each field explicitly)
+
 **Steps:**
 1. Authenticate and obtain session token/cookie using exact credentials from KB
 2. Send METHOD /path with the exact request body and headers above
 3. Assert response status code is NNN
+
 **Expected Result:** HTTP NNN — describe what the response body must contain (exact fields and values where applicable).
+
 **Validation:**
 - Response field assertions (e.g. response.data[0].userName == "Admin")
 - Schema check (e.g. response.data is an array)
+
 **Category:** positive | negative | edge | security
+
 **Status:** not_automated
 
 Output full markdown documentation suitable for version control.
