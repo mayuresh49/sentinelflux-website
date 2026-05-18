@@ -1,5 +1,22 @@
 # Completed work items — append only, newest first
 
+- id: vapt-apk-static-analysis
+  date: 2026-05-18
+  title: "VAPT: APK static analysis + infra/mobile scope inputs + scan delete + per-type reports/certs"
+  outcome: >
+    Per-scan-type reports/certs: check_certifiable/issue_certificate filter by scan_type;
+    certs in eng["certificates"][scan_type]; download endpoints accept scan_type param;
+    scan type toggle moved above sub-tabs. Scan delete: VaptManager.delete_scan() +
+    DELETE endpoint; admin Delete button on scan cards. Infra targets: scope.infra_targets[],
+    textarea in scope form, VAPT_INFRA_TARGETS env var to subprocess; conftest
+    vapt_infra_targets fixture. Mobile app path: scope.mobile_app_path, VAPT_MOBILE_APP_PATH
+    env var; vapt_mobile_app_path fixture (Path|None). APK static analysis: 2 new generated
+    files — test_vapt_mobile_apk_manifest.py (androguard: debuggable, allowBackup,
+    usesCleartextTraffic, exported components, taskAffinity) and test_vapt_mobile_apk_static.py
+    (pure Python: private keys, hardcoded secrets/http URLs in assets, weak crypto in DEX;
+    androguard: DEX string pool secrets, cert pinning, Log calls). androguard>=3.3.5 added
+    to requirements.txt. All APK tests skip gracefully without APK or androguard.
+
 - id: docs-tc-create-delete-ux
   date: 2026-05-18
   title: "Docs: TC create success toast + sfConfirm delete + Alpine timing fix"

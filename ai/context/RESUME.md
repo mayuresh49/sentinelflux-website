@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (15)  
+Last updated: 2026-05-18 (19)  
 Framework version: 0.1.0
 
 ---
@@ -26,7 +26,7 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 | AI Agents (post-suite) | Working | ResultAnalyzer, FlakyDetector, RegressionGuard, CoverageGap, LocatorHealer, QuarantineManager via `ai/agents/sentinel_orchestrator.py` |
 | DocReviewAgent | Working | Post-generation quality gate — audits batched headings, missing sections, thin steps; rewrites via LLM. Auto-runs after DocGenAgent in pipeline. `ai/agents/doc_review_agent.py` |
 | Remote Runner | Working | Pull-based runner daemon (`sentinelflux runner`) polls `/api/runner/claim`, executes pytest, POSTs JSON report back. Bearer token auth. Decouples test execution from app server. |
-| VAPT | Working | Engagement lifecycle: scope → scan → findings → PDF report/certificate. `core/vapt_manager.py`, `/vapt` dashboard page. Per-product storage under `data/vapt_findings/<product>/`. |
+| VAPT | Working | Full engagement lifecycle: scope → scan → findings → PDF report/certificate, per scan type (web/infra/mobile). Infra targets and mobile APK path in scope. APK static analysis via androguard. `core/vapt_manager.py`, `/vapt` dashboard page. |
 | Storage | Working | SQLite WAL mode (`data/sentinelflux.db` via `core/db.py`). Runs, schedules, approvals, pipeline jobs, activity log, quarantine all in DB. Per-product run config YAML still at `data/product_config/<product>.yaml`. |
 | Dashboard | Working | FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind. 16 pages/routers. Start: `uvicorn dashboard.app:app --reload` |
 | Runs | Working | Trigger/schedule pytest runs from dashboard, parse JSON reports, auto-analyze failures. `/runs` page |
@@ -38,6 +38,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **VAPT: APK/IPA static analysis + mobile/infra scope inputs + scan delete + per-type reports/certs** (`core/vapt_manager.py`, `core/vapt_test_generator.py`, `dashboard/routers/vapt.py`, `dashboard/templates/vapt.html`, `vapt_certificate_pdf.html`, `vapt_report_pdf.html`, `requirements.txt`): (1) Per-scan-type reports and certificates — `check_certifiable`/`issue_certificate` filter findings by scan type; certs stored in `eng["certificates"][scan_type]` with web backward compat; download endpoints accept `scan_type` query param and filter report/cert rendering accordingly; scan type toggle moved above sub-tabs as global context. (2) Delete scan history — `VaptManager.delete_scan()` + `DELETE /vapt/engagement/{eng_id}/scan/{scan_id}`; admin Delete button on scan cards (blocked while running). (3) Infra targets — `scope.infra_targets[]` field, textarea in scope form (one IP/hostname per line), passed as `VAPT_INFRA_TARGETS` env var to infra scan subprocess; infra conftest `vapt_infra_targets` fixture reads env var, `vapt_host` uses first target. (4) Mobile app path — `scope.mobile_app_path` field, text input in scope form, passed as `VAPT_MOBILE_APP_PATH`; mobile conftest `vapt_mobile_app_path` fixture returns Path or None. (5) APK static analysis — 2 new generated test files: `test_vapt_mobile_apk_manifest.py` (androguard; checks debuggable, allowBackup, usesCleartextTraffic, exported components, taskAffinity) and `test_vapt_mobile_apk_static.py` (pure Python: private key files, hardcoded secrets in assets, http:// URLs, weak crypto in DEX; androguard: DEX string pool secrets, cert pinning, Log calls near sensitive literals). All APK tests skip gracefully without APK or androguard. `androguard>=3.3.5` added to requirements.txt.
+
+## Previous: Docs TC create/delete UX fixes (2026-05-18)
 
 - **Docs TC create/delete UX fixes** (`dashboard/routers/partials.py`, `dashboard/templates/docs.html`, `dashboard/templates/partials/doc_tc_view.html`): (1) Success toast: `tc_create` redirect now appends `?created=TC_ID`; `docsPage.init()` reads the param, fires `sfToast("Test case X created successfully.", 'info')`, then removes the param via `history.replaceState` so a page refresh doesn't re-fire it. (2) Delete confirm: replaced inline Alpine Yes/No confirm div with `sfConfirm` modal — Delete button calls `await sfConfirm(...)` and only submits the hidden form via `htmx.trigger($refs.deleteForm, 'submit')` on confirmation. (3) Alpine timing fix: `tcCreateForm` function moved from partial `<script>` tag to `docs.html` `{% block scripts %}` so it's defined at page load before any HTMX swap, eliminating the race where Alpine's MutationObserver fired before HTMX re-executed the inline script.
 
