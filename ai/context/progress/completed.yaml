@@ -1,5 +1,16 @@
 # Completed work items — append only, newest first
 
+- id: doc-gen-robustness-vapt-certifiability
+  date: 2026-05-18
+  title: "Doc generation: strip code fences + TC_ID placeholder handling; VAPT certifiability fix"
+  outcome: >
+    orchestrator.py: _clean_doc() strips ``` code-fence wrappers models add around output
+    before normalization runs. _normalize_tc_ids() now replaces literal TC_ID placeholders
+    (models copying prompt template verbatim) in addition to renumbering PREFIX-NNN IDs.
+    vapt_manager.py: check_certifiable() now requires at least one completed scan
+    (was checking for any findings, which could be satisfied without a completed scan run).
+    ReportPortal security scan: 5/5 auth tests passed against live RP instance.
+
 - id: tc-id-generation-hardening
   date: 2026-05-17
   title: "TC ID generation hardening — normalizer, stronger prompt, increments string guard"
