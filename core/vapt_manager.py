@@ -237,8 +237,9 @@ class VaptManager:
             return False, "Engagement not found"
         if eng["status"] == "scoping":
             return False, "Scope has not been finalized"
-        if not eng.get("findings"):
-            return False, "No scans have been run yet"
+        completed_scans = [s for s in eng.get("scans", []) if s.get("status") == "completed"]
+        if not completed_scans:
+            return False, "No scans have been completed yet"
         threshold = eng.get("certificate_threshold", {"Critical": 0, "High": 0})
         open_by_sev: dict[str, int] = {}
         for f in eng["findings"]:

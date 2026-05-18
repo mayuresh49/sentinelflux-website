@@ -503,3 +503,45 @@ pages:
       edge_cases:
         - "Multiple interviewers can be assigned to one interview"
         - "Interview scheduled on a non-working day shows a warning"
+
+  - name: "Timesheets"
+    url: "/web/index.php/time/viewEmployeeTimesheet"
+    description: "Timesheets and attendance tracking — create, submit, approve/reject weekly timesheets"
+    fields:
+      - id: employee_id
+        label: "Employee ID"
+        type: text_input
+        required: true
+        note: "Must reference an existing employee; unique per timesheet period"
+      - id: timesheet_from_date
+        label: "From Date"
+        type: date_input
+        required: true
+        validation: "YYYY-MM-DD; cannot be empty"
+      - id: timesheet_to_date
+        label: "To Date"
+        type: date_input
+        required: true
+        validation: "YYYY-MM-DD; must be >= from_date"
+      - id: hours_worked
+        label: "Hours Worked"
+        type: number_input
+        required: true
+        validation: "Positive integer; maximum reasonable value enforced (e.g. >168 per week is invalid)"
+      - id: submit_button
+        label: "Submit"
+        type: button
+    test_scenarios:
+      positive:
+        - "Authenticated user can access Timesheets form"
+        - "Valid submission with employee_id, from_date, to_date, hours_worked succeeds"
+        - "Supervisor can view and approve direct reports' submitted timesheets"
+      negative:
+        - "Missing Employee ID shows required field validation error"
+        - "Missing Hours Worked shows required field validation error"
+        - "Empty From Date shows validation error"
+        - "Hours worked value exceeding maximum (e.g. 999) shows invalid input error"
+        - "Duplicate submission for same employee and period shows conflict error"
+      edge_cases:
+        - "Session expiry during timesheet editing requires re-login"
+        - "ESS user can only view and edit their own timesheet (not others')"
