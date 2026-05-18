@@ -329,8 +329,7 @@ def check_certifiable(eng_id: str, product: str,
 
 @router.post("/vapt/engagement/{eng_id}/certificate")
 def issue_certificate(eng_id: str, product: str,
-                      _: dict = Depends(_require_admin),
-                      current_user: dict = Depends(require_user)) -> dict:
+                      current_user: dict = Depends(_require_admin)) -> dict:
     eng = _vm.issue_certificate(product, eng_id, current_user.get("name", "unknown"))
     if not eng:
         can, reason = _vm.check_certifiable(product, eng_id)
@@ -523,8 +522,12 @@ def _render_template(tpl_name: str, **ctx: Any) -> str:
     tpl_path = Path(__file__).resolve().parent.parent / "templates" / tpl_name
     if not tpl_path.exists():
         return f"<html><body>Template {tpl_name} not found</body></html>"
-    from jinja2 import Template
-    return Template(tpl_path.read_text(encoding="utf-8")).render(**ctx)
+    from jinja2 import Environment, FileSystemLoader
+    env = Environment(
+        loader=FileSystemLoader(str(tpl_path.parent)),
+        autoescape=True,
+    )
+    return env.get_template(tpl_name).render(**ctx)
 
 
 def _render_plan_html(eng: dict) -> str:
