@@ -131,6 +131,50 @@ _DDL = [
         status TEXT NOT NULL DEFAULT 'running',
         output TEXT NOT NULL DEFAULT ''
     )""",
+    """CREATE TABLE IF NOT EXISTS test_plans (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        product TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        owner TEXT NOT NULL DEFAULT '',
+        status TEXT NOT NULL DEFAULT 'draft',
+        schedule_start TEXT,
+        schedule_end TEXT,
+        milestones TEXT NOT NULL DEFAULT '[]',
+        risks TEXT NOT NULL DEFAULT '[]',
+        exit_criteria TEXT NOT NULL DEFAULT '',
+        pass_criteria TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+    )""",
+    "CREATE INDEX IF NOT EXISTS idx_tplans_product ON test_plans(product, created_at)",
+    """CREATE TABLE IF NOT EXISTS test_plan_scope (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        plan_id TEXT NOT NULL REFERENCES test_plans(id) ON DELETE CASCADE,
+        domain TEXT NOT NULL,
+        module TEXT NOT NULL,
+        excluded_tc_ids TEXT NOT NULL DEFAULT '[]',
+        UNIQUE(plan_id, domain, module)
+    )""",
+    """CREATE TABLE IF NOT EXISTS test_plan_tc_status (
+        plan_id TEXT NOT NULL REFERENCES test_plans(id) ON DELETE CASCADE,
+        tc_id TEXT NOT NULL,
+        tc_title TEXT NOT NULL DEFAULT '',
+        domain TEXT NOT NULL,
+        module TEXT NOT NULL,
+        automation_status TEXT NOT NULL DEFAULT 'automated',
+        exec_status TEXT NOT NULL DEFAULT 'not_run',
+        notes TEXT NOT NULL DEFAULT '',
+        updated_at TEXT,
+        updated_by TEXT NOT NULL DEFAULT '',
+        PRIMARY KEY (plan_id, tc_id)
+    )""",
+    """CREATE TABLE IF NOT EXISTS test_plan_run_links (
+        plan_id TEXT NOT NULL REFERENCES test_plans(id) ON DELETE CASCADE,
+        run_id TEXT NOT NULL,
+        triggered_at TEXT NOT NULL,
+        PRIMARY KEY (plan_id, run_id)
+    )""",
 ]
 
 

@@ -1,0 +1,936 @@
+{% extends "base.html" %}
+{% block title %}Test Plans{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-4" x-data="testPlansApp()">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Test Plans</h1>
+      <p class="text-sm text-slate-500 mt-0.5">Define scope, track execution, and manage release readiness</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <select x-model="filterProduct" @change="loadPlans()"
+              class="text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+        <option value="">All Products</option>
+        {% for p in all_products %}
+        <option value="{{ p }}" {{ 'selected' if p == filter_product else '' }}>{{ p }}</option>
+        {% endfor %}
+      </select>
+      <button @click="showCreate = true"
+              class="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+        New Plan
+      </button>
+    </div>
+  </div>
+
+  <!-- Create plan modal -->
+  <div x-show="showCreate" x-cloak class="fixed inset-0 z-50 flex items-center justify-center"
+       @keydown.escape.window="showCreate = false">
+    <div class="absolute inset-0 bg-slate-900/40" @click="showCreate = false"></div>
+    <div class="relative bg-white rounded-xl shadow-xl w-full max-w-lg p-6 space-y-4 z-10 max-h-[90vh] overflow-y-auto">
+      <h2 class="text-base font-semibold text-slate-800">New Test Plan</h2>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Plan Name *</label>
+          <input x-model="createForm.name" type="text" placeholder="e.g. v2.3 Release Regression"
+                 class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Product *</label>
+          <select x-model="createForm.product"
+                  class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option value="">— select —</option>
+            {% for p in all_products %}
+            <option value="{{ p }}">{{ p }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Owner</label>
+            <input x-model="createForm.owner" type="text" placeholder="Your name"
+                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Start Date</label>
+            <input x-model="createForm.schedule_start" type="date"
+                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Target Completion Date</label>
+          <input x-model="createForm.schedule_end" type="date"
+                 class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Description</label>
+          <textarea x-model="createForm.description" rows="2" placeholder="What change does this plan cover?"
+                    class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Pass Criteria</label>
+          <input x-model="createForm.pass_criteria" type="text" placeholder="e.g. 95% pass rate, all P1 TCs pass"
+                 class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button @click="showCreate = false" class="text-sm text-slate-600 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-100">Cancel</button>
+        <button @click="createPlan()" :disabled="!createForm.name || !createForm.product"
+                class="text-sm font-medium bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white px-4 py-1.5 rounded-lg transition-colors">
+          Create Plan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main layout: plan list + detail -->
+  <div class="flex gap-4 min-h-[600px]">
+
+    <!-- Left: plan list -->
+    <div class="w-72 shrink-0 space-y-2">
+      <template x-if="plans.length === 0">
+        <div class="bg-white rounded-xl border border-slate-200 p-6 text-center text-sm text-slate-500">
+          No test plans yet.<br>Click <strong>New Plan</strong> to get started.
+        </div>
+      </template>
+      <template x-for="plan in plans" :key="plan.id">
+        <div @click="selectPlan(plan)"
+             :class="selectedPlan && selectedPlan.id === plan.id
+               ? 'border-indigo-400 bg-indigo-50 ring-1 ring-indigo-300'
+               : 'border-slate-200 bg-white hover:border-slate-300'"
+             class="rounded-xl border p-4 cursor-pointer transition-all">
+          <div class="flex items-start justify-between gap-2">
+            <span class="text-sm font-medium text-slate-800 leading-snug" x-text="plan.name"></span>
+            <span :class="statusBadge(plan.status)"
+                  class="shrink-0 text-xs px-2 py-0.5 rounded-full font-medium" x-text="plan.status"></span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1" x-text="plan.product"></p>
+          <div class="flex items-center gap-3 mt-2 text-xs text-slate-500">
+            <span x-show="plan.owner" x-text="'👤 ' + plan.owner"></span>
+            <span x-show="plan.schedule_end" x-text="'📅 ' + (plan.schedule_end || '')"></span>
+          </div>
+          <!-- Progress bar -->
+          <template x-if="plan.progress && plan.progress.total > 0">
+            <div class="mt-3">
+              <div class="flex justify-between text-xs text-slate-500 mb-1">
+                <span x-text="plan.progress.pass + '/' + plan.progress.total + ' passed'"></span>
+                <span x-text="plan.progress.pass_rate + '%'"></span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex">
+                <div class="h-full bg-emerald-500 transition-all"
+                     :style="'width:' + (plan.progress.pass / plan.progress.total * 100) + '%'"></div>
+                <div class="h-full bg-red-400 transition-all"
+                     :style="'width:' + (plan.progress.fail / plan.progress.total * 100) + '%'"></div>
+                <div class="h-full bg-amber-400 transition-all"
+                     :style="'width:' + (plan.progress.blocked / plan.progress.total * 100) + '%'"></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <!-- Right: plan detail -->
+    <div class="flex-1 min-w-0">
+      <template x-if="!selectedPlan">
+        <div class="bg-white rounded-xl border border-slate-200 h-full flex items-center justify-center text-slate-400 text-sm">
+          Select a plan to view details
+        </div>
+      </template>
+
+      <template x-if="selectedPlan">
+        <div class="bg-white rounded-xl border border-slate-200 flex flex-col h-full">
+
+          <!-- Plan header -->
+          <div class="px-6 pt-5 pb-0 border-b border-slate-100">
+            <div class="flex items-start justify-between gap-4 mb-4">
+              <div class="flex-1 min-w-0">
+                <h2 class="text-lg font-semibold text-slate-900 truncate" x-text="selectedPlan.name"></h2>
+                <p class="text-xs text-slate-500 mt-0.5" x-text="selectedPlan.product + ' · ' + (selectedPlan.owner || 'No owner')"></p>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <select x-model="selectedPlan.status" @change="patchStatus()"
+                        :class="statusBadge(selectedPlan.status)"
+                        class="text-xs px-2 py-1 rounded-full font-medium border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                  <option value="draft">draft</option>
+                  <option value="active">active</option>
+                  <option value="completed">completed</option>
+                  <option value="archived">archived</option>
+                </select>
+                <button @click="deletePlan()" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 transition-colors">Delete</button>
+              </div>
+            </div>
+            <!-- Tab bar -->
+            <div class="flex gap-0">
+              <button @click="tab = 'overview'"
+                      :class="tab === 'overview' ? 'border-b-2 border-indigo-600 text-indigo-700 font-medium' : 'text-slate-500 hover:text-slate-700'"
+                      class="px-4 py-2 text-sm transition-colors">Overview</button>
+              <button @click="tab = 'scope'; loadScope()"
+                      :class="tab === 'scope' ? 'border-b-2 border-indigo-600 text-indigo-700 font-medium' : 'text-slate-500 hover:text-slate-700'"
+                      class="px-4 py-2 text-sm transition-colors">Scope</button>
+              <button @click="tab = 'execution'; loadExecution()"
+                      :class="tab === 'execution' ? 'border-b-2 border-indigo-600 text-indigo-700 font-medium' : 'text-slate-500 hover:text-slate-700'"
+                      class="px-4 py-2 text-sm transition-colors">Execution</button>
+            </div>
+          </div>
+
+          <!-- Tab: Overview -->
+          <div x-show="tab === 'overview'" class="p-6 overflow-y-auto flex-1 space-y-6">
+            <!-- Basic metadata -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Plan Name</label>
+                <input x-model="selectedPlan.name" type="text"
+                       class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Owner</label>
+                <input x-model="selectedPlan.owner" type="text"
+                       class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Start Date</label>
+                <input x-model="selectedPlan.schedule_start" type="date"
+                       class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Target Completion Date</label>
+                <input x-model="selectedPlan.schedule_end" type="date"
+                       class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-500 mb-1">Description</label>
+              <textarea x-model="selectedPlan.description" rows="3"
+                        class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Pass Criteria</label>
+                <input x-model="selectedPlan.pass_criteria" type="text" placeholder="e.g. 95% pass rate"
+                       class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-500 mb-1">Exit Criteria</label>
+                <input x-model="selectedPlan.exit_criteria" type="text" placeholder="e.g. All P1 TCs executed"
+                       class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <button @click="saveOverview()" class="text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors">
+                Save Changes
+              </button>
+            </div>
+
+            <!-- Milestones -->
+            <div class="border-t border-slate-100 pt-5">
+              <h3 class="text-sm font-semibold text-slate-700 mb-3">Milestones</h3>
+              <div class="space-y-2 mb-3">
+                <template x-for="(m, idx) in selectedPlan.milestones" :key="idx">
+                  <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <button @click="toggleMilestone(idx)"
+                            :class="m.status === 'done' ? 'text-emerald-600' : 'text-slate-300 hover:text-slate-500'"
+                            class="shrink-0 transition-colors">
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                    </button>
+                    <span :class="m.status === 'done' ? 'line-through text-slate-400' : 'text-slate-700'"
+                          class="flex-1 text-sm" x-text="m.name"></span>
+                    <span class="text-xs text-slate-400" x-text="m.target_date || ''"></span>
+                    <button @click="removeMilestone(idx)" class="text-slate-300 hover:text-red-500 transition-colors">
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  </div>
+                </template>
+              </div>
+              <div class="flex gap-2">
+                <input x-model="newMilestone.name" type="text" placeholder="Milestone name"
+                       class="flex-1 text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                <input x-model="newMilestone.target_date" type="date"
+                       class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                <button @click="addMilestone()" :disabled="!newMilestone.name"
+                        class="text-sm font-medium bg-slate-700 hover:bg-slate-800 disabled:opacity-40 text-white px-3 py-1.5 rounded-lg transition-colors">
+                  Add
+                </button>
+              </div>
+            </div>
+
+            <!-- Risks -->
+            <div class="border-t border-slate-100 pt-5">
+              <h3 class="text-sm font-semibold text-slate-700 mb-3">Risks &amp; Mitigation</h3>
+              <div class="space-y-2 mb-3">
+                <template x-for="(r, idx) in selectedPlan.risks" :key="idx">
+                  <div class="p-3 bg-slate-50 rounded-lg">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                          <span :class="riskBadge(r.severity)"
+                                class="text-xs px-2 py-0.5 rounded-full font-medium" x-text="r.severity || 'medium'"></span>
+                          <span class="text-sm text-slate-700" x-text="r.description"></span>
+                        </div>
+                        <p class="text-xs text-slate-500" x-text="'Mitigation: ' + (r.mitigation || '—')"></p>
+                      </div>
+                      <button @click="removeRisk(idx)" class="text-slate-300 hover:text-red-500 shrink-0 transition-colors">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+              <div class="grid grid-cols-1 gap-2">
+                <input x-model="newRisk.description" type="text" placeholder="Risk description"
+                       class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                <div class="flex gap-2">
+                  <select x-model="newRisk.severity"
+                          class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                  <input x-model="newRisk.mitigation" type="text" placeholder="Mitigation strategy"
+                         class="flex-1 text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                  <button @click="addRisk()" :disabled="!newRisk.description"
+                          class="text-sm font-medium bg-slate-700 hover:bg-slate-800 disabled:opacity-40 text-white px-3 py-1.5 rounded-lg transition-colors">
+                    Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Scope -->
+          <div x-show="tab === 'scope'" class="p-6 overflow-y-auto flex-1 space-y-4">
+            <!-- Domain tabs -->
+            <div class="flex gap-1">
+              <template x-for="d in ['api', 'web', 'mobile', 'security']" :key="d">
+                <button @click="scopeDomain = d; loadAvailableModules(d)"
+                        :class="scopeDomain === d
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+                        class="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors capitalize" x-text="d"></button>
+              </template>
+            </div>
+
+            <!-- Module checkboxes -->
+            <div x-show="scopeLoadingModules" class="text-sm text-slate-400">Loading modules…</div>
+            <div x-show="!scopeLoadingModules && scopeAvailableModules.length === 0 && scopeDomain"
+                 class="text-sm text-slate-400 py-4 text-center">
+              No test modules found for <span class="font-medium" x-text="scopeDomain"></span> domain.
+            </div>
+            <div x-show="!scopeLoadingModules && scopeAvailableModules.length > 0" class="space-y-3">
+              <p class="text-xs text-slate-500">Select modules to include. Expand a module to exclude individual test cases.</p>
+              <template x-for="mod in scopeAvailableModules" :key="mod">
+                <div class="border border-slate-200 rounded-lg overflow-hidden">
+                  <div class="flex items-center gap-3 px-4 py-3 bg-slate-50">
+                    <input type="checkbox"
+                           :checked="isScopeChecked(scopeDomain, mod)"
+                           @change="toggleModuleScope(scopeDomain, mod)"
+                           class="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-300">
+                    <span class="flex-1 text-sm font-medium text-slate-700" x-text="mod"></span>
+                    <template x-if="isScopeChecked(scopeDomain, mod)">
+                      <button @click="toggleModuleExpand(scopeDomain, mod)"
+                              class="text-xs text-slate-500 hover:text-indigo-600 px-2 py-1 rounded hover:bg-slate-100 transition-colors">
+                        <span x-text="isModuleExpanded(scopeDomain, mod) ? 'Collapse' : 'Exclude TCs'"></span>
+                      </button>
+                    </template>
+                  </div>
+                  <!-- TC exclusion list -->
+                  <div x-show="isScopeChecked(scopeDomain, mod) && isModuleExpanded(scopeDomain, mod)"
+                       class="border-t border-slate-100 px-4 py-3">
+                    <div x-show="isModuleTCsLoading(scopeDomain, mod)" class="text-xs text-slate-400">Loading test cases…</div>
+                    <div x-show="!isModuleTCsLoading(scopeDomain, mod) && getModuleTCs(scopeDomain, mod).length === 0"
+                         class="text-xs text-slate-400">No test case docs found for this module.</div>
+                    <div x-show="!isModuleTCsLoading(scopeDomain, mod) && getModuleTCs(scopeDomain, mod).length > 0" class="space-y-1">
+                      <p class="text-xs text-slate-500 mb-2">Uncheck to exclude from this plan:</p>
+                      <template x-for="tc in getModuleTCs(scopeDomain, mod)" :key="tc.tc_id">
+                        <div class="flex items-center gap-2">
+                          <input type="checkbox"
+                                 :checked="!isExcluded(scopeDomain, mod, tc.tc_id)"
+                                 @change="toggleTCExclusion(scopeDomain, mod, tc.tc_id)"
+                                 class="w-3.5 h-3.5 rounded text-indigo-600 border-slate-300">
+                          <span class="text-xs text-slate-600">
+                            <span class="font-mono text-indigo-700 mr-1" x-text="tc.tc_id"></span>
+                            <span x-text="tc.tc_title"></span>
+                          </span>
+                          <span :class="autoStatusBadge(tc.automation_status)"
+                                class="ml-auto text-xs px-1.5 py-0.5 rounded font-medium" x-text="tc.automation_status"></span>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-slate-100">
+              <button @click="saveScope()" class="text-sm font-medium bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg transition-colors">
+                Save Scope
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab: Execution -->
+          <div x-show="tab === 'execution'" class="p-6 overflow-y-auto flex-1 space-y-5">
+
+            <!-- Progress summary -->
+            <div class="grid grid-cols-5 gap-3">
+              <div class="bg-slate-50 rounded-lg p-3 text-center">
+                <div class="text-xl font-bold text-slate-800" x-text="progress.total || 0"></div>
+                <div class="text-xs text-slate-500 mt-0.5">Total TCs</div>
+              </div>
+              <div class="bg-emerald-50 rounded-lg p-3 text-center">
+                <div class="text-xl font-bold text-emerald-700" x-text="progress.pass || 0"></div>
+                <div class="text-xs text-emerald-600 mt-0.5">Pass</div>
+              </div>
+              <div class="bg-red-50 rounded-lg p-3 text-center">
+                <div class="text-xl font-bold text-red-700" x-text="progress.fail || 0"></div>
+                <div class="text-xs text-red-600 mt-0.5">Fail</div>
+              </div>
+              <div class="bg-amber-50 rounded-lg p-3 text-center">
+                <div class="text-xl font-bold text-amber-700" x-text="progress.blocked || 0"></div>
+                <div class="text-xs text-amber-600 mt-0.5">Blocked</div>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-3 text-center">
+                <div class="text-xl font-bold text-slate-600" x-text="(progress.pass_rate || 0) + '%'"></div>
+                <div class="text-xs text-slate-500 mt-0.5">Pass Rate</div>
+              </div>
+            </div>
+
+            <!-- Progress bar -->
+            <template x-if="progress.total > 0">
+              <div>
+                <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex">
+                  <div class="h-full bg-emerald-500 transition-all"
+                       :style="'width:' + (progress.pass / progress.total * 100) + '%'"></div>
+                  <div class="h-full bg-red-400 transition-all"
+                       :style="'width:' + (progress.fail / progress.total * 100) + '%'"></div>
+                  <div class="h-full bg-amber-400 transition-all"
+                       :style="'width:' + (progress.blocked / progress.total * 100) + '%'"></div>
+                </div>
+              </div>
+            </template>
+
+            <!-- Actions row -->
+            <div class="flex items-center gap-3">
+              <button @click="runAutomated()"
+                      class="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Run Automated Tests
+              </button>
+              <div class="ml-auto flex items-center gap-2">
+                <select x-model="execFilterDomain"
+                        class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                  <option value="">All Domains</option>
+                  <option value="api">API</option>
+                  <option value="web">Web</option>
+                  <option value="mobile">Mobile</option>
+                </select>
+                <select x-model="execFilterStatus"
+                        class="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                  <option value="">All Statuses</option>
+                  <option value="not_run">Not Run</option>
+                  <option value="pass">Pass</option>
+                  <option value="fail">Fail</option>
+                  <option value="blocked">Blocked</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- TC status table -->
+            <div class="border border-slate-200 rounded-xl overflow-hidden">
+              <table class="w-full text-xs">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th class="text-left px-3 py-2.5 font-medium text-slate-600 w-28">TC ID</th>
+                    <th class="text-left px-3 py-2.5 font-medium text-slate-600">Title</th>
+                    <th class="text-left px-3 py-2.5 font-medium text-slate-600 w-20">Domain</th>
+                    <th class="text-left px-3 py-2.5 font-medium text-slate-600 w-20">Type</th>
+                    <th class="text-left px-3 py-2.5 font-medium text-slate-600 w-28">Status</th>
+                    <th class="text-left px-3 py-2.5 font-medium text-slate-600 w-40">Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="tc in filteredTCStatuses()" :key="tc.tc_id">
+                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                      <td class="px-3 py-2 font-mono text-indigo-700" x-text="tc.tc_id"></td>
+                      <td class="px-3 py-2 text-slate-700" x-text="tc.tc_title || '—'"></td>
+                      <td class="px-3 py-2 text-slate-500 capitalize" x-text="tc.domain"></td>
+                      <td class="px-3 py-2">
+                        <span :class="autoStatusBadge(tc.automation_status)"
+                              class="text-xs px-1.5 py-0.5 rounded font-medium" x-text="tc.automation_status === 'not_automatable' ? 'manual' : tc.automation_status"></span>
+                      </td>
+                      <td class="px-3 py-2">
+                        <select :value="tc.exec_status"
+                                @change="updateTCStatus(tc.tc_id, $event.target.value, tc.notes)"
+                                :class="execStatusBadgeSelect(tc.exec_status)"
+                                class="text-xs px-2 py-0.5 rounded-full font-medium border-0 cursor-pointer focus:outline-none">
+                          <option value="not_run">Not Run</option>
+                          <option value="pass">Pass</option>
+                          <option value="fail">Fail</option>
+                          <option value="blocked">Blocked</option>
+                        </select>
+                      </td>
+                      <td class="px-3 py-2">
+                        <input type="text" :value="tc.notes"
+                               @change="updateTCStatus(tc.tc_id, tc.exec_status, $event.target.value)"
+                               placeholder="Add note"
+                               class="w-full text-xs border border-slate-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-300">
+                      </td>
+                    </tr>
+                  </template>
+                  <template x-if="filteredTCStatuses().length === 0">
+                    <tr>
+                      <td colspan="6" class="px-3 py-8 text-center text-slate-400">
+                        <span x-show="tcStatuses.length === 0">No test cases in scope. Set scope first.</span>
+                        <span x-show="tcStatuses.length > 0">No TCs match the current filters.</span>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Linked runs -->
+            <div x-show="linkedRuns.length > 0" class="border-t border-slate-100 pt-4">
+              <h3 class="text-sm font-semibold text-slate-700 mb-3">Automated Run History</h3>
+              <div class="border border-slate-200 rounded-xl overflow-hidden">
+                <table class="w-full text-xs">
+                  <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th class="text-left px-3 py-2 font-medium text-slate-600">Run ID</th>
+                      <th class="text-left px-3 py-2 font-medium text-slate-600">Domain</th>
+                      <th class="text-left px-3 py-2 font-medium text-slate-600">Module</th>
+                      <th class="text-left px-3 py-2 font-medium text-slate-600">Status</th>
+                      <th class="text-left px-3 py-2 font-medium text-slate-600">Pass Rate</th>
+                      <th class="text-left px-3 py-2 font-medium text-slate-600">Triggered</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="run in linkedRuns" :key="run.id">
+                      <tr class="border-b border-slate-100 last:border-0">
+                        <td class="px-3 py-2 font-mono text-slate-600" x-text="run.id"></td>
+                        <td class="px-3 py-2 text-slate-500 capitalize" x-text="run.domain"></td>
+                        <td class="px-3 py-2 text-slate-500" x-text="run.module || 'all'"></td>
+                        <td class="px-3 py-2">
+                          <span :class="runStatusBadge(run.status)"
+                                class="text-xs px-2 py-0.5 rounded-full font-medium" x-text="run.status"></span>
+                        </td>
+                        <td class="px-3 py-2 text-slate-600"
+                            x-text="run.total > 0 ? Math.round(run.passed / run.total * 100) + '%' : '—'"></td>
+                        <td class="px-3 py-2 text-slate-400"
+                            x-text="run.triggered_at ? run.triggered_at.substring(0,16).replace('T',' ') : '—'"></td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div><!-- /tab execution -->
+        </div><!-- /plan detail card -->
+      </template>
+    </div><!-- /right panel -->
+  </div><!-- /main layout -->
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function testPlansApp() {
+  return {
+    filterProduct: '{{ filter_product }}',
+    plans: [],
+    selectedPlan: null,
+    tab: 'overview',
+
+    // create form
+    showCreate: false,
+    createForm: { name: '', product: '{{ filter_product }}', owner: '', description: '', schedule_start: '', schedule_end: '', pass_criteria: '' },
+
+    // milestone / risk editors
+    newMilestone: { name: '', target_date: '' },
+    newRisk: { description: '', severity: 'medium', mitigation: '' },
+
+    // scope tab state
+    scopeDomain: 'api',
+    scopeAvailableModules: [],
+    scopeLoadingModules: false,
+    scopeChecked: {},        // {domain_module: true}
+    scopeExpanded: {},       // {domain_module: true}
+    scopeModuleTCs: {},      // {domain_module: [{tc_id, tc_title, automation_status}]}
+    scopeModuleTCsLoading: {},
+    scopeExcluded: {},       // {domain_module: Set}
+    savedScope: [],          // from API
+
+    // execution tab state
+    tcStatuses: [],
+    linkedRuns: [],
+    progress: {},
+    execFilterDomain: '',
+    execFilterStatus: '',
+
+    async init() {
+      await this.loadPlans();
+    },
+
+    async loadPlans() {
+      try {
+        const qs = this.filterProduct ? `?product=${encodeURIComponent(this.filterProduct)}` : '';
+        const r = await fetch('/api/test-plans/' + qs);
+        if (!r.ok) return;
+        const d = await r.json();
+        this.plans = d.plans || [];
+        if (this.selectedPlan) {
+          const refreshed = this.plans.find(p => p.id === this.selectedPlan.id);
+          if (refreshed) this.selectedPlan = { ...this.selectedPlan, progress: refreshed.progress };
+        }
+      } catch(e) {}
+    },
+
+    async selectPlan(plan) {
+      this.selectedPlan = { ...plan };
+      this.tab = 'overview';
+      this.scopeChecked = {};
+      this.scopeExpanded = {};
+      this.scopeModuleTCs = {};
+      this.scopeExcluded = {};
+      this.tcStatuses = [];
+      this.linkedRuns = [];
+      this.progress = plan.progress || {};
+    },
+
+    async createPlan() {
+      if (!this.createForm.name || !this.createForm.product) return;
+      try {
+        const r = await fetch('/api/test-plans/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: this.createForm.name,
+            product: this.createForm.product,
+            owner: this.createForm.owner,
+            description: this.createForm.description,
+            schedule_start: this.createForm.schedule_start || null,
+            schedule_end: this.createForm.schedule_end || null,
+            pass_criteria: this.createForm.pass_criteria,
+          }),
+        });
+        if (!r.ok) { sfToast((await r.json()).detail || 'Failed to create plan', 'error'); return; }
+        const plan = await r.json();
+        this.showCreate = false;
+        this.createForm = { name: '', product: this.filterProduct, owner: '', description: '', schedule_start: '', schedule_end: '', pass_criteria: '' };
+        await this.loadPlans();
+        const created = this.plans.find(p => p.id === plan.id);
+        if (created) this.selectPlan(created);
+        sfToast('Test plan created.', 'info');
+      } catch(e) { sfToast('Failed to create plan.', 'error'); }
+    },
+
+    async deletePlan() {
+      if (!await sfConfirm(`Delete plan "${this.selectedPlan.name}"? This cannot be undone.`)) return;
+      try {
+        const r = await fetch(`/api/test-plans/${this.selectedPlan.id}`, { method: 'DELETE' });
+        if (!r.ok) { sfToast('Failed to delete plan.', 'error'); return; }
+        this.selectedPlan = null;
+        await this.loadPlans();
+        sfToast('Plan deleted.', 'info');
+      } catch(e) { sfToast('Failed to delete plan.', 'error'); }
+    },
+
+    async patchStatus() {
+      await fetch(`/api/test-plans/${this.selectedPlan.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: this.selectedPlan.status }),
+      });
+      await this.loadPlans();
+    },
+
+    async saveOverview() {
+      try {
+        const r = await fetch(`/api/test-plans/${this.selectedPlan.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: this.selectedPlan.name,
+            owner: this.selectedPlan.owner,
+            description: this.selectedPlan.description,
+            schedule_start: this.selectedPlan.schedule_start || null,
+            schedule_end: this.selectedPlan.schedule_end || null,
+            pass_criteria: this.selectedPlan.pass_criteria,
+            exit_criteria: this.selectedPlan.exit_criteria,
+            milestones: this.selectedPlan.milestones,
+            risks: this.selectedPlan.risks,
+          }),
+        });
+        if (!r.ok) { sfToast('Save failed.', 'error'); return; }
+        await this.loadPlans();
+        sfToast('Changes saved.', 'info');
+      } catch(e) { sfToast('Save failed.', 'error'); }
+    },
+
+    // ── milestones & risks ──────────────────────────────────────────────
+
+    addMilestone() {
+      if (!this.newMilestone.name) return;
+      this.selectedPlan.milestones = [...(this.selectedPlan.milestones || []), { ...this.newMilestone, status: 'pending' }];
+      this.newMilestone = { name: '', target_date: '' };
+    },
+    removeMilestone(idx) {
+      this.selectedPlan.milestones.splice(idx, 1);
+    },
+    toggleMilestone(idx) {
+      const m = this.selectedPlan.milestones[idx];
+      m.status = m.status === 'done' ? 'pending' : 'done';
+    },
+
+    addRisk() {
+      if (!this.newRisk.description) return;
+      this.selectedPlan.risks = [...(this.selectedPlan.risks || []), { ...this.newRisk }];
+      this.newRisk = { description: '', severity: 'medium', mitigation: '' };
+    },
+    removeRisk(idx) {
+      this.selectedPlan.risks.splice(idx, 1);
+    },
+
+    // ── scope tab ───────────────────────────────────────────────────────
+
+    async loadScope() {
+      try {
+        const r = await fetch(`/api/test-plans/${this.selectedPlan.id}/scope`);
+        if (!r.ok) return;
+        const d = await r.json();
+        this.savedScope = d.scope || [];
+        // Rebuild scopeChecked + scopeExcluded from saved scope
+        this.scopeChecked = {};
+        this.scopeExcluded = {};
+        for (const item of this.savedScope) {
+          const key = item.domain + '_' + item.module;
+          this.scopeChecked[key] = true;
+          if (item.excluded_tc_ids && item.excluded_tc_ids.length) {
+            this.scopeExcluded[key] = new Set(item.excluded_tc_ids);
+          }
+        }
+        // Load modules for current domain
+        await this.loadAvailableModules(this.scopeDomain);
+      } catch(e) {}
+    },
+
+    async loadAvailableModules(domain) {
+      if (!this.selectedPlan) return;
+      this.scopeDomain = domain;
+      this.scopeLoadingModules = true;
+      this.scopeAvailableModules = [];
+      try {
+        const r = await fetch(`/api/test-plans/${this.selectedPlan.id}/scope/available-modules?domain=${domain}`);
+        if (!r.ok) return;
+        const d = await r.json();
+        this.scopeAvailableModules = d.modules || [];
+      } catch(e) {
+      } finally {
+        this.scopeLoadingModules = false;
+      }
+    },
+
+    isScopeChecked(domain, mod) {
+      return !!this.scopeChecked[domain + '_' + mod];
+    },
+    toggleModuleScope(domain, mod) {
+      const key = domain + '_' + mod;
+      if (this.scopeChecked[key]) {
+        delete this.scopeChecked[key];
+        delete this.scopeExpanded[key];
+      } else {
+        this.scopeChecked[key] = true;
+      }
+      this.scopeChecked = { ...this.scopeChecked };
+    },
+    isModuleExpanded(domain, mod) {
+      return !!this.scopeExpanded[domain + '_' + mod];
+    },
+    async toggleModuleExpand(domain, mod) {
+      const key = domain + '_' + mod;
+      if (this.scopeExpanded[key]) {
+        delete this.scopeExpanded[key];
+        this.scopeExpanded = { ...this.scopeExpanded };
+        return;
+      }
+      this.scopeExpanded[key] = true;
+      this.scopeExpanded = { ...this.scopeExpanded };
+      if (!this.scopeModuleTCs[key]) {
+        this.scopeModuleTCsLoading[key] = true;
+        this.scopeModuleTCsLoading = { ...this.scopeModuleTCsLoading };
+        try {
+          const r = await fetch(`/api/test-plans/${this.selectedPlan.id}/scope/module-tcs?domain=${domain}&module=${mod}`);
+          if (r.ok) {
+            const d = await r.json();
+            this.scopeModuleTCs[key] = d.tcs || [];
+            this.scopeModuleTCs = { ...this.scopeModuleTCs };
+          }
+        } catch(e) {
+        } finally {
+          this.scopeModuleTCsLoading[key] = false;
+          this.scopeModuleTCsLoading = { ...this.scopeModuleTCsLoading };
+        }
+      }
+    },
+    isModuleTCsLoading(domain, mod) {
+      return !!this.scopeModuleTCsLoading[domain + '_' + mod];
+    },
+    getModuleTCs(domain, mod) {
+      return this.scopeModuleTCs[domain + '_' + mod] || [];
+    },
+    isExcluded(domain, mod, tcId) {
+      const key = domain + '_' + mod;
+      return this.scopeExcluded[key] ? this.scopeExcluded[key].has(tcId) : false;
+    },
+    toggleTCExclusion(domain, mod, tcId) {
+      const key = domain + '_' + mod;
+      if (!this.scopeExcluded[key]) this.scopeExcluded[key] = new Set();
+      if (this.scopeExcluded[key].has(tcId)) {
+        this.scopeExcluded[key].delete(tcId);
+      } else {
+        this.scopeExcluded[key].add(tcId);
+      }
+      this.scopeExcluded = { ...this.scopeExcluded };
+    },
+
+    async saveScope() {
+      // Collect all checked modules across all domains
+      const items = [];
+      for (const key of Object.keys(this.scopeChecked)) {
+        if (!this.scopeChecked[key]) continue;
+        const [domain, ...rest] = key.split('_');
+        const module = rest.join('_');
+        const excludedSet = this.scopeExcluded[key];
+        items.push({
+          domain,
+          module,
+          excluded_tc_ids: excludedSet ? Array.from(excludedSet) : [],
+        });
+      }
+      try {
+        const r = await fetch(`/api/test-plans/${this.selectedPlan.id}/scope`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items }),
+        });
+        if (!r.ok) { sfToast('Failed to save scope.', 'error'); return; }
+        sfToast('Scope saved. Test cases synced.', 'info');
+        await this.loadPlans();
+      } catch(e) { sfToast('Failed to save scope.', 'error'); }
+    },
+
+    // ── execution tab ───────────────────────────────────────────────────
+
+    async loadExecution() {
+      if (!this.selectedPlan) return;
+      try {
+        const [tcR, runR, progR] = await Promise.all([
+          fetch(`/api/test-plans/${this.selectedPlan.id}/tc-status`),
+          fetch(`/api/test-plans/${this.selectedPlan.id}/runs`),
+          fetch(`/api/test-plans/${this.selectedPlan.id}/progress`),
+        ]);
+        if (tcR.ok) this.tcStatuses = (await tcR.json()).tc_statuses || [];
+        if (runR.ok) this.linkedRuns = (await runR.json()).runs || [];
+        if (progR.ok) this.progress = await progR.json();
+      } catch(e) {}
+    },
+
+    filteredTCStatuses() {
+      return this.tcStatuses.filter(tc => {
+        if (this.execFilterDomain && tc.domain !== this.execFilterDomain) return false;
+        if (this.execFilterStatus && tc.exec_status !== this.execFilterStatus) return false;
+        return true;
+      });
+    },
+
+    async updateTCStatus(tcId, execStatus, notes) {
+      try {
+        const r = await fetch(`/api/test-plans/${this.selectedPlan.id}/tc-status/${tcId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ exec_status: execStatus, notes: notes || '' }),
+        });
+        if (!r.ok) { sfToast('Update failed.', 'warn'); return; }
+        // Update local state
+        const idx = this.tcStatuses.findIndex(t => t.tc_id === tcId);
+        if (idx >= 0) {
+          this.tcStatuses[idx] = { ...this.tcStatuses[idx], exec_status: execStatus, notes: notes || '' };
+          this.tcStatuses = [...this.tcStatuses];
+        }
+        // Refresh progress
+        const pr = await fetch(`/api/test-plans/${this.selectedPlan.id}/progress`);
+        if (pr.ok) {
+          this.progress = await pr.json();
+          await this.loadPlans();
+        }
+      } catch(e) { sfToast('Update failed.', 'error'); }
+    },
+
+    async runAutomated() {
+      if (!await sfConfirm('Trigger automated runs for all in-scope modules?')) return;
+      try {
+        const r = await fetch(`/api/test-plans/${this.selectedPlan.id}/execute`, { method: 'POST' });
+        if (!r.ok) {
+          const e = await r.json();
+          sfToast(e.detail || 'Failed to trigger runs.', 'error');
+          return;
+        }
+        const d = await r.json();
+        sfToast(`${d.triggered} run(s) queued.`, 'info');
+        setTimeout(() => this.loadExecution(), 2000);
+      } catch(e) { sfToast('Failed to trigger runs.', 'error'); }
+    },
+
+    // ── badge helpers ───────────────────────────────────────────────────
+
+    statusBadge(status) {
+      const m = {
+        draft: 'bg-slate-100 text-slate-600',
+        active: 'bg-blue-100 text-blue-700',
+        completed: 'bg-emerald-100 text-emerald-700',
+        archived: 'bg-slate-200 text-slate-500',
+      };
+      return m[status] || 'bg-slate-100 text-slate-600';
+    },
+    riskBadge(sev) {
+      const m = { low: 'bg-emerald-100 text-emerald-700', medium: 'bg-amber-100 text-amber-700', high: 'bg-red-100 text-red-700' };
+      return m[sev] || 'bg-slate-100 text-slate-600';
+    },
+    autoStatusBadge(s) {
+      if (!s || s === 'automated') return 'bg-indigo-100 text-indigo-700';
+      if (s === 'not_automatable') return 'bg-slate-100 text-slate-500';
+      return 'bg-amber-100 text-amber-700';
+    },
+    execStatusBadgeSelect(s) {
+      const m = {
+        not_run: 'bg-slate-100 text-slate-600',
+        pass: 'bg-emerald-100 text-emerald-700',
+        fail: 'bg-red-100 text-red-700',
+        blocked: 'bg-amber-100 text-amber-700',
+      };
+      return m[s] || 'bg-slate-100 text-slate-600';
+    },
+    runStatusBadge(s) {
+      const m = { queued: 'bg-slate-100 text-slate-600', running: 'bg-blue-100 text-blue-700', completed: 'bg-emerald-100 text-emerald-700', failed: 'bg-red-100 text-red-700' };
+      return m[s] || 'bg-slate-100 text-slate-600';
+    },
+  };
+}
+</script>
+{% endblock %}

@@ -572,3 +572,15 @@ async def vapt_page(request: Request, product: str | None = None,
         vapt_products=vapt_prods,
         vapt_access=True,
     ))
+
+
+@router.get("/test-plans", response_class=HTMLResponse)
+async def test_plans_page(request: Request, product: str | None = None,
+                          current_user: dict = Depends(_require_auth)):
+    visible = user_products(current_user, _list_products())
+    if product and product not in visible:
+        product = None
+    return templates.TemplateResponse(request, "test_plans.html", context=_ctx(
+        request, current_user,
+        filter_product=product or "",
+    ))
