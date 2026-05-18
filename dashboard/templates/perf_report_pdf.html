@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #1e293b; margin: 0; padding: 0; font-size: 11pt; }
+  .cover { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 60pt 50pt; min-height: 200pt; }
+  .cover h1 { font-size: 26pt; font-weight: 700; margin: 0 0 8pt; }
+  .cover .sub { font-size: 13pt; opacity: 0.85; margin: 0 0 24pt; }
+  .cover .meta { font-size: 9pt; opacity: 0.7; }
+  .section { padding: 24pt 50pt; }
+  .section h2 { font-size: 14pt; font-weight: 600; color: #4f46e5; border-bottom: 1.5pt solid #e0e7ff; padding-bottom: 6pt; margin-bottom: 14pt; }
+  .section h3 { font-size: 11pt; font-weight: 600; color: #334155; margin: 16pt 0 8pt; }
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10pt; margin: 12pt 0; }
+  .metric-card { background: #f8fafc; border: 1pt solid #e2e8f0; border-radius: 6pt; padding: 10pt; text-align: center; }
+  .metric-card .value { font-size: 16pt; font-weight: 700; color: #1e293b; }
+  .metric-card .label { font-size: 8pt; color: #64748b; margin-top: 3pt; }
+  .badge { display: inline-block; padding: 2pt 6pt; border-radius: 4pt; font-size: 8pt; font-weight: 600; }
+  .badge-pass { background: #dcfce7; color: #166534; }
+  .badge-fail { background: #fee2e2; color: #991b1b; }
+  .badge-load { background: #dbeafe; color: #1d4ed8; }
+  .badge-stress { background: #ffedd5; color: #c2410c; }
+  .badge-spike { background: #fef9c3; color: #854d0e; }
+  .badge-soak { background: #f3e8ff; color: #7e22ce; }
+  .run-row { padding: 8pt; border-bottom: 0.5pt solid #f1f5f9; }
+  .run-row:last-child { border-bottom: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+  th { background: #f1f5f9; color: #475569; font-weight: 600; text-align: left; padding: 6pt 8pt; }
+  td { padding: 5pt 8pt; border-bottom: 0.5pt solid #f1f5f9; }
+  .footer { padding: 12pt 50pt; text-align: center; font-size: 8pt; color: #94a3b8; border-top: 0.5pt solid #e2e8f0; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>{{ eng.name }}</h1>
+  <div class="sub">Performance Test Report — {{ eng.target_url }}</div>
+  <div class="meta">
+    Product: {{ eng.product }} &nbsp;·&nbsp;
+    Generated: {{ generated_at }} &nbsp;·&nbsp;
+    Created by: {{ eng.created_by }}
+  </div>
+</div>
+
+<div class="section">
+  <h2>Summary</h2>
+  {% set completed_runs = runs | selectattr('status', 'equalto', 'completed') | list %}
+  <table>
+    <tr><th>Total Profiles</th><td>{{ eng.profiles | length }}</td></tr>
+    <tr><th>Total Runs</th><td>{{ runs | length }}</td></tr>
+    <tr><th>Completed Runs</th><td>{{ completed_runs | length }}</td></tr>
+    <tr><th>Runs with All Thresholds Passed</th><td>{{ completed_runs | selectattr('metrics.thresholds_passed') | list | length }}</td></tr>
+  </table>
+</div>
+
+{% for prof in eng.profiles %}
+<div class="section">
+  <h2>Profile: {{ prof.type | title }} Test</h2>
+  <table>
+    <tr><th>Type</th><td>{{ prof.type | title }}</td></tr>
+    <tr><th>Virtual Users</th><td>{{ prof.vus }}</td></tr>
+    <tr><th>Duration</th><td>{{ prof.duration_s }}s</td></tr>
+    <tr><th>Ramp-up</th><td>{{ prof.ramp_up_s }}s</td></tr>
+    <tr><th>P95 Threshold</th><td>{{ prof.thresholds.get('p95_ms', '—') }} ms</td></tr>
+    <tr><th>Error Rate Threshold</th><td>{{ prof.thresholds.get('error_rate_pct', '—') }}%</td></tr>
+    <tr><th>Endpoints</th><td>{% for ep in prof.endpoints %}{{ ep.method }} {{ ep.path }}{% if not loop.last %}, {% endif %}{% endfor %}</td></tr>
+  </table>
+
+  {% set prof_runs = runs | selectattr('profile_id', 'equalto', prof.profile_id) | list %}
+  {% if prof_runs %}
+  <h3>Run Results</h3>
+  <table>
+    <thead><tr>
+      <th>Date</th><th>Status</th><th>P50</th><th>P75</th><th>P95</th><th>P99</th><th>Throughput</th><th>Error %</th><th>Thresholds</th>
+    </tr></thead>
+    <tbody>
+    {% for run in prof_runs %}
+    <tr>
+      <td>{{ run.triggered_at[:16].replace('T',' ') if run.triggered_at else '—' }}</td>
+      <td><span class="badge {{ 'badge-pass' if run.status == 'completed' else 'badge-fail' }}">{{ run.status }}</span></td>
+      {% if run.metrics %}
+      <td>{{ run.metrics.p50_ms }}ms</td>
+      <td>{{ run.metrics.p75_ms }}ms</td>
+      <td>{{ run.metrics.p95_ms }}ms</td>
+      <td>{{ run.metrics.p99_ms }}ms</td>
+      <td>{{ run.metrics.throughput_rps }} rps</td>
+      <td>{{ run.metrics.error_rate_pct }}%</td>
+      <td><span class="badge {{ 'badge-pass' if run.metrics.thresholds_passed else 'badge-fail' }}">{{ 'Pass' if run.metrics.thresholds_passed else 'Fail' }}</span></td>
+      {% else %}
+      <td colspan="7">{{ run.error or '—' }}</td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endfor %}
+
+<div class="footer">SentinelFlux Performance Report &nbsp;·&nbsp; {{ generated_at }}</div>
+</body>
+</html>

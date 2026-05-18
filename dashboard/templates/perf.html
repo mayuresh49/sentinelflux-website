@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+{% block title %}Performance Testing{% endblock %}
+{% block header_filter %}
+<div class="flex items-center gap-3">
+  <label class="text-xs font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap">Product</label>
+  <select class="text-sm border border-slate-200 rounded-lg px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300"
+          onchange="applyProductFilter(this.value)">
+    <option value="">Select product…</option>
+    {% for p in perf_products %}
+    <option value="{{ p }}" {{ 'selected' if request.query_params.get('product') == p else '' }}>{{ p }}</option>
+    {% endfor %}
+  </select>
+  {% if request.query_params.get('product') %}
+  <a href="/perf" class="text-xs text-slate-400 hover:text-slate-600 transition-colors">× clear</a>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6" x-data="perfApp()" x-init="init()">
+
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Performance Testing</h1>
+      <p class="text-sm text-slate-500 mt-0.5">Load, stress, spike and soak test execution — httpx async engine</p>
+    </div>
+    <button @click="showCreate = true" x-show="product"
+            class="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+      </svg>
+      New Test Suite
+    </button>
+  </div>
+
+  {% if not perf_products %}
+  <div class="bg-amber-50 border border-amber-200 rounded-xl p-8 text-center">
+    <p class="text-sm font-medium text-amber-800">No performance-testing-enabled products</p>
+    <p class="text-xs text-amber-600 mt-1">Enable performance testing for a product in <a href="/config" class="underline font-medium">Configurations → Products</a>.</p>
+  </div>
+  {% else %}
+
+  <!-- Create Modal -->
+  <div x-show="showCreate" x-cloak class="fixed inset-0 z-50 flex items-center justify-center" @keydown.escape.window="showCreate = false">
+    <div class="absolute inset-0 bg-slate-900/40" @click="showCreate = false"></div>
+    <div class="relative bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-md mx-4 p-6 space-y-4">
+      <h3 class="text-base font-semibold text-slate-800">New Test Suite</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Suite Name</label>
+          <input x-model="createForm.name" type="text" placeholder="e.g. Login Flow Load Test"
+                 class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Target URL</label>
+          <input x-model="createForm.target_url" type="url" placeholder="https://app.example.com"
+                 class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button @click="showCreate = false" class="text-sm text-slate-600 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-100">Cancel</button>
+        <button @click="createEngagement()" :disabled="!createForm.name || !createForm.target_url"
+                class="text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg disabled:opacity-40">
+          Create Suite
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Profile Modal -->
+  <div x-show="showProfile" x-cloak class="fixed inset-0 z-50 flex items-center justify-center" @keydown.escape.window="showProfile = false">
+    <div class="absolute inset-0 bg-slate-900/40" @click="showProfile = false"></div>
+    <div class="relative bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-lg mx-4 p-6 space-y-4 overflow-y-auto max-h-[90vh]">
+      <h3 class="text-base font-semibold text-slate-800">Test Profile</h3>
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Type</label>
+            <select x-model="profileForm.type" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="load">Load</option>
+              <option value="stress">Stress</option>
+              <option value="spike">Spike</option>
+              <option value="soak">Soak</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Virtual Users</label>
+            <input x-model.number="profileForm.vus" type="number" min="1" max="500"
+                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Duration (seconds)</label>
+            <input x-model.number="profileForm.duration_s" type="number" min="5"
+                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Ramp-up (seconds)</label>
+            <input x-model.number="profileForm.ramp_up_s" type="number" min="0"
+                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">P95 Threshold (ms)</label>
+            <input x-model.number="profileForm.thresholds.p95_ms" type="number" min="100"
+                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Error Rate Threshold (%)</label>
+            <input x-model.number="profileForm.thresholds.error_rate_pct" type="number" min="0" max="100" step="0.1"
+                   class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Endpoints (one per line: METHOD /path)</label>
+          <textarea x-model="profileForm.endpoints_raw" rows="4" placeholder="GET /
+POST /api/login
+GET /api/users"
+                    class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button @click="showProfile = false" class="text-sm text-slate-600 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-100">Cancel</button>
+        <button @click="saveProfile()"
+                class="text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-lg">
+          Save Profile
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Suite list -->
+    <div class="space-y-3">
+      <div x-show="!product" class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center">
+        <p class="text-sm text-slate-500">Select a product above to view test suites.</p>
+      </div>
+      <template x-for="eng in engagements" :key="eng.id">
+        <div @click="selectEng(eng)"
+             :class="selectedEng?.id === eng.id ? 'border-indigo-500 bg-indigo-50/50' : 'border-slate-200 bg-white hover:border-slate-300'"
+             class="border rounded-xl p-4 cursor-pointer transition-all">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-slate-800 truncate" x-text="eng.name"></p>
+              <p class="text-xs text-slate-400 mt-0.5" x-text="eng.target_url"></p>
+            </div>
+            <span class="shrink-0 text-xs px-2 py-0.5 rounded-full font-medium"
+                  :class="runStatusBadge(eng)">
+              <span x-text="latestRunStatus(eng)"></span>
+            </span>
+          </div>
+          <div class="flex items-center gap-3 mt-2 text-xs text-slate-500">
+            <span x-text="eng.profiles?.length + ' profiles'"></span>
+            <span x-text="eng.runs?.length + ' runs'"></span>
+          </div>
+        </div>
+      </template>
+      <div x-show="product && engagements.length === 0" class="text-center py-8 text-sm text-slate-400">No test suites yet. Create one above.</div>
+    </div>
+
+    <!-- Detail panel -->
+    <div class="lg:col-span-2" x-show="selectedEng">
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <!-- Tabs -->
+        <div x-data="{ tab: 'profiles' }" class="h-full">
+          <div class="border-b border-slate-100 px-5 flex items-center gap-1 pt-2">
+            <button @click="tab = 'profiles'" :class="tab === 'profiles' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'"
+                    class="px-3 py-2 text-sm font-medium border-b-2 transition-colors">Profiles</button>
+            <button @click="tab = 'runs'" :class="tab === 'runs' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'"
+                    class="px-3 py-2 text-sm font-medium border-b-2 transition-colors">
+              Run History
+              <span x-text="'(' + (selectedEng?.runs?.length || 0) + ')'" class="ml-1 text-xs text-slate-400"></span>
+            </button>
+            <button @click="tab = 'report'" :class="tab === 'report' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'"
+                    class="px-3 py-2 text-sm font-medium border-b-2 transition-colors">Report</button>
+            <div class="ml-auto pb-2">
+              <button @click="deleteEng()" class="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors">Delete Suite</button>
+            </div>
+          </div>
+
+          <!-- Profiles tab -->
+          <div x-show="tab === 'profiles'" class="p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <p class="text-sm font-medium text-slate-700">Test Profiles</p>
+              <button @click="openAddProfile()"
+                      class="text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                Add Profile
+              </button>
+            </div>
+            <div x-show="!selectedEng?.profiles?.length" class="text-sm text-slate-400 text-center py-6">No profiles configured. Add one to define load parameters.</div>
+            <template x-for="prof in (selectedEng?.profiles || [])" :key="prof.profile_id">
+              <div class="border border-slate-200 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs px-2 py-0.5 rounded-full font-medium capitalize"
+                          :class="{
+                            'bg-blue-100 text-blue-700': prof.type === 'load',
+                            'bg-orange-100 text-orange-700': prof.type === 'stress',
+                            'bg-yellow-100 text-yellow-700': prof.type === 'spike',
+                            'bg-purple-100 text-purple-700': prof.type === 'soak'
+                          }" x-text="prof.type"></span>
+                    <span class="text-xs text-slate-500" x-text="prof.vus + ' VUs · ' + prof.duration_s + 's'"></span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button @click="triggerRun(prof.profile_id)"
+                            class="text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg transition-colors">
+                      Run
+                    </button>
+                    <button @click="deleteProfile(prof.profile_id)" class="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors">Remove</button>
+                  </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-xs text-slate-500">
+                  <span>Ramp-up: <strong class="text-slate-700" x-text="prof.ramp_up_s + 's'"></strong></span>
+                  <span>P95 limit: <strong class="text-slate-700" x-text="prof.thresholds?.p95_ms + 'ms'"></strong></span>
+                  <span>Error limit: <strong class="text-slate-700" x-text="prof.thresholds?.error_rate_pct + '%'"></strong></span>
+                </div>
+                <div class="mt-2 text-xs text-slate-400" x-text="(prof.endpoints?.length || 0) + ' endpoint(s)'"></div>
+              </div>
+            </template>
+          </div>
+
+          <!-- Run History tab -->
+          <div x-show="tab === 'runs'" class="p-5 space-y-3">
+            <div x-show="!selectedEng?.runs?.length" class="text-sm text-slate-400 text-center py-6">No runs yet.</div>
+            <template x-for="run in [...(selectedEng?.runs || [])].reverse()" :key="run.run_id">
+              <div class="border border-slate-200 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs px-2 py-0.5 rounded-full font-medium"
+                          :class="{
+                            'bg-green-100 text-green-700': run.status === 'completed' && run.metrics?.thresholds_passed,
+                            'bg-red-100 text-red-700': run.status === 'failed' || (run.status === 'completed' && !run.metrics?.thresholds_passed),
+                            'bg-blue-100 text-blue-700': run.status === 'running',
+                            'bg-slate-100 text-slate-700': run.status === 'queued'
+                          }" x-text="run.status === 'completed' ? (run.metrics?.thresholds_passed ? 'Passed' : 'Thresholds Failed') : run.status"></span>
+                    <span class="text-xs text-slate-500" x-text="run.triggered_at?.slice(0,16).replace('T',' ')"></span>
+                  </div>
+                  <button @click="deleteRun(run.run_id)" x-show="!['queued','running'].includes(run.status)"
+                          class="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors">Delete</button>
+                </div>
+                <template x-if="run.metrics">
+                  <div class="grid grid-cols-4 gap-2 text-xs text-center mt-2">
+                    <div class="bg-slate-50 rounded-lg p-2">
+                      <p class="font-semibold text-slate-800" x-text="run.metrics.p50_ms + 'ms'"></p>
+                      <p class="text-slate-400">P50</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-lg p-2">
+                      <p class="font-semibold text-slate-800" x-text="run.metrics.p95_ms + 'ms'"></p>
+                      <p class="text-slate-400">P95</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-lg p-2">
+                      <p class="font-semibold text-slate-800" x-text="run.metrics.throughput_rps + ' rps'"></p>
+                      <p class="text-slate-400">Throughput</p>
+                    </div>
+                    <div class="bg-slate-50 rounded-lg p-2">
+                      <p class="font-semibold text-slate-800" x-text="run.metrics.error_rate_pct + '%'"></p>
+                      <p class="text-slate-400">Error Rate</p>
+                    </div>
+                  </div>
+                </template>
+                <p x-show="run.error" class="text-xs text-red-600 mt-2" x-text="run.error"></p>
+              </div>
+            </template>
+          </div>
+
+          <!-- Report tab -->
+          <div x-show="tab === 'report'" class="p-5 space-y-4">
+            <p class="text-sm text-slate-600">Download a PDF report summarising all runs and metrics for this test suite.</p>
+            <a :href="'/api/perf/engagement/' + selectedEng?.id + '/report?product=' + product + '&format=pdf'"
+               target="_blank"
+               class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              Download PDF Report
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+
+<script>
+function perfApp() {
+  return {
+    product: '{{ request.query_params.get("product", "") }}',
+    engagements: [],
+    selectedEng: null,
+    showCreate: false,
+    showProfile: false,
+    createForm: { name: '', target_url: '' },
+    profileForm: { type: 'load', vus: 10, duration_s: 60, ramp_up_s: 10, thresholds: { p95_ms: 2000, error_rate_pct: 5 }, endpoints_raw: 'GET /' },
+
+    async init() {
+      if (this.product) await this.loadEngagements();
+    },
+
+    async loadEngagements() {
+      const resp = await fetch(`/api/perf/engagements?product=${this.product}`);
+      if (resp.ok) this.engagements = await resp.json();
+    },
+
+    async selectEng(eng) {
+      const resp = await fetch(`/api/perf/engagement/${eng.id}?product=${this.product}`);
+      if (resp.ok) this.selectedEng = await resp.json();
+    },
+
+    async createEngagement() {
+      const resp = await fetch('/api/perf/engagements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...this.createForm, product: this.product })
+      });
+      if (resp.ok) {
+        this.showCreate = false;
+        this.createForm = { name: '', target_url: '' };
+        await this.loadEngagements();
+        sfToast('Test suite created', 'info');
+      } else {
+        sfToast('Failed to create suite', 'error');
+      }
+    },
+
+    async deleteEng() {
+      if (!await sfConfirm('Delete this test suite and all its run history?')) return;
+      const resp = await fetch(`/api/perf/engagement/${this.selectedEng.id}?product=${this.product}`, { method: 'DELETE' });
+      if (resp.ok) {
+        this.selectedEng = null;
+        await this.loadEngagements();
+        sfToast('Suite deleted', 'info');
+      }
+    },
+
+    openAddProfile() {
+      this.profileForm = { type: 'load', vus: 10, duration_s: 60, ramp_up_s: 10, thresholds: { p95_ms: 2000, error_rate_pct: 5 }, endpoints_raw: 'GET /' };
+      this.showProfile = true;
+    },
+
+    async saveProfile() {
+      const endpoints = (this.profileForm.endpoints_raw || 'GET /').trim().split('\n').map(l => {
+        const parts = l.trim().split(/\s+/);
+        const method = parts.length > 1 ? parts[0].toUpperCase() : 'GET';
+        const path = parts.length > 1 ? parts[1] : parts[0];
+        return { method, path, expected_status: 200 };
+      }).filter(e => e.path);
+      const payload = { ...this.profileForm, endpoints, endpoints_raw: undefined };
+      delete payload.endpoints_raw;
+      const resp = await fetch(`/api/perf/engagement/${this.selectedEng.id}/profile?product=${this.product}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (resp.ok) {
+        this.selectedEng = await resp.json();
+        this.showProfile = false;
+        sfToast('Profile saved', 'info');
+      } else {
+        sfToast('Failed to save profile', 'error');
+      }
+    },
+
+    async deleteProfile(profileId) {
+      if (!await sfConfirm('Remove this test profile?')) return;
+      const resp = await fetch(`/api/perf/engagement/${this.selectedEng.id}/profile/${profileId}?product=${this.product}`, { method: 'DELETE' });
+      if (resp.ok) {
+        this.selectedEng = await resp.json();
+        sfToast('Profile removed', 'info');
+      }
+    },
+
+    async triggerRun(profileId) {
+      const resp = await fetch(`/api/perf/engagement/${this.selectedEng.id}/run?product=${this.product}&profile_id=${profileId}`, { method: 'POST' });
+      if (resp.ok) {
+        sfToast('Run started', 'info');
+        await this.poll(this.selectedEng.id);
+      } else {
+        const err = await resp.json();
+        sfToast(err.detail || 'Failed to start run', 'error');
+      }
+    },
+
+    async poll(engId) {
+      await new Promise(r => setTimeout(r, 1500));
+      const check = async () => {
+        const r = await fetch(`/api/perf/engagement/${engId}?product=${this.product}`);
+        if (!r.ok) return;
+        const eng = await r.json();
+        const hasActive = eng.runs?.some(r => ['queued','running'].includes(r.status));
+        if (this.selectedEng?.id === engId) this.selectedEng = eng;
+        if (hasActive) setTimeout(check, 3000);
+        else await this.loadEngagements();
+      };
+      check();
+    },
+
+    async deleteRun(runId) {
+      if (!await sfConfirm('Delete this run record?')) return;
+      const resp = await fetch(`/api/perf/engagement/${this.selectedEng.id}/run/${runId}?product=${this.product}`, { method: 'DELETE' });
+      if (resp.ok) { this.selectedEng = await resp.json(); sfToast('Run deleted', 'info'); }
+    },
+
+    latestRunStatus(eng) {
+      if (!eng.runs?.length) return 'No runs';
+      const last = eng.runs[eng.runs.length - 1];
+      if (last.status === 'completed') return last.metrics?.thresholds_passed ? '✓ Passed' : '⚠ Thresholds';
+      return last.status;
+    },
+
+    runStatusBadge(eng) {
+      if (!eng.runs?.length) return 'bg-slate-100 text-slate-500';
+      const last = eng.runs[eng.runs.length - 1];
+      if (last.status === 'completed' && last.metrics?.thresholds_passed) return 'bg-green-100 text-green-700';
+      if (last.status === 'completed') return 'bg-amber-100 text-amber-700';
+      if (last.status === 'failed') return 'bg-red-100 text-red-700';
+      return 'bg-blue-100 text-blue-600';
+    },
+  };
+}
+</script>
+{% endblock %}

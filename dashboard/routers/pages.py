@@ -29,6 +29,18 @@ def _require_auth(request: Request) -> dict:
     return user
 
 
+def _module_access(flag: str, current_user: dict) -> bool:
+    try:
+        from dashboard.routers.config._helpers import _load_config
+        cfg = _load_config()
+        if current_user.get("admin"):
+            return True
+        user_prods = set(current_user.get("products", []))
+        return any(p.get(flag) and p["name"] in user_prods for p in cfg.get("products", []))
+    except Exception:
+        return bool(current_user.get("admin"))
+
+
 def _vapt_access(current_user: dict) -> bool:
     try:
         from dashboard.routers.config._helpers import _load_config
@@ -49,6 +61,10 @@ def _ctx(request: Request, current_user: dict, **kwargs) -> dict:
         "all_products": visible,
         "current_user": current_user,
         "vapt_access": _vapt_access(current_user),
+        "perf_access": _module_access("perf_enabled", current_user),
+        "a11y_access": _module_access("a11y_enabled", current_user),
+        "contract_access": _module_access("contract_enabled", current_user),
+        "visual_access": _module_access("visual_enabled", current_user),
         **kwargs,
     }
 
@@ -571,6 +587,46 @@ async def vapt_page(request: Request, product: str | None = None,
         request, current_user,
         vapt_products=vapt_prods,
         vapt_access=True,
+    ))
+
+
+@router.get("/perf", response_class=HTMLResponse)
+async def perf_page(request: Request, current_user: dict = Depends(_require_auth)):
+    if not _module_access("perf_enabled", current_user):
+        return RedirectResponse("/", status_code=302)
+    from dashboard.routers.perf import _perf_products
+    return templates.TemplateResponse(request, "perf.html", context=_ctx(
+        request, current_user, perf_products=_perf_products(current_user),
+    ))
+
+
+@router.get("/a11y", response_class=HTMLResponse)
+async def a11y_page(request: Request, current_user: dict = Depends(_require_auth)):
+    if not _module_access("a11y_enabled", current_user):
+        return RedirectResponse("/", status_code=302)
+    from dashboard.routers.a11y import _a11y_products
+    return templates.TemplateResponse(request, "a11y.html", context=_ctx(
+        request, current_user, a11y_products=_a11y_products(current_user),
+    ))
+
+
+@router.get("/contract", response_class=HTMLResponse)
+async def contract_page(request: Request, current_user: dict = Depends(_require_auth)):
+    if not _module_access("contract_enabled", current_user):
+        return RedirectResponse("/", status_code=302)
+    from dashboard.routers.contract import _contract_products
+    return templates.TemplateResponse(request, "contract.html", context=_ctx(
+        request, current_user, contract_products=_contract_products(current_user),
+    ))
+
+
+@router.get("/visual", response_class=HTMLResponse)
+async def visual_page(request: Request, current_user: dict = Depends(_require_auth)):
+    if not _module_access("visual_enabled", current_user):
+        return RedirectResponse("/", status_code=302)
+    from dashboard.routers.visual import _visual_products
+    return templates.TemplateResponse(request, "visual.html", context=_ctx(
+        request, current_user, visual_products=_visual_products(current_user),
     ))
 
 

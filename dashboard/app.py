@@ -47,6 +47,10 @@ from dashboard.routers import runner as runner_router
 from dashboard.routers import runs as runs_router
 from dashboard.routers import vapt as vapt_router
 from dashboard.routers import test_plans as test_plans_router
+from dashboard.routers import perf as perf_router
+from dashboard.routers import a11y as a11y_router
+from dashboard.routers import contract as contract_router
+from dashboard.routers import visual as visual_router
 
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
 # Use a stable secret from env so sessions survive restarts; fall back to a generated one.
@@ -103,6 +107,10 @@ app.include_router(runs_router.router, prefix="/api")
 app.include_router(runner_router.router, prefix="/api")
 app.include_router(vapt_router.router, prefix="/api")
 app.include_router(test_plans_router.router, prefix="/api/test-plans")
+app.include_router(perf_router.router, prefix="/api")
+app.include_router(a11y_router.router, prefix="/api")
+app.include_router(contract_router.router, prefix="/api")
+app.include_router(visual_router.router, prefix="/api")
 
 
 @app.on_event("startup")

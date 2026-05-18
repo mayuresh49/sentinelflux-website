@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #1e293b; margin: 0; padding: 0; font-size: 11pt; }
+  .cover { background: linear-gradient(135deg, #059669, #0891b2); color: white; padding: 60pt 50pt; min-height: 200pt; }
+  .cover h1 { font-size: 26pt; font-weight: 700; margin: 0 0 8pt; }
+  .cover .sub { font-size: 13pt; opacity: 0.85; margin: 0 0 24pt; }
+  .cover .meta { font-size: 9pt; opacity: 0.7; }
+  .section { padding: 24pt 50pt; }
+  .section h2 { font-size: 14pt; font-weight: 600; color: #059669; border-bottom: 1.5pt solid #d1fae5; padding-bottom: 6pt; margin-bottom: 14pt; }
+  .section h3 { font-size: 11pt; font-weight: 600; color: #334155; margin: 14pt 0 8pt; }
+  .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10pt; margin: 12pt 0; }
+  .summary-card { background: #f8fafc; border: 1pt solid #e2e8f0; border-radius: 6pt; padding: 10pt; text-align: center; }
+  .summary-card .value { font-size: 18pt; font-weight: 700; }
+  .summary-card .label { font-size: 8pt; color: #64748b; margin-top: 3pt; }
+  .pass .value { color: #059669; }
+  .fail .value { color: #dc2626; }
+  .total .value { color: #0891b2; }
+  .badge { display: inline-block; padding: 2pt 6pt; border-radius: 4pt; font-size: 8pt; font-weight: 600; }
+  .badge-pass { background: #dcfce7; color: #166534; }
+  .badge-fail { background: #fee2e2; color: #991b1b; }
+  .badge-skip { background: #f1f5f9; color: #64748b; }
+  .badge-get { background: #dbeafe; color: #1d4ed8; }
+  .badge-post { background: #dcfce7; color: #166534; }
+  .badge-put, .badge-patch { background: #ffedd5; color: #c2410c; }
+  .badge-delete { background: #fee2e2; color: #991b1b; }
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+  th { background: #ecfdf5; color: #065f46; font-weight: 600; text-align: left; padding: 6pt 8pt; }
+  td { padding: 5pt 8pt; border-bottom: 0.5pt solid #f1f5f9; vertical-align: top; font-family: monospace; font-size: 8.5pt; }
+  td.normal { font-family: inherit; font-size: 9pt; }
+  .footer { padding: 12pt 50pt; text-align: center; font-size: 8pt; color: #94a3b8; border-top: 0.5pt solid #e2e8f0; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>{{ eng.name }}</h1>
+  <div class="sub">API Contract Validation Report</div>
+  <div class="meta">
+    Product: {{ eng.product }} &nbsp;·&nbsp;
+    Spec: {{ eng.spec_source }} &nbsp;·&nbsp;
+    Generated: {{ generated_at }}
+  </div>
+</div>
+
+<div class="section">
+  <h2>Configuration</h2>
+  <table>
+    <tr><th class="normal" style="width:30%">Spec Source</th><td>{{ eng.spec_source }}</td></tr>
+    <tr><th class="normal">Base URL</th><td>{{ eng.base_url }}</td></tr>
+    <tr><th class="normal">Total Runs</th><td class="normal">{{ eng.runs | length }}</td></tr>
+  </table>
+</div>
+
+{% set completed_runs = eng.runs | selectattr('status', 'equalto', 'completed') | list %}
+{% if completed_runs %}
+{% set latest = completed_runs[-1] %}
+<div class="section">
+  <h2>Latest Run Results</h2>
+  <p style="font-size:9pt;color:#64748b;">Run date: {{ latest.triggered_at[:16].replace('T',' ') }}</p>
+
+  <div class="summary-grid">
+    <div class="summary-card total"><div class="value">{{ latest.endpoints_tested }}</div><div class="label">Endpoints Tested</div></div>
+    <div class="summary-card pass"><div class="value">{{ latest.passed }}</div><div class="label">Passed</div></div>
+    <div class="summary-card fail"><div class="value">{{ latest.failed }}</div><div class="label">Failed</div></div>
+  </div>
+
+  {% if latest.results %}
+  <table>
+    <thead><tr><th class="normal">Method</th><th class="normal">Path</th><th class="normal">Expected</th><th class="normal">Actual</th><th class="normal">Schema</th><th class="normal">Result</th></tr></thead>
+    <tbody>
+    {% for r in latest.results %}
+    <tr>
+      <td><span class="badge badge-{{ r.method | lower }}">{{ r.method }}</span></td>
+      <td>{{ r.path }}</td>
+      {% if r.skipped %}
+      <td class="normal" colspan="3" style="color:#94a3b8">{{ r.skip_reason }}</td>
+      <td><span class="badge badge-skip">Skipped</span></td>
+      {% else %}
+      <td class="normal">{{ r.expected_status or '—' }}</td>
+      <td class="normal">{{ r.actual_status or '—' }}</td>
+      <td class="normal">{{ '✓' if r.schema_valid else '✗' }}</td>
+      <td><span class="badge {{ 'badge-pass' if r.passed else 'badge-fail' }}">{{ 'Pass' if r.passed else 'Fail' }}</span></td>
+      {% endif %}
+    </tr>
+    {% if not r.skipped and r.issues %}
+    <tr><td colspan="6" style="color:#dc2626;font-size:8pt;padding-left:16pt;">Issues: {{ r.issues | join(' | ') }}</td></tr>
+    {% endif %}
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+<div class="section">
+  <h2>Run History</h2>
+  <table>
+    <thead><tr><th class="normal">Date</th><th class="normal">Status</th><th class="normal">Endpoints</th><th class="normal">Passed</th><th class="normal">Failed</th></tr></thead>
+    <tbody>
+    {% for run in eng.runs | reverse %}
+    <tr>
+      <td class="normal">{{ run.triggered_at[:16].replace('T',' ') if run.triggered_at else '—' }}</td>
+      <td><span class="badge {{ 'badge-pass' if run.status == 'completed' and run.failed == 0 else 'badge-fail' }}">{{ run.status }}</span></td>
+      <td class="normal">{{ run.endpoints_tested }}</td>
+      <td class="normal">{{ run.passed }}</td>
+      <td class="normal">{{ run.failed }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="footer">SentinelFlux API Contract Validation Report &nbsp;·&nbsp; {{ generated_at }}</div>
+</body>
+</html>
