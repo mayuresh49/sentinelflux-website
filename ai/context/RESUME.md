@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (22)  
+Last updated: 2026-05-18 (23)  
 Framework version: 0.1.0
 
 ---
