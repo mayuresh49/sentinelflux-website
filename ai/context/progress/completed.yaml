@@ -1,5 +1,15 @@
 # Completed work items — append only, newest first
 
+- id: tc-doc-section-spacing
+  date: 2026-05-18
+  title: "TC doc section spacing: blank lines before Pre-conditions/Steps/Expected Result"
+  outcome: >
+    prompt_templates.py: web + API format examples now have blank lines between every section.
+    orchestrator.py _clean_doc(): _TC_HEADERS regex (pattern: **<keyword>[^*]*\*\*) ensures
+    blank line before each bold section header on every pipeline run; also strips inline ```
+    fences. 23 existing docs reformatted in one pass. Bug caught: colon is inside bold
+    markers (**Pre-conditions:**), not after — fixed regex accordingly.
+
 - id: vapt-exhaustive-suite-template-viewer
   date: 2026-05-18
   title: "VAPT: exhaustive A01-A10 test suite, template viewer, dedup product filter"

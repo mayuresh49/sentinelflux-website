@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (7)  
+Last updated: 2026-05-18 (9)  
 Framework version: 0.1.0
 
 ---
@@ -38,6 +38,14 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **TC doc section spacing** (`ai/prompts/prompt_templates.py`, `ai/pipeline/orchestrator.py`, 23 docs): LLM was generating `**Pre-conditions:**`, `**Steps:**` etc. with no blank line before them, making sections run together. Fixed in three places: (1) prompt templates — added blank lines between every section in the web and API format examples; (2) `_clean_doc()` in orchestrator — added `_TC_HEADERS` regex normalizer that ensures a blank line before every `**<section>...**` header on every pipeline run (also strips inline ``` fences some models inject around TC blocks); (3) all 23 existing docs reformatted in one pass. Key bug: pattern must be `\*\*<keyword>[^*]*\*\*` not `\*\*<keyword>\*\*[:\s]` because the colon sits inside the closing `**`, not after it.
+
+## Previous: Quality metrics VAPT exclusion + doc-gen signal (2026-05-18)
+
+- **Quality metrics: VAPT exclusion + low-coverage doc-gen signal** (`dashboard/routers/quality.py`, `dashboard/templates/quality.html`): VAPT tests (`products/*/tests/vapt/`) excluded from all quality metrics (script count, test function count, doc coverage denominator) — they are template-generated with no KB docs. Added `_EXCLUDED_DOMAINS = {"vapt"}` constant applied in `_script_features()`, `_scripts_by_domain()`, `_count_test_functions()`. Added `_undocumented_with_domain(product)` returning `[{feature, domain}]` for scripts missing test case docs. Health signals section now shows a per-product low-coverage card when `doc_coverage < 70%` with collapsible list of undocumented scripts; each script has a "Generate Doc" button that POSTs to `/api/pipeline/trigger` with `skip_script=true` (generates doc only, preserves existing script), button shows pending/queued/error state via Alpine + `sfToast`.
+
+## Previous: VAPT exhaustive test suite + template viewer (2026-05-18)
 
 - **VAPT exhaustive test suite + template viewer** (`core/vapt_test_generator.py`, `dashboard/routers/vapt.py`, `vapt.html`): Expanded from 5 to 9 test files (31 tests) covering full OWASP A01–A10. New files: `test_vapt_injection.py` (A03 — SQL, XSS, path traversal, SSTI), `test_vapt_session.py` (A07 — HttpOnly/Secure/SameSite cookie flags, session not in URL), `test_vapt_web.py` (A01/A05 — clickjacking, open redirect, referrer policy, HTML comments), `test_vapt_ssrf.py` (A10 — IMDS probes, RFC-1918 rebinding). OWASP inference fixed: `clickjack` moved A03→A05, added `path_traversal`, `httponly`, `samesite`, `dns_rebinding` keywords. Template viewer panel in Scans tab — "View Standard Test Templates" collapsible with per-file OWASP context and code. `vapt._vapt_products()` is now the single source of truth — `pages.py` `vapt_page()` no longer duplicates the filtering logic. RP result: 25 passed, 3 skipped, 3 xfailed.
 
