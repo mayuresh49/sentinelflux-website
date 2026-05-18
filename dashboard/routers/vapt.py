@@ -92,6 +92,7 @@ def _infer_owasp(nodeid: str) -> tuple[str, str]:
 def _make_title(nodeid: str) -> str:
     fn = nodeid.split("::")[-1]
     fn = re.sub(r"^test_", "", fn)
+    fn = re.sub(r"^(A0[1-9]|A10)_", "", fn, flags=re.IGNORECASE)
     return fn.replace("_", " ").title()
 
 
@@ -568,6 +569,43 @@ def _render_template(tpl_name: str, **ctx: Any) -> str:
     return env.get_template(tpl_name).render(**ctx)
 
 
+_OWASP_EMBEDDED = re.compile(r"(?:^|_)(A0[1-9]|A10)(?:_|$)", re.IGNORECASE)
+_OWASP_CAT_MAP = {r: cat for _, r, cat in _OWASP_RULES}  # built once at import
+
+def _infer_test_log_from_files(product: str, scan_id: str, findings: list[dict]) -> list[dict]:
+    """Reconstruct a test log from vapt test files for scans that predate test_log persistence."""
+    vapt_dir = _ROOT / "products" / product / "tests" / "vapt"
+    if not vapt_dir.exists():
+        return []
+    finding_ids = {f["test_id"] for f in findings if f.get("scan_id") == scan_id}
+    rows = []
+    for tf in sorted(vapt_dir.glob("test_*.py")):
+        rel = str(tf.relative_to(_ROOT))
+        for line in tf.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line.startswith("def test_"):
+                continue
+            fn = line[4:].split("(")[0]
+            nodeid = f"{rel}::{fn}"
+            # prefer OWASP ref embedded in function name (e.g. test_A01_...)
+            m = _OWASP_EMBEDDED.search(fn)
+            if m:
+                owasp_ref = m.group(1).upper()
+                owasp_category = _OWASP_CAT_MAP.get(owasp_ref, "Unknown")
+            else:
+                owasp_ref, owasp_category = _infer_owasp(nodeid)
+            status = "finding" if nodeid in finding_ids else "confirmed_secure"
+            rows.append({
+                "test_id": nodeid,
+                "title": _make_title(nodeid),
+                "owasp_ref": owasp_ref,
+                "owasp_category": owasp_category,
+                "severity": _SEVERITY_BY_OWASP.get(owasp_ref, "Medium"),
+                "status": status,
+            })
+    return rows
+
+
 def _render_plan_html(eng: dict) -> str:
     return _render_template("vapt_plan_pdf.html", eng=eng,
                              owasp_desc=_OWASP_DESCRIPTIONS,
@@ -583,12 +621,12 @@ def _render_report_html(eng: dict) -> str:
             by_sev[f["severity"]] = by_sev.get(f["severity"], 0) + 1
         cat = f"{f['owasp_ref']} — {f['owasp_category']}"
         by_owasp[cat].append(f)
-    # Collect per-scan test logs for the execution detail section
-    scan_test_logs = [
-        {"scan": s, "tests": s.get("test_log", [])}
-        for s in eng.get("scans", [])
-        if s.get("status") == "completed" and s.get("test_log")
-    ]
+    scan_test_logs = []
+    for s in eng.get("scans", []):
+        if s.get("status") != "completed":
+            continue
+        tests = s.get("test_log") or _infer_test_log_from_files(eng["product"], s["scan_id"], eng.get("findings", []))
+        scan_test_logs.append({"scan": s, "tests": tests})
     return _render_template("vapt_report_pdf.html", eng=eng,
                              by_sev=by_sev, by_owasp=dict(by_owasp),
                              scan_test_logs=scan_test_logs,

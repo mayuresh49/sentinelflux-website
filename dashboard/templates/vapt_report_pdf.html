@@ -209,6 +209,7 @@
 {% for entry in scan_test_logs %}
 {% set s = entry.scan %}
 <h3>Scan {{ loop.index }}: {{ s.triggered_at[:10] }} — {{ 'Re-validation' if s.is_revalidation else 'Initial Scan' }} ({{ s.total }} tests, {{ '%.1f s' % s.duration if s.duration else '?' }})</h3>
+{% if not s.get('test_log') %}<p style="font-size:8pt;color:#94a3b8;font-style:italic;">* Pass/skip breakdown inferred from test files; skipped tests shown as Secure. Re-run the scan for exact per-test outcomes.</p>{% endif %}
 <table>
   <tr><th>#</th><th>Test</th><th>OWASP</th><th>Severity</th><th>Result</th></tr>
   {% for t in entry.tests %}
