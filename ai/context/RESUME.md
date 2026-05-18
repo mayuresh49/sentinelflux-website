@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (9)  
+Last updated: 2026-05-18 (10)  
 Framework version: 0.1.0
 
 ---
@@ -38,6 +38,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **VAPT bug fixes** (`dashboard/routers/config/__init__.py`, `dashboard/routers/vapt.py`, `dashboard/templates/vapt.html`): Three bugs fixed. (1) VAPT nav link invisible on config page — `config_page()` built its own context dict without `vapt_access`; `base.html` gated the nav link on that key so it was always hidden. Added inline admin-or-vapt-enabled-product check directly in the config route. (2) Scope save data lost on re-select — `saveScope()` updated `this.selectedEng` but not the `this.engagements` array; clicking another engagement then back re-populated the form from the stale list entry. Fixed with `engagements.splice(idx, 1, updated)` after each successful PUT. Same fix applied to `updateFinding`. (3) Report generation blocked with zero findings — backend raised 400 if `eng.findings` was empty; UI hid the report form behind a findings-count gate. Both guards removed; reports generate regardless of findings count.
+
+## Previous: TC doc section spacing (2026-05-18)
 
 - **TC doc section spacing** (`ai/prompts/prompt_templates.py`, `ai/pipeline/orchestrator.py`, 23 docs): LLM was generating `**Pre-conditions:**`, `**Steps:**` etc. with no blank line before them, making sections run together. Fixed in three places: (1) prompt templates — added blank lines between every section in the web and API format examples; (2) `_clean_doc()` in orchestrator — added `_TC_HEADERS` regex normalizer that ensures a blank line before every `**<section>...**` header on every pipeline run (also strips inline ``` fences some models inject around TC blocks); (3) all 23 existing docs reformatted in one pass. Key bug: pattern must be `\*\*<keyword>[^*]*\*\*` not `\*\*<keyword>\*\*[:\s]` because the colon sits inside the closing `**`, not after it.
 
