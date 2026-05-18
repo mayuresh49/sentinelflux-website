@@ -23,11 +23,18 @@ def _all_products() -> list[str]:
     return _list_products()
 
 
+_EXCLUDED_DOMAINS = {"vapt"}  # template-generated; no KB docs exist for these
+
+
 def _script_features(product: str) -> set[str]:
     base = _PRODUCTS_DIR / product / "tests"
     if not base.exists():
         return set()
-    return {py.stem.removeprefix("test_") for py in base.rglob("test_*.py")}
+    return {
+        py.stem.removeprefix("test_")
+        for py in base.rglob("test_*.py")
+        if py.relative_to(base).parts[0] not in _EXCLUDED_DOMAINS
+    }
 
 
 def _scripts_by_domain(product: str) -> dict[str, int]:
@@ -37,7 +44,7 @@ def _scripts_by_domain(product: str) -> dict[str, int]:
     counts: dict[str, int] = {}
     for py in base.rglob("test_*.py"):
         parts = py.relative_to(base).parts
-        if len(parts) >= 2:
+        if len(parts) >= 2 and parts[0] not in _EXCLUDED_DOMAINS:
             domain = parts[0]
             counts[domain] = counts.get(domain, 0) + 1
     return counts
@@ -56,11 +63,35 @@ def _count_test_functions(product: str) -> int:
         return 0
     count = 0
     for py in base.rglob("test_*.py"):
+        if py.relative_to(base).parts[0] in _EXCLUDED_DOMAINS:
+            continue
         try:
             count += len(re.findall(r"^def (test_\w+)", py.read_text(encoding="utf-8"), re.MULTILINE))
         except OSError:
             pass
     return count
+
+
+def _undocumented_with_domain(product: str) -> list[dict]:
+    """Scripts that have no matching test case doc, ordered by domain then feature."""
+    base = _PRODUCTS_DIR / product / "tests"
+    doc_base = _PRODUCTS_DIR / product / "docs" / "test_cases"
+    if not base.exists():
+        return []
+    existing_docs = (
+        {md.stem for md in doc_base.rglob("*.md") if md.stem != "README"}
+        if doc_base.exists() else set()
+    )
+    missing, seen = [], set()
+    for py in base.rglob("test_*.py"):
+        parts = py.relative_to(base).parts
+        if len(parts) < 2 or parts[0] in _EXCLUDED_DOMAINS:
+            continue
+        feature = py.stem.removeprefix("test_")
+        if feature not in existing_docs and feature not in seen:
+            missing.append({"feature": feature, "domain": parts[0]})
+            seen.add(feature)
+    return sorted(missing, key=lambda x: (x["domain"], x["feature"]))
 
 
 def _load_quarantine() -> list:
@@ -172,6 +203,7 @@ def compute_metrics(product: str | None = None, allowed_products: list[str] | No
             "flaky": flaky,
             "risk_score": _risk_score(run_stats["pass_rate"], len(p_quarantined), test_fns, doc_coverage, flaky),
             "scripts_with_docs": len(documented),
+            "undocumented_scripts": _undocumented_with_domain(p),
         })
 
     total_scripts = sum(r["scripts"] for r in per_product)
