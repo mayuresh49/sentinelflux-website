@@ -1,5 +1,18 @@
 # Completed work items — append only, newest first
 
+- id: vapt-standard-test-suite
+  date: 2026-05-18
+  title: "VAPT standard test suite — per-product generation on enable"
+  outcome: >
+    core/vapt_test_generator.py: VaptTestGenerator generates products/<product>/tests/vapt/
+    with conftest.py (auto-detects base_url/api_token from env_*.yaml) and 5 test files:
+    test_vapt_auth (A07), test_vapt_headers (A05), test_vapt_access_control (A01),
+    test_vapt_crypto (A02), test_vapt_rate_limiting (A04). 17 tests total.
+    Rate-limiting tests use xfail (advisory), HTTPS tests use skip for local envs.
+    _products.py: auto-generates on first VAPT enable. vapt.py: test-info + generate-tests
+    endpoints. vapt.html: test suite status card + Regenerate button in Scans tab.
+    reportportal vapt suite: 13 passed, 2 skipped, 2 xfailed against live RP instance.
+
 - id: vapt-security-review-fixes
   date: 2026-05-18
   title: "VAPT security review: autoescape HTML reports + redundant auth dependency"

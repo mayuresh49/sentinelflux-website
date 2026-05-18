@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (2)  
+Last updated: 2026-05-18 (3)  
 Framework version: 0.1.0
 
 ---
@@ -39,9 +39,9 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-18)
 
-- **VAPT security fix** (`dashboard/routers/vapt.py`): `_render_template()` switched from bare `jinja2.Template` to `Environment(autoescape=True, FileSystemLoader)` — prevents XSS when evidence strings from test failures are rendered in the HTML report endpoint. `issue_certificate` reduced from two auth dependencies to one (`Depends(_require_admin)`) since `_require_admin` already wraps `require_user` internally.
+- **VAPT standard test suite generation** (`core/vapt_test_generator.py`): `VaptTestGenerator.generate(product, force)` creates `products/<product>/tests/vapt/` with a product-aware `conftest.py` (auto-detects `base_url`/`api_token` from `env_*.yaml`) and 5 test files covering OWASP A01/A02/A04/A05/A07 — 17 tests total. Tests use `xfail` for infrastructure-dependent checks (rate limiting) and `skip` for environment-dependent ones (HTTPS). Enabling VAPT via the Config toggle auto-generates tests for that product. Two new endpoints: `GET /api/vapt/products/{product}/test-info` + `POST .../generate-tests`. Scans tab in `vapt.html` shows test count and a Regenerate Tests button (admin only). First generated suite for `reportportal`: 13 passed, 2 skipped, 2 xfailed against live RP.
 
-## Previous: Doc gen robustness + VAPT certifiability (2026-05-18)
+## Previous: VAPT security review fixes (2026-05-18)
 
 - **Doc generation robustness** (`ai/pipeline/orchestrator.py`): `_clean_doc()` strips markdown code-fence wrappers that some models emit before TC ID normalization runs. `_normalize_tc_ids()` now also handles literal `TC_ID` placeholder tokens.
 - **VAPT certifiability fix** (`core/vapt_manager.py`): `check_certifiable()` now checks for completed scans (not just presence of findings).
