@@ -172,6 +172,7 @@ class UpdateScopeBody(BaseModel):
     owasp_categories: list[str] = []
     in_scope: list[str] = []
     out_of_scope: list[str] = []
+    infra_targets: list[str] = []
     environment: str = ""
     start_date: str = ""
     end_date: str = ""
@@ -349,6 +350,22 @@ def patch_finding(eng_id: str, finding_id: str, product: str, body: PatchFinding
     return eng
 
 
+@router.delete("/vapt/engagement/{eng_id}/scan/{scan_id}")
+def delete_scan(eng_id: str, scan_id: str, product: str,
+                current_user: dict = Depends(require_user)) -> dict:
+    _check_product_access(product, current_user)
+    eng = _vm.get(product, eng_id)
+    if not eng:
+        raise HTTPException(404, detail="Engagement not found")
+    target = next((s for s in eng.get("scans", []) if s["scan_id"] == scan_id), None)
+    if not target:
+        raise HTTPException(404, detail="Scan not found")
+    if target.get("status") in ("queued", "running"):
+        raise HTTPException(400, detail="Cannot delete a scan that is currently running")
+    _vm.delete_scan(product, eng_id, scan_id)
+    return _vm.get(product, eng_id)
+
+
 # ── plan document ─────────────────────────────────────────────────────────────
 
 @router.get("/vapt/engagement/{eng_id}/plan")
@@ -486,13 +503,20 @@ def _execute_vapt_scan(product: str, eng_id: str, scan_id: str,
     if scan_type == "web":
         cmd.append("--screenshot=only-on-failure")
 
+    run_env = {**os.environ}
+    if scan_type == "infra":
+        eng = _vm.get(product, eng_id)
+        targets = (eng or {}).get("scope", {}).get("infra_targets", [])
+        if targets:
+            run_env["VAPT_INFRA_TARGETS"] = ",".join(str(t) for t in targets)
+
     _collected_re = re.compile(r"collected (\d+) item")
     _result_re = re.compile(r"\s(PASSED|FAILED|ERROR|SKIPPED)\s")
 
     try:
         proc = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            text=True, cwd=str(_ROOT), env={**os.environ},
+            text=True, cwd=str(_ROOT), env=run_env,
         )
         progress_total = 0
         progress_done = 0

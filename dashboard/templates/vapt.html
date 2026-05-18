@@ -235,6 +235,15 @@
                           class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-400"
                           placeholder="Performance testing&#10;Third-party integrations"></textarea>
               </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-slate-600 mb-1">
+                  Infrastructure Targets
+                  <span class="ml-1 text-slate-400 font-normal">(one IP address or hostname per line — used by Infrastructure scans)</span>
+                </label>
+                <textarea x-model="scopeInfraTargets" rows="3" :disabled="!!selectedEng?.scope?.finalized_at"
+                          class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-400"
+                          placeholder="192.168.1.10&#10;10.0.0.5&#10;app.internal.example.com"></textarea>
+              </div>
             </div>
             <div x-show="!selectedEng?.scope?.finalized_at" class="flex items-center gap-2 pt-2">
               <button @click="saveScope()" class="text-sm font-medium bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg transition-colors">Save Scope</button>
@@ -380,6 +389,11 @@
                       <span x-text="s.triggered_at.slice(0,10)"></span>
                       <span x-text="s.triggered_by"></span>
                       <span x-show="s.duration" x-text="s.duration + 's'"></span>
+                      {% if current_user.admin %}
+                      <button @click="deleteScan(s.scan_id)"
+                              x-show="!['queued','running'].includes(s.status)"
+                              class="text-red-400 hover:text-red-600 hover:bg-red-50 px-1.5 py-0.5 rounded transition-colors">Delete</button>
+                      {% endif %}
                     </div>
                   </div>
                   <div x-show="s.status === 'completed'" class="mt-2 flex items-center gap-4 text-slate-600">
@@ -618,6 +632,7 @@ function vaptApp() {
                  test_types: [], owasp_categories: [], environment: '', start_date: '', end_date: '' },
     scopeInScope: '',
     scopeOutOfScope: '',
+    scopeInfraTargets: '',
     certThreshold: { Critical: 0, High: 0 },
     tabs: [
       { id: 'scope', label: 'Scope' },
@@ -773,6 +788,7 @@ function vaptApp() {
       };
       this.scopeInScope = (s.in_scope || []).join('\n');
       this.scopeOutOfScope = (s.out_of_scope || []).join('\n');
+      this.scopeInfraTargets = (s.infra_targets || []).join('\n');
     },
 
     async saveScope() {
@@ -780,6 +796,7 @@ function vaptApp() {
         ...this.scopeForm,
         in_scope: this.scopeInScope.split('\n').map(s => s.trim()).filter(Boolean),
         out_of_scope: this.scopeOutOfScope.split('\n').map(s => s.trim()).filter(Boolean),
+        infra_targets: this.scopeInfraTargets.split('\n').map(s => s.trim()).filter(Boolean),
       };
       const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/scope?product=' + this.product, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
@@ -866,6 +883,15 @@ function vaptApp() {
       await this.loadEngagements();
       const cert = this.currentCertInfo();
       sfToast('Certificate issued: ' + (cert?.cert_id || ''), 'info');
+    },
+
+    async deleteScan(scan_id) {
+      const ok = await sfConfirm('Delete this scan record? Findings already recorded from this scan will not be removed.');
+      if (!ok) return;
+      const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/scan/' + scan_id + '?product=' + this.product, { method: 'DELETE' });
+      if (!r.ok) { sfToast((await r.json()).detail, 'error'); return; }
+      this.selectedEng = await r.json();
+      sfToast('Scan deleted.', 'info');
     },
 
     async deleteEngagement() {

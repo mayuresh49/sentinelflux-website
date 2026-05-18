@@ -62,6 +62,7 @@ class VaptManager:
                 "owasp_categories": [],
                 "in_scope": [],
                 "out_of_scope": [],
+                "infra_targets": [],
                 "environment": "",
                 "start_date": "",
                 "end_date": "",
@@ -166,6 +167,17 @@ class VaptManager:
                 s.update(fields)
                 break
         self._save(product, eng_id, eng)
+
+    def delete_scan(self, product: str, eng_id: str, scan_id: str) -> bool:
+        eng = self._load(product, eng_id)
+        if eng is None:
+            return False
+        before = len(eng.get("scans", []))
+        eng["scans"] = [s for s in eng.get("scans", []) if s["scan_id"] != scan_id]
+        if len(eng["scans"]) == before:
+            return False
+        self._save(product, eng_id, eng)
+        return True
 
     # ── findings ──────────────────────────────────────────────────────────────
 

@@ -611,7 +611,10 @@ def test_A10_ssrf_dns_rebinding_probe(vapt_base_url):
 # ── infrastructure test content ───────────────────────────────────────────────
 
 _INFRA_CONFTEST = '''\
-"""VAPT infrastructure fixture set — auto-detected from products/<product>/config/env_*.yaml."""
+"""VAPT infrastructure fixture set — auto-detected from products/<product>/config/env_*.yaml.
+VAPT_INFRA_TARGETS env var (comma-separated) overrides the host list when set by the scan runner.
+"""
+import os
 import re
 from pathlib import Path
 import pytest
@@ -645,9 +648,17 @@ def vapt_base_url() -> str:
 
 
 @pytest.fixture(scope="session")
-def vapt_host(vapt_base_url) -> str:
+def vapt_infra_targets(vapt_base_url) -> "list[str]":
+    raw = os.environ.get("VAPT_INFRA_TARGETS", "").strip()
+    if raw:
+        return [t.strip() for t in raw.split(",") if t.strip()]
     m = re.match(r"https?://([^/:]+)", vapt_base_url)
-    return m.group(1) if m else "localhost"
+    return [m.group(1) if m else "localhost"]
+
+
+@pytest.fixture(scope="session")
+def vapt_host(vapt_infra_targets) -> str:
+    return vapt_infra_targets[0] if vapt_infra_targets else "localhost"
 
 
 @pytest.fixture(scope="session")
@@ -660,7 +671,7 @@ def vapt_https_port(vapt_base_url) -> "int | None":
 
 @pytest.fixture(scope="session")
 def vapt_domain(vapt_host) -> str:
-    if re.match(r"^\d+\.\d+\.\d+\.\d+$", vapt_host) or vapt_host in ("localhost", "127.0.0.1", "::1"):
+    if re.match(r"^\d+\\.\\d+\\.\\d+\\.\\d+$", vapt_host) or vapt_host in ("localhost", "127.0.0.1", "::1"):
         return ""
     return vapt_host
 '''
