@@ -65,6 +65,11 @@ Run independent agents **in parallel** (single message, multiple Agent blocks).
 - `sfConfirm(msg)` → `Promise<boolean>` — use `await` inside `async` functions; resolves `true` on Confirm, `false` on Cancel
   - Always use for destructive actions (delete, overwrite, irreversible ops)
 
+### Global Product Filter
+- **Never** add a product `<select>` inside `{% block content %}` — the global filter bar in `base.html` already handles product filtering via `?product=X` and `applyProductFilter()`.
+- Page routes read `product` from query params and pass `filter_product` to the template; Alpine initialises from `{{ filter_product }}`.
+- Only override `{% block header_filter %}` when the page needs a **different** product list (e.g. VAPT restricts to VAPT-enabled products only).
+
 ### Labels, Forms, Buttons
 - No abbreviations in user-facing labels
 - Title Case for buttons and headings
