@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (3)  
+Last updated: 2026-05-18 (4)  
 Framework version: 0.1.0
 
 ---
@@ -38,6 +38,12 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **ScriptReview KeyError fix** (`ai/agents/script_review_agent.py`): `_REWRITE_PROMPT` template had unescaped `{"positive", "negative", "edge"}` set literals — Python's `str.format()` raised `KeyError` silently caught by the orchestrator, skipping ALL ScriptReview passes. Fixed by doubling the braces (`{{...}}`).
+- **Orchestrator fixes** (`ai/pipeline/orchestrator.py`): (1) DocReview now always runs even when `--doc` (skip_doc=True) is used — was only running on freshly generated docs. (2) `--doc` path now resolved to absolute so `relative_to(ROOT_DIR)` never fails. (3) Default doc-model changed from `mistral:7b-instruct-v0.3-q4_K_M` to `qwen2.5-coder:14b-instruct-q4_K_M`.
+- **Timesheets test scripts corrected**: API script rewritten with correct IDs OH-API-014..028 (was 001..011), real status-code + body assertions, `orangehrm_client` + `shared_state` fixtures. Web script completed with all 11 TCs OH-WEB-072..082 (was 5 of 11), added validation-error helper assertions for 074–077, stubs for 078–082.
+
+## Previous: VAPT standard test suite generation (2026-05-18)
 
 - **VAPT standard test suite generation** (`core/vapt_test_generator.py`): `VaptTestGenerator.generate(product, force)` creates `products/<product>/tests/vapt/` with a product-aware `conftest.py` (auto-detects `base_url`/`api_token` from `env_*.yaml`) and 5 test files covering OWASP A01/A02/A04/A05/A07 — 17 tests total. Tests use `xfail` for infrastructure-dependent checks (rate limiting) and `skip` for environment-dependent ones (HTTPS). Enabling VAPT via the Config toggle auto-generates tests for that product. Two new endpoints: `GET /api/vapt/products/{product}/test-info` + `POST .../generate-tests`. Scans tab in `vapt.html` shows test count and a Regenerate Tests button (admin only). First generated suite for `reportportal`: 13 passed, 2 skipped, 2 xfailed against live RP.
 

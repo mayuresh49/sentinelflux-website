@@ -1,5 +1,16 @@
 # Completed work items — append only, newest first
 
+- id: timesheets-pipeline-fixes
+  date: 2026-05-18
+  title: "Timesheets pipeline: ScriptReview KeyError fix, orchestrator fixes, correct test scripts"
+  outcome: >
+    script_review_agent.py: escaped {{"positive","negative","edge"}} in _REWRITE_PROMPT — str.format()
+    was raising KeyError silently, causing all ScriptReview passes to be skipped.
+    orchestrator.py: DocReview now always runs with --doc flag; --doc path resolved absolute;
+    default doc-model changed to qwen2.5-coder:14b-instruct-q4_K_M.
+    tests/api/test_Timesheets.py: rewritten OH-API-014..028 with real assertions and orangehrm_client.
+    tests/web/test_Timesheets.py: completed all 11 TCs OH-WEB-072..082.
+
 - id: vapt-standard-test-suite
   date: 2026-05-18
   title: "VAPT standard test suite — per-product generation on enable"
