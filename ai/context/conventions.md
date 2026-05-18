@@ -35,8 +35,8 @@ Test case IDs follow the pattern `{PRODUCT}-{LAYER}-{NNN}` where NNN is a zero-p
 
 | Prefix | Highest allocated | Next available |
 |---|---|---|
-| OH-WEB | 071 (leave_list manual) | 072 |
-| OH-API | 013 | 014 |
+| OH-WEB | 082 (Timesheets) | 083 |
+| OH-API | 028 (Timesheets) | 029 |
 | OH-MOB | 016 | 017 |
 | OH-SEC | 012 | 013 |
 | OH-A11Y | 006 | 007 |
