@@ -457,6 +457,13 @@ def _execute_vapt_scan(product: str, eng_id: str, scan_id: str, is_revalidation:
             pass
 
         findings = _parse_scan_findings(tmp_report, product)
+        # Slim test log stored on the scan — only fields needed for the report
+        test_log = [
+            {"test_id": f["test_id"], "title": f["title"],
+             "owasp_ref": f["owasp_ref"], "owasp_category": f["owasp_category"],
+             "severity": f["severity"], "status": f["status"]}
+            for f in findings
+        ]
         stats = {
             "total": len(findings),
             "passed": sum(1 for f in findings if f["status"] == "confirmed_secure"),
@@ -465,6 +472,7 @@ def _execute_vapt_scan(product: str, eng_id: str, scan_id: str, is_revalidation:
             "duration": duration,
             "status": "completed",
             "finished_at": datetime.now(timezone.utc).isoformat(),
+            "test_log": test_log,
         }
         _vm.patch_scan(product, eng_id, scan_id, **stats)
         _vm.upsert_findings(product, eng_id, scan_id, findings, is_revalidation)
@@ -575,8 +583,15 @@ def _render_report_html(eng: dict) -> str:
             by_sev[f["severity"]] = by_sev.get(f["severity"], 0) + 1
         cat = f"{f['owasp_ref']} — {f['owasp_category']}"
         by_owasp[cat].append(f)
+    # Collect per-scan test logs for the execution detail section
+    scan_test_logs = [
+        {"scan": s, "tests": s.get("test_log", [])}
+        for s in eng.get("scans", [])
+        if s.get("status") == "completed" and s.get("test_log")
+    ]
     return _render_template("vapt_report_pdf.html", eng=eng,
                              by_sev=by_sev, by_owasp=dict(by_owasp),
+                             scan_test_logs=scan_test_logs,
                              now=datetime.now(timezone.utc))
 
 

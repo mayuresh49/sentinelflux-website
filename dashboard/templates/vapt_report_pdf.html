@@ -185,7 +185,7 @@
 {% if eng.scans %}
 <h2>6. Scan History</h2>
 <table>
-  <tr><th>Scan ID</th><th>Date</th><th>Type</th><th>Total</th><th>Findings</th><th>Confirmed Secure</th><th>Status</th></tr>
+  <tr><th>Scan ID</th><th>Date</th><th>Type</th><th>Total</th><th>Findings</th><th>Confirmed Secure</th><th>Skipped</th><th>Duration</th><th>Status</th></tr>
   {% for s in eng.scans %}
   <tr>
     <td style="font-family:monospace;font-size:8pt;">{{ s.scan_id[:16] }}…</td>
@@ -194,10 +194,43 @@
     <td>{{ s.total }}</td>
     <td>{{ s.failed }}</td>
     <td>{{ s.passed }}</td>
+    <td>{{ s.get('skipped', 0) }}</td>
+    <td>{{ '%.1f s' % s.duration if s.duration else '—' }}</td>
     <td>{{ s.status.title() }}</td>
   </tr>
   {% endfor %}
 </table>
+{% endif %}
+
+<!-- Test Execution Details -->
+{% if scan_test_logs %}
+<h2>7. Test Execution Details</h2>
+<p style="font-size:9pt;color:#475569;">Complete list of security tests executed per scan, including passed (confirmed secure), failed (finding), and skipped tests.</p>
+{% for entry in scan_test_logs %}
+{% set s = entry.scan %}
+<h3>Scan {{ loop.index }}: {{ s.triggered_at[:10] }} — {{ 'Re-validation' if s.is_revalidation else 'Initial Scan' }} ({{ s.total }} tests, {{ '%.1f s' % s.duration if s.duration else '?' }})</h3>
+<table>
+  <tr><th>#</th><th>Test</th><th>OWASP</th><th>Severity</th><th>Result</th></tr>
+  {% for t in entry.tests %}
+  <tr>
+    <td style="font-size:8pt;color:#64748b;">{{ loop.index }}</td>
+    <td style="font-family:monospace;font-size:8pt;word-break:break-all;">{{ t.title }}</td>
+    <td>{{ t.owasp_ref }}</td>
+    <td>
+      {% if t.severity == 'Critical' %}<span class="sev-critical">{{ t.severity }}</span>
+      {% elif t.severity == 'High' %}<span class="sev-high">{{ t.severity }}</span>
+      {% elif t.severity == 'Medium' %}<span class="sev-medium">{{ t.severity }}</span>
+      {% else %}<span class="sev-low">{{ t.severity }}</span>{% endif %}
+    </td>
+    <td>
+      {% if t.status == 'confirmed_secure' %}<span style="color:#16a34a;font-weight:700;">✓ Secure</span>
+      {% elif t.status == 'finding' %}<span style="color:#dc2626;font-weight:700;">✗ Finding</span>
+      {% else %}<span style="color:#94a3b8;">— Skipped</span>{% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endfor %}
 {% endif %}
 
 </body>
