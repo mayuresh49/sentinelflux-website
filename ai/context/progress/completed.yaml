@@ -1,5 +1,15 @@
 # Completed work items — append only, newest first
 
+- id: script-fn-id-normalizer
+  date: 2026-05-18
+  title: "Orchestrator: _normalize_script_fn_ids() — code-level TC ID backstop for scripts"
+  outcome: >
+    orchestrator.py: _normalize_script_fn_ids(script_path, doc_path, tc_prefix) runs after
+    _generate_script() and before _review_script(). Extracts TC IDs from doc index table
+    (non-not_automatable rows), matches to test function declarations in order, renames any
+    function with wrong embedded ID (test_OH_API_001_x → test_OH_API_014_x) or no ID prefix.
+    Skips silently when count mismatch (needs human review). Mirrors _normalize_tc_ids() for docs.
+
 - id: quality-dashboard-metrics
   date: 2026-05-18
   title: "Quality dashboard: real pass rate, automated test count, execution stats, risk score"

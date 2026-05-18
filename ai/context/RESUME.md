@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (5)  
+Last updated: 2026-05-18 (6)  
 Framework version: 0.1.0
 
 ---
@@ -38,6 +38,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **Script TC ID normalizer** (`ai/pipeline/orchestrator.py`): Added `_normalize_script_fn_ids()` — code-level backstop that runs after `ScriptGenAgent` and before `ScriptReview`. Reads TC IDs from the doc index table (skipping `not_automatable` rows) in order, matches them to test function declarations in order, renames any function whose embedded ID doesn't match (e.g. `test_OH_API_001_x` → `test_OH_API_014_x`). Also handles functions with no ID prefix at all by prepending it. Silently skips if function count ≠ doc ID count (mismatch = human review needed). Closes the gap where models consistently ignored the TC IDs in the doc and numbered from 001.
+
+## Previous: Quality dashboard metrics overhaul (2026-05-18)
 
 - **Quality dashboard metrics overhaul** (`dashboard/routers/quality.py`, `dashboard/templates/quality.html`): Pass rate now computed from actual pytest results in `test_runs` table (was incorrectly using `activity_log` agent status). Added: automated test function count (`def test_` grep, not file count — 169 functions vs 25 scripts), execution stats card (total/passed/failed from real runs), 7-day pass rate trend from `test_runs` daily aggregates, composite risk score 0–100 (pass rate gap 50pt + quarantine rate 20pt + doc gap 20pt + flaky 10pt). Template expanded from 5 to 6 summary cards; each card has an `ⓘ` Alpine tooltip explaining its formula. Per-product table updated: automated test count, real pass rate, execution breakdown, risk badge.
 
