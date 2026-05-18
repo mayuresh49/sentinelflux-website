@@ -1,5 +1,19 @@
 # Completed work items — append only, newest first
 
+- id: quality-vapt-exclusion-coverage-signal
+  date: 2026-05-18
+  title: "Quality metrics: exclude VAPT tests; low-coverage doc-gen signal"
+  outcome: >
+    quality.py: _EXCLUDED_DOMAINS = {"vapt"} applied in _script_features(),
+    _scripts_by_domain(), _count_test_functions() — VAPT template-generated tests
+    no longer inflate script count or drag down doc coverage.
+    _undocumented_with_domain(product) returns [{feature, domain}] for scripts
+    lacking a matching test case doc. per-product data gains undocumented_scripts list.
+    quality.html: health signals section adds low-coverage card per product when
+    doc_coverage < 70% — collapsible list of undocumented scripts, each with a
+    Generate Doc button (POST /api/pipeline/trigger, skip_script=true, Alpine state
+    machine idle→pending→done/error, sfToast feedback).
+
 - id: tc-doc-section-spacing
   date: 2026-05-18
   title: "TC doc section spacing: blank lines before Pre-conditions/Steps/Expected Result"
