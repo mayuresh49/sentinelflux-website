@@ -1,5 +1,14 @@
 # Completed work items — append only, newest first
 
+- id: nav-access-flags-config-page
+  date: 2026-05-18
+  title: "Fix: perf/a11y/contract/visual nav items invisible on /config page"
+  outcome: >
+    config/__init__.py config_page() built its own context dict that only set
+    vapt_access; the 4 new module flags were undefined (falsy), hiding nav items
+    when the user navigated to /config. Fixed with a local _has_flag(flag) helper
+    covering all 5 flags. Nav items now consistent across all pages.
+
 - id: test-plans-empty-modules-ux
   date: 2026-05-18
   title: "Test Plans: empty-modules empty state UX fix and API error surfacing"

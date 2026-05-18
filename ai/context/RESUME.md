@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (25)  
+Last updated: 2026-05-18 (26)  
 Framework version: 0.1.0
 
 ---
@@ -42,6 +42,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-18)
+
+- **Fix: nav access flags missing from /config page** (`dashboard/routers/config/__init__.py`): `config_page` was building its own context dict and only included `vapt_access`; the 4 new module flags (`perf_access`, `a11y_access`, `contract_access`, `visual_access`) were undefined (falsy) there, causing those nav items to disappear when navigating to /config. Replaced duplicated `vapt_access` inline logic with a shared `_has_flag(flag)` helper that covers all 5 flags consistently. Nav items now show/hide correctly on every page.
+
+## Previous: Test Plans empty-modules UX (2026-05-18)
 
 - **Test Plans: empty-modules UX fix** (`dashboard/templates/test_plans.html`): Empty state for Scope tab now shows the expected path (`products/{product}/tests/{domain}/`) and the file pattern (`test_*.py`) so users know where to add scripts. API failures in `loadAvailableModules` now trigger `sfToast` instead of silently leaving the list blank. Added `scopeLoadError` state flag to distinguish "API call failed" from "legitimately no test scripts". `scopeLoadError` is reset on plan change and at start of each load.
 
