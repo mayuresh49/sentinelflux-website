@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18  
+Last updated: 2026-05-18 (2)  
 Framework version: 0.1.0
 
 ---
@@ -39,9 +39,13 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-18)
 
-- **Doc generation robustness** (`ai/pipeline/orchestrator.py`): `_clean_doc()` strips markdown code-fence wrappers (` ```markdown ` etc.) that some models emit before TC ID normalization runs. `_normalize_tc_ids()` now also handles literal `TC_ID` placeholder tokens that models copy verbatim from the prompt template — replaces them sequentially starting at `tc_start` before the PREFIX-NNN renumbering pass.
-- **VAPT certifiability fix** (`core/vapt_manager.py`): `check_certifiable()` now checks for completed scans (not just presence of findings) before evaluating open-finding thresholds.
-- **ReportPortal VAPT security scan** — ran `pytest -m security` against live RP instance (`localhost:8080`); all 5 auth-enforcement tests passed (unauthenticated and invalid-token requests correctly return 401/403).
+- **VAPT security fix** (`dashboard/routers/vapt.py`): `_render_template()` switched from bare `jinja2.Template` to `Environment(autoescape=True, FileSystemLoader)` — prevents XSS when evidence strings from test failures are rendered in the HTML report endpoint. `issue_certificate` reduced from two auth dependencies to one (`Depends(_require_admin)`) since `_require_admin` already wraps `require_user` internally.
+
+## Previous: Doc gen robustness + VAPT certifiability (2026-05-18)
+
+- **Doc generation robustness** (`ai/pipeline/orchestrator.py`): `_clean_doc()` strips markdown code-fence wrappers that some models emit before TC ID normalization runs. `_normalize_tc_ids()` now also handles literal `TC_ID` placeholder tokens.
+- **VAPT certifiability fix** (`core/vapt_manager.py`): `check_certifiable()` now checks for completed scans (not just presence of findings).
+- **ReportPortal VAPT security scan** — all 5 auth-enforcement tests passed against live RP (`localhost:8080`).
 
 ## Previous: TC ID generation hardening (2026-05-17)
 

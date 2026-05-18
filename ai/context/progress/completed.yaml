@@ -1,5 +1,14 @@
 # Completed work items — append only, newest first
 
+- id: vapt-security-review-fixes
+  date: 2026-05-18
+  title: "VAPT security review: autoescape HTML reports + redundant auth dependency"
+  outcome: >
+    dashboard/routers/vapt.py: _render_template() now uses jinja2 Environment with
+    autoescape=True and FileSystemLoader — prevents XSS from test-failure evidence strings
+    in the HTML report preview endpoint. issue_certificate consolidated to single
+    Depends(_require_admin) since _require_admin already wraps require_user.
+
 - id: doc-gen-robustness-vapt-certifiability
   date: 2026-05-18
   title: "Doc generation: strip code fences + TC_ID placeholder handling; VAPT certifiability fix"
