@@ -109,6 +109,7 @@ class TestPipelineOrchestrator:
             out_script = self._generate_script(
                 test_case_doc, feature_name, domain, output_base=output_base, tc_prefix=tc_prefix,
             )
+            self._normalize_script_fn_ids(out_script, out_doc, tc_prefix)
             self._review_script(out_script, domain)
 
             if increment_file:
@@ -218,6 +219,76 @@ class TestPipelineOrchestrator:
         doc_path.write_text(fixed, encoding="utf-8")
         _log.info("Normalized TC IDs in %s: %s → %s..%s",
                   doc_path.name, found[0], correct_seq[0], correct_seq[-1])
+
+    def _normalize_script_fn_ids(self, script_path: Path, doc_path: Path, tc_prefix: str) -> None:
+        """Rename test function names so they match the TC IDs in the doc, in order.
+
+        After ScriptGenAgent runs, models often ignore the doc IDs and number functions
+        from 001.  This step reads TC IDs (non-not_automatable) from the doc index table,
+        reads function names from the script in declaration order, and renames any that
+        carry the wrong ID.  Skips silently if counts don't match (mismatch = model
+        added or dropped tests, needs manual review).
+        """
+        import re
+
+        if not tc_prefix or not doc_path or not doc_path.exists() or not script_path.exists():
+            return
+
+        doc_text = doc_path.read_text(encoding="utf-8")
+
+        # Extract TC IDs from the index table rows where status != not_automatable.
+        # Table format: | OH-API-014 | description | type | automated | script.py |
+        row_re = re.compile(
+            rf"^\|\s*({re.escape(tc_prefix)}-(\d{{3}}))\s*\|"
+            r"[^|]*\|[^|]*\|\s*(?!not_automatable)(\w+)\s*\|",
+            re.MULTILINE | re.IGNORECASE,
+        )
+        doc_ids = [m.group(1) for m in row_re.finditer(doc_text)]
+
+        source = script_path.read_text(encoding="utf-8")
+        fn_re = re.compile(r"^def (test_\w+)\s*\(", re.MULTILINE)
+        fn_names = fn_re.findall(source)
+
+        if not doc_ids or not fn_names:
+            return
+
+        if len(doc_ids) != len(fn_names):
+            _log.warning(
+                "_normalize_script_fn_ids: %d doc IDs vs %d test functions in %s — skipping",
+                len(doc_ids), len(fn_names), script_path.name,
+            )
+            return
+
+        prefix_in_fn = tc_prefix.replace("-", "_")
+        # Matches test_OH_API_001_ prefix in function name (case-insensitive)
+        id_in_fn_re = re.compile(rf"^test_{re.escape(prefix_in_fn)}_(\d{{3}})_", re.IGNORECASE)
+
+        new_source = source
+        renamed: list[tuple[str, str]] = []
+
+        for doc_id, fn_name in zip(doc_ids, fn_names):
+            expected_num = doc_id.split("-")[-1]  # "014"
+            m = id_in_fn_re.match(fn_name)
+            if m and m.group(1) == expected_num:
+                continue  # already correct
+
+            if m:
+                # Has the prefix but wrong number — replace the number part only
+                correct_fn = f"test_{prefix_in_fn}_{expected_num}_{fn_name[m.end():]}"
+            else:
+                # No TC ID prefix at all — prepend it
+                rest = fn_name[5:] if fn_name.startswith("test_") else fn_name
+                correct_fn = f"test_{prefix_in_fn}_{expected_num}_{rest}"
+
+            new_source = re.sub(rf"\b{re.escape(fn_name)}\b", correct_fn, new_source)
+            renamed.append((fn_name, correct_fn))
+
+        if renamed:
+            script_path.write_text(new_source, encoding="utf-8")
+            _log.info(
+                "_normalize_script_fn_ids: renamed %d function(s) in %s (e.g. %s → %s)",
+                len(renamed), script_path.name, renamed[0][0], renamed[0][1],
+            )
 
     def _review_doc(self, doc_path: Path, domain: str) -> None:
         """Run DocReviewAgent on a freshly generated doc — best-effort, never raises."""
