@@ -50,6 +50,62 @@
         <button type="submit" class="text-xs text-slate-400 hover:text-violet-700 font-medium px-2 py-0.5 rounded hover:bg-violet-50 transition-colors">VAPT Off</button>
       </form>
       {% endif %}
+      <!-- Performance toggle -->
+      {% if p.get('perf_enabled') %}
+      <form hx-post="/ui/config/products/set-perf" hx-target="#products-list" hx-swap="innerHTML">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="perf" value="false">
+        <button type="submit" class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 font-medium px-2 py-0.5 rounded transition-colors">Perf On</button>
+      </form>
+      {% else %}
+      <form hx-post="/ui/config/products/set-perf" hx-target="#products-list" hx-swap="innerHTML">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="perf" value="true">
+        <button type="submit" class="text-xs text-slate-400 hover:text-blue-700 font-medium px-2 py-0.5 rounded hover:bg-blue-50 transition-colors">Perf Off</button>
+      </form>
+      {% endif %}
+      <!-- Accessibility toggle -->
+      {% if p.get('a11y_enabled') %}
+      <form hx-post="/ui/config/products/set-a11y" hx-target="#products-list" hx-swap="innerHTML">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="a11y" value="false">
+        <button type="submit" class="text-xs bg-sky-100 text-sky-700 hover:bg-sky-200 font-medium px-2 py-0.5 rounded transition-colors">A11y On</button>
+      </form>
+      {% else %}
+      <form hx-post="/ui/config/products/set-a11y" hx-target="#products-list" hx-swap="innerHTML">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="a11y" value="true">
+        <button type="submit" class="text-xs text-slate-400 hover:text-sky-700 font-medium px-2 py-0.5 rounded hover:bg-sky-50 transition-colors">A11y Off</button>
+      </form>
+      {% endif %}
+      <!-- API Contract toggle -->
+      {% if p.get('contract_enabled') %}
+      <form hx-post="/ui/config/products/set-contract" hx-target="#products-list" hx-swap="innerHTML">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="contract" value="false">
+        <button type="submit" class="text-xs bg-emerald-100 text-emerald-700 hover:bg-emerald-200 font-medium px-2 py-0.5 rounded transition-colors">Contract On</button>
+      </form>
+      {% else %}
+      <form hx-post="/ui/config/products/set-contract" hx-target="#products-list" hx-swap="innerHTML">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="contract" value="true">
+        <button type="submit" class="text-xs text-slate-400 hover:text-emerald-700 font-medium px-2 py-0.5 rounded hover:bg-emerald-50 transition-colors">Contract Off</button>
+      </form>
+      {% endif %}
+      <!-- Visual Regression toggle -->
+      {% if p.get('visual_enabled') %}
+      <form hx-post="/ui/config/products/set-visual" hx-target="#products-list" hx-swap="innerHTML">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="visual" value="false">
+        <button type="submit" class="text-xs bg-pink-100 text-pink-700 hover:bg-pink-200 font-medium px-2 py-0.5 rounded transition-colors">Visual On</button>
+      </form>
+      {% else %}
+      <form hx-post="/ui/config/products/set-visual" hx-target="#products-list" hx-swap="innerHTML">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="visual" value="true">
+        <button type="submit" class="text-xs text-slate-400 hover:text-pink-700 font-medium px-2 py-0.5 rounded hover:bg-pink-50 transition-colors">Visual Off</button>
+      </form>
+      {% endif %}
       {% if p.get('active', True) %}
       <button @click="showDeactivate = true"
               class="text-xs text-amber-600 hover:text-amber-800 font-medium px-2 py-0.5 rounded hover:bg-amber-50 transition-colors">

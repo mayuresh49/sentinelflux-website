@@ -190,3 +190,39 @@ async def products_set_vapt(request: Request, name: str = Form(...), vapt: str =
         except Exception:
             pass
     return _render_products(request, cfg, flash=flash)
+
+
+def _set_flag(request: Request, name: str, flag: str, value: str, label: str):
+    cfg = _load_config()
+    enabled = value.lower() not in {"false", "0", "no"}
+    for p in cfg.get("products", []):
+        if p["name"] == name:
+            p[flag] = enabled
+            break
+    _save_config(cfg)
+    _audit_config(request, "Products", f"Set {label} {'enabled' if enabled else 'disabled'} for '{name}'")
+    return _render_products(request, cfg, flash=f"{label} {'enabled' if enabled else 'disabled'} for '{name}'.")
+
+
+@router.post("/ui/config/products/set-perf", response_class=HTMLResponse)
+async def products_set_perf(request: Request, name: str = Form(...), perf: str = Form("true"),
+                            _: dict = Depends(_require_admin)):
+    return _set_flag(request, name, "perf_enabled", perf, "Performance Testing")
+
+
+@router.post("/ui/config/products/set-a11y", response_class=HTMLResponse)
+async def products_set_a11y(request: Request, name: str = Form(...), a11y: str = Form("true"),
+                            _: dict = Depends(_require_admin)):
+    return _set_flag(request, name, "a11y_enabled", a11y, "Accessibility Testing")
+
+
+@router.post("/ui/config/products/set-contract", response_class=HTMLResponse)
+async def products_set_contract(request: Request, name: str = Form(...), contract: str = Form("true"),
+                                _: dict = Depends(_require_admin)):
+    return _set_flag(request, name, "contract_enabled", contract, "API Contract Validation")
+
+
+@router.post("/ui/config/products/set-visual", response_class=HTMLResponse)
+async def products_set_visual(request: Request, name: str = Form(...), visual: str = Form("true"),
+                              _: dict = Depends(_require_admin)):
+    return _set_flag(request, name, "visual_enabled", visual, "Visual Regression")
