@@ -207,9 +207,14 @@ function docsPage() {
 
     init() {
       this.updateVisibleCount();
-      // Sync module/domain filters from URL if product filter changed
-      const prod = new URLSearchParams(location.search).get('product') || '';
-      if (prod) this.applyFilters();
+      const params = new URLSearchParams(location.search);
+      if (params.get('product')) this.applyFilters();
+      const created = params.get('created');
+      if (created) {
+        sfToast(`Test case ${created} created successfully.`, 'info');
+        params.delete('created');
+        history.replaceState({}, '', location.pathname + (params.toString() ? '?' + params.toString() : ''));
+      }
     },
 
     selectTC(product, domain, feature, tcId) {
@@ -275,6 +280,73 @@ function exportDocs(fmt) {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+}
+
+function tcCreateForm(data) {
+  return {
+    products:             data.products,
+    users:                data.users,
+    featuresByProdDomain: data.featuresByProdDomain,
+    scriptsByProdDomain:  data.scriptsByProdDomain,
+    nextIds:              data.nextIds,
+    scriptUsage:          data.scriptUsage,
+
+    selectedProduct:    data.products[0] || '',
+    selectedDomain:     'web',
+    featureMode:        'existing',
+    selectedFeatureVal: '',
+    newFeatureVal:      '',
+    selectedScript:     '',
+
+    init() {
+      this._syncFeature();
+    },
+
+    get availableFeatures() {
+      return (this.featuresByProdDomain[this.selectedProduct] || {})[this.selectedDomain] || [];
+    },
+
+    get availableScripts() {
+      return (this.scriptsByProdDomain[this.selectedProduct] || {})[this.selectedDomain] || [];
+    },
+
+    get computedTcId() {
+      return (this.nextIds[this.selectedProduct] || {})[this.selectedDomain] || '';
+    },
+
+    get featureValue() {
+      return this.featureMode === 'existing' ? this.selectedFeatureVal : this.newFeatureVal;
+    },
+
+    get scriptWarn() {
+      if (!this.selectedScript) return '';
+      const key = `${this.selectedProduct}/${this.selectedDomain}/${this.selectedScript}`;
+      const used = this.scriptUsage[key] || [];
+      return used.length
+        ? `Already linked to: ${used.join(', ')} — allowed, but verify this is intentional.`
+        : '';
+    },
+
+    onProductChange() { this._syncFeature(); },
+    onDomainChange()  { this._syncFeature(); },
+
+    onFeatureSelect(val) {
+      if (val === '__new__') {
+        this.featureMode = 'new';
+        this.selectedFeatureVal = '';
+      } else {
+        this.selectedFeatureVal = val;
+      }
+    },
+
+    _syncFeature() {
+      const features = this.availableFeatures;
+      this.featureMode        = features.length > 0 ? 'existing' : 'new';
+      this.selectedFeatureVal = features.length > 0 ? features[0] : '';
+      this.newFeatureVal      = '';
+      this.selectedScript     = '';
+    },
+  };
 }
 </script>
 {% endblock %}

@@ -408,8 +408,8 @@ async def tc_create(
 
         path.write_text(content, encoding="utf-8")
 
-    prod_param = f"?product={product}" if product else ""
-    return HTMLResponse("", headers={"HX-Redirect": f"/docs{prod_param}"})
+    base = f"/docs?product={product}" if product else "/docs"
+    return HTMLResponse("", headers={"HX-Redirect": f"{base}&created={tc_id}"})
 
 
 @router.get("/docs/export")
