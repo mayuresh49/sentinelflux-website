@@ -83,7 +83,6 @@ class TestPipelineOrchestrator:
 
             if skip_doc and doc_path and doc_path.exists():
                 _log.info("Skipping doc generation — using existing: %s", doc_path)
-                test_case_doc = doc_path.read_text(encoding="utf-8")
                 out_doc = doc_path
             else:
                 out_doc = self._generate_doc(
@@ -91,8 +90,8 @@ class TestPipelineOrchestrator:
                     output_base=output_base, tc_prefix=tc_prefix, tc_start=tc_start,
                     source=source,
                 )
-                self._review_doc(out_doc, domain)
-                test_case_doc = out_doc.read_text(encoding="utf-8")
+            self._review_doc(out_doc, domain)
+            test_case_doc = out_doc.read_text(encoding="utf-8")
 
             if skip_script:
                 _log.info("Skipping script generation (--skip-script)")
@@ -352,7 +351,7 @@ def _parse_args(argv=None):
                         help="Product name (e.g. orangehrm). Loads KB from products/<name>/ai/knowledge_base/.")
     parser.add_argument("--local", action="store_true", default=True, help="Use local Ollama (default)")
     parser.add_argument("--local-url", default="http://localhost:11434")
-    parser.add_argument("--doc-model", default="mistral:7b-instruct-v0.3-q4_K_M",
+    parser.add_argument("--doc-model", default="qwen2.5-coder:14b-instruct-q4_K_M",
                         help="Ollama model for test case doc generation")
     parser.add_argument("--script-model", default="qwen2.5-coder:14b-instruct-q4_K_M",
                         help="Ollama model for pytest script generation")
@@ -422,7 +421,7 @@ def main(argv=None):
                       tc_start, tc_prefix, detected)
 
     if args.doc:
-        doc_path = Path(args.doc)
+        doc_path = Path(args.doc).resolve()
         feature_name = doc_path.stem.removeprefix("test_")
         orchestrator.run(
             feature_name=feature_name,

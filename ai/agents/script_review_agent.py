@@ -93,11 +93,11 @@ AI-BASED SYSTEM OUTPUTS (non-deterministic):
       from utils.ai_assertions import assert_confidence_above, assert_category_in, SoftAssertions
       from utils.constants import AI_CONFIDENCE_THRESHOLD
       assert_confidence_above(result["confidence_score"], AI_CONFIDENCE_THRESHOLD)
-      assert_category_in(result["category"], {"positive", "negative", "edge"})
+      assert_category_in(result["category"], {{"positive", "negative", "edge"}})
   * When checking multiple AI fields in one test, use SoftAssertions to collect all failures:
       with SoftAssertions() as soft:
           soft.assert_confidence_above(result["score"], AI_CONFIDENCE_THRESHOLD)
-          soft.assert_category_in(result["label"], {"positive", "negative"})
+          soft.assert_category_in(result["label"], {{"positive", "negative"}})
   * Never use exact string equality: `assert result["category"] == "positive"` is wrong.
 
 MARKERS:
