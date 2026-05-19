@@ -270,6 +270,8 @@ def _execute_run(run_id: str, product: str, domain: str, module: str, extra_args
         "-v", "--tb=short", "--no-header",
         "--override-ini=addopts=",
     ]
+    if env_overrides.get("SF_ENV"):
+        cmd.extend(["--env", env_overrides["SF_ENV"]])
     if extra_args.strip():
         cmd.extend(extra_args.split())
 
@@ -336,10 +338,14 @@ def _run_post_suite(run_id: str, product: str, domain: str, report_path: Path) -
             artifacts_dir=_ARTIFACTS_DIR,
             tests_dir=tests_dir if tests_dir.exists() else None,
         )
-        cats = summary.get("blockers")
+        failure_analysis = summary.get("failure_analysis") or {}
         patch: dict = {"analyzed": True}
-        if isinstance(cats, dict):
-            patch["failure_categories"] = cats
+        by_class = failure_analysis.get("by_classification")
+        if isinstance(by_class, dict) and by_class:
+            patch["failure_categories"] = by_class
+        analyzed_failures = failure_analysis.get("failures")
+        if isinstance(analyzed_failures, list) and analyzed_failures:
+            patch["failures"] = analyzed_failures
         _rm.patch_run(run_id, **patch)
     except Exception:
         pass  # analysis is best-effort; raw failures already stored from report parse

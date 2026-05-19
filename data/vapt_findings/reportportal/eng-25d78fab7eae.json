@@ -439,6 +439,95 @@
           "status": "confirmed_secure"
         }
       ]
+    },
+    {
+      "scan_id": "scan-6376f5c94cf4",
+      "scan_type": "infra_int",
+      "triggered_at": "2026-05-19T08:14:56.268802+00:00",
+      "triggered_by": "Mayuresh Kulkarni",
+      "status": "completed",
+      "is_revalidation": false,
+      "total": 7,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 7,
+      "duration": 0.01,
+      "finished_at": "2026-05-19T08:14:56.601175+00:00",
+      "progress_total": 7,
+      "progress_done": 1,
+      "test_log": [
+        {
+          "test_id": "tests/vapt_infra_int/test_vapt_infra_ssh_config.py::test_INFRA_INT_ssh_permit_root_login_disabled[localhost]",
+          "title": "Infra Int Ssh Permit Root Login Disabled[Localhost]",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_infra_int/test_vapt_infra_ssh_config.py::test_INFRA_INT_ssh_password_auth_disabled[localhost]",
+          "title": "Infra Int Ssh Password Auth Disabled[Localhost]",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_infra_int/test_vapt_infra_ssh_config.py::test_INFRA_INT_ssh_max_auth_tries[localhost]",
+          "title": "Infra Int Ssh Max Auth Tries[Localhost]",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_infra_int/test_vapt_infra_ssh_config.py::test_INFRA_INT_ssh_allow_users_configured[localhost]",
+          "title": "Infra Int Ssh Allow Users Configured[Localhost]",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_infra_int/test_vapt_infra_ssh_config.py::test_INFRA_INT_suid_sgid_files[localhost]",
+          "title": "Infra Int Suid Sgid Files[Localhost]",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_infra_int/test_vapt_infra_ssh_config.py::test_INFRA_INT_sensitive_file_permissions[localhost]",
+          "title": "Infra Int Sensitive File Permissions[Localhost]",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_infra_int/test_vapt_infra_ssh_config.py::test_INFRA_INT_audit_log_present[localhost]",
+          "title": "Infra Int Audit Log Present[Localhost]",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        }
+      ]
+    },
+    {
+      "scan_id": "scan-205c06f4da52",
+      "scan_type": "infra_int",
+      "triggered_at": "2026-05-19T08:44:53.949131+00:00",
+      "triggered_by": "Mayuresh Kulkarni",
+      "status": "failed",
+      "is_revalidation": false,
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "duration": 0.0,
+      "finished_at": "2026-05-19T08:44:53.956772+00:00",
+      "summary_error": "SSH credentials not configured — set SSH Username and SSH Key Path in the Scope tab before running an Internal Infrastructure scan"
     }
   ],
   "findings": [

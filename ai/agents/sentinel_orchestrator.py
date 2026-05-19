@@ -96,6 +96,7 @@ class SentinelOrchestrator:
             "blockers_count": len(blockers),
             "requires_human": len(blockers) > 0,
             "failure_count": failure_result.get("total", 0),
+            "failure_analysis": failure_result,
             "regression_count": len(regression_result.get("regressions", [])),
             "flaky_candidates": len(flaky_result.get("quarantine_candidates", [])),
             "coverage_gaps": len(gap_result.get("gaps", [])),

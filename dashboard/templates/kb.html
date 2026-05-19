@@ -496,8 +496,24 @@ function fillAndTrigger(product, domain, feature) {
   featureEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+// Pre-fill pipeline LLM fields from AI Assistant settings
+async function loadAiCfgIntoPipeline() {
+  try {
+    const r = await fetch('/api/chat/config');
+    if (!r.ok) return;
+    const cfg = await r.json();
+    const urlEl   = document.getElementById('pipeline-local-url');
+    const docEl   = document.getElementById('pipeline-doc-model');
+    const sctEl   = document.getElementById('pipeline-script-model');
+    if (cfg.base_url && urlEl) urlEl.value = cfg.base_url;
+    if (cfg.model   && docEl) docEl.value  = cfg.model;
+    if (cfg.model   && sctEl) sctEl.value  = cfg.model;
+  } catch (_) {}
+}
+
 // Pre-fill from sessionStorage if navigated from home page gap chip
 window.addEventListener('DOMContentLoaded', () => {
+  loadAiCfgIntoPipeline();
   const prefill = sessionStorage.getItem('kb_prefill');
   if (prefill) {
     try {

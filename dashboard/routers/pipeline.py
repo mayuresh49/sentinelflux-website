@@ -163,6 +163,23 @@ def queue_pipeline_for_increment(product: str, domain: str, increment_file: str)
     return job_id
 
 
+def _write_job(job: dict) -> None:
+    conn = get_conn()
+    conn.execute(
+        """INSERT INTO pipeline_jobs
+           (id, started, finished, product, feature, domain, increment_file, status, output)
+           VALUES (?, ?, NULL, ?, ?, ?, ?, 'running', '')""",
+        (job["id"], job["started"], job["product"], job["feature"],
+         job["domain"], job["increment_file"]),
+    )
+    conn.execute(
+        "DELETE FROM pipeline_jobs WHERE id NOT IN "
+        "(SELECT id FROM pipeline_jobs ORDER BY started DESC LIMIT ?)",
+        (_MAX_JOBS,),
+    )
+    conn.commit()
+
+
 def _load_jobs() -> list[dict]:
     rows = get_conn().execute(
         "SELECT * FROM pipeline_jobs ORDER BY started DESC LIMIT ?", (_MAX_JOBS,)
