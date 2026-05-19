@@ -122,4 +122,10 @@ AGENT_META: dict = {
         "outputs": ["product_insights rows (agent_type=ux_architect) in sentinelflux.db"],
         "config_params": [],
     },
+    "cto": {
+        "responsibility": "Reads all active product_insights rows from the 4 expert agents, presents them numbered to the LLM, and asks it to select the top 4-5 most strategically important items with a per-item rationale. Creates roadmap_items rows for the selections and marks the source insights as 'planned'.",
+        "inputs": ["All active product_insights rows from sentinelflux.db"],
+        "outputs": ["roadmap_items rows in sentinelflux.db", "source product_insights status updated to 'planned'"],
+        "config_params": [],
+    },
 }

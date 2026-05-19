@@ -9,6 +9,7 @@ from ai.agents.regression_guard_agent import RegressionGuardAgent
 from ai.agents.result_analyzer_agent import ResultAnalyzerAgent
 from ai.agents.script_gen_agent import ScriptGenAgent
 from ai.agents.script_review_agent import ScriptReviewAgent
+from ai.agents.cto_agent import CTOAgent
 from ai.agents.product_review_agents import (
     DevArchitectAgent,
     ProductManagerAgent,
@@ -35,4 +36,5 @@ __all__ = [
     "DevArchitectAgent",
     "QAArchitectAgent",
     "UXArchitectAgent",
+    "CTOAgent",
 ]

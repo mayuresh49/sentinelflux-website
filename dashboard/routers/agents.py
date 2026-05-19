@@ -22,6 +22,7 @@ _AGENT_REGISTRY = [
     {"name": "dev_architect", "description": "Reviews SentinelFlux architecture, tech debt, and security", "domain": "product", "requires_ai": True},
     {"name": "qa_architect", "description": "Reviews testing strategy, coverage, and quality infrastructure", "domain": "product", "requires_ai": True},
     {"name": "ux_architect", "description": "Reviews dashboard UX and information architecture", "domain": "product", "requires_ai": True},
+    {"name": "cto", "description": "Synthesises all expert insights into a strategic top-5 roadmap", "domain": "product", "requires_ai": True},
 ]
 
 

@@ -188,6 +188,20 @@ _DDL = [
         run_at TEXT NOT NULL,
         updated_at TEXT
     )""",
+    """CREATE TABLE IF NOT EXISTS roadmap_items (
+        id TEXT PRIMARY KEY,
+        source_insight_id TEXT NOT NULL UNIQUE,
+        agent_type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        recommendation TEXT NOT NULL DEFAULT '',
+        category TEXT NOT NULL DEFAULT 'opportunity',
+        priority TEXT NOT NULL DEFAULT 'medium',
+        cto_rationale TEXT NOT NULL DEFAULT '',
+        status TEXT NOT NULL DEFAULT 'planned',
+        promoted_at TEXT NOT NULL,
+        done_at TEXT
+    )""",
 ]
 
 
