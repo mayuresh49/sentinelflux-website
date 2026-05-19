@@ -155,6 +155,91 @@ def create_bug(
     )
 
 
+# ── Export ────────────────────────────────────────────────────────────────────
+
+@router.get("/bugs/export")
+def export_bugs(
+    request: Request,
+    product: str | None = None,
+    state: str | None = None,
+    priority: str | None = None,
+    format: str = "csv",
+    current_user: dict = Depends(_require_user),
+):
+    import csv, io
+    from fastapi.responses import StreamingResponse
+
+    visible = set(user_products(current_user, _all_products()))
+    if product and product not in visible:
+        raise HTTPException(403, "Product not accessible")
+    bugs = _bm.list_bugs(product=product, state=state, priority=priority)
+    if not current_user.get("admin"):
+        bugs = [b for b in bugs if b["product"] in visible]
+
+    headers = [
+        "Bug Number", "Title", "Product", "State", "Priority", "Severity",
+        "Type", "Component", "Assignee", "Reporter", "Environment",
+        "Build Version", "Linked TC", "Linked Run", "Linked Plan",
+        "Description", "Steps to Reproduce", "Expected Result", "Actual Result",
+        "Root Cause", "Fix Notes", "Created At", "Resolved At",
+    ]
+
+    def _row(b: dict) -> dict:
+        return {
+            "Bug Number": b.get("bug_number") or b.get("id", ""),
+            "Title": b.get("title", ""),
+            "Product": b.get("product", ""),
+            "State": b.get("state", ""),
+            "Priority": b.get("priority", ""),
+            "Severity": b.get("severity", ""),
+            "Type": b.get("bug_type", ""),
+            "Component": b.get("component", ""),
+            "Assignee": b.get("assignee", ""),
+            "Reporter": b.get("reporter", ""),
+            "Environment": b.get("environment", ""),
+            "Build Version": b.get("build_version", ""),
+            "Linked TC": b.get("linked_tc_id", ""),
+            "Linked Run": b.get("linked_run_id", ""),
+            "Linked Plan": b.get("linked_plan_id", ""),
+            "Description": b.get("description", ""),
+            "Steps to Reproduce": b.get("steps_to_reproduce", ""),
+            "Expected Result": b.get("expected_result", ""),
+            "Actual Result": b.get("actual_result", ""),
+            "Root Cause": b.get("root_cause", ""),
+            "Fix Notes": b.get("fix_notes", ""),
+            "Created At": (b.get("created_at") or "")[:16].replace("T", " "),
+            "Resolved At": (b.get("resolved_at") or "")[:16].replace("T", " "),
+        }
+
+    rows = [_row(b) for b in bugs]
+
+    if format == "xlsx":
+        import openpyxl
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Bugs"
+        ws.append(headers)
+        for r in rows:
+            ws.append([r.get(h, "") for h in headers])
+        buf = io.BytesIO()
+        wb.save(buf)
+        buf.seek(0)
+        return StreamingResponse(
+            buf,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment; filename=bugs.xlsx"},
+        )
+
+    buf = io.StringIO()
+    w = csv.DictWriter(buf, fieldnames=headers)
+    w.writeheader()
+    w.writerows(rows)
+    return StreamingResponse(
+        iter([buf.getvalue()]), media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=bugs.csv"},
+    )
+
+
 # ── Single bug ────────────────────────────────────────────────────────────────
 
 @router.get("/bugs/{bug_id}")
