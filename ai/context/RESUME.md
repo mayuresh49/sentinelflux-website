@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (41)  
+Last updated: 2026-05-19 (42)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Runs: missing DB columns + stuck-run fix** (`core/db.py`, `dashboard/routers/runs.py`): `progress_total`, `progress_done`, `summary_error` were missing from `test_runs` schema — `patch_run` calls in `_execute_run` silently threw `OperationalError`, leaving runs stuck in `running` and "Collecting tests…" never advancing. Added columns to `CREATE TABLE` (fresh installs) + `ALTER TABLE` migrations (existing DBs). `apply_schema` now swallows `duplicate column name` so restarts are idempotent. Manually recovered `run_26a4ee07`. Root cause of `exitcode: 3` (pytest INTERRUPTED) is uvicorn `--reload` sending SIGTERM to child processes — open issue.
+
+## Previous: VAPT scope SSH fix (2026-05-19)
 
 - **VAPT scope: SSH credentials section always visible** (`dashboard/templates/vapt.html`): SSH credentials section was gated on `scopeForm.test_types.includes('infra_int')` but `infra_int` is not in the Test Domains checkbox list (`['web','api','mobile']`), so it was permanently hidden. Removed the `x-show` guard — section now always visible, matching the pattern of Infrastructure Targets and Mobile App Path fields.
 
