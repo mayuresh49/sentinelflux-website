@@ -24,3 +24,13 @@ agents:
     run_regression_guard: true
     run_coverage_gap: true
     run_locator_healer: true
+  product_manager:
+    enabled: true
+  dev_architect:
+    enabled: true
+  qa_architect:
+    enabled: true
+  ux_architect:
+    enabled: true
+  cto:
+    enabled: true

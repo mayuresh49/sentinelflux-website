@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (28)  
+Last updated: 2026-05-19 (30)  
 Framework version: 0.1.0
 
 ---
@@ -42,6 +42,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Insights: CTO agent + Strategic Roadmap + deduplication fix** (`ai/agents/cto_agent.py`, `core/roadmap_manager.py`, `core/db.py`, `core/insights_manager.py`, `dashboard/routers/insights.py`, `dashboard/templates/insights.html`, `ai/agents/__init__.py`, `dashboard/routers/agents.py`, `dashboard/agent_meta.py`): New `CTOAgent` reads all `active` insights from the 4 expert agents, presents them numbered to the LLM, and selects the top 4–5 most strategically important with a per-item rationale. New `roadmap_items` SQLite table: `source_insight_id UNIQUE` (prevents duplicates across CTO runs), `agent_type`, title/description/recommendation copied from source, `cto_rationale`, `status (planned|done)`, `promoted_at`, `done_at`. `RoadmapManager`: create (INSERT OR IGNORE), list, update_status (planned→done), delete + restore source insight to active. New `/api/insights/roadmap` CRUD + `/roadmap/run` background trigger + CTO run state in `_run_state`. Strategic Roadmap panel at top of `/insights` page (above persona tabs): gradient header with CTO Review button + last-run timestamp; planned item cards showing source persona badge (color-coded), priority+category pills, description, Recommendation block, CTO Rationale block (indigo background); Mark Done + Remove actions; collapsible Completed section with strikethrough + done timestamp. Removing an item restores source insight to `active`. Deduplication fix: `save_insights()` now deletes existing `active` rows for that `agent_type` before inserting fresh ones — re-running an expert agent replaces its active insights rather than accumulating duplicates. `planned`/`punted`/`discarded` rows preserved (user decisions respected). CTO only reads `active` insights so already-promoted (`planned`) and done-roadmap-source (`planned`) items are naturally excluded from CTO selection.
+
+## Previous: Fix runs latest-first + test plan → run navigation (2026-05-19)
 
 - **Fix: runs show latest first + test plan → run navigation** (`dashboard/routers/pages.py`, `dashboard/templates/runs.html`, `dashboard/templates/test_plans.html`): `reversed(rm.all_runs())` in `runs_page` and `failures_page` was flipping `all_runs()`'s DESC order to ASC (oldest first) — removed both `reversed()` calls. Added `?highlight=<run_id>` param to `runs_page`: auto-calculates the page the run lives on, renders it, and scrolls to the card via JS `scrollIntoView`. Run cards now have `id="run-{{ run.id }}"` anchors with an indigo ring when highlighted. Run IDs in Test Plans → Execution → Automated Run History are now clickable links opening `/runs?product=...&highlight=<run_id>#run-<run_id>` in a new tab. Client-side sort changed from `localeCompare` to direct `>` string comparison (locale-safe for ISO dates).
 

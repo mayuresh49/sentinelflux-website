@@ -1,5 +1,18 @@
 # Completed work items — append only, newest first
 
+- id: cto-agent-strategic-roadmap
+  date: 2026-05-19
+  title: "Insights: CTO agent + Strategic Roadmap + deduplication fix"
+  outcome: >
+    CTOAgent reads all active insights from 4 expert agents, selects top 4-5
+    strategically with LLM rationale. New roadmap_items SQLite table (source_insight_id
+    UNIQUE). RoadmapManager: create/list/update_status/delete+restore. New
+    /api/insights/roadmap CRUD + /roadmap/run trigger. Strategic Roadmap panel on
+    /insights page: planned cards with persona badge, CTO Rationale block (indigo),
+    Mark Done + Remove actions, collapsible Completed section. save_insights() now
+    deletes existing active rows before inserting — re-runs replace rather than
+    accumulate. CTO reads only active insights so planned/done sources are excluded.
+
 - id: runs-latest-first-and-nav-link
   date: 2026-05-19
   title: "Fix: runs latest-first ordering + test plan → run navigation link"
