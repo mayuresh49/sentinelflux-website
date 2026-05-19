@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (50)  
+Last updated: 2026-05-19 (51)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Bugs: auto-attach run artifacts on bug creation; fix transition config fallback** (`dashboard/routers/bugs.py`, `core/bug_manager.py`): `create_bug_from_run` now calls `_attach_run_artifacts` after creating the bug — copies screenshot, console log, API log, trace.zip, and the JSON run report from `reports/artifacts/<safe_nodeid>/` into bug artifact storage. `_get_transitions` fix: `if raw is not None` (was `if raw`) so an explicitly empty `bug_transitions: {}` is honoured rather than falling back to defaults; correctly reflects Config > Bug Workflow settings in the Move To dropdown.
+
+## Previous: UI padding + bug sequential numbers (2026-05-19)
 
 - **UI: Standardise padding/spacing across all dashboard pages** (all non-PDF templates + partials): All right/detail panel containers now use `border-slate-100` + `shadow-sm`. Section card headers uniformly `px-5 py-3`. Tab content areas `p-6`. Config page: removed `max-w-5xl` width constraint and redundant `<h1>` title block; tab spacing tightened. Covers: bugs, vapt, test_plans, a11y, contract, perf, visual, kb, runs, docs, scripts, admin_users, index, quality, insights, config, config_labels, config_priorities partials.
 - **Bugs: sequential bug numbers with per-product code** (`core/bug_manager.py`, `core/db.py`, `dashboard/routers/config/_products.py`, `dashboard/templates/partials/config_products.html`, `dashboard/templates/test_plan_report_pdf.html`): Bugs now get a sequential number on creation (`BUG-XX-001` format). Per-product `bug_code` field (up to 6 chars) configurable inline from Config > Products. DB gains `bug_seq` + `bug_number` columns. PDF report shows `bug_number` instead of raw UUID.

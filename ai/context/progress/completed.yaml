@@ -1,5 +1,14 @@
 # Completed work items — append only, newest first
 
+- id: bugs-run-artifact-attach-transition-fix
+  date: 2026-05-19
+  title: "Bugs: auto-attach run artifacts on creation; fix transition config fallback"
+  outcome: >
+    create_bug_from_run now calls _attach_run_artifacts — copies screenshot,
+    console log, API log, trace.zip and JSON run report into bug artifact storage.
+    _get_transitions: if raw is not None (was if raw) so empty bug_transitions:{}
+    is honoured rather than falling back to defaults.
+
 - id: ui-padding-standardisation
   date: 2026-05-19
   title: "UI: standardise padding/spacing across all dashboard pages"
