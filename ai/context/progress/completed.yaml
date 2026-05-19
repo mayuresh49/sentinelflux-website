@@ -1,5 +1,18 @@
 # Completed work items — append only, newest first
 
+- id: vapt-infra-bug-fixes
+  date: 2026-05-19
+  title: "VAPT infra scan: xfail fix, real AXFR test, multi-target parametrize"
+  outcome: >
+    pytest.xfail → pytest.fail for exposed-ports and SSH-on-22 tests (security
+    findings must be FAILED, not xfail). Zone transfer test now sends actual raw
+    DNS-over-TCP AXFR query (struct+socket) and reads RCODE+ancount — passes when
+    AXFR is blocked, fails only when transfer succeeds. conftest.py replaced
+    vapt_infra_targets + single vapt_host session fixtures with _resolve_targets()
+    + pytest_generate_tests so all vapt_host tests run once per IP. Same fixes
+    applied to vapt_test_generator.py templates. Backlog item V-01 added for
+    authenticated SSH grey-box scanning.
+
 - id: agents-public-registry
   date: 2026-05-19
   title: "Agents: filter product-domain agents from public registry"

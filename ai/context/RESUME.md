@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (33)  
+Last updated: 2026-05-19 (34)  
 Framework version: 0.1.0
 
 ---
@@ -42,6 +42,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **VAPT infra scan: bug fixes + multi-target** (`products/reportportal/tests/vapt_infra/`, `core/vapt_test_generator.py`, `ai/context/progress/backlog.yaml`): Three bugs fixed across generated test files and generator templates. (1) `pytest.xfail` → `pytest.fail` for `test_INFRA_sensitive_service_ports_not_exposed` and `test_INFRA_ssh_port_not_on_default` — exposed ports and SSH-on-22 are real security findings, not "expected" failures. (2) Zone transfer test now sends a raw DNS-over-TCP AXFR packet (struct + socket, no new deps) and reads RCODE + ancount from response — only fails if transfer actually succeeds; a locked-down nameserver passes even with port 53 open. (3) `conftest.py` replaced `vapt_infra_targets` + single-host `vapt_host` session fixtures with `_resolve_targets()` + `pytest_generate_tests` — all `vapt_host`-dependent tests now run once per IP when multiple targets are entered in the UI. `vapt_domain` downgraded to function scope; `vapt_https_port` stays session-scoped. Backlog item `V-01` added for future authenticated SSH (grey-box) scanning.
+
+## Previous: Agents: filter product-domain agents from public registry (2026-05-19)
 
 - **Agents: filter product-domain agents from public registry** (`dashboard/routers/agents.py`, `dashboard/routers/pages.py`): Added `_PUBLIC_REGISTRY` (filters `_AGENT_REGISTRY` by `domain != "product"`) so internal product-review agents (QA Architect, Dev Architect, etc.) are not exposed via the public `/api/agents` list/get endpoints or counted on the home dashboard. Home page and agents page both import `_PUBLIC_REGISTRY`.
 
