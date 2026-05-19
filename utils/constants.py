@@ -10,6 +10,9 @@ MISTRAL_LOCAL_TIMEOUT_S = 300
 
 # Generic polling timeouts for async/scheduler-based test steps (seconds).
 # Product-specific timeouts live in products/<product>/constants.py.
+BUG_ARTIFACT_MAX_MB = 100
+BUG_ARTIFACTS_DIR = "data/bugs"  # relative to ROOT; per-bug: <dir>/<product>/<bug_id>/artifacts/
+
 REPORT_GEN_TIMEOUT = 120
 EMAIL_DELIVERY_TIMEOUT = 30
 DATA_SYNC_TIMEOUT = 90

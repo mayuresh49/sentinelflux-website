@@ -202,6 +202,68 @@ _DDL = [
         promoted_at TEXT NOT NULL,
         done_at TEXT
     )""",
+    """CREATE TABLE IF NOT EXISTS bugs (
+        id TEXT PRIMARY KEY,
+        product TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        priority TEXT NOT NULL DEFAULT 'P2',
+        severity TEXT NOT NULL DEFAULT 'major',
+        state TEXT NOT NULL DEFAULT 'new',
+        bug_type TEXT NOT NULL DEFAULT 'functional',
+        component TEXT NOT NULL DEFAULT '',
+        environment TEXT NOT NULL DEFAULT '',
+        build_version TEXT NOT NULL DEFAULT '',
+        reporter TEXT NOT NULL DEFAULT '',
+        assignee TEXT NOT NULL DEFAULT '',
+        steps_to_reproduce TEXT NOT NULL DEFAULT '',
+        expected_result TEXT NOT NULL DEFAULT '',
+        actual_result TEXT NOT NULL DEFAULT '',
+        root_cause TEXT NOT NULL DEFAULT '',
+        fix_notes TEXT NOT NULL DEFAULT '',
+        tags TEXT NOT NULL DEFAULT '[]',
+        linked_tc_id TEXT NOT NULL DEFAULT '',
+        linked_run_id TEXT NOT NULL DEFAULT '',
+        linked_plan_id TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        resolved_at TEXT,
+        closed_at TEXT
+    )""",
+    "CREATE INDEX IF NOT EXISTS idx_bugs_product ON bugs(product, created_at)",
+    "CREATE INDEX IF NOT EXISTS idx_bugs_state ON bugs(state)",
+    "CREATE INDEX IF NOT EXISTS idx_bugs_assignee ON bugs(assignee)",
+    """CREATE TABLE IF NOT EXISTS bug_state_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        bug_id TEXT NOT NULL,
+        from_state TEXT NOT NULL,
+        to_state TEXT NOT NULL,
+        changed_by TEXT NOT NULL,
+        changed_at TEXT NOT NULL,
+        comment TEXT NOT NULL DEFAULT ''
+    )""",
+    "CREATE INDEX IF NOT EXISTS idx_bug_history ON bug_state_history(bug_id)",
+    """CREATE TABLE IF NOT EXISTS bug_comments (
+        id TEXT PRIMARY KEY,
+        bug_id TEXT NOT NULL,
+        author TEXT NOT NULL,
+        body TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+    )""",
+    "CREATE INDEX IF NOT EXISTS idx_bug_comments ON bug_comments(bug_id, created_at)",
+    """CREATE TABLE IF NOT EXISTS bug_artifacts (
+        id TEXT PRIMARY KEY,
+        bug_id TEXT NOT NULL,
+        filename TEXT NOT NULL,
+        artifact_type TEXT NOT NULL DEFAULT 'document',
+        mime_type TEXT NOT NULL DEFAULT '',
+        size_bytes INTEGER NOT NULL DEFAULT 0,
+        storage_path TEXT NOT NULL,
+        uploaded_at TEXT NOT NULL,
+        uploaded_by TEXT NOT NULL DEFAULT ''
+    )""",
+    "CREATE INDEX IF NOT EXISTS idx_bug_artifacts ON bug_artifacts(bug_id)",
 ]
 
 

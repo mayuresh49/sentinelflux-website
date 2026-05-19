@@ -52,6 +52,7 @@ from dashboard.routers import a11y as a11y_router
 from dashboard.routers import contract as contract_router
 from dashboard.routers import visual as visual_router
 from dashboard.routers import insights as insights_router
+from dashboard.routers import bugs as bugs_router
 
 _STATIC_DIR = Path(__file__).resolve().parent / "static"
 # Use a stable secret from env so sessions survive restarts; fall back to a generated one.
@@ -113,6 +114,7 @@ app.include_router(a11y_router.router, prefix="/api")
 app.include_router(contract_router.router, prefix="/api")
 app.include_router(visual_router.router, prefix="/api")
 app.include_router(insights_router.router, prefix="/api")
+app.include_router(bugs_router.router, prefix="/api")
 
 
 @app.on_event("startup")

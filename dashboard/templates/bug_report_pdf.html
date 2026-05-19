@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10pt; color: #1e293b; line-height: 1.5; }
+  @page { size: A4; margin: 20mm 18mm 18mm 18mm; }
+
+  .cover { padding: 30pt 0 20pt; border-bottom: 2pt solid #6366f1; margin-bottom: 20pt; }
+  .cover h1 { font-size: 20pt; font-weight: 700; color: #1e293b; }
+  .cover .sub { font-size: 10pt; color: #64748b; margin-top: 4pt; }
+  .meta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8pt; margin-top: 14pt; }
+  .meta-cell { background: #f8fafc; border: 0.5pt solid #e2e8f0; border-radius: 4pt; padding: 6pt 8pt; }
+  .meta-cell .label { font-size: 7pt; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5pt; }
+  .meta-cell .value { font-size: 9pt; font-weight: 600; color: #1e293b; margin-top: 2pt; }
+
+  .state-badge { display: inline-block; padding: 2pt 7pt; border-radius: 10pt; font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5pt; }
+  .state-new      { background: #e0f2fe; color: #0369a1; }
+  .state-open     { background: #fef3c7; color: #92400e; }
+  .state-in_progress { background: #ede9fe; color: #5b21b6; }
+  .state-resolved { background: #dcfce7; color: #166534; }
+  .state-closed   { background: #f1f5f9; color: #475569; }
+  .state-wont_fix { background: #fee2e2; color: #991b1b; }
+  .state-deferred { background: #fef9c3; color: #713f12; }
+
+  .prio-P0 { background: #fee2e2; color: #991b1b; }
+  .prio-P1 { background: #ffedd5; color: #9a3412; }
+  .prio-P2 { background: #fef3c7; color: #92400e; }
+  .prio-P3 { background: #f1f5f9; color: #475569; }
+
+  h2 { font-size: 12pt; font-weight: 700; color: #1e293b; border-bottom: 0.5pt solid #e2e8f0; padding-bottom: 4pt; margin: 18pt 0 10pt; }
+  h3 { font-size: 10pt; font-weight: 600; color: #475569; margin: 10pt 0 4pt; }
+  p { margin-bottom: 6pt; }
+  pre { background: #f8fafc; border: 0.5pt solid #e2e8f0; border-radius: 3pt; padding: 6pt 8pt; font-size: 8pt; white-space: pre-wrap; word-break: break-word; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; margin-bottom: 10pt; }
+  th { background: #f1f5f9; text-align: left; padding: 5pt 7pt; font-weight: 600; border: 0.5pt solid #e2e8f0; color: #475569; font-size: 8pt; text-transform: uppercase; letter-spacing: 0.3pt; }
+  td { padding: 5pt 7pt; border: 0.5pt solid #e2e8f0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .artifact-icon { font-size: 8pt; padding: 1pt 5pt; border-radius: 3pt; background: #e0f2fe; color: #0369a1; }
+  .comment-block { border-left: 2pt solid #e2e8f0; padding-left: 8pt; margin-bottom: 8pt; }
+  .comment-author { font-weight: 600; font-size: 9pt; color: #1e293b; }
+  .comment-time { font-size: 8pt; color: #94a3b8; margin-left: 4pt; }
+  .comment-body { font-size: 9pt; color: #475569; margin-top: 3pt; }
+
+  .timeline-row { display: flex; gap: 10pt; align-items: flex-start; margin-bottom: 8pt; }
+  .timeline-dot { width: 8pt; height: 8pt; border-radius: 50%; background: #6366f1; margin-top: 3pt; shrink: 0; }
+  .timeline-content { flex: 1; }
+  .timeline-states { font-size: 9pt; font-weight: 600; }
+  .timeline-meta { font-size: 8pt; color: #94a3b8; }
+  .timeline-comment { font-size: 9pt; color: #475569; margin-top: 2pt; }
+
+  .footer { margin-top: 30pt; border-top: 0.5pt solid #e2e8f0; padding-top: 6pt; font-size: 8pt; color: #94a3b8; text-align: center; }
+</style>
+</head>
+<body>
+
+<!-- Cover -->
+<div class="cover">
+  <div class="sub">Incident Report · SentinelFlux</div>
+  <h1>{{ bug.title }}</h1>
+  <div style="margin-top:8pt; display:flex; gap:6pt; align-items:center;">
+    <span class="state-badge state-{{ bug.state }}">{{ bug.state.replace('_',' ') }}</span>
+    <span class="state-badge prio-{{ bug.priority }}">{{ bug.priority }}</span>
+    <span style="font-size:8pt;color:#64748b;">{{ bug.severity }}</span>
+    <span style="font-size:8pt;color:#64748b;">·</span>
+    <span style="font-size:8pt;color:#64748b;">{{ bug.bug_type }}</span>
+  </div>
+  <div class="meta-grid">
+    <div class="meta-cell"><div class="label">Bug ID</div><div class="value" style="font-family:monospace;">{{ bug.id[:12] }}…</div></div>
+    <div class="meta-cell"><div class="label">Product</div><div class="value">{{ bug.product }}</div></div>
+    <div class="meta-cell"><div class="label">Component</div><div class="value">{{ bug.component or '—' }}</div></div>
+    <div class="meta-cell"><div class="label">Reporter</div><div class="value">{{ bug.reporter or '—' }}</div></div>
+    <div class="meta-cell"><div class="label">Assignee</div><div class="value">{{ bug.assignee or 'Unassigned' }}</div></div>
+    <div class="meta-cell"><div class="label">Environment</div><div class="value">{{ bug.environment or '—' }}</div></div>
+    <div class="meta-cell"><div class="label">Build / Version</div><div class="value">{{ bug.build_version or '—' }}</div></div>
+    <div class="meta-cell"><div class="label">Created</div><div class="value">{{ bug.created_at[:16].replace('T',' ') }} UTC</div></div>
+    <div class="meta-cell"><div class="label">Resolved</div><div class="value">{{ bug.resolved_at[:16].replace('T',' ') + ' UTC' if bug.resolved_at else '—' }}</div></div>
+  </div>
+  {% if bug.linked_tc_id or bug.linked_run_id %}
+  <div style="margin-top:10pt;font-size:8pt;color:#64748b;">
+    {% if bug.linked_tc_id %}Linked Test Case: <b>{{ bug.linked_tc_id }}</b>{% endif %}
+    {% if bug.linked_tc_id and bug.linked_run_id %} · {% endif %}
+    {% if bug.linked_run_id %}Linked Run: <b style="font-family:monospace;">{{ bug.linked_run_id[:12] }}</b>{% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Section 1: Description -->
+{% if bug.description %}
+<h2>1. Description</h2>
+<p>{{ bug.description }}</p>
+{% endif %}
+
+<!-- Section 2: Reproduction & Results -->
+<h2>2. Reproduction &amp; Results</h2>
+{% if bug.steps_to_reproduce %}
+<h3>Steps to Reproduce</h3>
+<pre>{{ bug.steps_to_reproduce }}</pre>
+{% endif %}
+{% if bug.expected_result %}
+<h3>Expected Result</h3>
+<p>{{ bug.expected_result }}</p>
+{% endif %}
+{% if bug.actual_result %}
+<h3>Actual Result</h3>
+<p>{{ bug.actual_result }}</p>
+{% endif %}
+{% if not bug.steps_to_reproduce and not bug.expected_result and not bug.actual_result %}
+<p style="color:#94a3b8;">No reproduction details recorded.</p>
+{% endif %}
+
+<!-- Section 3: Resolution -->
+{% if bug.root_cause or bug.fix_notes %}
+<h2>3. Resolution</h2>
+{% if bug.root_cause %}
+<h3>Root Cause</h3>
+<p>{{ bug.root_cause }}</p>
+{% endif %}
+{% if bug.fix_notes %}
+<h3>Fix Notes</h3>
+<p>{{ bug.fix_notes }}</p>
+{% endif %}
+{% endif %}
+
+<!-- Section 4: Artifacts -->
+<h2>4. Artifacts ({{ artifacts | length }})</h2>
+{% if artifacts %}
+<table>
+  <tr><th>#</th><th>Filename</th><th>Type</th><th>Size</th><th>Uploaded By</th><th>Uploaded At</th></tr>
+  {% for a in artifacts %}
+  <tr>
+    <td>{{ loop.index }}</td>
+    <td style="font-family:monospace;font-size:8pt;">{{ a.filename }}</td>
+    <td><span class="artifact-icon">{{ a.artifact_type }}</span></td>
+    <td>{{ (a.size_bytes / 1024) | round(1) }} KB</td>
+    <td>{{ a.uploaded_by or '—' }}</td>
+    <td>{{ a.uploaded_at[:16].replace('T',' ') }} UTC</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p style="color:#94a3b8;">No artifacts attached.</p>
+{% endif %}
+
+<!-- Section 5: State History -->
+<h2>5. State History</h2>
+{% if history %}
+{% for h in history %}
+<div class="timeline-row">
+  <div class="timeline-dot"></div>
+  <div class="timeline-content">
+    <div class="timeline-states">{{ h.from_state.replace('_',' ') }} → {{ h.to_state.replace('_',' ') }}</div>
+    <div class="timeline-meta">{{ h.changed_by }} · {{ h.changed_at[:16].replace('T',' ') }} UTC</div>
+    {% if h.comment %}<div class="timeline-comment">{{ h.comment }}</div>{% endif %}
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<p style="color:#94a3b8;">No state transitions recorded.</p>
+{% endif %}
+
+<!-- Section 6: Comments -->
+<h2>6. Comments ({{ comments | length }})</h2>
+{% if comments %}
+{% for c in comments %}
+<div class="comment-block">
+  <span class="comment-author">{{ c.author }}</span>
+  <span class="comment-time">{{ c.created_at[:16].replace('T',' ') }} UTC</span>
+  <div class="comment-body">{{ c.body }}</div>
+</div>
+{% endfor %}
+{% else %}
+<p style="color:#94a3b8;">No comments.</p>
+{% endif %}
+
+<div class="footer">Generated {{ generated_at }} · SentinelFlux Incident Report · Bug {{ bug.id[:8] }}</div>
+</body>
+</html>

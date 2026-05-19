@@ -106,6 +106,20 @@
         <button type="submit" class="text-xs text-slate-400 hover:text-pink-700 font-medium px-2 py-0.5 rounded hover:bg-pink-50 transition-colors">Visual Off</button>
       </form>
       {% endif %}
+      <!-- Bug Tracker toggle -->
+      {% if p.get('bugs_enabled') %}
+      <form hx-post="/ui/config/products/set-bugs" hx-target="#products-list" hx-swap="innerHTML">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="bugs" value="false">
+        <button type="submit" class="text-xs bg-rose-100 text-rose-700 hover:bg-rose-200 font-medium px-2 py-0.5 rounded transition-colors">Bugs On</button>
+      </form>
+      {% else %}
+      <form hx-post="/ui/config/products/set-bugs" hx-target="#products-list" hx-swap="innerHTML">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="bugs" value="true">
+        <button type="submit" class="text-xs text-slate-400 hover:text-rose-700 font-medium px-2 py-0.5 rounded hover:bg-rose-50 transition-colors">Bugs Off</button>
+      </form>
+      {% endif %}
       {% if p.get('active', True) %}
       <button @click="showDeactivate = true"
               class="text-xs text-amber-600 hover:text-amber-800 font-medium px-2 py-0.5 rounded hover:bg-amber-50 transition-colors">

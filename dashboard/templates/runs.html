@@ -299,6 +299,7 @@
       <option value="running" {{ 'selected' if filter_status == 'running' else '' }}>Running</option>
       <option value="completed" {{ 'selected' if filter_status == 'completed' else '' }}>Completed</option>
       <option value="failed" {{ 'selected' if filter_status == 'failed' else '' }}>Failed</option>
+      <option value="errored" {{ 'selected' if filter_status == 'errored' else '' }}>Errored</option>
     </select>
     {% if any_running %}
     <span class="text-xs text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-full flex items-center gap-1">
@@ -318,6 +319,7 @@
       "running":   "bg-amber-100 text-amber-700",
       "queued":    "bg-slate-100 text-slate-500",
       "failed":    "bg-red-100 text-red-700",
+      "errored":   "bg-orange-100 text-orange-700",
       "aborted":   "bg-slate-100 text-slate-500",
     } %}
     {% set dot_colors = {
@@ -325,6 +327,7 @@
       "running":   "bg-amber-500",
       "queued":    "bg-slate-300",
       "failed":    "bg-red-500",
+      "errored":   "bg-orange-400",
       "aborted":   "bg-slate-300",
     } %}
 
@@ -431,7 +434,7 @@
           <!-- Actions -->
           <div class="shrink-0 flex flex-col items-end gap-1.5 ml-2">
             <div class="flex items-center gap-1.5">
-              {% if run.status in ('completed', 'failed') %}
+              {% if run.status in ('completed', 'failed', 'errored') %}
               <button @click="rerun('{{ run.id }}')"
                       class="text-xs px-2 py-1 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded transition-colors">
                 Re-run

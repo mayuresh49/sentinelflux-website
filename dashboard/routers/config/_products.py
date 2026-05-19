@@ -226,3 +226,9 @@ async def products_set_contract(request: Request, name: str = Form(...), contrac
 async def products_set_visual(request: Request, name: str = Form(...), visual: str = Form("true"),
                               _: dict = Depends(_require_admin)):
     return _set_flag(request, name, "visual_enabled", visual, "Visual Regression")
+
+
+@router.post("/ui/config/products/set-bugs", response_class=HTMLResponse)
+async def products_set_bugs(request: Request, name: str = Form(...), bugs: str = Form("true"),
+                            _: dict = Depends(_require_admin)):
+    return _set_flag(request, name, "bugs_enabled", bugs, "Bug Tracker")

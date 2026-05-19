@@ -92,6 +92,12 @@
           <span class="text-[10px] text-slate-400">{{ f.triggered_at[5:16].replace('T',' ') }}</span>
         </div>
 
+        <!-- File Bug -->
+        <button @click="fileBug('{{ f.run_id }}', '{{ f.test_id }}')"
+                class="text-[10px] text-rose-500 hover:text-rose-700 hover:bg-rose-50 shrink-0 px-1.5 py-0.5 rounded font-medium transition-colors">
+          File Bug
+        </button>
+
         <!-- Expand toggle -->
         {% if f.summary or f.suggestion %}
         <button @click="open = !open"
@@ -168,6 +174,18 @@ function applyFilter(key, val) {
   if (val) u.searchParams.set(key, val);
   else u.searchParams.delete(key);
   location.href = u.toString();
+}
+
+async function fileBug(runId, testId) {
+  try {
+    const res = await fetch(`/api/bugs/from-run/${runId}?test_id=${encodeURIComponent(testId)}`, {method: 'POST'});
+    if (!res.ok) throw new Error(await res.text());
+    const bug = await res.json();
+    sfToast(`Bug ${bug.id.slice(0,8)} created — opening Bugs page`, 'info');
+    setTimeout(() => window.open(`/bugs?highlight=${bug.id}`, '_blank'), 800);
+  } catch(e) {
+    sfToast('Failed to file bug: ' + e.message, 'error');
+  }
 }
 </script>
 {% endblock %}

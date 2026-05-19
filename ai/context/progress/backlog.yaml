@@ -189,6 +189,22 @@
   status: todo
   notes: Add full locale variants where UI text differs by locale.
 
+- id: P6-01
+  phase: 6
+  title: "Bugs: migrate artifact storage to S3"
+  files:
+    - core/bug_manager.py
+    - dashboard/routers/bugs.py
+  priority: medium
+  status: todo
+  notes: >
+    Bug artifacts currently stored on disk under data/bugs/<product>/<bug_id>/artifacts/.
+    Migrate to S3-compatible object store (R2, MinIO, AWS S3) for multi-node deployments.
+    BugManager.add_artifact() should accept a pluggable storage backend.
+    Keep disk as default; S3 backend reads AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY /
+    SF_BUGS_S3_BUCKET from env. artifact_type, size, mime already in bug_artifacts table —
+    storage_path becomes the S3 object key on migration.
+
 - id: V-01
   phase: vapt
   title: "VAPT Infra — authenticated SSH scan (grey-box)"

@@ -65,6 +65,7 @@ def _ctx(request: Request, current_user: dict, **kwargs) -> dict:
         "a11y_access": _module_access("a11y_enabled", current_user),
         "contract_access": _module_access("contract_enabled", current_user),
         "visual_access": _module_access("visual_enabled", current_user),
+        "bugs_access": _module_access("bugs_enabled", current_user),
         "master_admin": current_user.get("master_admin", False),
         **kwargs,
     }
@@ -647,6 +648,26 @@ async def test_plans_page(request: Request, product: str | None = None,
     return templates.TemplateResponse(request, "test_plans.html", context=_ctx(
         request, current_user,
         filter_product=product or "",
+    ))
+
+
+@router.get("/bugs", response_class=HTMLResponse)
+async def bugs_page(request: Request, product: str | None = None,
+                    current_user: dict = Depends(_require_auth)):
+    if not _module_access("bugs_enabled", current_user):
+        return RedirectResponse("/", status_code=302)
+    visible = user_products(current_user, _list_products())
+    if product and product not in visible:
+        product = None
+    from dashboard.routers.config._helpers import _load_config
+    cfg = _load_config()
+    users = cfg.get("users", [])
+    priorities = cfg.get("priorities", [])
+    return templates.TemplateResponse(request, "bugs.html", context=_ctx(
+        request, current_user,
+        filter_product=product or "",
+        config_users=users,
+        config_priorities=priorities,
     ))
 
 
