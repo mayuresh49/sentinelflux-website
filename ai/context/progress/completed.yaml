@@ -1,5 +1,14 @@
 # Completed work items — append only, newest first
 
+- id: bugs-transition-parity
+  date: 2026-05-19
+  title: "Fix: Bug Workflow matrix ↔ Move To dropdown parity"
+  outcome: >
+    _load_product_transitions now intersects default targets with product state names,
+    matching _get_transitions behaviour. Both Config > Bug Workflow matrix and the
+    Move-To dropdown are driven by identical logic. Fixes case where `resolved` appeared
+    in matrix/dropdown for products that have no resolved status.
+
 - id: bugs-export-dropdown
   date: 2026-05-19
   title: "Feat: Bug export dropdown — CSV/Excel from bugs page"

@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (55)  
+Last updated: 2026-05-19 (56)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Fix: Bug Workflow matrix ↔ Move To dropdown parity** (`dashboard/routers/config/_bugs.py`): `_load_product_transitions` now filters targets to only states present in the product's status list (same intersection logic as `_get_transitions`). Before this fix the config UI matrix and the runtime dropdown used different fallback paths — matrix could show `resolved` as a target for `in_progress` even when `resolved` wasn't a product status. Now both are guaranteed identical: custom states with no configured transitions show empty in both places.
+
+## Previous: bug export dropdown (2026-05-19)
 
 - **Feat: Bug export dropdown** (`dashboard/templates/bugs.html`): Export dropdown (download icon + chevron) added to the Bugs left-panel header, next to "New Bug". `exportBugs(fmt)` reads active product/state/priority filters from Alpine state and hits `GET /api/bugs/export?format=csv|xlsx`. Matches UX pattern from Test Case Docs export.
 
