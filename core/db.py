@@ -70,9 +70,15 @@ _DDL = [
         analyzed INTEGER NOT NULL DEFAULT 0,
         failure_categories TEXT NOT NULL DEFAULT '{}',
         failures TEXT NOT NULL DEFAULT '[]',
-        run_config_snapshot TEXT NOT NULL DEFAULT '{}'
+        run_config_snapshot TEXT NOT NULL DEFAULT '{}',
+        progress_total INTEGER DEFAULT 0,
+        progress_done INTEGER DEFAULT 0,
+        summary_error TEXT NOT NULL DEFAULT ''
     )""",
     "CREATE INDEX IF NOT EXISTS idx_runs_product ON test_runs(product, triggered_at)",
+    "ALTER TABLE test_runs ADD COLUMN progress_total INTEGER DEFAULT 0",
+    "ALTER TABLE test_runs ADD COLUMN progress_done INTEGER DEFAULT 0",
+    "ALTER TABLE test_runs ADD COLUMN summary_error TEXT NOT NULL DEFAULT ''",
     """CREATE TABLE IF NOT EXISTS test_schedules (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
@@ -294,7 +300,11 @@ def init_db() -> None:
 def apply_schema(conn: sqlite3.Connection) -> None:
     """Apply DDL to any connection — used by managers with custom DB paths (e.g. tests)."""
     for stmt in _DDL:
-        conn.execute(stmt)
+        try:
+            conn.execute(stmt)
+        except sqlite3.OperationalError as e:
+            if "duplicate column name" not in str(e).lower():
+                raise
     conn.commit()
 
 

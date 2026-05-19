@@ -259,7 +259,7 @@ def _execute_run(run_id: str, product: str, domain: str, module: str, extra_args
                       finished_at=datetime.now(timezone.utc).isoformat(),
                       failures=[],
                       total=0,
-                      summary_error=f"No tests found for product={product} domain={domain} module={module}")
+                      summary_error=f"No tests found for {product}/{domain}/{module}")
         return
 
     cmd = [
