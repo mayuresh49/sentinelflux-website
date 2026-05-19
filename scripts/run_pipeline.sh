@@ -3,10 +3,22 @@
 # Usage: ./run_pipeline.sh <project> <feature> <domain> [doc-model] [script-model] [tc-prefix] [tc-start] [source]
 # Domains: api | web | mobile | security | a11y
 # source: path to OpenAPI spec (.yaml/.json), service code file (.py/.ts/etc), or URL
-# Example: ./run_pipeline.sh orangehrm login web
-#          ./run_pipeline.sh orangehrm booking api _ _ RB-API 1 products/restfulbooker/openapi.yaml
-#          ./run_pipeline.sh orangehrm recruitment web qwen2.5-coder:14b-instruct-q4_K_M qwen2.5-coder:14b-instruct-q4_K_M OH-WEB 58
-#          ./run_pipeline.sh orangehrm security_api security _ _ OH-SEC 1
+#
+# Exploration (web domain only) — pass via env vars before the command:
+#   SF_EXPLORE=1              Enable AppExplorerAgent (doc-review → explore → script-gen)
+#   SF_BASE_URL=http://...    App root URL
+#   SF_LOGIN_URL=/auth/login  Login page path
+#   SF_EXPLORE_PAGES=/p1,/p2  Comma-separated pages to visit (auto-extracted from doc if omitted)
+#   SF_EXPLORE_USER / SF_EXPLORE_PASS  Credentials (never pass as positional args)
+#
+# Examples:
+#   ./run_pipeline.sh orangehrm login web
+#   ./run_pipeline.sh orangehrm booking api _ _ RB-API 1 products/restfulbooker/openapi.yaml
+#   ./run_pipeline.sh orangehrm recruitment web qwen2.5-coder:14b-instruct-q4_K_M qwen2.5-coder:14b-instruct-q4_K_M OH-WEB 58
+#   ./run_pipeline.sh orangehrm security_api security _ _ OH-SEC 1
+#   SF_EXPLORE=1 SF_BASE_URL=http://localhost SF_LOGIN_URL=/web/index.php/auth/login \
+#     SF_EXPLORE_USER=Kris.Chapman SF_EXPLORE_PASS=Admin123 \
+#     ./run_pipeline.sh orangehrm ess web _ _ OH-WEB 129
 
 set -e
 
@@ -18,6 +30,12 @@ SCRIPT_MODEL="${5:-qwen2.5-coder:14b-instruct-q4_K_M}"
 TC_PREFIX="${6:-}"
 TC_START="${7:-1}"
 SOURCE="${8:-}"
+
+# Exploration — driven by env vars (never positional to keep credentials out of shell history)
+EXPLORE="${SF_EXPLORE:-}"
+EXPLORE_BASE_URL="${SF_BASE_URL:-}"
+EXPLORE_LOGIN_URL="${SF_LOGIN_URL:-}"
+EXPLORE_PAGES="${SF_EXPLORE_PAGES:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}/.."
@@ -56,6 +74,7 @@ echo "ScrModel  : $SCRIPT_MODEL"
 echo "OutputBase: $EXAMPLE_DIR"
 [ -n "$TC_PREFIX" ] && echo "TC Prefix : $TC_PREFIX (start: $TC_START)"
 [ -n "$SOURCE" ] && echo "Source    : $SOURCE"
+[ -n "$EXPLORE" ] && echo "Explore   : YES (base: $EXPLORE_BASE_URL)"
 echo ""
 
 # --- Memory check ---
@@ -103,6 +122,18 @@ if [ -n "$SOURCE" ]; then
   SOURCE_FLAG="--source $SOURCE"
 fi
 
+EXPLORE_FLAGS=""
+if [ -n "$EXPLORE" ]; then
+  if [ -z "$EXPLORE_BASE_URL" ]; then
+    echo "ERROR: SF_EXPLORE=1 requires SF_BASE_URL to be set."
+    exit 1
+  fi
+  EXPLORE_FLAGS="--explore --base-url $EXPLORE_BASE_URL"
+  [ -n "$EXPLORE_LOGIN_URL" ] && EXPLORE_FLAGS="$EXPLORE_FLAGS --login-url $EXPLORE_LOGIN_URL"
+  [ -n "$EXPLORE_PAGES" ] && EXPLORE_FLAGS="$EXPLORE_FLAGS --explore-pages $EXPLORE_PAGES"
+  # SF_EXPLORE_USER / SF_EXPLORE_PASS are read directly by the orchestrator from env
+fi
+
 # --- Run pipeline ---
 echo ">>> Generating: $FEATURE ($DOMAIN) ..."
 "$PYTHON" -m ai.pipeline.orchestrator \
@@ -114,7 +145,8 @@ echo ">>> Generating: $FEATURE ($DOMAIN) ..."
   --output-base "$EXAMPLE_DIR" \
   $SKIP_SCRIPT_FLAG \
   $TC_FLAGS \
-  $SOURCE_FLAG
+  $SOURCE_FLAG \
+  $EXPLORE_FLAGS
 
 echo ""
 echo "=== Done ==="

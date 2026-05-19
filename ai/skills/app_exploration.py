@@ -345,7 +345,7 @@ class DiscoveredPage:
 class AppExplorationSkill:
     """Playwright-based page structure discovery."""
 
-    def __init__(self, headless: bool = True, timeout_ms: int = 15000):
+    def __init__(self, headless: bool = True, timeout_ms: int = 30000):
         self.headless = headless
         self.timeout_ms = timeout_ms
 
@@ -363,7 +363,7 @@ class AppExplorationSkill:
             page = browser_context.new_page()
             try:
                 page.goto(url, timeout=self.timeout_ms, wait_until="domcontentloaded")
-                page.wait_for_timeout(1000)
+                self._wait_for_spa(page)
                 return self._extract(page, url)
             finally:
                 page.close()
@@ -374,7 +374,7 @@ class AppExplorationSkill:
             page = ctx.new_page()
             try:
                 page.goto(url, timeout=self.timeout_ms, wait_until="domcontentloaded")
-                page.wait_for_timeout(1000)
+                self._wait_for_spa(page)
                 return self._extract(page, url)
             finally:
                 browser.close()
@@ -405,7 +405,7 @@ class AppExplorationSkill:
                     full_url = url if url.startswith("http") else f"{base_url.rstrip('/')}{url}"
                     try:
                         page.goto(full_url, timeout=self.timeout_ms, wait_until="domcontentloaded")
-                        page.wait_for_timeout(1000)
+                        self._wait_for_spa(page)
                         dp = self._extract(page, full_url)
                         results.append(dp)
                         _log.info("Explored %s — %d fields, %d buttons", full_url, len(dp.fields), len(dp.buttons))
@@ -414,6 +414,14 @@ class AppExplorationSkill:
             finally:
                 browser.close()
         return results
+
+    def _wait_for_spa(self, page, extra_ms: int = 500) -> None:
+        """Wait for a SPA to settle after navigation: networkidle then a short DOM-settle pause."""
+        try:
+            page.wait_for_load_state("networkidle", timeout=10000)
+        except Exception:
+            pass
+        page.wait_for_timeout(extra_ms)
 
     def _login(self, page, login_url: str, credentials: dict) -> None:
         page.goto(login_url, timeout=self.timeout_ms, wait_until="domcontentloaded")
@@ -448,12 +456,23 @@ class AppExplorationSkill:
                 el = page.locator(sel).first
                 if el.count() and el.is_visible():
                     el.click()
-                    page.wait_for_load_state("networkidle", timeout=self.timeout_ms)
+                    try:
+                        page.wait_for_load_state("networkidle", timeout=self.timeout_ms)
+                    except Exception:
+                        page.wait_for_timeout(3000)
                     break
             except Exception:
                 pass
 
-        _log.info("Login attempted at %s", login_url)
+        current_url = page.url
+        login_base = login_url.split("?")[0].rstrip("/")
+        if current_url.rstrip("/").endswith(login_base.split("/")[-1]):
+            _log.warning(
+                "Login may have failed — still on login page after submit. "
+                "Check credentials or login URL: %s", login_url
+            )
+        else:
+            _log.info("Login succeeded — redirected to %s", current_url)
 
     def _extract(self, page, url: str) -> DiscoveredPage:
         title = page.title() or url.rsplit("/", 1)[-1]
