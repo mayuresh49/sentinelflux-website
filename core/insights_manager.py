@@ -16,6 +16,11 @@ class InsightsManager:
         run_at = datetime.now(timezone.utc).isoformat()
         conn = get_conn()
         with conn:
+            # Replace active insights for this agent — preserves planned/punted/discarded (user decisions)
+            conn.execute(
+                "DELETE FROM product_insights WHERE agent_type=? AND status='active'",
+                (agent_type,),
+            )
             for ins in insights:
                 conn.execute(
                     """INSERT INTO product_insights
