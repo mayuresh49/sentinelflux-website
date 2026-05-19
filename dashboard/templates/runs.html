@@ -332,7 +332,7 @@
     } %}
 
     <!-- Failure category totals -->
-    {% set cats = run.failure_categories %}
+    {% set cats = run.failure_categories if run.failure_categories is mapping else {} %}
     {% set n_product_bug = (cats.get('assertion', 0)) %}
     {% set n_env = (cats.get('env', 0) + cats.get('infra', 0)) %}
     {% set n_script = (cats.get('locator', 0) + cats.get('flaky', 0)) %}

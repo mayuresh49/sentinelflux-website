@@ -336,11 +336,11 @@ def _run_post_suite(run_id: str, product: str, domain: str, report_path: Path) -
             artifacts_dir=_ARTIFACTS_DIR,
             tests_dir=tests_dir if tests_dir.exists() else None,
         )
-        _rm.patch_run(
-            run_id,
-            analyzed=True,
-            failure_categories=summary.get("blockers", []),
-        )
+        cats = summary.get("blockers")
+        patch: dict = {"analyzed": True}
+        if isinstance(cats, dict):
+            patch["failure_categories"] = cats
+        _rm.patch_run(run_id, **patch)
     except Exception:
         pass  # analysis is best-effort; raw failures already stored from report parse
 
