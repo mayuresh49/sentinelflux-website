@@ -44,6 +44,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-19)
 
+- **Bugs: transition dropdown + Update Bug button** (`dashboard/templates/bugs.html`): Replaced flat transition button row with a compact `<select>` dropdown ("Move to…") that fires the existing transition modal. Removed `@blur` auto-save from all textarea/text-input fields in the Details tab; added explicit "Update Bug" button that PATCHes all text fields in one call. Select dropdowns (assignee, priority, severity, component, type) still auto-save on `@change`.
+
+## Previous: Runs analyzed flag fix (2026-05-19)
+
 - **Runs: fix analyzed flag never flipping** (`dashboard/routers/runs.py`): `_run_post_suite` called `patch_run` with `post_suite_summary={}` — not a DB column — causing the entire call to fail silently (same unknown-column pattern as `progress_total`). `result_analyzer` was running successfully but `analyzed` stayed `0`. Dropped the non-existent field; `analyzed=True` and `failure_categories` now commit correctly. Manually recovered `run_9d157fc3`.
 
 ## Previous: VAPT SSH multi-auth (2026-05-19)

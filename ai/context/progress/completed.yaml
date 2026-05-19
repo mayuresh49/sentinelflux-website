@@ -1,5 +1,13 @@
 # Completed work items — append only, newest first
 
+- id: bugs-transition-dropdown-update-button
+  date: 2026-05-19
+  title: "Bugs: transition dropdown + explicit Update Bug button"
+  outcome: >
+    Replaced flat transition buttons with a <select> dropdown. Removed @blur
+    auto-save from textarea/text-input fields; added Update Bug button that
+    PATCHes all text fields in one call. Select fields still auto-save on @change.
+
 - id: vapt-ssh-multi-auth
   date: 2026-05-19
   title: "VAPT SSH multi-auth: key path, key paste, password"
