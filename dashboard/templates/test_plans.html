@@ -531,7 +531,12 @@
                   <tbody>
                     <template x-for="run in linkedRuns" :key="run.id">
                       <tr class="border-b border-slate-100 last:border-0">
-                        <td class="px-3 py-2 font-mono text-slate-600" x-text="run.id"></td>
+                        <td class="px-3 py-2">
+                          <a :href="`/runs?product=${selectedPlan.product}&highlight=${run.id}#run-${run.id}`"
+                             target="_blank"
+                             class="font-mono text-indigo-600 hover:text-indigo-800 hover:underline text-xs"
+                             x-text="run.id"></a>
+                        </td>
                         <td class="px-3 py-2 text-slate-500 capitalize" x-text="run.domain"></td>
                         <td class="px-3 py-2 text-slate-500" x-text="run.module || 'all'"></td>
                         <td class="px-3 py-2">
@@ -869,7 +874,7 @@ function testPlansApp() {
         if (runR.ok) {
           const runs = (await runR.json()).runs || [];
           this.linkedRuns = runs.sort((a, b) =>
-            (b.triggered_at || '').localeCompare(a.triggered_at || ''));
+            (b.triggered_at || '') > (a.triggered_at || '') ? 1 : -1);
         }
         if (progR.ok) this.progress = await progR.json();
       } catch(e) {}

@@ -375,6 +375,7 @@ async def runs_page(
     product: str | None = None,
     domain: str | None = None,
     status: str | None = None,
+    highlight: str | None = None,
     page: int = 1,
     current_user: dict = Depends(_require_auth),
 ):
@@ -383,13 +384,18 @@ async def runs_page(
     visible = user_products(current_user, _list_products())
     if product and product not in visible:
         product = None
-    runs = [r for r in reversed(rm.all_runs()) if r.get("product") in visible]
+    runs = [r for r in rm.all_runs() if r.get("product") in visible]
     if product:
         runs = [r for r in runs if r.get("product") == product]
     if domain:
         runs = [r for r in runs if r.get("domain") == domain]
     if status:
         runs = [r for r in runs if r.get("status") == status]
+    # If a specific run is highlighted, jump to the page it lives on
+    if highlight:
+        ids = [r["id"] for r in runs]
+        if highlight in ids:
+            page = ids.index(highlight) // _PAGE_SIZE + 1
     schedules = [s for s in rm.all_schedules() if s.get("product") in visible]
     any_running = any(r.get("status") in ("running", "queued") for r in runs)
     total = len(runs)
@@ -403,6 +409,7 @@ async def runs_page(
         filter_product=product or "",
         filter_domain=domain or "",
         filter_status=status or "",
+        highlight=highlight or "",
         page=page,
         total_pages=total_pages,
         total=total,
@@ -438,7 +445,7 @@ async def failures_page(
         "Unanalyzed":   ("bg-slate-50 text-slate-500 border-slate-200", "bg-slate-400"),
     }
 
-    all_runs = [r for r in reversed(rm.all_runs()) if r.get("product") in visible]
+    all_runs = [r for r in rm.all_runs() if r.get("product") in visible]
     all_failures = []
     for run in all_runs:
         if run.get("status") not in ("completed", "failed"):

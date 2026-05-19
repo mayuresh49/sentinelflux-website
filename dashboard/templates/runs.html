@@ -334,7 +334,7 @@
     {% set n_env = (cats.get('env', 0) + cats.get('infra', 0)) %}
     {% set n_script = (cats.get('locator', 0) + cats.get('flaky', 0)) %}
 
-    <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+    <div id="run-{{ run.id }}" class="bg-white rounded-xl border {% if highlight == run.id %}border-indigo-400 ring-2 ring-indigo-200{% else %}border-slate-100{% endif %} shadow-sm overflow-hidden scroll-mt-20">
 
       <!-- Main row -->
       <div class="p-4">
@@ -692,6 +692,12 @@ function applyRunFilter(key, val) {
 // Auto-refresh if any run is in progress
 {% if any_running %}
 setTimeout(() => location.reload(), 5000);
+{% endif %}
+{% if highlight %}
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('run-{{ highlight }}');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
 {% endif %}
 </script>
 {% endblock %}
