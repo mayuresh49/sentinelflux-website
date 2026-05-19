@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (36)  
+Last updated: 2026-05-19 (37)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Runs UX: errored status + Re-run + queued indicator** (`dashboard/templates/runs.html`, `dashboard/routers/pages.py`): Diagnosed three runs stuck as errored — root cause was server restart killing FastAPI BackgroundTasks mid-execution (trigger: plan). Fixed three UX gaps: (1) `errored` runs now show orange badge/dot and a Re-run button (previously only `completed`/`failed` had one); (2) `queued` run cards now show a pulsing "Waiting to start…" inline indicator (previously only `running` had a progress row); (3) `any_running` banner/auto-refresh scoped to current page runs instead of full filtered list (was showing banner even when in-progress run was on another page). Also added `errored` option to the status filter dropdown.
+
+## Previous: Bugs module (2026-05-19)
 
 - **Bugs module** (`core/bug_manager.py`, `core/db.py`, `dashboard/routers/bugs.py`, `dashboard/templates/bugs.html`, `dashboard/templates/bug_report_pdf.html`, `utils/constants.py`, `dashboard/app.py`, `dashboard/routers/pages.py`, `dashboard/templates/base.html`, `dashboard/routers/config/_products.py`, `dashboard/templates/partials/config_products.html`, `dashboard/templates/failures.html`, `ai/context/progress/backlog.yaml`): Full defect tracking module. Four new SQLite tables: `bugs` (full metadata — product, title, description, priority P0-P3, severity blocker-trivial, state, bug_type, component, environment, build_version, reporter, assignee, steps/expected/actual/root_cause/fix_notes, tags, linked_tc_id, linked_run_id, linked_plan_id), `bug_state_history` (every transition recorded), `bug_comments`, `bug_artifacts` (type/mime/size/storage_path). `BugManager`: create/get/list/patch/delete, `transition()` with enforced state machine (new→open→in_progress→resolved→closed, plus deferred/wont_fix paths with reopen support), get_history, add/list comments, add/list/delete artifacts, counts_by_state. 14 REST endpoints under `/api/bugs`: list, create, get, patch, delete (admin), transition with comment, history, comments, artifact upload (multipart, 100 MB cap, auto-inferred type), artifact download/serve, artifact delete, HTML/PDF incident report, `POST /api/bugs/from-run/{run_id}` pre-fills from test failure. `bugs.html`: split-panel UI — left list with state/priority filters + state count chips; right detail with 4 tabs: Details (inline editing of all fields via blur-patch), Artifacts (drag-and-drop upload, screenshot thumbnail grid + lightbox, inline video player, download table for logs/HAR/docs), History (timeline), Comments (threaded + add form). State transition modal with required comment for wont_fix/deferred. Create Bug modal. Export PDF button → WeasyPrint incident report. `bugs_enabled` product flag added — Config → Products toggle + sidebar nav item. Failures page gets "File Bug" button per row that calls `from-run` endpoint and opens `/bugs?highlight=<id>` in new tab. Backlog item P6-01 added for future S3 artifact storage migration.
 
