@@ -31,7 +31,7 @@
 <div class="px-5 py-8 text-center text-sm text-slate-400">No priorities defined yet for this product.</div>
 {% endif %}
 
-<div class="px-5 py-4 border-t border-slate-50 bg-slate-50/40">
+<div class="px-5 py-3 border-t border-slate-50 bg-slate-50/40">
   <form hx-post="/ui/config/priorities/add" hx-target="#priorities-panel" hx-swap="innerHTML"
         class="flex items-end gap-3 flex-wrap">
     <input type="hidden" name="product" value="{{ product or '' }}">

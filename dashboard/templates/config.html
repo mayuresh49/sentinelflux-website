@@ -335,9 +335,9 @@
           <h2 class="font-semibold text-slate-800">Run Configuration</h2>
           <p class="text-xs text-slate-400 mt-0.5">Per-product environment, browser, device, and credential profiles used when triggering runs</p>
         </div>
-        <div class="px-5 py-4">
+        <div class="px-5 py-3">
           {% if all_products %}
-          <div class="flex items-center gap-3 mb-5">
+          <div class="flex items-center gap-3 mb-4">
             <label class="text-xs font-medium text-slate-600 shrink-0">Product</label>
             <select x-model="rcProduct"
                     @change="htmx.ajax('GET', '/ui/config/run-config/' + rcProduct, '#run-config-content')"

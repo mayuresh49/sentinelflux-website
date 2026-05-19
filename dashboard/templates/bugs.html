@@ -187,6 +187,11 @@
 
           <!-- ── Details tab ── -->
           <div x-show="activeTab === 'Details'" class="space-y-4">
+            <!-- Bug ID -->
+            <div class="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2">
+              <span class="text-[10px] font-medium text-slate-400 uppercase tracking-wide shrink-0">Bug ID</span>
+              <span class="font-mono text-xs text-slate-700 truncate" x-text="selectedBug.id"></span>
+            </div>
             <!-- Meta fields grid -->
             <div class="grid grid-cols-2 gap-3">
               <!-- Assignee -->
@@ -259,7 +264,7 @@
             </div>
 
             <!-- Linked info -->
-            <div class="flex items-center gap-4 text-xs text-slate-500">
+            <div class="flex items-center gap-4 text-xs text-slate-500 flex-wrap">
               <template x-if="selectedBug.linked_tc_id">
                 <span>Test Case: <span class="font-mono font-medium text-indigo-600" x-text="selectedBug.linked_tc_id"></span></span>
               </template>
@@ -267,8 +272,12 @@
                 <a :href="`/runs?highlight=${selectedBug.linked_run_id}`" target="_blank"
                    class="text-indigo-500 hover:underline font-mono text-xs" x-text="`Run: ${selectedBug.linked_run_id.slice(0,12)}`"></a>
               </template>
-              <template x-if="!selectedBug.linked_tc_id && !selectedBug.linked_run_id">
-                <span class="text-slate-300 text-xs italic">No linked test case or run</span>
+              <template x-if="selectedBug.linked_plan_id">
+                <a :href="`/test-plans?highlight=${selectedBug.linked_plan_id}`" target="_blank"
+                   class="text-indigo-500 hover:underline font-mono text-xs" x-text="`Plan: ${selectedBug.linked_plan_id.slice(0,12)}`"></a>
+              </template>
+              <template x-if="!selectedBug.linked_tc_id && !selectedBug.linked_run_id && !selectedBug.linked_plan_id">
+                <span class="text-slate-300 text-xs italic">No linked test case, run, or plan</span>
               </template>
             </div>
 
