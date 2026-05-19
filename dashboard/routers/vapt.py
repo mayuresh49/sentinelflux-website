@@ -180,8 +180,11 @@ class UpdateScopeBody(BaseModel):
     out_of_scope: list[str] = []
     infra_targets: list[str] = []
     mobile_app_path: str = ""
+    ssh_auth_method: str = "key_path"
     ssh_username: str = ""
     ssh_key_path: str = ""
+    ssh_key_content: str = ""
+    ssh_password: str = ""
     environment: str = ""
     start_date: str = ""
     end_date: str = ""
@@ -503,13 +506,21 @@ def _execute_vapt_scan(product: str, eng_id: str, scan_id: str,
     if scan_type == "infra_int":
         _pre_eng = _vm.get(product, eng_id)
         _scope = (_pre_eng or {}).get("scope", {})
-        if not _scope.get("ssh_username", "").strip() or not _scope.get("ssh_key_path", "").strip():
+        _auth = _scope.get("ssh_auth_method", "key_path")
+        _user = _scope.get("ssh_username", "").strip()
+        _cred_ok = bool(_user) and (
+            (_auth == "key_path" and _scope.get("ssh_key_path", "").strip()) or
+            (_auth == "key_paste" and _scope.get("ssh_key_content", "").strip()) or
+            (_auth == "password" and _scope.get("ssh_password", "").strip())
+        )
+        if not _cred_ok:
             _vm.patch_scan(product, eng_id, scan_id,
                            status="failed",
                            finished_at=datetime.now(timezone.utc).isoformat(),
                            summary_error=(
-                               "SSH credentials not configured — set SSH Username and SSH Key Path "
-                               "in the Scope tab before running an Internal Infrastructure scan"
+                               "SSH credentials not configured — set SSH Username and credentials "
+                               f"(auth method: {_auth}) in the Scope tab before running an "
+                               "Internal Infrastructure scan"
                            ))
             return
 
@@ -535,12 +546,16 @@ def _execute_vapt_scan(product: str, eng_id: str, scan_id: str,
             if targets:
                 run_env["VAPT_INFRA_TARGETS"] = ",".join(str(t) for t in targets)
         if scan_type == "infra_int":
-            ssh_user = scope.get("ssh_username", "")
-            ssh_key = scope.get("ssh_key_path", "")
-            if ssh_user:
-                run_env["VAPT_SSH_USER"] = ssh_user
-            if ssh_key:
-                run_env["VAPT_SSH_KEY_PATH"] = ssh_key
+            auth_method = scope.get("ssh_auth_method", "key_path")
+            run_env["VAPT_SSH_AUTH_METHOD"] = auth_method
+            if scope.get("ssh_username", ""):
+                run_env["VAPT_SSH_USER"] = scope["ssh_username"]
+            if auth_method == "key_path" and scope.get("ssh_key_path", ""):
+                run_env["VAPT_SSH_KEY_PATH"] = scope["ssh_key_path"]
+            elif auth_method == "key_paste" and scope.get("ssh_key_content", ""):
+                run_env["VAPT_SSH_KEY_CONTENT"] = scope["ssh_key_content"]
+            elif auth_method == "password" and scope.get("ssh_password", ""):
+                run_env["VAPT_SSH_PASSWORD"] = scope["ssh_password"]
         elif scan_type == "mobile":
             app_path = scope.get("mobile_app_path", "")
             if app_path:

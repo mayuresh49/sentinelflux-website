@@ -1,9 +1,14 @@
 """VAPT infrastructure (internal/grey-box) fixture set — authenticated SSH scan.
-VAPT_INFRA_TARGETS env var (comma-separated) overrides the host list when set by the scan runner.
-VAPT_SSH_USER / VAPT_SSH_KEY_PATH enable authenticated checks — set via the engagement scope.
+VAPT_INFRA_TARGETS   env var (comma-separated) overrides the host list.
+VAPT_SSH_USER        SSH username.
+VAPT_SSH_AUTH_METHOD key_path | key_paste | password  (default: key_path)
+VAPT_SSH_KEY_PATH    path to private key on server (key_path mode)
+VAPT_SSH_KEY_CONTENT PEM key content (key_paste mode)
+VAPT_SSH_PASSWORD    password (password mode)
 """
 import os
 import re
+import tempfile
 from pathlib import Path
 import pytest
 import yaml
@@ -39,15 +44,27 @@ def _resolve_targets() -> list[str]:
     return [m.group(1) if m else "localhost"]
 
 
+def _creds_present() -> bool:
+    user = os.environ.get("VAPT_SSH_USER", "").strip()
+    if not user:
+        return False
+    method = os.environ.get("VAPT_SSH_AUTH_METHOD", "key_path")
+    if method == "key_path":
+        return bool(os.environ.get("VAPT_SSH_KEY_PATH", "").strip())
+    if method == "key_paste":
+        return bool(os.environ.get("VAPT_SSH_KEY_CONTENT", "").strip())
+    if method == "password":
+        return bool(os.environ.get("VAPT_SSH_PASSWORD", "").strip())
+    return False
+
+
 def pytest_runtest_setup(item):
-    """Fast-skip all SSH tests when credentials are not configured — avoids entering the fixture."""
-    if "ssh_client" in item.fixturenames:
-        if not os.environ.get("VAPT_SSH_USER", "").strip() or \
-           not os.environ.get("VAPT_SSH_KEY_PATH", "").strip():
-            pytest.skip(
-                "SSH credentials not configured — set ssh_username and ssh_key_path "
-                "in the engagement scope to enable grey-box internal infrastructure checks"
-            )
+    """Fast-skip all SSH tests when credentials are not configured."""
+    if "ssh_client" in item.fixturenames and not _creds_present():
+        pytest.skip(
+            "SSH credentials not configured — set SSH Username and credentials "
+            "in the engagement scope to enable grey-box internal infrastructure checks"
+        )
 
 
 def pytest_generate_tests(metafunc):
@@ -62,17 +79,16 @@ def vapt_base_url() -> str:
 
 @pytest.fixture(scope="session")
 def ssh_client():
-    """Session-scoped SSH connection factory.
-    Yields a callable: ssh_client(host) -> paramiko.SSHClient.
-    Skips all SSH tests when VAPT_SSH_USER / VAPT_SSH_KEY_PATH are absent or paramiko is missing.
-    Each unique host gets one connection, cached for the session lifetime.
-    """
-    ssh_user = os.environ.get("VAPT_SSH_USER", "").strip()
-    ssh_key = os.environ.get("VAPT_SSH_KEY_PATH", "").strip()
+    """Session-scoped SSH factory — yields callable: ssh_client(host) -> paramiko.SSHClient.
 
-    if not ssh_user or not ssh_key:
+    Supports three auth methods via VAPT_SSH_AUTH_METHOD:
+      key_path  — VAPT_SSH_KEY_PATH points to private key on server (default)
+      key_paste — VAPT_SSH_KEY_CONTENT holds PEM key text; written to a temp file
+      password  — VAPT_SSH_PASSWORD
+    """
+    if not _creds_present():
         pytest.skip(
-            "SSH credentials not configured — set ssh_username and ssh_key_path "
+            "SSH credentials not configured — set SSH Username and credentials "
             "in the engagement scope to enable grey-box internal infrastructure checks"
         )
 
@@ -81,8 +97,13 @@ def ssh_client():
     except ImportError:
         pytest.skip("paramiko not installed — run: pip install paramiko>=3.0")
 
-    if not Path(ssh_key).exists():
-        pytest.skip(f"SSH private key not found on server: {ssh_key}")
+    ssh_user = os.environ.get("VAPT_SSH_USER", "").strip()
+    auth_method = os.environ.get("VAPT_SSH_AUTH_METHOD", "key_path")
+
+    if auth_method == "key_path":
+        ssh_key = os.environ.get("VAPT_SSH_KEY_PATH", "").strip()
+        if not Path(ssh_key).exists():
+            pytest.skip(f"SSH private key not found on server: {ssh_key}")
 
     _clients: dict = {}
 
@@ -93,14 +114,44 @@ def ssh_client():
         # AutoAddPolicy is acceptable here — VAPT targets are known, controlled hosts
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            client.connect(
-                hostname=host,
-                username=ssh_user,
-                key_filename=ssh_key,
-                timeout=15,
-                look_for_keys=False,
-                allow_agent=False,
-            )
+            if auth_method == "password":
+                client.connect(
+                    hostname=host,
+                    username=ssh_user,
+                    password=os.environ.get("VAPT_SSH_PASSWORD", ""),
+                    timeout=15,
+                    look_for_keys=False,
+                    allow_agent=False,
+                )
+            elif auth_method == "key_paste":
+                key_content = os.environ.get("VAPT_SSH_KEY_CONTENT", "")
+                fd, tmp_path = tempfile.mkstemp(suffix=".pem")
+                try:
+                    os.write(fd, key_content.encode())
+                    os.close(fd)
+                    os.chmod(tmp_path, 0o600)
+                    client.connect(
+                        hostname=host,
+                        username=ssh_user,
+                        key_filename=tmp_path,
+                        timeout=15,
+                        look_for_keys=False,
+                        allow_agent=False,
+                    )
+                finally:
+                    try:
+                        os.unlink(tmp_path)
+                    except Exception:
+                        pass
+            else:  # key_path
+                client.connect(
+                    hostname=host,
+                    username=ssh_user,
+                    key_filename=os.environ.get("VAPT_SSH_KEY_PATH", ""),
+                    timeout=15,
+                    look_for_keys=False,
+                    allow_agent=False,
+                )
         except paramiko.AuthenticationException as e:
             pytest.skip(f"SSH authentication failed for {ssh_user}@{host}: {e}")
         except Exception as e:
