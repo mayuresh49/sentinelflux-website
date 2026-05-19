@@ -1,5 +1,13 @@
 # Completed work items — append only, newest first
 
+- id: bugs-export-dropdown
+  date: 2026-05-19
+  title: "Feat: Bug export dropdown — CSV/Excel from bugs page"
+  outcome: >
+    Export dropdown (download icon + chevron) added to the Bugs left-panel header
+    next to "New Bug". exportBugs(fmt) reads active product/state/priority filters
+    from Alpine and hits GET /api/bugs/export. Matches Test Case Docs export UX.
+
 - id: runs-page-500-fix
   date: 2026-05-19
   title: "Fix: /runs page 500 crash — failure_categories list guard"

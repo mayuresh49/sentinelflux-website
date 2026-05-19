@@ -44,6 +44,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-19)
 
+- **Feat: Bug export dropdown** (`dashboard/templates/bugs.html`): Export dropdown (download icon + chevron) added to the Bugs left-panel header, next to "New Bug". `exportBugs(fmt)` reads active product/state/priority filters from Alpine state and hits `GET /api/bugs/export?format=csv|xlsx`. Matches UX pattern from Test Case Docs export.
+
+## Previous: runs 500 fix + bug export endpoint (2026-05-19)
+
 - **Fix: /runs page 500 crash** (`dashboard/templates/runs.html`, `dashboard/routers/runs.py`): `failure_categories` was stored as `[]` (list) for one run because `_run_post_suite` passed `summary.get("blockers", [])` directly. Template now uses `is mapping` guard (falls back to `{}`). `runs.py` only writes `failure_categories` when `blockers` is a dict.
 - **Feat: Bug export endpoint** (`dashboard/routers/bugs.py`): `GET /api/bugs/export?format=csv|xlsx` — streams all visible bugs with 23 columns (linked IDs, timestamps, metadata). XLSX via openpyxl, CSV via stdlib.
 
