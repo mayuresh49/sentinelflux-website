@@ -55,13 +55,14 @@ def _load_product_statuses(product: str) -> list[dict]:
 
 def _load_product_transitions(product: str, statuses: list[dict]) -> dict[str, list[str]]:
     state_names = [s["name"] for s in statuses]
+    valid = set(state_names)
     cfg = _load_config()
     for p in cfg.get("products", []):
         if p["name"] == product:
             raw = p.get("bug_transitions")
             if raw:
-                return {s: list(raw.get(s, [])) for s in state_names}
-    return {s: list(_DEFAULT_TRANSITIONS.get(s, [])) for s in state_names}
+                return {s: [t for t in raw.get(s, []) if t in valid] for s in state_names}
+    return {s: [t for t in _DEFAULT_TRANSITIONS.get(s, []) if t in valid] for s in state_names}
 
 
 def _render_statuses(request: Request, product: str, flash: str = "") -> HTMLResponse:
