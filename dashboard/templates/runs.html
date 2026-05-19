@@ -413,7 +413,12 @@
             {% endif %}
             {% endif %}
 
-            {% if run.status == 'running' %}
+            {% if run.status == 'queued' %}
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-slate-400 animate-pulse inline-block shrink-0"></span>
+              <span class="text-xs text-slate-500">Waiting to start…</span>
+            </div>
+            {% elif run.status == 'running' %}
             {% set done = run.get('progress_done', 0) %}
             {% set tot = run.get('progress_total', 0) %}
             <div class="flex items-center gap-2">

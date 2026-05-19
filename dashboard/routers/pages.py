@@ -398,13 +398,14 @@ async def runs_page(
         if highlight in ids:
             page = ids.index(highlight) // _PAGE_SIZE + 1
     schedules = [s for s in rm.all_schedules() if s.get("product") in visible]
-    any_running = any(r.get("status") in ("running", "queued") for r in runs)
     total = len(runs)
     total_pages = max(1, (total + _PAGE_SIZE - 1) // _PAGE_SIZE)
     page = max(1, min(page, total_pages))
+    page_runs = runs[(page - 1) * _PAGE_SIZE: page * _PAGE_SIZE]
+    any_running = any(r.get("status") in ("running", "queued") for r in page_runs)
     return templates.TemplateResponse(request, "runs.html", context=_ctx(
         request, current_user,
-        runs=runs[(page - 1) * _PAGE_SIZE: page * _PAGE_SIZE],
+        runs=page_runs,
         schedules=schedules,
         any_running=any_running,
         filter_product=product or "",
