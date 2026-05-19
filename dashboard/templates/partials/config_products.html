@@ -9,20 +9,39 @@
 {% endif %}
 
 {% if products %}
-<div class="divide-y divide-slate-50">
+<div class="divide-y divide-slate-100">
   {% for p in products %}
-  <div x-data="{ showDelete: false, showDeactivate: false }" class="px-5 py-3 flex items-center gap-3">
-    <div class="flex-1 min-w-0">
-      <div class="flex items-center gap-2 flex-wrap">
-        <p class="text-sm font-medium text-slate-700">{{ p.name }}</p>
+  <div x-data="{ showDelete: false, showDeactivate: false }" class="px-5 py-3.5 space-y-2">
+
+    <!-- Row 1: identity left, bug code + danger actions right -->
+    <div class="flex items-center justify-between gap-4 min-w-0">
+      <div class="flex items-center gap-2 flex-wrap min-w-0">
+        <span class="text-sm font-semibold text-slate-800">{{ p.name }}</span>
         {% if p.get('display_name') and p.display_name != p.name %}
         <span class="text-xs text-slate-400">{{ p.display_name }}</span>
         {% endif %}
-        <!-- Bug ID code inline editor -->
+        {% if p.get('active', True) %}
+        <span class="text-[11px] bg-emerald-50 text-emerald-600 border border-emerald-100 px-1.5 py-0.5 rounded-full font-medium">Active</span>
+        {% else %}
+        <span class="text-[11px] bg-amber-50 text-amber-700 border border-amber-100 px-1.5 py-0.5 rounded-full font-medium">Inactive</span>
+        {% endif %}
+        {% set domain_colors = {'web': 'bg-indigo-100 text-indigo-700', 'api': 'bg-blue-100 text-blue-700', 'mobile': 'bg-emerald-100 text-emerald-700'} %}
+        {% for d in p.get('domains', []) %}
+        <span class="text-[11px] px-1.5 py-0.5 rounded-full font-medium {{ domain_colors.get(d, 'bg-slate-100 text-slate-500') }}">{{ d }}</span>
+        {% endfor %}
+        {% if p.get('has_tests') %}
+        <span class="text-[11px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-full">{{ p.test_count }} test{{ 's' if p.test_count != 1 else '' }}</span>
+        {% else %}
+        <span class="text-[11px] bg-slate-50 text-slate-400 px-1.5 py-0.5 rounded-full">no tests</span>
+        {% endif %}
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0">
+        <!-- Bug Code -->
         <form hx-post="/ui/config/products/set-bug-code" hx-target="#products-list" hx-swap="innerHTML"
-              class="flex items-center gap-1" x-data>
+              class="flex items-center gap-1.5" x-data>
           <input type="hidden" name="name" value="{{ p.name }}">
-          <span class="text-[10px] text-slate-400 font-medium">Bug Code:</span>
+          <span class="text-[10px] text-slate-400 font-medium">Bug Code</span>
           <input type="text" name="bug_code"
                  value="{{ p.get('bug_code', '') }}"
                  placeholder="{{ p.name[:2].upper() }}"
@@ -31,127 +50,108 @@
                  @keydown.enter.prevent="$el.closest('form').requestSubmit()">
           <button type="submit" class="text-[10px] text-slate-400 hover:text-rose-600 px-1 py-0.5 rounded hover:bg-rose-50 transition-colors">Save</button>
         </form>
+
+        <!-- Divider -->
+        <div class="w-px h-4 bg-slate-200 shrink-0"></div>
+
+        <!-- Danger actions -->
         {% if p.get('active', True) %}
-        <span class="text-xs bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded font-medium">active</span>
+        <button @click="showDeactivate = true"
+                class="text-xs text-slate-400 hover:text-amber-600 font-medium px-2 py-1 rounded-lg hover:bg-amber-50 transition-colors">
+          Deactivate
+        </button>
         {% else %}
-        <span class="text-xs bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium">inactive</span>
+        <form hx-post="/ui/config/products/set-active" hx-target="#products-list" hx-swap="innerHTML">
+          <input type="hidden" name="name" value="{{ p.name }}">
+          <input type="hidden" name="active" value="true">
+          <button type="submit"
+                  class="text-xs text-slate-400 hover:text-emerald-600 font-medium px-2 py-1 rounded-lg hover:bg-emerald-50 transition-colors">
+            Activate
+          </button>
+        </form>
         {% endif %}
-        {% set domain_colors = {'web': 'bg-indigo-100 text-indigo-700', 'api': 'bg-blue-100 text-blue-700', 'mobile': 'bg-emerald-100 text-emerald-700'} %}
-        {% for d in p.get('domains', []) %}
-        <span class="text-xs px-1.5 py-0.5 rounded font-medium {{ domain_colors.get(d, 'bg-slate-100 text-slate-500') }}">{{ d }}</span>
-        {% endfor %}
-        {% if p.get('has_tests') %}
-        <span class="text-xs bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">{{ p.test_count }} test{{ 's' if p.test_count != 1 else '' }}</span>
-        {% else %}
-        <span class="text-xs bg-slate-50 text-slate-400 px-1.5 py-0.5 rounded">no tests</span>
-        {% endif %}
+        <button @click="showDelete = true"
+                class="text-xs text-slate-400 hover:text-red-600 font-medium px-2 py-1 rounded-lg hover:bg-red-50 transition-colors">
+          Delete
+        </button>
       </div>
     </div>
 
-    <div class="flex items-center gap-2 shrink-0 flex-wrap">
-      <!-- VAPT toggle -->
-      {% if p.get('vapt_enabled') %}
-      <form hx-post="/ui/config/products/set-vapt" hx-target="#products-list" hx-swap="innerHTML">
+    <!-- Row 2: module toggle chips -->
+    <div class="flex items-center gap-1.5 flex-wrap">
+      <span class="text-[10px] font-medium text-slate-400 mr-0.5">Modules</span>
+
+      {% set vapt_on = p.get('vapt_enabled') %}
+      <form hx-post="/ui/config/products/set-vapt" hx-target="#products-list" hx-swap="innerHTML" class="inline-flex">
         <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="vapt" value="false">
-        <button type="submit" class="text-xs bg-violet-100 text-violet-700 hover:bg-violet-200 font-medium px-2 py-0.5 rounded transition-colors">VAPT On</button>
-      </form>
-      {% else %}
-      <form hx-post="/ui/config/products/set-vapt" hx-target="#products-list" hx-swap="innerHTML">
-        <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="vapt" value="true">
-        <button type="submit" class="text-xs text-slate-400 hover:text-violet-700 font-medium px-2 py-0.5 rounded hover:bg-violet-50 transition-colors">VAPT Off</button>
-      </form>
-      {% endif %}
-      <!-- Performance toggle -->
-      {% if p.get('perf_enabled') %}
-      <form hx-post="/ui/config/products/set-perf" hx-target="#products-list" hx-swap="innerHTML">
-        <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="perf" value="false">
-        <button type="submit" class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 font-medium px-2 py-0.5 rounded transition-colors">Perf On</button>
-      </form>
-      {% else %}
-      <form hx-post="/ui/config/products/set-perf" hx-target="#products-list" hx-swap="innerHTML">
-        <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="perf" value="true">
-        <button type="submit" class="text-xs text-slate-400 hover:text-blue-700 font-medium px-2 py-0.5 rounded hover:bg-blue-50 transition-colors">Perf Off</button>
-      </form>
-      {% endif %}
-      <!-- Accessibility toggle -->
-      {% if p.get('a11y_enabled') %}
-      <form hx-post="/ui/config/products/set-a11y" hx-target="#products-list" hx-swap="innerHTML">
-        <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="a11y" value="false">
-        <button type="submit" class="text-xs bg-sky-100 text-sky-700 hover:bg-sky-200 font-medium px-2 py-0.5 rounded transition-colors">A11y On</button>
-      </form>
-      {% else %}
-      <form hx-post="/ui/config/products/set-a11y" hx-target="#products-list" hx-swap="innerHTML">
-        <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="a11y" value="true">
-        <button type="submit" class="text-xs text-slate-400 hover:text-sky-700 font-medium px-2 py-0.5 rounded hover:bg-sky-50 transition-colors">A11y Off</button>
-      </form>
-      {% endif %}
-      <!-- API Contract toggle -->
-      {% if p.get('contract_enabled') %}
-      <form hx-post="/ui/config/products/set-contract" hx-target="#products-list" hx-swap="innerHTML">
-        <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="contract" value="false">
-        <button type="submit" class="text-xs bg-emerald-100 text-emerald-700 hover:bg-emerald-200 font-medium px-2 py-0.5 rounded transition-colors">Contract On</button>
-      </form>
-      {% else %}
-      <form hx-post="/ui/config/products/set-contract" hx-target="#products-list" hx-swap="innerHTML">
-        <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="contract" value="true">
-        <button type="submit" class="text-xs text-slate-400 hover:text-emerald-700 font-medium px-2 py-0.5 rounded hover:bg-emerald-50 transition-colors">Contract Off</button>
-      </form>
-      {% endif %}
-      <!-- Visual Regression toggle -->
-      {% if p.get('visual_enabled') %}
-      <form hx-post="/ui/config/products/set-visual" hx-target="#products-list" hx-swap="innerHTML">
-        <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="visual" value="false">
-        <button type="submit" class="text-xs bg-pink-100 text-pink-700 hover:bg-pink-200 font-medium px-2 py-0.5 rounded transition-colors">Visual On</button>
-      </form>
-      {% else %}
-      <form hx-post="/ui/config/products/set-visual" hx-target="#products-list" hx-swap="innerHTML">
-        <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="visual" value="true">
-        <button type="submit" class="text-xs text-slate-400 hover:text-pink-700 font-medium px-2 py-0.5 rounded hover:bg-pink-50 transition-colors">Visual Off</button>
-      </form>
-      {% endif %}
-      <!-- Bug Tracker toggle -->
-      {% if p.get('bugs_enabled') %}
-      <form hx-post="/ui/config/products/set-bugs" hx-target="#products-list" hx-swap="innerHTML">
-        <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="bugs" value="false">
-        <button type="submit" class="text-xs bg-rose-100 text-rose-700 hover:bg-rose-200 font-medium px-2 py-0.5 rounded transition-colors">Bugs On</button>
-      </form>
-      {% else %}
-      <form hx-post="/ui/config/products/set-bugs" hx-target="#products-list" hx-swap="innerHTML">
-        <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="bugs" value="true">
-        <button type="submit" class="text-xs text-slate-400 hover:text-rose-700 font-medium px-2 py-0.5 rounded hover:bg-rose-50 transition-colors">Bugs Off</button>
-      </form>
-      {% endif %}
-      {% if p.get('active', True) %}
-      <button @click="showDeactivate = true"
-              class="text-xs text-amber-600 hover:text-amber-800 font-medium px-2 py-0.5 rounded hover:bg-amber-50 transition-colors">
-        Deactivate
-      </button>
-      {% else %}
-      <form hx-post="/ui/config/products/set-active" hx-target="#products-list" hx-swap="innerHTML">
-        <input type="hidden" name="name" value="{{ p.name }}">
-        <input type="hidden" name="active" value="true">
-        <button type="submit"
-                class="text-xs text-emerald-600 hover:text-emerald-800 font-medium px-2 py-0.5 rounded hover:bg-emerald-50 transition-colors">
-          Activate
+        <input type="hidden" name="vapt" value="{{ 'false' if vapt_on else 'true' }}">
+        <button type="submit" title="{{ 'Disable VAPT' if vapt_on else 'Enable VAPT' }}"
+                class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border transition-colors
+                       {{ 'bg-violet-100 text-violet-700 border-violet-200 hover:bg-violet-200' if vapt_on else 'bg-white text-slate-400 border-slate-200 hover:border-violet-300 hover:text-violet-600' }}">
+          <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ 'bg-violet-500' if vapt_on else 'bg-slate-300' }}"></span>
+          VAPT
         </button>
       </form>
-      {% endif %}
-      <button @click="showDelete = true"
-              class="text-xs text-red-500 hover:text-red-700 font-medium px-2 py-0.5 rounded hover:bg-red-50 transition-colors">
-        Delete
-      </button>
+
+      {% set perf_on = p.get('perf_enabled') %}
+      <form hx-post="/ui/config/products/set-perf" hx-target="#products-list" hx-swap="innerHTML" class="inline-flex">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="perf" value="{{ 'false' if perf_on else 'true' }}">
+        <button type="submit" title="{{ 'Disable Performance' if perf_on else 'Enable Performance' }}"
+                class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border transition-colors
+                       {{ 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200' if perf_on else 'bg-white text-slate-400 border-slate-200 hover:border-blue-300 hover:text-blue-600' }}">
+          <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ 'bg-blue-500' if perf_on else 'bg-slate-300' }}"></span>
+          Performance
+        </button>
+      </form>
+
+      {% set a11y_on = p.get('a11y_enabled') %}
+      <form hx-post="/ui/config/products/set-a11y" hx-target="#products-list" hx-swap="innerHTML" class="inline-flex">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="a11y" value="{{ 'false' if a11y_on else 'true' }}">
+        <button type="submit" title="{{ 'Disable Accessibility' if a11y_on else 'Enable Accessibility' }}"
+                class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border transition-colors
+                       {{ 'bg-sky-100 text-sky-700 border-sky-200 hover:bg-sky-200' if a11y_on else 'bg-white text-slate-400 border-slate-200 hover:border-sky-300 hover:text-sky-600' }}">
+          <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ 'bg-sky-500' if a11y_on else 'bg-slate-300' }}"></span>
+          Accessibility
+        </button>
+      </form>
+
+      {% set contract_on = p.get('contract_enabled') %}
+      <form hx-post="/ui/config/products/set-contract" hx-target="#products-list" hx-swap="innerHTML" class="inline-flex">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="contract" value="{{ 'false' if contract_on else 'true' }}">
+        <button type="submit" title="{{ 'Disable Contract' if contract_on else 'Enable Contract' }}"
+                class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border transition-colors
+                       {{ 'bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-200' if contract_on else 'bg-white text-slate-400 border-slate-200 hover:border-emerald-300 hover:text-emerald-600' }}">
+          <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ 'bg-emerald-500' if contract_on else 'bg-slate-300' }}"></span>
+          Contract
+        </button>
+      </form>
+
+      {% set visual_on = p.get('visual_enabled') %}
+      <form hx-post="/ui/config/products/set-visual" hx-target="#products-list" hx-swap="innerHTML" class="inline-flex">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="visual" value="{{ 'false' if visual_on else 'true' }}">
+        <button type="submit" title="{{ 'Disable Visual Regression' if visual_on else 'Enable Visual Regression' }}"
+                class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border transition-colors
+                       {{ 'bg-pink-100 text-pink-700 border-pink-200 hover:bg-pink-200' if visual_on else 'bg-white text-slate-400 border-slate-200 hover:border-pink-300 hover:text-pink-600' }}">
+          <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ 'bg-pink-500' if visual_on else 'bg-slate-300' }}"></span>
+          Visual Regression
+        </button>
+      </form>
+
+      {% set bugs_on = p.get('bugs_enabled') %}
+      <form hx-post="/ui/config/products/set-bugs" hx-target="#products-list" hx-swap="innerHTML" class="inline-flex">
+        <input type="hidden" name="name" value="{{ p.name }}">
+        <input type="hidden" name="bugs" value="{{ 'false' if bugs_on else 'true' }}">
+        <button type="submit" title="{{ 'Disable Bug Tracker' if bugs_on else 'Enable Bug Tracker' }}"
+                class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border transition-colors
+                       {{ 'bg-rose-100 text-rose-700 border-rose-200 hover:bg-rose-200' if bugs_on else 'bg-white text-slate-400 border-slate-200 hover:border-rose-300 hover:text-rose-600' }}">
+          <span class="w-1.5 h-1.5 rounded-full shrink-0 {{ 'bg-rose-500' if bugs_on else 'bg-slate-300' }}"></span>
+          Bug Tracker
+        </button>
+      </form>
     </div>
 
     <!-- Deactivate confirmation modal -->
@@ -226,7 +226,7 @@
             <input type="hidden" name="name" value="{{ p.name }}">
             <button type="submit"
                     class="text-xs font-medium text-white bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded-lg transition-colors">
-              Delete permanently
+              Delete Permanently
             </button>
           </form>
         </div>
