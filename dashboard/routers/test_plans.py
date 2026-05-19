@@ -371,10 +371,10 @@ def _render_plan_report_html(plan_id: str) -> str:
             tcs_by_domain[d] = []
         tcs_by_domain[d].append(tc)
 
-    _TERMINAL = {"closed", "wont_fix"}
+    closed_states = _bm.closed_state_names(plan["product"])
     open_bugs = [
         b for b in _bm.list_bugs(linked_plan_id=plan_id)
-        if b.get("state") not in _TERMINAL
+        if b.get("state") not in closed_states
     ]
 
     env = Environment(autoescape=True,

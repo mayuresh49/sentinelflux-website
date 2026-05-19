@@ -267,6 +267,13 @@ class BugManager:
     def get_product_statuses(self, product: str) -> list[dict]:
         return _get_statuses(product)
 
+    def closed_state_names(self, product: str) -> set[str]:
+        """Return state names considered closed/done for the given product.
+
+        Reads is_open from each status; custom statuses without the field default to open.
+        """
+        return {s["name"] for s in _get_statuses(product) if not s.get("is_open", True)}
+
     # ── Comments ──────────────────────────────────────────────────────────────
 
     def add_comment(self, bug_id: str, author: str, body: str) -> dict:
