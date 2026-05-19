@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (43)  
+Last updated: 2026-05-19 (44)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Runs: fix analyzed flag never flipping** (`dashboard/routers/runs.py`): `_run_post_suite` called `patch_run` with `post_suite_summary={}` — not a DB column — causing the entire call to fail silently (same unknown-column pattern as `progress_total`). `result_analyzer` was running successfully but `analyzed` stayed `0`. Dropped the non-existent field; `analyzed=True` and `failure_categories` now commit correctly. Manually recovered `run_9d157fc3`.
+
+## Previous: VAPT SSH multi-auth (2026-05-19)
 
 - **VAPT SSH multi-auth: key path, key paste, password** (`core/vapt_manager.py`, `dashboard/routers/vapt.py`, `products/reportportal/tests/vapt_infra_int/conftest.py`, `core/vapt_test_generator.py`, `dashboard/templates/vapt.html`): Scope gains `ssh_auth_method` (key_path | key_paste | password), `ssh_key_content`, `ssh_password`. UI: radio selector switches between server key path input, PEM textarea (paste), and password field. Runner injects the matching env var (`VAPT_SSH_KEY_PATH` / `VAPT_SSH_KEY_CONTENT` / `VAPT_SSH_PASSWORD`) plus `VAPT_SSH_AUTH_METHOD`. Conftest handles all three: key_paste writes content to a `tempfile.mkstemp` PEM file (chmod 600), connects, then deletes the temp file immediately. Pre-flight check validates the correct field per method. Generator template updated to match.
 
