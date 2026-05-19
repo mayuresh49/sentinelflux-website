@@ -232,3 +232,17 @@ async def products_set_visual(request: Request, name: str = Form(...), visual: s
 async def products_set_bugs(request: Request, name: str = Form(...), bugs: str = Form("true"),
                             _: dict = Depends(_require_admin)):
     return _set_flag(request, name, "bugs_enabled", bugs, "Bug Tracker")
+
+
+@router.post("/ui/config/products/set-bug-code", response_class=HTMLResponse)
+async def products_set_bug_code(request: Request, name: str = Form(...), bug_code: str = Form(""),
+                                _: dict = Depends(_require_admin)):
+    cfg = _load_config()
+    code = _re.sub(r"[^A-Z0-9]", "", bug_code.strip().upper())[:6]
+    for p in cfg.get("products", []):
+        if p["name"] == name:
+            p["bug_code"] = code
+            break
+    _save_config(cfg)
+    _audit_config(request, "Products", f"Set bug code '{code}' for '{name}'")
+    return _render_products(request, cfg, flash=f"Bug ID code for '{name}' set to '{code}'.")

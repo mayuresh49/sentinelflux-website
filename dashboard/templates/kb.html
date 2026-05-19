@@ -242,7 +242,7 @@ scenarios:
 
       <!-- DOCX upload panel — same scope as button above -->
       <div x-show="showDocxUpload" x-cloak
-           class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+           class="bg-white rounded-xl border border-slate-100 shadow-sm p-6 space-y-4">
         <h3 class="font-semibold text-slate-800 text-sm">Convert Word Document to KB Increment YAML</h3>
         <p class="text-xs text-slate-500">Upload an API spec document, feature description, or any Word doc. The system extracts the text and uses an LLM to produce a KB YAML increment ready for test generation.</p>
         <div class="grid grid-cols-2 gap-3">
@@ -290,7 +290,7 @@ scenarios:
 
     <!-- New increment form -->
     <div x-show="showIncrementForm" x-cloak
-         class="bg-white rounded-xl border border-indigo-100 shadow-sm p-5 space-y-4">
+         class="bg-white rounded-xl border border-indigo-100 shadow-sm p-6 space-y-4">
       <h3 class="font-semibold text-slate-800 text-sm">New Increment YAML</h3>
       <div class="flex gap-3 items-end">
         <div class="flex flex-col gap-1 flex-1">
@@ -385,7 +385,7 @@ scenarios:
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
     <!-- Trigger form -->
-    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-5 space-y-4">
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-6 space-y-4">
       <h2 class="font-semibold text-slate-800">Trigger Test Generation</h2>
       <p class="text-xs text-slate-500">Runs <code class="bg-slate-100 px-1 rounded">KB → doc → pytest script</code> pipeline in the background. Progress appears in the job list and Activity log.</p>
 

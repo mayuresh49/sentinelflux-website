@@ -18,6 +18,19 @@
         {% if p.get('display_name') and p.display_name != p.name %}
         <span class="text-xs text-slate-400">{{ p.display_name }}</span>
         {% endif %}
+        <!-- Bug ID code inline editor -->
+        <form hx-post="/ui/config/products/set-bug-code" hx-target="#products-list" hx-swap="innerHTML"
+              class="flex items-center gap-1" x-data>
+          <input type="hidden" name="name" value="{{ p.name }}">
+          <span class="text-[10px] text-slate-400 font-medium">Bug Code:</span>
+          <input type="text" name="bug_code"
+                 value="{{ p.get('bug_code', '') }}"
+                 placeholder="{{ p.name[:2].upper() }}"
+                 maxlength="6"
+                 class="w-14 text-[10px] font-mono font-semibold border border-slate-200 rounded px-1.5 py-0.5 uppercase focus:outline-none focus:ring-1 focus:ring-rose-300 focus:border-rose-300 text-slate-700"
+                 @keydown.enter.prevent="$el.closest('form').requestSubmit()">
+          <button type="submit" class="text-[10px] text-slate-400 hover:text-rose-600 px-1 py-0.5 rounded hover:bg-rose-50 transition-colors">Save</button>
+        </form>
         {% if p.get('active', True) %}
         <span class="text-xs bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded font-medium">active</span>
         {% else %}

@@ -79,6 +79,8 @@ _DDL = [
     "ALTER TABLE test_runs ADD COLUMN progress_total INTEGER DEFAULT 0",
     "ALTER TABLE test_runs ADD COLUMN progress_done INTEGER DEFAULT 0",
     "ALTER TABLE test_runs ADD COLUMN summary_error TEXT NOT NULL DEFAULT ''",
+    "ALTER TABLE bugs ADD COLUMN bug_seq INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE bugs ADD COLUMN bug_number TEXT NOT NULL DEFAULT ''",
     """CREATE TABLE IF NOT EXISTS test_schedules (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,

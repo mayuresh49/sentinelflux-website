@@ -67,6 +67,24 @@ def _get_transitions(product: str | None = None) -> dict[str, set[str]]:
         pass
     return _DEFAULT_TRANSITIONS
 
+def _get_bug_code(product: str | None = None) -> str:
+    """Return the short code used in bug IDs (e.g. 'OH' → 'BUG-OH-001').
+
+    Falls back to uppercased first two characters of the product name.
+    """
+    if product and _CONFIG_PATH.exists():
+        try:
+            cfg = yaml.safe_load(_CONFIG_PATH.read_text(encoding="utf-8")) or {}
+            for p in cfg.get("products", []):
+                if p["name"] == product:
+                    code = p.get("bug_code", "")
+                    if code:
+                        return code.upper()
+        except Exception:
+            pass
+    return (product or "XX")[:2].upper()
+
+
 _SEVERITY_VALUES = {"blocker", "critical", "major", "minor", "trivial"}
 _TYPE_VALUES = {"functional", "performance", "security", "ui", "regression", "data"}
 
@@ -116,20 +134,25 @@ class BugManager:
         bug_id = str(uuid.uuid4())
         now = _now()
         conn = self._conn()
+        seq = conn.execute(
+            "SELECT COALESCE(MAX(bug_seq), 0) + 1 FROM bugs WHERE product = ?", (product,)
+        ).fetchone()[0]
+        code = _get_bug_code(product)
+        bug_number = f"BUG-{code}-{seq:03d}"
         conn.execute(
             """INSERT INTO bugs
                (id, product, title, description, priority, severity, state, bug_type,
                 component, environment, build_version, reporter, assignee,
                 steps_to_reproduce, expected_result, actual_result,
                 tags, linked_tc_id, linked_run_id, linked_plan_id,
-                created_at, updated_at)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                created_at, updated_at, bug_seq, bug_number)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
             (
                 bug_id, product, title, description, priority, severity, "new", bug_type,
                 component, environment, build_version, reporter, assignee,
                 steps_to_reproduce, expected_result, actual_result,
                 json.dumps(tags or []), linked_tc_id, linked_run_id, linked_plan_id,
-                now, now,
+                now, now, seq, bug_number,
             ),
         )
         conn.commit()

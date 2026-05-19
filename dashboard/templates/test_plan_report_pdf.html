@@ -211,7 +211,7 @@
     <tbody>
     {% for bug in open_bugs %}
     <tr>
-      <td style="font-family:monospace; font-size:8pt; color:#4f46e5;">{{ bug.id }}</td>
+      <td style="font-family:monospace; font-size:8pt; color:#4f46e5;">{{ bug.bug_number or bug.id[:8] }}</td>
       <td>{{ bug.title }}</td>
       <td>{{ bug.priority | title if bug.priority else '—' }}</td>
       <td>{{ bug.severity | title if bug.severity else '—' }}</td>
