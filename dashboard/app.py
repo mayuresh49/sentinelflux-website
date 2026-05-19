@@ -118,7 +118,23 @@ app.include_router(insights_router.router, prefix="/api")
 @app.on_event("startup")
 async def _start_schedule_checker():
     import asyncio
+    _reap_orphaned_runs()
     asyncio.create_task(_schedule_loop())
+
+
+def _reap_orphaned_runs():
+    """Mark queued/running runs as errored if they pre-date this server start.
+
+    Background tasks are lost on restart; any run still queued or running from
+    a previous process will never complete, so we error them out immediately.
+    """
+    from datetime import datetime, timezone
+    from core.run_manager import RunManager
+    rm = RunManager()
+    now = datetime.now(timezone.utc).isoformat()
+    for run in rm.all_runs():
+        if run.get("status") in ("queued", "running"):
+            rm.patch_run(run["id"], status="errored", finished_at=now, errors=1)
 
 
 async def _schedule_loop():
