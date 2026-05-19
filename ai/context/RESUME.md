@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (47)  
+Last updated: 2026-05-19 (48)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Test plan report: open bugs section + product-aware closed-state detection** (`core/bug_manager.py`, `dashboard/routers/test_plans.py`, `dashboard/templates/test_plan_report_pdf.html`): `BugManager.list_bugs()` gains a `linked_plan_id` filter. `_DEFAULT_STATUSES` now carries `is_open: True/False` on each entry (new/open/in_progress/deferred = open; resolved/closed/wont_fix = closed). New `BugManager.closed_state_names(product)` method reads `is_open` from the product's configured statuses (custom statuses without the field default to open). Report renderer calls `closed_state_names` instead of a hardcoded set, then passes `open_bugs` to the template. PDF/HTML report includes an "Open Bugs" table (ID, title, priority, severity, state, component, linked TC) between the run history and scope sections. Badge styles added for all bug states.
+
+## Previous: Activities top pagination (2026-05-19)
 
 - **Activities: top pagination added and synced via HTMX OOB** (`dashboard/templates/activities.html`, `dashboard/templates/partials/activities_rows.html`): Added a second pagination control above the table (`id="activities-pagination-top"`). The partial now emits two `hx-swap-oob` blocks — one for each pagination div — so both are updated in sync on every HTMX page/filter change. Initial page load renders both via Jinja2 using plain `href` links; after any HTMX swap both switch to `hx-get` powered links.
 

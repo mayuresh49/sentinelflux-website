@@ -1,5 +1,16 @@
 # Completed work items — append only, newest first
 
+- id: test-plan-report-open-bugs
+  date: 2026-05-19
+  title: "Test plan report: open bugs section with product-aware closed-state detection"
+  outcome: >
+    BugManager.list_bugs() gains linked_plan_id filter. _DEFAULT_STATUSES now
+    carries is_open flag per entry. New closed_state_names(product) method reads
+    is_open from configured statuses (custom statuses default to open). Report
+    renderer uses closed_state_names instead of hardcoded set; passes open_bugs
+    to template. PDF/HTML report renders an Open Bugs table between run history
+    and scope sections.
+
 - id: activities-top-pagination
   date: 2026-05-19
   title: "Activities: top pagination with HTMX OOB sync"
