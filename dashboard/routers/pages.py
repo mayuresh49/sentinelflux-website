@@ -661,14 +661,19 @@ async def bugs_page(request: Request, product: str | None = None,
     if product and product not in visible:
         product = None
     from dashboard.routers.config._helpers import _load_config
+    from core.bug_manager import _get_statuses
+    import json as _json
     cfg = _load_config()
     users = cfg.get("users", [])
     priorities = cfg.get("priorities", [])
+    bug_statuses = _get_statuses(product)
     return templates.TemplateResponse(request, "bugs.html", context=_ctx(
         request, current_user,
         filter_product=product or "",
         config_users=users,
         config_priorities=priorities,
+        bug_statuses=bug_statuses,
+        bug_statuses_json=_json.dumps(bug_statuses),
     ))
 
 

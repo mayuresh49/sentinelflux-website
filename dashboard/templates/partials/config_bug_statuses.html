@@ -1,0 +1,96 @@
+{% set color_badge = {
+  "sky":     "bg-sky-100 text-sky-700",
+  "amber":   "bg-amber-100 text-amber-700",
+  "violet":  "bg-violet-100 text-violet-700",
+  "emerald": "bg-emerald-100 text-emerald-700",
+  "slate":   "bg-slate-100 text-slate-500",
+  "red":     "bg-red-100 text-red-700",
+  "yellow":  "bg-yellow-100 text-yellow-700",
+  "rose":    "bg-rose-100 text-rose-700",
+  "indigo":  "bg-indigo-100 text-indigo-700",
+  "teal":    "bg-teal-100 text-teal-700",
+  "orange":  "bg-orange-100 text-orange-700",
+  "purple":  "bg-purple-100 text-purple-700",
+  "cyan":    "bg-cyan-100 text-cyan-700",
+} %}
+
+{% if flash %}
+<div class="px-5 py-2 bg-emerald-50 border-b border-emerald-100 text-xs text-emerald-700 font-medium">{{ flash }}</div>
+{% endif %}
+
+<input type="hidden" name="product" value="{{ product }}">
+
+{% if statuses %}
+<div class="divide-y divide-slate-50">
+  {% for s in statuses %}
+  <div class="px-5 py-2.5 flex items-center gap-3">
+    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ color_badge.get(s.color, 'bg-slate-100 text-slate-500') }}">
+      {{ s.label }}
+    </span>
+    <span class="text-[10px] text-slate-400 font-mono">{{ s.name }}</span>
+    <span class="text-[10px] text-slate-300">· {{ s.color }}</span>
+    <form hx-post="/ui/config/bug-statuses/delete"
+          hx-target="#bug-statuses-panel"
+          hx-swap="innerHTML"
+          class="ml-auto">
+      <input type="hidden" name="product" value="{{ product }}">
+      <input type="hidden" name="name" value="{{ s.name }}">
+      <button type="submit"
+              class="text-[10px] text-red-400 hover:text-red-600 font-medium px-2 py-0.5 rounded hover:bg-red-50 transition-colors">
+        Remove
+      </button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="px-5 py-6 text-center text-sm text-slate-400">
+  No custom statuses defined — defaults are in use (New, Open, In Progress, Resolved, Closed, Deferred, Won't Fix).
+</div>
+{% endif %}
+
+<div class="px-5 py-4 border-t border-slate-50 bg-slate-50/40 space-y-3">
+  <form hx-post="/ui/config/bug-statuses/add"
+        hx-target="#bug-statuses-panel"
+        hx-swap="innerHTML"
+        class="flex items-end gap-3 flex-wrap">
+    <input type="hidden" name="product" value="{{ product }}">
+    <div>
+      <label class="block text-xs font-medium text-slate-600 mb-1">Name <span class="text-slate-400 font-normal">(identifier)</span></label>
+      <input type="text" name="name" required
+             placeholder="e.g. qa_test"
+             pattern="[a-z][a-z0-9_]{0,31}"
+             title="Lowercase letters, digits, underscores — must start with a letter"
+             class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-200 w-36">
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-slate-600 mb-1">Label <span class="text-slate-400 font-normal">(display)</span></label>
+      <input type="text" name="label" required
+             placeholder="e.g. QA Test"
+             class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-200 w-36">
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-slate-600 mb-1">Color</label>
+      <select name="color"
+              class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-200">
+        {% for c in colors %}
+        <option value="{{ c }}">{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit"
+            class="bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium rounded-lg px-4 py-1.5 transition-colors">
+      Add Status
+    </button>
+  </form>
+  <form hx-post="/ui/config/bug-statuses/reset"
+        hx-target="#bug-statuses-panel"
+        hx-swap="innerHTML"
+        class="flex items-center gap-2">
+    <input type="hidden" name="product" value="{{ product }}">
+    <button type="submit"
+            class="text-xs text-slate-400 hover:text-slate-600 underline">
+      Reset to defaults (clears custom statuses and transitions)
+    </button>
+  </form>
+</div>

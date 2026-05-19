@@ -14,6 +14,16 @@ from utils.paths import ROOT
 _BUGS_DIR = ROOT / "data" / "bugs"
 _CONFIG_PATH = ROOT / "data" / "config.yaml"
 
+_DEFAULT_STATUSES: list[dict] = [
+    {"name": "new",         "label": "New",         "color": "sky"},
+    {"name": "open",        "label": "Open",        "color": "amber"},
+    {"name": "in_progress", "label": "In Progress", "color": "violet"},
+    {"name": "resolved",    "label": "Resolved",    "color": "emerald"},
+    {"name": "closed",      "label": "Closed",      "color": "slate"},
+    {"name": "deferred",    "label": "Deferred",    "color": "yellow"},
+    {"name": "wont_fix",    "label": "Won't Fix",   "color": "red"},
+]
+
 # Default state transitions: state → set of allowed next states
 _DEFAULT_TRANSITIONS: dict[str, set[str]] = {
     "new":         {"open", "deferred", "wont_fix"},
@@ -24,6 +34,22 @@ _DEFAULT_TRANSITIONS: dict[str, set[str]] = {
     "deferred":    {"open"},
     "wont_fix":    set(),
 }
+
+
+def _get_statuses(product: str | None = None) -> list[dict]:
+    """Return configured statuses for a product, falling back to defaults."""
+    if not product or not _CONFIG_PATH.exists():
+        return _DEFAULT_STATUSES
+    try:
+        cfg = yaml.safe_load(_CONFIG_PATH.read_text(encoding="utf-8")) or {}
+        for p in cfg.get("products", []):
+            if p["name"] == product:
+                raw = p.get("bug_statuses")
+                if raw:
+                    return raw
+    except Exception:
+        pass
+    return _DEFAULT_STATUSES
 
 
 def _get_transitions(product: str | None = None) -> dict[str, set[str]]:
@@ -234,6 +260,9 @@ class BugManager:
         if not bug:
             return []
         return sorted(_get_transitions(bug.get("product")).get(bug["state"], set()))
+
+    def get_product_statuses(self, product: str) -> list[dict]:
+        return _get_statuses(product)
 
     # ── Comments ──────────────────────────────────────────────────────────────
 

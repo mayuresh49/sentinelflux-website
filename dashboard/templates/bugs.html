@@ -26,13 +26,9 @@
           <select x-model="filterState" @change="loadBugs()"
                   class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200">
             <option value="">All States</option>
-            <option value="new">New</option>
-            <option value="open">Open</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-            <option value="closed">Closed</option>
-            <option value="deferred">Deferred</option>
-            <option value="wont_fix">Won't Fix</option>
+            {% for s in bug_statuses %}
+            <option value="{{ s.name }}">{{ s.label }}</option>
+            {% endfor %}
           </select>
           <select x-model="filterPriority" @change="loadBugs()"
                   class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200">
@@ -50,7 +46,7 @@
           <button @click="filterState = (filterState === state ? '' : state); loadBugs()"
                   :class="filterState === state ? stateChipActive(state) : 'bg-slate-100 text-slate-500 hover:bg-slate-200'"
                   class="text-[10px] font-medium px-1.5 py-0.5 rounded transition-colors"
-                  x-text="`${state.replace('_',' ')} ${count}`">
+                  x-text="`${stateLabel(state)} ${count}`">
           </button>
         </template>
       </div>
@@ -73,7 +69,7 @@
              class="px-3 py-2.5 cursor-pointer transition-colors">
           <div class="flex items-center gap-1.5 mb-1">
             <span :class="priorityDot(bug.priority)" class="w-2 h-2 rounded-full shrink-0"></span>
-            <span class="text-[10px] font-medium" :class="stateColor(bug.state)" x-text="bug.state.replace('_',' ')"></span>
+            <span class="text-[10px] font-medium" :class="stateColor(bug.state)" x-text="stateLabel(bug.state)"></span>
             <span class="ml-auto text-[10px] text-slate-400 font-mono" x-text="bug.id.slice(0,8)"></span>
           </div>
           <p class="text-xs font-medium text-slate-800 leading-tight line-clamp-2" x-text="bug.title"></p>
@@ -128,7 +124,7 @@
               <div class="flex items-center gap-2 mt-1.5 flex-wrap">
                 <span :class="stateBadgeClass(selectedBug.state)"
                       class="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide"
-                      x-text="selectedBug.state.replace('_',' ')"></span>
+                      x-text="stateLabel(selectedBug.state)"></span>
                 <span :class="priorityBadgeClass(selectedBug.priority)"
                       class="text-[10px] font-semibold px-2 py-0.5 rounded-full"
                       x-text="selectedBug.priority"></span>
@@ -148,7 +144,7 @@
                     class="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200 disabled:opacity-40 disabled:cursor-not-allowed">
               <option value="" x-text="allowedTransitions.length ? 'Move to…' : 'No transitions'"></option>
               <template x-for="t in allowedTransitions" :key="t">
-                <option :value="t" x-text="t.replace('_',' ').replace('wont fix','Won\'t Fix')"></option>
+                <option :value="t" x-text="stateLabel(t)"></option>
               </template>
             </select>
             <div class="ml-auto flex gap-1.5">
@@ -616,22 +612,19 @@
   <div class="absolute inset-0 bg-slate-900/40" @click="showTransitionModal = false"></div>
   <div class="relative bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-sm mx-4 p-5 space-y-4">
     <h3 class="text-sm font-bold text-slate-900">
-      Transition to "<span x-text="pendingTransition && pendingTransition.replace('_',' ')"></span>"
+      Transition to "<span x-text="pendingTransition && stateLabel(pendingTransition)"></span>"
     </h3>
     <div>
-      <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">
-        Comment <span x-show="pendingTransition === 'wont_fix' || pendingTransition === 'deferred'" class="text-red-500">*</span>
-      </label>
+      <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">Comment</label>
       <textarea x-model="transitionComment" rows="3"
                 class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
-                :placeholder="pendingTransition === 'wont_fix' ? 'Reason for closing as Won\'t Fix…' : pendingTransition === 'deferred' ? 'Reason for deferring…' : 'Optional comment…'"></textarea>
+                placeholder="Optional comment…"></textarea>
     </div>
     <div class="flex justify-end gap-2">
       <button @click="showTransitionModal = false"
               class="text-xs font-medium text-slate-600 px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors">Cancel</button>
       <button @click="confirmTransition()"
-              :disabled="(pendingTransition === 'wont_fix' || pendingTransition === 'deferred') && !transitionComment.trim()"
-              class="text-xs font-medium bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors">
+              class="text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors">
         Confirm
       </button>
     </div>
@@ -668,6 +661,7 @@ function bugsApp() {
     filterState: '',
     filterPriority: '',
     stateCounts: {},
+    productStatuses: {{ bug_statuses_json | safe }},
 
     activeTab: 'Details',
     editingTitle: false,
@@ -818,7 +812,7 @@ function bugsApp() {
       });
       this.showTransitionModal = false;
       if (r.ok) {
-        sfToast(`Bug moved to ${this.pendingTransition.replace('_',' ')}`, 'info');
+        sfToast(`Bug moved to ${this.stateLabel(this.pendingTransition)}`, 'info');
         await this.loadBugs();
         await this.loadTransitions();
         await this.loadHistory();
@@ -883,18 +877,28 @@ function bugsApp() {
       return (b/1048576).toFixed(1) + ' MB';
     },
 
-    stateColor(s) {
-      const m = {new:'text-sky-600',open:'text-amber-600',in_progress:'text-violet-600',resolved:'text-emerald-600',closed:'text-slate-400',deferred:'text-yellow-600',wont_fix:'text-red-500'};
-      return m[s] || 'text-slate-500';
+    _COLOR_PALETTE: {
+      sky:     { text:'text-sky-600',     badge:'bg-sky-100 text-sky-700',       chip:'bg-sky-600 text-white',     btn:'border-sky-300 text-sky-700 hover:bg-sky-50' },
+      amber:   { text:'text-amber-600',   badge:'bg-amber-100 text-amber-700',   chip:'bg-amber-500 text-white',   btn:'border-amber-300 text-amber-700 hover:bg-amber-50' },
+      violet:  { text:'text-violet-600',  badge:'bg-violet-100 text-violet-700', chip:'bg-violet-600 text-white',  btn:'border-violet-300 text-violet-700 hover:bg-violet-50' },
+      emerald: { text:'text-emerald-600', badge:'bg-emerald-100 text-emerald-700',chip:'bg-emerald-600 text-white',btn:'border-emerald-300 text-emerald-700 hover:bg-emerald-50' },
+      slate:   { text:'text-slate-400',   badge:'bg-slate-100 text-slate-500',   chip:'bg-slate-500 text-white',   btn:'border-slate-300 text-slate-600 hover:bg-slate-50' },
+      red:     { text:'text-red-500',     badge:'bg-red-100 text-red-700',       chip:'bg-red-500 text-white',     btn:'border-red-300 text-red-600 hover:bg-red-50' },
+      yellow:  { text:'text-yellow-600',  badge:'bg-yellow-100 text-yellow-700', chip:'bg-yellow-500 text-white',  btn:'border-yellow-300 text-yellow-700 hover:bg-yellow-50' },
+      rose:    { text:'text-rose-600',    badge:'bg-rose-100 text-rose-700',     chip:'bg-rose-500 text-white',    btn:'border-rose-300 text-rose-700 hover:bg-rose-50' },
+      indigo:  { text:'text-indigo-600',  badge:'bg-indigo-100 text-indigo-700', chip:'bg-indigo-600 text-white',  btn:'border-indigo-300 text-indigo-700 hover:bg-indigo-50' },
+      teal:    { text:'text-teal-600',    badge:'bg-teal-100 text-teal-700',     chip:'bg-teal-600 text-white',    btn:'border-teal-300 text-teal-700 hover:bg-teal-50' },
+      orange:  { text:'text-orange-600',  badge:'bg-orange-100 text-orange-700', chip:'bg-orange-500 text-white',  btn:'border-orange-300 text-orange-700 hover:bg-orange-50' },
+      purple:  { text:'text-purple-600',  badge:'bg-purple-100 text-purple-700', chip:'bg-purple-600 text-white',  btn:'border-purple-300 text-purple-700 hover:bg-purple-50' },
+      cyan:    { text:'text-cyan-600',    badge:'bg-cyan-100 text-cyan-700',     chip:'bg-cyan-600 text-white',    btn:'border-cyan-300 text-cyan-700 hover:bg-cyan-50' },
     },
-    stateBadgeClass(s) {
-      const m = {new:'bg-sky-100 text-sky-700',open:'bg-amber-100 text-amber-700',in_progress:'bg-violet-100 text-violet-700',resolved:'bg-emerald-100 text-emerald-700',closed:'bg-slate-100 text-slate-500',deferred:'bg-yellow-100 text-yellow-700',wont_fix:'bg-red-100 text-red-700'};
-      return m[s] || 'bg-slate-100 text-slate-500';
-    },
-    stateChipActive(s) {
-      const m = {new:'bg-sky-600 text-white',open:'bg-amber-500 text-white',in_progress:'bg-violet-600 text-white',resolved:'bg-emerald-600 text-white',closed:'bg-slate-500 text-white',deferred:'bg-yellow-500 text-white',wont_fix:'bg-red-500 text-white'};
-      return m[s] || 'bg-slate-600 text-white';
-    },
+    _statusMeta(s) { return this.productStatuses.find(st => st.name === s) || { label: s.replace(/_/g,' '), color: 'slate' }; },
+    _palette(s)    { return this._COLOR_PALETTE[this._statusMeta(s).color] || this._COLOR_PALETTE.slate; },
+    stateLabel(s)        { return this._statusMeta(s).label; },
+    stateColor(s)        { return this._palette(s).text; },
+    stateBadgeClass(s)   { return this._palette(s).badge; },
+    stateChipActive(s)   { return this._palette(s).chip; },
+    transitionBtnClass(t){ return this._palette(t).btn; },
     priorityDot(p) {
       const m = {P0:'bg-red-500',P1:'bg-orange-400',P2:'bg-amber-400',P3:'bg-slate-300'};
       return m[p] || 'bg-slate-300';
@@ -902,10 +906,6 @@ function bugsApp() {
     priorityBadgeClass(p) {
       const m = {P0:'bg-red-100 text-red-700',P1:'bg-orange-100 text-orange-700',P2:'bg-amber-100 text-amber-700',P3:'bg-slate-100 text-slate-500'};
       return m[p] || 'bg-slate-100 text-slate-500';
-    },
-    transitionBtnClass(t) {
-      const m = {open:'border-amber-300 text-amber-700 hover:bg-amber-50',in_progress:'border-violet-300 text-violet-700 hover:bg-violet-50',resolved:'border-emerald-300 text-emerald-700 hover:bg-emerald-50',closed:'border-slate-300 text-slate-600 hover:bg-slate-50',deferred:'border-yellow-300 text-yellow-700 hover:bg-yellow-50',wont_fix:'border-red-300 text-red-600 hover:bg-red-50'};
-      return m[t] || 'border-slate-200 text-slate-600 hover:bg-slate-50';
     },
     artifactTypeColor(t) {
       const m = {log:'bg-slate-100 text-slate-600',har:'bg-blue-100 text-blue-700',document:'bg-indigo-100 text-indigo-700',report:'bg-emerald-100 text-emerald-700'};

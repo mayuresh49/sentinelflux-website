@@ -275,19 +275,21 @@
       </div>
     </div>
     <!-- ── BUG WORKFLOW ── -->
-    <div x-show="tab==='bugworkflow'" x-cloak class="mt-4"
+    <div x-show="tab==='bugworkflow'" x-cloak class="mt-4 space-y-4"
          x-data="{ bugwfProduct: '{{ all_products[0] if all_products else '' }}' }">
+
+      <!-- Product picker shared header -->
       <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
         <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-4 flex-wrap">
           <div class="flex-1 min-w-0">
-            <h2 class="font-semibold text-slate-800">Bug State Transitions</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Configure which state transitions are allowed per product. Rows are "from" states, columns are "to" states.</p>
+            <h2 class="font-semibold text-slate-800">Bug Workflow</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Define custom statuses and configure allowed state transitions per product.</p>
           </div>
           {% if all_products %}
           <div class="shrink-0">
             <label class="text-xs font-medium text-slate-500 mr-2">Product</label>
             <select x-model="bugwfProduct"
-                    @change="htmx.ajax('GET', '/ui/config/bug-transitions/' + bugwfProduct, '#bug-transitions-panel')"
+                    @change="htmx.ajax('GET', '/ui/config/bug-statuses/' + bugwfProduct, '#bug-statuses-panel'); htmx.ajax('GET', '/ui/config/bug-transitions/' + bugwfProduct, '#bug-transitions-panel')"
                     class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
               {% for p in all_products %}
               <option value="{{ p }}">{{ p }}</option>
@@ -296,13 +298,36 @@
           </div>
           {% endif %}
         </div>
+
+        <!-- Statuses section -->
+        <div class="px-5 py-3 border-b border-slate-100">
+          <h3 class="text-sm font-semibold text-slate-700">Custom Statuses</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Add or remove statuses (e.g. "In Development", "QA Test", "Ready for Deployment"). Defaults are used when none are defined.</p>
+        </div>
+        <div id="bug-statuses-panel"
+             {% if all_products %}
+             hx-get="/ui/config/bug-statuses/{{ all_products[0] }}"
+             hx-trigger="load"
+             {% endif %}>
+          {% if not all_products %}
+          <div class="px-5 py-8 text-center text-sm text-slate-400">No products configured yet. Add a product first.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Transitions section -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-5 py-3 border-b border-slate-100">
+          <h3 class="text-sm font-semibold text-slate-700">State Transitions</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Check a cell to allow that transition. Rows are "from" states, columns are "to" states.</p>
+        </div>
         <div id="bug-transitions-panel"
              {% if all_products %}
              hx-get="/ui/config/bug-transitions/{{ all_products[0] }}"
              hx-trigger="load"
              {% endif %}>
           {% if not all_products %}
-          <div class="px-5 py-8 text-center text-sm text-slate-400">No products configured yet. Add a product first.</div>
+          <div class="px-5 py-8 text-center text-sm text-slate-400">No products configured yet.</div>
           {% endif %}
         </div>
       </div>
