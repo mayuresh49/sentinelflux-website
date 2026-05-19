@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (39)  
+Last updated: 2026-05-19 (40)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **VAPT infra_int: pre-flight SSH credentials check** (`dashboard/routers/vapt.py`): Without SSH credentials in scope all 7 tests silently skip and the scan lands as "completed 0/0/7" with no explanation. Added a pre-flight check in `_execute_vapt_scan` that detects missing `ssh_username`/`ssh_key_path` before spawning the subprocess, fails the scan immediately with a human-readable `summary_error` visible in the scan card: "SSH credentials not configured — set SSH Username and SSH Key Path in the Scope tab before running an Internal Infrastructure scan".
+
+## Previous: VAPT findings scan-type filter (2026-05-19)
 
 - **VAPT findings tab: scan-type filter fix** (`dashboard/templates/vapt.html`): `filteredFindings`, `uniqueOwaspRefs`, `hasOpenFindings`, and the report-tab severity summary (Critical/High/Medium/Low open counts) were all reading from the full `findings` array regardless of `scanTypeSel`. Promoted the existing `scanTypeFindings()` method to a reactive Alpine getter scoped to the current scan type's scan IDs; wired into all four consumers. Empty-state "No findings" message and N-of-M counter also corrected to use scan-type scope.
 

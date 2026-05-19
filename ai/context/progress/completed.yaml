@@ -1,5 +1,13 @@
 # Completed work items — append only, newest first
 
+- id: vapt-infra-int-preflight
+  date: 2026-05-19
+  title: "VAPT infra_int: pre-flight SSH credentials check"
+  outcome: >
+    Missing ssh_username/ssh_key_path in scope caused 7 silent skips with a
+    misleading 'completed' scan. Pre-flight check now fails the scan immediately
+    with a human-readable summary_error before the subprocess is spawned.
+
 - id: vapt-findings-scan-type-filter
   date: 2026-05-19
   title: "VAPT findings tab: filter by scan type"
