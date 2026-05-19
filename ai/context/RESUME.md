@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (57)  
+Last updated: 2026-05-20 (58)  
 Framework version: 0.1.0
 
 ---
@@ -42,7 +42,13 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ---
 
-## What Was Just Done (2026-05-19)
+## What Was Just Done (2026-05-20)
+
+- **Fix: result analyzer output never written to DB** (`ai/agents/sentinel_orchestrator.py`, `dashboard/routers/runs.py`): `_run_post_suite` was doing `isinstance(summary["blockers"], dict)` — `blockers` is always a list, so `failure_categories` was never updated and all failures stayed `"unanalyzed"` even after analysis ran. Fixed: orchestrator now includes `failure_analysis` (the full `ResultAnalyzerAgent` result: `by_classification` dict + per-failure records) in its summary. `_run_post_suite` reads `failure_analysis.by_classification` for `failure_categories` and `failure_analysis.failures` for per-failure classification, both patched in one `patch_run` call.
+- **Fix: SF_ENV not forwarded to pytest** (`dashboard/routers/runs.py`): `_execute_run` injected `SF_ENV` into subprocess env but never passed `--env` CLI arg, so pytest always defaulted to `env_qa.yaml`. Now adds `--env <value>` to the pytest command when `SF_ENV` is set, ensuring the correct product env profile is loaded.
+- **OrangeHRM browser timeout raised** (`products/orangehrm/config/env_qa.yaml`): 12 s → 30 s to handle the public demo site latency. Root cause of `run_65f104b4` failures (9 errors): all from `logged_in_page` fixture timing out on `Fill username` against the demo site under load.
+
+## Previous: Pipeline hardening for SPA exploration (2026-05-19)
 
 - **Pipeline hardening for SPA exploration** (`ai/skills/app_exploration.py`, `scripts/run_pipeline.sh`): Three robustness fixes to `AppExplorationSkill` for OrangeHRM ESS pipeline run: (1) Default `timeout_ms` raised 15s→30s — SPA initial loads need headroom. (2) Fixed 1s `wait_for_timeout` after navigation replaced with `_wait_for_spa()` helper that tries `networkidle` (10s, best-effort) then a 500ms DOM-settle pause. (3) Login verification added: `_login()` now checks URL after submit — warns if still on login page (silent failure was exploring the login form instead of actual pages); `networkidle` timeout guarded with 3s fallback. `run_pipeline.sh` updated to expose `SF_EXPLORE` / `SF_BASE_URL` / `SF_LOGIN_URL` / `SF_EXPLORE_PAGES` env-var flags (credentials stay out of shell history via `SF_EXPLORE_USER` / `SF_EXPLORE_PASS` read directly by the orchestrator).
 

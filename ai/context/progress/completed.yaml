@@ -1,5 +1,17 @@
 # Completed work items — append only, newest first
 
+- id: result-analyzer-db-fix
+  date: 2026-05-20
+  title: "Fix: result analyzer output never written to DB + SF_ENV forwarding + browser timeout"
+  outcome: >
+    sentinel_orchestrator.py: expose failure_analysis (by_classification dict + per-failure
+    records) in run_post_suite summary. runs.py _run_post_suite: isinstance(blockers, dict)
+    was always False — failure_categories never written; now reads failure_analysis correctly.
+    _execute_run: SF_ENV forwarded as --env to pytest so product env_*.yaml is selected.
+    orangehrm/env_qa.yaml: Playwright timeout 12s → 30s for demo-site latency.
+    Root cause of run_65f104b4 all-errors: logged_in_page fixture timeout on Fill username
+    (demo site load + 12s too tight).
+
 - id: pipeline-spa-hardening
   date: 2026-05-19
   title: "Fix: AppExplorerAgent robustness for SPA apps + run_pipeline.sh explore flags"
