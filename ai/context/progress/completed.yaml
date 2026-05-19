@@ -1,5 +1,15 @@
 # Completed work items — append only, newest first
 
+- id: product-filter-retention
+  date: 2026-05-19
+  title: "Fix: product filter retention across all nav pages; suppress on Insights"
+  outcome: >
+    VAPT, Performance, Accessibility, API Contract, and Visual Regression sidebar
+    nav links now carry ?product= when a product is selected. The main nav_items
+    loop already did this; these five special-access pages were hardcoded hrefs.
+    insights.html gets an empty header_filter block to suppress the global product
+    filter on Product Insights (matches admin_users.html pattern).
+
 - id: visual-compare-modal
   date: 2026-05-19
   title: "Visual Regression: baseline vs current screenshot compare modal + empty-state alignment"

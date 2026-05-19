@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (31)  
+Last updated: 2026-05-19 (32)  
 Framework version: 0.1.0
 
 ---
@@ -42,6 +42,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Fix: product filter retention across all nav pages; suppress on Insights** (`dashboard/templates/base.html`, `dashboard/templates/insights.html`): VAPT, Performance, Accessibility, API Contract, and Visual Regression sidebar nav links now carry `?product=<value>` when a product is selected — previously these were hardcoded hrefs so the selected product was lost on navigation. The main nav_items loop already did this correctly; the five special-access pages were missed. Added empty `{% block header_filter %}` override to `insights.html` to suppress the global product filter on the Product Insights page (consistent with `admin_users.html` pattern).
+
+## Previous: Visual Regression compare modal + empty-state fix (2026-05-19)
 
 - **Visual Regression: baseline vs current screenshot compare modal** (`dashboard/routers/visual.py`, `dashboard/templates/visual.html`): New `GET /api/visual/engagement/{eng_id}/screenshot` endpoint serves stored PNG files from disk — `type=baseline` reads from `eng.baselines[page_path]`, `type=scan&scan_id=...` reads from the scan's `pages_results`. Template adds a full-screen lightbox modal (two-column: Baseline | Current) with diff % badge in header; each per-page row in a completed comparison scan gets a "View" button that opens the modal. Images load via session-cookie auth.
 - **Empty-state card alignment fix** (`a11y.html`, `contract.html`, `perf.html`, `visual.html`): "No … suites yet" messages were bare `div`s with `py-8`; now match the sibling "Select a product" card style (`bg-slate-50 border border-slate-200 rounded-xl p-6`).
