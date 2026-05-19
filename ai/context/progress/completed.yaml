@@ -1,5 +1,15 @@
 # Completed work items — append only, newest first
 
+- id: startup-orphan-run-reaper
+  date: 2026-05-19
+  title: "Startup: auto-error orphaned queued/running runs on server restart"
+  outcome: >
+    _reap_orphaned_runs() added to FastAPI startup event in app.py. Marks any
+    run in queued or running status as errored (finished_at=now, errors=1) at
+    startup. Prevents runs submitted as background tasks from staying stuck
+    indefinitely after a server restart (tasks are lost; runs would never
+    complete without this). Users can retrigger from the Test Plans UI.
+
 - id: cto-agent-strategic-roadmap
   date: 2026-05-19
   title: "Insights: CTO agent + Strategic Roadmap + deduplication fix"
