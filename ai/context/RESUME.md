@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (40)  
+Last updated: 2026-05-19 (41)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **VAPT scope: SSH credentials section always visible** (`dashboard/templates/vapt.html`): SSH credentials section was gated on `scopeForm.test_types.includes('infra_int')` but `infra_int` is not in the Test Domains checkbox list (`['web','api','mobile']`), so it was permanently hidden. Removed the `x-show` guard — section now always visible, matching the pattern of Infrastructure Targets and Mobile App Path fields.
+
+## Previous: infra_int pre-flight check (2026-05-19)
 
 - **VAPT infra_int: pre-flight SSH credentials check** (`dashboard/routers/vapt.py`): Without SSH credentials in scope all 7 tests silently skip and the scan lands as "completed 0/0/7" with no explanation. Added a pre-flight check in `_execute_vapt_scan` that detects missing `ssh_username`/`ssh_key_path` before spawning the subprocess, fails the scan immediately with a human-readable `summary_error` visible in the scan card: "SSH credentials not configured — set SSH Username and SSH Key Path in the Scope tab before running an Internal Infrastructure scan".
 

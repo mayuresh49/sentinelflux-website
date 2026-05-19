@@ -1,5 +1,13 @@
 # Completed work items — append only, newest first
 
+- id: vapt-ssh-section-visibility
+  date: 2026-05-19
+  title: "VAPT scope: SSH credentials section always visible"
+  outcome: >
+    x-show gated on scopeForm.test_types.includes('infra_int') but infra_int
+    is not in Test Domains checkboxes so section was permanently hidden.
+    Removed guard — always visible, matching Infrastructure Targets pattern.
+
 - id: vapt-infra-int-preflight
   date: 2026-05-19
   title: "VAPT infra_int: pre-flight SSH credentials check"
