@@ -18,6 +18,10 @@ _AGENT_REGISTRY = [
     {"name": "locator_healer", "description": "Proposes healed UI selectors for failing elements", "domain": "web,mobile", "requires_ai": True},
     {"name": "quarantine_manager", "description": "Manages test quarantine lifecycle", "domain": "all", "requires_ai": False},
     {"name": "sentinel_orchestrator", "description": "Coordinates all monitoring agents post-suite", "domain": "all", "requires_ai": False},
+    {"name": "product_manager", "description": "Reviews SentinelFlux from a product management perspective", "domain": "product", "requires_ai": True},
+    {"name": "dev_architect", "description": "Reviews SentinelFlux architecture, tech debt, and security", "domain": "product", "requires_ai": True},
+    {"name": "qa_architect", "description": "Reviews testing strategy, coverage, and quality infrastructure", "domain": "product", "requires_ai": True},
+    {"name": "ux_architect", "description": "Reviews dashboard UX and information architecture", "domain": "product", "requires_ai": True},
 ]
 
 

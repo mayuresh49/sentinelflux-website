@@ -41,7 +41,11 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ---
 
-## What Was Just Done (2026-05-18)
+## What Was Just Done (2026-05-19)
+
+- **Product Insights module** (`ai/agents/product_review_agents.py`, `core/insights_manager.py`, `dashboard/routers/insights.py`, `dashboard/templates/insights.html`): Master-admin-only `/insights` page showing AI-driven expert review from 4 perspectives — Product Manager, Dev Architect, QA Architect, UX Architect. Each agent reads relevant codebase context (RESUME.md, db.py, conftest.py, base.html, backlog.yaml) and calls the LLM to produce 5–8 structured insights (title, description, recommendation, category, priority). Insights stored in new `product_insights` SQLite table. UI: persona tab selector with active-count badges, run-control bar with last-run timestamp, status filter chips (active/planned/punted/discarded), card grid with expandable descriptions, inline status transitions, polling-based run completion detection. All 4 agents registered in `__init__.py`, `_AGENT_REGISTRY`, and `AGENT_META`. Nav item gated by `master_admin` flag in `base.html`.
+
+## Previous: Test Plans report export + latest runs on top (2026-05-18)
 
 - **Test Plans: report export + latest runs on top** (`dashboard/routers/test_plans.py`, `dashboard/templates/test_plan_report_pdf.html`, `dashboard/templates/test_plans.html`): New `GET /{plan_id}/report?format=pdf|html` endpoint renders a full execution report — cover page with plan metadata, milestones table, progress metric cards with stacked colour bar, TC execution status table grouped by domain (with colour-coded status badges), automated run history table, scope summary. WeasyPrint PDF via `_to_pdf()` helper; HTML preview served directly. "Preview Report" (new tab) and "Export PDF" (download) buttons added to the Execution tab. Linked runs now sorted latest-first in both API (`sorted(...reverse=True)`) and client (`localeCompare` sort after fetch).
 

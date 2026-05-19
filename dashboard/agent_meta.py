@@ -98,4 +98,28 @@ AGENT_META: dict = {
             {"name": "run_locator_healer", "type": "bool", "default": True, "description": "Enable locator healing (web/mobile domains only)"},
         ],
     },
+    "product_manager": {
+        "responsibility": "Reads RESUME.md and the product backlog, then calls the configured LLM to produce 5–8 structured insights about SentinelFlux from a product management perspective: feature gaps, backlog prioritisation, user value, onboarding, monetisation, and competitive positioning.",
+        "inputs": ["ai/context/RESUME.md", "ai/context/progress/backlog.yaml"],
+        "outputs": ["product_insights rows (agent_type=product_manager) in sentinelflux.db"],
+        "config_params": [],
+    },
+    "dev_architect": {
+        "responsibility": "Reads RESUME.md, db.py, and app.py, then calls the LLM to produce insights about SentinelFlux's software architecture: coupling, technical debt, scalability, security posture, missing engineering infrastructure, and testability of the framework itself.",
+        "inputs": ["ai/context/RESUME.md", "core/db.py", "dashboard/app.py"],
+        "outputs": ["product_insights rows (agent_type=dev_architect) in sentinelflux.db"],
+        "config_params": [],
+    },
+    "qa_architect": {
+        "responsibility": "Reads RESUME.md, conftest.py, pytest.ini, and counts test files per domain, then calls the LLM to produce insights about testing strategy: test pyramid, flakiness risks, AI-generated test quality, CI/CD integration, reporting gaps, and meta-coverage of the framework itself.",
+        "inputs": ["ai/context/RESUME.md", "conftest.py", "pytest.ini", "test file counts by domain"],
+        "outputs": ["product_insights rows (agent_type=qa_architect) in sentinelflux.db"],
+        "config_params": [],
+    },
+    "ux_architect": {
+        "responsibility": "Reads RESUME.md, lists all dashboard templates, and reads base.html navigation, then calls the LLM to produce insights about the dashboard UX: information architecture, feature discoverability, cognitive load, onboarding, UI pattern consistency, and accessibility.",
+        "inputs": ["ai/context/RESUME.md", "dashboard/templates/*.html names", "dashboard/templates/base.html"],
+        "outputs": ["product_insights rows (agent_type=ux_architect) in sentinelflux.db"],
+        "config_params": [],
+    },
 }

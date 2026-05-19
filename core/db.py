@@ -175,6 +175,19 @@ _DDL = [
         triggered_at TEXT NOT NULL,
         PRIMARY KEY (plan_id, run_id)
     )""",
+    """CREATE TABLE IF NOT EXISTS product_insights (
+        id TEXT PRIMARY KEY,
+        agent_type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL DEFAULT '',
+        recommendation TEXT NOT NULL DEFAULT '',
+        category TEXT NOT NULL DEFAULT 'opportunity',
+        priority TEXT NOT NULL DEFAULT 'medium',
+        status TEXT NOT NULL DEFAULT 'active',
+        run_id TEXT NOT NULL,
+        run_at TEXT NOT NULL,
+        updated_at TEXT
+    )""",
 ]
 
 

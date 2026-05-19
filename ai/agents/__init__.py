@@ -9,6 +9,12 @@ from ai.agents.regression_guard_agent import RegressionGuardAgent
 from ai.agents.result_analyzer_agent import ResultAnalyzerAgent
 from ai.agents.script_gen_agent import ScriptGenAgent
 from ai.agents.script_review_agent import ScriptReviewAgent
+from ai.agents.product_review_agents import (
+    DevArchitectAgent,
+    ProductManagerAgent,
+    QAArchitectAgent,
+    UXArchitectAgent,
+)
 from ai.agents.sentinel_orchestrator import SentinelOrchestrator
 
 __all__ = [
@@ -25,4 +31,8 @@ __all__ = [
     "LocatorHealerAgent",
     "RegressionGuardAgent",
     "SentinelOrchestrator",
+    "ProductManagerAgent",
+    "DevArchitectAgent",
+    "QAArchitectAgent",
+    "UXArchitectAgent",
 ]
