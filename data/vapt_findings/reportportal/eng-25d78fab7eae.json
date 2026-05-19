@@ -4,7 +4,7 @@
   "name": "Q2 2026 Security Assesment",
   "client_name": "reportportal",
   "assessor_org": "SentinelFlux",
-  "status": "reported",
+  "status": "certified",
   "created_at": "2026-05-18T06:27:55.386424+00:00",
   "created_by": "Mayuresh Kulkarni",
   "scope": {
@@ -59,6 +59,386 @@
       "finished_at": "2026-05-18T06:36:14.328805+00:00",
       "progress_total": 36,
       "progress_done": 1
+    },
+    {
+      "scan_id": "scan-d79ea1851bcc",
+      "scan_type": "infra",
+      "triggered_at": "2026-05-18T11:55:03.356854+00:00",
+      "triggered_by": "Mayuresh Kulkarni",
+      "status": "completed",
+      "is_revalidation": false,
+      "total": 15,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 7,
+      "duration": 0.14,
+      "finished_at": "2026-05-18T11:55:03.781540+00:00",
+      "progress_total": 15,
+      "progress_done": 1,
+      "test_log": [
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_dns.py::test_INFRA_spf_record_configured",
+          "title": "Infra Spf Record Configured",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_dns.py::test_INFRA_dmarc_record_configured",
+          "title": "Infra Dmarc Record Configured",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_dns.py::test_INFRA_zone_transfer_blocked",
+          "title": "Infra Zone Transfer Blocked",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_ports.py::test_INFRA_sensitive_service_ports_not_exposed",
+          "title": "Infra Sensitive Service Ports Not Exposed",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_ports.py::test_INFRA_ssh_port_not_on_default",
+          "title": "Infra Ssh Port Not On Default",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_ports.py::test_INFRA_no_telnet_service",
+          "title": "Infra No Telnet Service",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_ports.py::test_INFRA_no_ftp_service",
+          "title": "Infra No Ftp Service",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_services.py::test_INFRA_no_default_server_page",
+          "title": "Infra No Default Server Page",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_services.py::test_INFRA_version_disclosure_in_headers",
+          "title": "Infra Version Disclosure In Headers",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_services.py::test_INFRA_debug_endpoints_blocked",
+          "title": "Infra Debug Endpoints Blocked",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_services.py::test_INFRA_backup_files_not_exposed",
+          "title": "Infra Backup Files Not Exposed",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_tls.py::test_INFRA_tls_1_0_disabled",
+          "title": "Infra Tls 1 0 Disabled",
+          "owasp_ref": "A02",
+          "owasp_category": "Cryptographic Failures",
+          "severity": "Critical",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_tls.py::test_INFRA_tls_1_1_disabled",
+          "title": "Infra Tls 1 1 Disabled",
+          "owasp_ref": "A02",
+          "owasp_category": "Cryptographic Failures",
+          "severity": "Critical",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_tls.py::test_INFRA_certificate_not_expired",
+          "title": "Infra Certificate Not Expired",
+          "owasp_ref": "A02",
+          "owasp_category": "Cryptographic Failures",
+          "severity": "Critical",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_infra/test_vapt_infra_tls.py::test_INFRA_certificate_hostname_match",
+          "title": "Infra Certificate Hostname Match",
+          "owasp_ref": "A02",
+          "owasp_category": "Cryptographic Failures",
+          "severity": "Critical",
+          "status": "skipped"
+        }
+      ]
+    },
+    {
+      "scan_id": "scan-ce73e4d645bf",
+      "scan_type": "mobile",
+      "triggered_at": "2026-05-18T16:50:35.259035+00:00",
+      "triggered_by": "Mayuresh Kulkarni",
+      "status": "completed",
+      "is_revalidation": false,
+      "total": 28,
+      "passed": 11,
+      "failed": 0,
+      "skipped": 17,
+      "duration": 0.37,
+      "finished_at": "2026-05-18T16:50:35.985842+00:00",
+      "progress_total": 28,
+      "progress_done": 1,
+      "test_log": [
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_api.py::test_M1_mobile_specific_endpoints_require_auth",
+          "title": "M1 Mobile Specific Endpoints Require Auth",
+          "owasp_ref": "A01",
+          "owasp_category": "Broken Access Control",
+          "severity": "High",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_api.py::test_M6_cors_not_wildcard_on_mobile_origin",
+          "title": "M6 Cors Not Wildcard On Mobile Origin",
+          "owasp_ref": "A01",
+          "owasp_category": "Broken Access Control",
+          "severity": "High",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_api.py::test_M6_http_method_override_blocked",
+          "title": "M6 Http Method Override Blocked",
+          "owasp_ref": "A01",
+          "owasp_category": "Broken Access Control",
+          "severity": "High",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_api.py::test_M1_error_responses_no_internal_paths",
+          "title": "M1 Error Responses No Internal Paths",
+          "owasp_ref": "A01",
+          "owasp_category": "Broken Access Control",
+          "severity": "High",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_apk_manifest.py::test_M8_app_not_debuggable",
+          "title": "M8 App Not Debuggable",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_apk_manifest.py::test_M2_backup_not_allowed",
+          "title": "M2 Backup Not Allowed",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_apk_manifest.py::test_M3_cleartext_traffic_disabled",
+          "title": "M3 Cleartext Traffic Disabled",
+          "owasp_ref": "A02",
+          "owasp_category": "Cryptographic Failures",
+          "severity": "Critical",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_apk_manifest.py::test_M1_exported_components_require_permissions",
+          "title": "M1 Exported Components Require Permissions",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_apk_manifest.py::test_M8_task_affinity_not_hijackable",
+          "title": "M8 Task Affinity Not Hijackable",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_apk_static.py::test_M2_no_private_key_files_in_apk",
+          "title": "M2 No Private Key Files In Apk",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_apk_static.py::test_M2_no_hardcoded_secrets_in_assets",
+          "title": "M2 No Hardcoded Secrets In Assets",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_apk_static.py::test_M3_no_http_urls_in_assets",
+          "title": "M3 No Http Urls In Assets",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_apk_static.py::test_M5_no_weak_crypto_strings_in_dex",
+          "title": "M5 No Weak Crypto Strings In Dex",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_apk_static.py::test_M2_no_hardcoded_secrets_in_dex",
+          "title": "M2 No Hardcoded Secrets In Dex",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_apk_static.py::test_M3_certificate_pinning_present",
+          "title": "M3 Certificate Pinning Present",
+          "owasp_ref": "A02",
+          "owasp_category": "Cryptographic Failures",
+          "severity": "Critical",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_apk_static.py::test_M5_no_logging_sensitive_data",
+          "title": "M5 No Logging Sensitive Data",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_auth.py::test_M4_auth_token_not_in_url",
+          "title": "M4 Auth Token Not In Url",
+          "owasp_ref": "A07",
+          "owasp_category": "Identification and Authentication Failures",
+          "severity": "High",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_auth.py::test_M4_api_requires_auth_from_mobile",
+          "title": "M4 Api Requires Auth From Mobile",
+          "owasp_ref": "A07",
+          "owasp_category": "Identification and Authentication Failures",
+          "severity": "High",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_auth.py::test_M4_login_brute_force_protection",
+          "title": "M4 Login Brute Force Protection",
+          "owasp_ref": "A07",
+          "owasp_category": "Identification and Authentication Failures",
+          "severity": "High",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_auth.py::test_M4_weak_default_credentials_rejected",
+          "title": "M4 Weak Default Credentials Rejected",
+          "owasp_ref": "A07",
+          "owasp_category": "Identification and Authentication Failures",
+          "severity": "High",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_network.py::test_M3_https_enforced_for_mobile",
+          "title": "M3 Https Enforced For Mobile",
+          "owasp_ref": "A02",
+          "owasp_category": "Cryptographic Failures",
+          "severity": "Critical",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_network.py::test_M3_tls_minimum_version_1_2",
+          "title": "M3 Tls Minimum Version 1 2",
+          "owasp_ref": "A02",
+          "owasp_category": "Cryptographic Failures",
+          "severity": "Critical",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_network.py::test_M3_hsts_header_enforced",
+          "title": "M3 Hsts Header Enforced",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_network.py::test_M3_api_certificate_trusted",
+          "title": "M3 Api Certificate Trusted",
+          "owasp_ref": "A02",
+          "owasp_category": "Cryptographic Failures",
+          "severity": "Critical",
+          "status": "skipped"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_storage.py::test_M2_sensitive_api_responses_not_cacheable",
+          "title": "M2 Sensitive Api Responses Not Cacheable",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_storage.py::test_M2_login_response_no_password_echo",
+          "title": "M2 Login Response No Password Echo",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_storage.py::test_M2_session_cookies_have_secure_flags",
+          "title": "M2 Session Cookies Have Secure Flags",
+          "owasp_ref": "A07",
+          "owasp_category": "Identification and Authentication Failures",
+          "severity": "High",
+          "status": "confirmed_secure"
+        },
+        {
+          "test_id": "tests/vapt_mobile/test_vapt_mobile_storage.py::test_M2_no_sensitive_data_in_url_params",
+          "title": "M2 No Sensitive Data In Url Params",
+          "owasp_ref": "A05",
+          "owasp_category": "Security Misconfiguration",
+          "severity": "Medium",
+          "status": "confirmed_secure"
+        }
+      ]
     }
   ],
   "findings": [],
@@ -69,5 +449,12 @@
   },
   "certificate_issued_at": null,
   "certificate_id": null,
-  "certificate_issued_by": null
+  "certificate_issued_by": null,
+  "certificates": {
+    "infra": {
+      "cert_id": "SF-CERT-3BFB0EC8",
+      "issued_at": "2026-05-18T16:50:07.972182+00:00",
+      "issued_by": "Mayuresh Kulkarni"
+    }
+  }
 }
