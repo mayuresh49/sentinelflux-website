@@ -77,7 +77,7 @@
         </a>
       {% endfor %}
       {% if vapt_access %}
-      <a href="/vapt"
+      <a href="/vapt{% if _prod %}?product={{ _prod }}{% endif %}"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
                 {{ 'bg-indigo-600 text-white font-medium nav-active' if _vapt_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
         <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
@@ -88,7 +88,7 @@
       {% endif %}
       {% if perf_access %}
       {% set _perf_active = request.url.path == '/perf' %}
-      <a href="/perf"
+      <a href="/perf{% if _prod %}?product={{ _prod }}{% endif %}"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
                 {{ 'bg-indigo-600 text-white font-medium nav-active' if _perf_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
         <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
@@ -99,7 +99,7 @@
       {% endif %}
       {% if a11y_access %}
       {% set _a11y_active = request.url.path == '/a11y' %}
-      <a href="/a11y"
+      <a href="/a11y{% if _prod %}?product={{ _prod }}{% endif %}"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
                 {{ 'bg-indigo-600 text-white font-medium nav-active' if _a11y_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
         <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
@@ -110,7 +110,7 @@
       {% endif %}
       {% if contract_access %}
       {% set _contract_active = request.url.path == '/contract' %}
-      <a href="/contract"
+      <a href="/contract{% if _prod %}?product={{ _prod }}{% endif %}"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
                 {{ 'bg-indigo-600 text-white font-medium nav-active' if _contract_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
         <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
@@ -121,7 +121,7 @@
       {% endif %}
       {% if visual_access %}
       {% set _visual_active = request.url.path == '/visual' %}
-      <a href="/visual"
+      <a href="/visual{% if _prod %}?product={{ _prod }}{% endif %}"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
                 {{ 'bg-indigo-600 text-white font-medium nav-active' if _visual_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
         <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
