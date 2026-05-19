@@ -1,5 +1,15 @@
 # Completed work items — append only, newest first
 
+- id: vapt-findings-scan-type-filter
+  date: 2026-05-19
+  title: "VAPT findings tab: filter by scan type"
+  outcome: >
+    filteredFindings, uniqueOwaspRefs, hasOpenFindings, and report-tab severity
+    summary all read from the full findings array regardless of scanTypeSel.
+    Promoted scanTypeFindings() method to a reactive Alpine getter scoped to
+    current scan type scan IDs; wired into all consumers. Empty-state check
+    and N-of-M counter also corrected.
+
 - id: V-01
   date: 2026-05-19
   title: "VAPT: Infrastructure (Internal) — grey-box SSH scan"

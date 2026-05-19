@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (38)  
+Last updated: 2026-05-19 (39)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **VAPT findings tab: scan-type filter fix** (`dashboard/templates/vapt.html`): `filteredFindings`, `uniqueOwaspRefs`, `hasOpenFindings`, and the report-tab severity summary (Critical/High/Medium/Low open counts) were all reading from the full `findings` array regardless of `scanTypeSel`. Promoted the existing `scanTypeFindings()` method to a reactive Alpine getter scoped to the current scan type's scan IDs; wired into all four consumers. Empty-state "No findings" message and N-of-M counter also corrected to use scan-type scope.
+
+## Previous: V-01 VAPT internal infra SSH scan (2026-05-19)
 
 - **VAPT: Infrastructure (Internal) grey-box SSH scan — V-01** (`products/reportportal/tests/vapt_infra_int/`, `core/vapt_test_generator.py`, `dashboard/routers/vapt.py`, `core/vapt_manager.py`, `dashboard/templates/vapt.html`, `requirements.txt`): New `infra_int` scan type alongside existing external `infra`. Test suite has 7 SSH hardening checks (PermitRootLogin, PasswordAuthentication, MaxAuthTries, AllowUsers/AllowGroups, SUID/SGID files, sensitive file permissions, audit log). paramiko session fixture yields factory callable `ssh_client(host)` to avoid scope mismatch with function-parametrized `vapt_host`. `pytest_runtest_setup` hook fast-skips all SSH tests when env vars missing. Scope model adds `ssh_username` + `ssh_key_path` (key-path only). Runner injects `VAPT_SSH_USER`/`VAPT_SSH_KEY_PATH` env vars. Generator templates added. Dashboard: "Internal Infra" scan type selector button, SSH credentials section in scope tab (shown only when `infra_int` in test_types, finalize-lockable). `paramiko>=3.0` added to requirements.
 
