@@ -188,3 +188,29 @@
   priority: low
   status: todo
   notes: Add full locale variants where UI text differs by locale.
+
+- id: V-01
+  phase: vapt
+  title: "VAPT Infra — authenticated SSH scan (grey-box)"
+  files:
+    - products/<product>/tests/vapt_infra/test_vapt_infra_ssh_config.py
+    - core/vapt_test_generator.py
+    - dashboard/routers/vapt.py
+    - dashboard/templates/vapt.html
+  priority: medium
+  status: todo
+  notes: >
+    Current infra scan is black-box only (socket/HTTP/TLS, no credentials).
+    Authenticated scanning requires paramiko and a new test file covering:
+      - SSH config hardening: PermitRootLogin no, PasswordAuthentication no,
+        MaxAuthTries <=4, AllowUsers/AllowGroups set
+      - OS patch level / kernel version (uname -r, last apt/yum update)
+      - SUID/SGID files (find / -perm /6000 -type f)
+      - Unnecessary running services (systemctl list-units --state=running)
+      - Firewall rules from inside (iptables -L / ufw status)
+      - Sensitive file permissions (/etc/shadow 640, ~/.ssh/authorized_keys 600)
+      - Audit log presence (/var/log/auth.log or /var/log/secure)
+    Scope model needs new fields: ssh_username, ssh_key_path (no plaintext passwords).
+    UI needs a "SSH Credentials" section in scope tab (key-path only — no password storage).
+    Credentials passed to pytest via VAPT_SSH_USER + VAPT_SSH_KEY_PATH env vars.
+    Scan type could remain "infra" with a toggle, or become "infra_auth" sub-type.

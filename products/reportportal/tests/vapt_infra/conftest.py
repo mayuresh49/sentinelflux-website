@@ -29,23 +29,23 @@ def _find(cfg: dict, *keys: str) -> str:
     return ""
 
 
-@pytest.fixture(scope="session")
-def vapt_base_url() -> str:
-    return _find(_load_config(), "base_url", "api_url", "url") or "http://localhost:8080"
-
-
-@pytest.fixture(scope="session")
-def vapt_infra_targets(vapt_base_url) -> list[str]:
+def _resolve_targets() -> list[str]:
     raw = os.environ.get("VAPT_INFRA_TARGETS", "").strip()
     if raw:
         return [t.strip() for t in raw.split(",") if t.strip()]
-    m = re.match(r"https?://([^/:]+)", vapt_base_url)
+    url = _find(_load_config(), "base_url", "api_url", "url") or "http://localhost:8080"
+    m = re.match(r"https?://([^/:]+)", url)
     return [m.group(1) if m else "localhost"]
 
 
+def pytest_generate_tests(metafunc):
+    if "vapt_host" in metafunc.fixturenames:
+        metafunc.parametrize("vapt_host", _resolve_targets())
+
+
 @pytest.fixture(scope="session")
-def vapt_host(vapt_infra_targets) -> str:
-    return vapt_infra_targets[0] if vapt_infra_targets else "localhost"
+def vapt_base_url() -> str:
+    return _find(_load_config(), "base_url", "api_url", "url") or "http://localhost:8080"
 
 
 @pytest.fixture(scope="session")
@@ -56,7 +56,7 @@ def vapt_https_port(vapt_base_url) -> int | None:
     return None
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def vapt_domain(vapt_host) -> str:
     if re.match(r"^\d+\.\d+\.\d+\.\d+$", vapt_host) or vapt_host in ("localhost", "127.0.0.1", "::1"):
         return ""

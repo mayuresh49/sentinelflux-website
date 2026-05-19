@@ -27,9 +27,9 @@ def test_INFRA_sensitive_service_ports_not_exposed(vapt_host):
         except (socket.timeout, ConnectionRefusedError, OSError):
             pass
     if exposed:
-        pytest.xfail(
-            f"Service ports reachable from test network — verify firewall rules: {exposed}. "
-            "These should only be accessible from trusted internal networks."
+        pytest.fail(
+            f"Service ports reachable from test network — firewall gap confirmed: {exposed}. "
+            "These must only be accessible from trusted internal networks."
         )
 
 
@@ -40,9 +40,9 @@ def test_INFRA_ssh_port_not_on_default(vapt_host):
         with socket.create_connection((vapt_host, 22), timeout=2) as sock:
             banner = sock.recv(256).decode(errors="replace")
             if "SSH" in banner.upper():
-                pytest.xfail(
+                pytest.fail(
                     f"SSH running on default port 22 at {vapt_host}. "
-                    "Moving SSH to a non-standard port reduces automated brute-force attempts."
+                    "Move SSH to a non-standard port to reduce automated brute-force surface."
                 )
     except (socket.timeout, ConnectionRefusedError, OSError):
         pass

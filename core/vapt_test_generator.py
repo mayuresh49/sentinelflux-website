@@ -642,36 +642,36 @@ def _find(cfg: dict, *keys: str) -> str:
     return ""
 
 
+def _resolve_targets() -> list[str]:
+    raw = os.environ.get("VAPT_INFRA_TARGETS", "").strip()
+    if raw:
+        return [t.strip() for t in raw.split(",") if t.strip()]
+    url = _find(_load_config(), "base_url", "api_url", "url") or "http://localhost:8080"
+    m = re.match(r"https?://([^/:]+)", url)
+    return [m.group(1) if m else "localhost"]
+
+
+def pytest_generate_tests(metafunc):
+    if "vapt_host" in metafunc.fixturenames:
+        metafunc.parametrize("vapt_host", _resolve_targets())
+
+
 @pytest.fixture(scope="session")
 def vapt_base_url() -> str:
     return _find(_load_config(), "base_url", "api_url", "url") or "http://localhost:8080"
 
 
 @pytest.fixture(scope="session")
-def vapt_infra_targets(vapt_base_url) -> "list[str]":
-    raw = os.environ.get("VAPT_INFRA_TARGETS", "").strip()
-    if raw:
-        return [t.strip() for t in raw.split(",") if t.strip()]
-    m = re.match(r"https?://([^/:]+)", vapt_base_url)
-    return [m.group(1) if m else "localhost"]
-
-
-@pytest.fixture(scope="session")
-def vapt_host(vapt_infra_targets) -> str:
-    return vapt_infra_targets[0] if vapt_infra_targets else "localhost"
-
-
-@pytest.fixture(scope="session")
 def vapt_https_port(vapt_base_url) -> "int | None":
     if vapt_base_url.startswith("https://"):
-        m = re.match(r"https://[^/:]+:(\d+)", vapt_base_url)
+        m = re.match(r"https://[^/:]+:(\\d+)", vapt_base_url)
         return int(m.group(1)) if m else 443
     return None
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def vapt_domain(vapt_host) -> str:
-    if re.match(r"^\d+\\.\\d+\\.\\d+\\.\\d+$", vapt_host) or vapt_host in ("localhost", "127.0.0.1", "::1"):
+    if re.match(r"^\\d+\\.\\d+\\.\\d+\\.\\d+$", vapt_host) or vapt_host in ("localhost", "127.0.0.1", "::1"):
         return ""
     return vapt_host
 '''
@@ -706,9 +706,9 @@ def test_INFRA_sensitive_service_ports_not_exposed(vapt_host):
         except (socket.timeout, ConnectionRefusedError, OSError):
             pass
     if exposed:
-        pytest.xfail(
-            f"Service ports reachable from test network — verify firewall rules: {exposed}. "
-            "These should only be accessible from trusted internal networks."
+        pytest.fail(
+            f"Service ports reachable from test network — firewall gap confirmed: {exposed}. "
+            "These must only be accessible from trusted internal networks."
         )
 
 
@@ -719,9 +719,9 @@ def test_INFRA_ssh_port_not_on_default(vapt_host):
         with socket.create_connection((vapt_host, 22), timeout=2) as sock:
             banner = sock.recv(256).decode(errors="replace")
             if "SSH" in banner.upper():
-                pytest.xfail(
+                pytest.fail(
                     f"SSH running on default port 22 at {vapt_host}. "
-                    "Moving SSH to a non-standard port reduces automated brute-force attempts."
+                    "Move SSH to a non-standard port to reduce automated brute-force surface."
                 )
     except (socket.timeout, ConnectionRefusedError, OSError):
         pass
@@ -941,8 +941,40 @@ def test_INFRA_backup_files_not_exposed(vapt_base_url):
 _INFRA_DNS_TESTS = '''\
 """Standard VAPT DNS security tests — SPF, DMARC, zone transfer."""
 import socket
+import struct
 import pytest
 import requests
+
+
+def _axfr_allowed(host: str, domain: str) -> bool:
+    """Returns True if the DNS server at host permits AXFR for domain (zone transfer not blocked)."""
+    qname = b"".join(bytes([len(p)]) + p.encode() for p in domain.split(".")) + b"\\x00"
+    msg = (
+        b"\\xab\\xcd\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x00\\x00\\x00"
+        + qname
+        + b"\\x00\\xfc\\x00\\x01"
+    )
+    wire = struct.pack("!H", len(msg)) + msg
+    try:
+        with socket.create_connection((host, 53), timeout=5) as sock:
+            sock.sendall(wire)
+            rlen_b = sock.recv(2)
+            if len(rlen_b) < 2:
+                return False
+            rlen = struct.unpack("!H", rlen_b)[0]
+            resp = b""
+            while len(resp) < rlen:
+                chunk = sock.recv(rlen - len(resp))
+                if not chunk:
+                    break
+                resp += chunk
+            if len(resp) < 8:
+                return False
+            rcode = resp[3] & 0x0F
+            ancount = struct.unpack("!H", resp[6:8])[0]
+            return rcode == 0 and ancount > 0
+    except Exception:
+        return False
 
 
 @pytest.mark.security
@@ -994,7 +1026,7 @@ def test_INFRA_dmarc_record_configured(vapt_domain):
 
 @pytest.mark.security
 def test_INFRA_zone_transfer_blocked(vapt_host, vapt_domain):
-    """DNS zone transfers must be disabled to prevent domain enumeration."""
+    """DNS zone transfers (AXFR) must be blocked — unrestricted AXFR leaks the full DNS zone."""
     if not vapt_domain:
         pytest.skip("IP address or localhost — zone transfer check skipped")
     try:
@@ -1003,10 +1035,11 @@ def test_INFRA_zone_transfer_blocked(vapt_host, vapt_domain):
     except (socket.timeout, ConnectionRefusedError, OSError):
         pytest.skip(f"Port 53 not open on {vapt_host} — not acting as DNS server")
         return
-    pytest.xfail(
-        f"DNS port 53 is open on {vapt_host} — verify zone transfers (AXFR) are restricted "
-        "to authorized secondary nameservers only"
-    )
+    if _axfr_allowed(vapt_host, vapt_domain):
+        pytest.fail(
+            f"DNS zone transfer (AXFR) allowed for {vapt_domain} via {vapt_host} — "
+            "restrict AXFR to authorized secondary nameservers only"
+        )
 '''
 
 # ── mobile test content ───────────────────────────────────────────────────────
