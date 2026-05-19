@@ -1,5 +1,14 @@
 # Completed work items — append only, newest first
 
+- id: agents-public-registry
+  date: 2026-05-19
+  title: "Agents: filter product-domain agents from public registry"
+  outcome: >
+    _PUBLIC_REGISTRY added to agents.py — excludes agents with domain=="product"
+    (the 4 Insights persona agents). Public API endpoints (/api/agents list/get)
+    and the home + agents dashboard pages now use _PUBLIC_REGISTRY so internal
+    product-review agents are not surfaced externally.
+
 - id: product-filter-retention
   date: 2026-05-19
   title: "Fix: product filter retention across all nav pages; suppress on Insights"

@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (32)  
+Last updated: 2026-05-19 (33)  
 Framework version: 0.1.0
 
 ---
@@ -42,6 +42,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Agents: filter product-domain agents from public registry** (`dashboard/routers/agents.py`, `dashboard/routers/pages.py`): Added `_PUBLIC_REGISTRY` (filters `_AGENT_REGISTRY` by `domain != "product"`) so internal product-review agents (QA Architect, Dev Architect, etc.) are not exposed via the public `/api/agents` list/get endpoints or counted on the home dashboard. Home page and agents page both import `_PUBLIC_REGISTRY`.
+
+## Previous: Product filter retention fix (2026-05-19)
 
 - **Fix: product filter retention across all nav pages; suppress on Insights** (`dashboard/templates/base.html`, `dashboard/templates/insights.html`): VAPT, Performance, Accessibility, API Contract, and Visual Regression sidebar nav links now carry `?product=<value>` when a product is selected — previously these were hardcoded hrefs so the selected product was lost on navigation. The main nav_items loop already did this correctly; the five special-access pages were missed. Added empty `{% block header_filter %}` override to `insights.html` to suppress the global product filter on the Product Insights page (consistent with `admin_users.html` pattern).
 
