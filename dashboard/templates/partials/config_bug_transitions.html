@@ -1,0 +1,66 @@
+{% if flash %}
+<div class="px-5 py-2 bg-emerald-50 border-b border-emerald-100 text-xs text-emerald-700 font-medium">{{ flash }}</div>
+{% endif %}
+
+<form hx-post="/ui/config/bug-transitions/save"
+      hx-target="#bug-transitions-panel"
+      hx-swap="innerHTML">
+  <input type="hidden" name="product" value="{{ product }}">
+
+  <div class="overflow-x-auto px-5 py-4">
+    <table class="text-xs w-full border-collapse">
+      <thead>
+        <tr>
+          <th class="text-left text-[10px] font-semibold text-slate-400 uppercase tracking-wide pb-2 pr-4 whitespace-nowrap">
+            From \ To
+          </th>
+          {% for to_state in all_states %}
+          <th class="text-center pb-2 px-2 whitespace-nowrap">
+            <span class="text-[10px] font-medium text-slate-600">{{ to_state.replace('_', ' ') }}</span>
+          </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50">
+        {% for from_state in all_states %}
+        <tr class="hover:bg-slate-50/60 transition-colors">
+          <td class="py-2 pr-4 font-medium text-slate-700 whitespace-nowrap">
+            {{ from_state.replace('_', ' ') }}
+          </td>
+          {% for to_state in all_states %}
+          <td class="text-center py-2 px-2">
+            {% if from_state == to_state %}
+            <span class="inline-block w-4 h-4 rounded bg-slate-100 text-slate-300 text-center leading-4">—</span>
+            {% else %}
+            <input type="checkbox"
+                   name="transitions"
+                   value="{{ from_state }}:{{ to_state }}"
+                   {% if to_state in transitions.get(from_state, []) %}checked{% endif %}
+                   class="w-3.5 h-3.5 rounded border-slate-300 text-rose-600 focus:ring-rose-200 cursor-pointer">
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="px-5 py-3 border-t border-slate-100 bg-slate-50/40 flex items-center justify-between gap-3">
+    <p class="text-[10px] text-slate-400">Check a cell to allow that state transition. Changes apply immediately to all bugs in this product.</p>
+    <div class="flex gap-2 shrink-0">
+      <button type="button"
+              hx-post="/ui/config/bug-transitions/reset"
+              hx-target="#bug-transitions-panel"
+              hx-swap="innerHTML"
+              hx-include="[name='product']"
+              class="text-xs font-medium text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300 px-3 py-1.5 rounded-lg transition-colors">
+        Reset to Defaults
+      </button>
+      <button type="submit"
+              class="text-xs font-medium bg-rose-600 hover:bg-rose-700 text-white px-4 py-1.5 rounded-lg transition-colors">
+        Save Transitions
+      </button>
+    </div>
+  </div>
+</form>

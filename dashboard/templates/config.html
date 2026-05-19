@@ -37,7 +37,7 @@
     <!-- Tab bar -->
     <div class="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit flex-wrap">
       {% if current_user.admin %}
-      {% for t, label in [('products','Products'),('labels','Test Types'),('priorities','Priorities'),('fields','Custom Fields'),('testtypes','Test Distribution'),('gencategories','Test Generation')] %}
+      {% for t, label in [('products','Products'),('labels','Test Types'),('priorities','Priorities'),('fields','Custom Fields'),('testtypes','Test Distribution'),('gencategories','Test Generation'),('bugworkflow','Bug Workflow')] %}
       <button @click="tab='{{ t }}'"
               :class="tab==='{{ t }}' ? 'bg-white shadow text-slate-900' : 'text-slate-500 hover:text-slate-700'"
               class="px-4 py-1.5 rounded-md text-sm font-medium transition-all">{{ label }}</button>
@@ -270,6 +270,39 @@
              {% endif %}>
           {% if not all_products %}
           <p class="text-sm text-slate-400">No products configured yet. Add a product first.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <!-- ── BUG WORKFLOW ── -->
+    <div x-show="tab==='bugworkflow'" x-cloak class="mt-4"
+         x-data="{ bugwfProduct: '{{ all_products[0] if all_products else '' }}' }">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-4 flex-wrap">
+          <div class="flex-1 min-w-0">
+            <h2 class="font-semibold text-slate-800">Bug State Transitions</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Configure which state transitions are allowed per product. Rows are "from" states, columns are "to" states.</p>
+          </div>
+          {% if all_products %}
+          <div class="shrink-0">
+            <label class="text-xs font-medium text-slate-500 mr-2">Product</label>
+            <select x-model="bugwfProduct"
+                    @change="htmx.ajax('GET', '/ui/config/bug-transitions/' + bugwfProduct, '#bug-transitions-panel')"
+                    class="text-sm border border-slate-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
+              {% for p in all_products %}
+              <option value="{{ p }}">{{ p }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+        </div>
+        <div id="bug-transitions-panel"
+             {% if all_products %}
+             hx-get="/ui/config/bug-transitions/{{ all_products[0] }}"
+             hx-trigger="load"
+             {% endif %}>
+          {% if not all_products %}
+          <div class="px-5 py-8 text-center text-sm text-slate-400">No products configured yet. Add a product first.</div>
           {% endif %}
         </div>
       </div>

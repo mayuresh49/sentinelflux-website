@@ -6,13 +6,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from core.db import get_conn
 from utils.paths import ROOT
 
 _BUGS_DIR = ROOT / "data" / "bugs"
+_CONFIG_PATH = ROOT / "data" / "config.yaml"
 
-# Valid state transitions: state → set of allowed next states
-_TRANSITIONS: dict[str, set[str]] = {
+# Default state transitions: state → set of allowed next states
+_DEFAULT_TRANSITIONS: dict[str, set[str]] = {
     "new":         {"open", "deferred", "wont_fix"},
     "open":        {"in_progress", "deferred", "wont_fix"},
     "in_progress": {"resolved", "open"},
@@ -21,6 +24,22 @@ _TRANSITIONS: dict[str, set[str]] = {
     "deferred":    {"open"},
     "wont_fix":    set(),
 }
+
+
+def _get_transitions(product: str | None = None) -> dict[str, set[str]]:
+    """Return the configured transitions for a product, falling back to defaults."""
+    if not product or not _CONFIG_PATH.exists():
+        return _DEFAULT_TRANSITIONS
+    try:
+        cfg = yaml.safe_load(_CONFIG_PATH.read_text(encoding="utf-8")) or {}
+        for p in cfg.get("products", []):
+            if p["name"] == product:
+                raw = p.get("bug_transitions")
+                if raw:
+                    return {state: set(targets) for state, targets in raw.items()}
+    except Exception:
+        pass
+    return _DEFAULT_TRANSITIONS
 
 _SEVERITY_VALUES = {"blocker", "critical", "major", "minor", "trivial"}
 _TYPE_VALUES = {"functional", "performance", "security", "ui", "regression", "data"}
@@ -174,7 +193,7 @@ class BugManager:
         if not bug:
             raise ValueError(f"Bug {bug_id} not found")
         from_state = bug["state"]
-        allowed = _TRANSITIONS.get(from_state, set())
+        allowed = _get_transitions(bug.get("product")).get(from_state, set())
         if to_state not in allowed:
             raise ValueError(
                 f"Cannot transition from '{from_state}' to '{to_state}'. "
@@ -214,7 +233,7 @@ class BugManager:
         bug = self.get(bug_id)
         if not bug:
             return []
-        return sorted(_TRANSITIONS.get(bug["state"], set()))
+        return sorted(_get_transitions(bug.get("product")).get(bug["state"], set()))
 
     # ── Comments ──────────────────────────────────────────────────────────────
 

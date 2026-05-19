@@ -185,6 +185,15 @@ def delete_bug(bug_id: str, current_user: dict = Depends(_require_user)):
 
 # ── State transitions ─────────────────────────────────────────────────────────
 
+@router.get("/bugs/{bug_id}/transitions")
+def get_transitions(bug_id: str, current_user: dict = Depends(_require_user)):
+    bug = _bm.get(bug_id)
+    if not bug:
+        raise HTTPException(404)
+    _check_product_access(bug["product"], current_user)
+    return _bm.allowed_transitions(bug_id)
+
+
 @router.post("/bugs/{bug_id}/transition")
 def transition_bug(bug_id: str, body: TransitionBody, current_user: dict = Depends(_require_user)):
     bug = _bm.get(bug_id)

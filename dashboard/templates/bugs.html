@@ -740,13 +740,12 @@ function bugsApp() {
       this.comments = r.ok ? await r.json() : [];
     },
     async loadTransitions() {
-      const r = await fetch(`/api/bugs/${this.selectedBug.id}`);
-      if (r.ok) {
-        const b = await r.json();
-        const map = {new:['open','deferred','wont_fix'],open:['in_progress','deferred','wont_fix'],in_progress:['resolved','open'],resolved:['closed','open'],closed:['open'],deferred:['open'],wont_fix:[]};
-        this.allowedTransitions = map[b.state] || [];
-        this.selectedBug = b;
-      }
+      const [bugRes, trRes] = await Promise.all([
+        fetch(`/api/bugs/${this.selectedBug.id}`),
+        fetch(`/api/bugs/${this.selectedBug.id}/transitions`),
+      ]);
+      if (bugRes.ok) this.selectedBug = await bugRes.json();
+      this.allowedTransitions = trRes.ok ? await trRes.json() : [];
     },
 
     openCreateModal() {
