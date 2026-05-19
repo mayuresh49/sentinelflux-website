@@ -43,6 +43,11 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-19)
 
+- **Visual Regression: baseline vs current screenshot compare modal** (`dashboard/routers/visual.py`, `dashboard/templates/visual.html`): New `GET /api/visual/engagement/{eng_id}/screenshot` endpoint serves stored PNG files from disk — `type=baseline` reads from `eng.baselines[page_path]`, `type=scan&scan_id=...` reads from the scan's `pages_results`. Template adds a full-screen lightbox modal (two-column: Baseline | Current) with diff % badge in header; each per-page row in a completed comparison scan gets a "View" button that opens the modal. Images load via session-cookie auth.
+- **Empty-state card alignment fix** (`a11y.html`, `contract.html`, `perf.html`, `visual.html`): "No … suites yet" messages were bare `div`s with `py-8`; now match the sibling "Select a product" card style (`bg-slate-50 border border-slate-200 rounded-xl p-6`).
+
+## Previous: Startup orphan run reaper (2026-05-19)
+
 - **Startup: reap orphaned queued/running runs** (`dashboard/app.py`): `_reap_orphaned_runs()` added to the startup event — marks any run still in `queued` or `running` state as `errored` with `finished_at = now`. Fixes runs that were submitted as FastAPI background tasks getting permanently stuck after a server restart (tasks are lost on restart, so those runs would never complete). Users can then retrigger from the Test Plans UI.
 
 ## Previous: Insights CTO agent + Strategic Roadmap (2026-05-19)

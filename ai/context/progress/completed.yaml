@@ -1,5 +1,15 @@
 # Completed work items — append only, newest first
 
+- id: visual-compare-modal
+  date: 2026-05-19
+  title: "Visual Regression: baseline vs current screenshot compare modal + empty-state alignment"
+  outcome: >
+    New GET /api/visual/engagement/{eng_id}/screenshot endpoint serves stored PNGs from disk
+    (type=baseline or type=scan&scan_id=). Template adds a lightbox modal (two-column Baseline|Current
+    grid) with diff % badge; each per-page row in completed comparison scans gets a "View" button.
+    Also fixed "No … suites yet" empty-state cards in a11y, contract, perf, visual to match the
+    styled "Select a product" card (bg-slate-50 border rounded-xl p-6).
+
 - id: startup-orphan-run-reaper
   date: 2026-05-19
   title: "Startup: auto-error orphaned queued/running runs on server restart"
