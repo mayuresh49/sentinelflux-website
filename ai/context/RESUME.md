@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (52)  
+Last updated: 2026-05-19 (53)  
 Framework version: 0.1.0
 
 ---
@@ -44,8 +44,12 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-19)
 
-- **Fix: revert transition fallback regression** (`core/bug_manager.py`): `if raw is not None` broke `bug_transitions: {}` (empty = not yet configured) — returned no transitions from any state, including New. Reverted to `if raw:` so empty dict correctly falls back to `_DEFAULT_TRANSITIONS`. **Note:** `if raw:` is correct — `bug_transitions_save` always writes a populated dict; `{}` only appears as an unconfigured placeholder.
-- **Bugs: auto-attach run artifacts on bug creation** (`dashboard/routers/bugs.py`): `create_bug_from_run` now calls `_attach_run_artifacts` after creating the bug — copies screenshot, console log, API log, trace.zip, and the JSON run report from `reports/artifacts/<safe_nodeid>/` into bug artifact storage.
+- **Fix: align transition fallback with product's configured statuses** (`core/bug_manager.py`): When `bug_transitions` is unconfigured (`{}`), now builds fallback by intersecting `_DEFAULT_TRANSITIONS` with the product's actual status names (instead of returning raw defaults). This ensures the Move To dropdown matches the Bug Workflow matrix exactly — e.g. `resolved` is excluded from `in_progress` targets if the product has no `resolved` status; custom states (`qa_test`, `ready_for_deployment`) get empty sets until explicitly configured via the matrix.
+
+## Previous: transition revert + artifact attach (2026-05-19)
+
+- **Fix: revert transition fallback regression** (`core/bug_manager.py`): `if raw is not None` broke `bug_transitions: {}` — returned no transitions from any state. Reverted to `if raw:`.
+- **Bugs: auto-attach run artifacts on bug creation** (`dashboard/routers/bugs.py`): `create_bug_from_run` now calls `_attach_run_artifacts` — copies screenshot, console log, API log, trace.zip, and JSON run report from `reports/artifacts/<safe_nodeid>/` into bug artifact storage.
 
 ## Previous: UI padding + bug sequential numbers (2026-05-19)
 

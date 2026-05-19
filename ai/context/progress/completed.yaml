@@ -1,5 +1,14 @@
 # Completed work items — append only, newest first
 
+- id: bugs-transition-fallback-product-statuses
+  date: 2026-05-19
+  title: "Fix: align transition fallback with product's configured statuses"
+  outcome: >
+    _get_transitions now intersects _DEFAULT_TRANSITIONS with the product's
+    actual status names when bug_transitions is unconfigured. Ensures Move To
+    dropdown matches Bug Workflow matrix exactly — resolved excluded if not in
+    product statuses; custom states get empty sets until admin configures them.
+
 - id: bugs-run-artifact-attach-transition-fix
   date: 2026-05-19
   title: "Bugs: auto-attach run artifacts on creation; fix transition config fallback"
