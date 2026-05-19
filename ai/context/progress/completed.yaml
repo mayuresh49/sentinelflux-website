@@ -1,5 +1,16 @@
 # Completed work items — append only, newest first
 
+- id: pipeline-spa-hardening
+  date: 2026-05-19
+  title: "Fix: AppExplorerAgent robustness for SPA apps + run_pipeline.sh explore flags"
+  outcome: >
+    Three fixes to AppExplorationSkill: (1) timeout_ms 15s→30s for SPA headroom,
+    (2) fixed 1s wait replaced with _wait_for_spa() (networkidle best-effort + 500ms settle),
+    (3) login verification — warns if still on login page after submit; networkidle guarded
+    with 3s fallback. run_pipeline.sh gains SF_EXPLORE / SF_BASE_URL / SF_LOGIN_URL /
+    SF_EXPLORE_PAGES env-var flags. Unblocks full DocGen→DocReview→Explore→ScriptGen→ScriptReview
+    pipeline for OrangeHRM ESS module.
+
 - id: bugs-transition-parity
   date: 2026-05-19
   title: "Fix: Bug Workflow matrix ↔ Move To dropdown parity"
