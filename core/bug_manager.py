@@ -61,7 +61,7 @@ def _get_transitions(product: str | None = None) -> dict[str, set[str]]:
         for p in cfg.get("products", []):
             if p["name"] == product:
                 raw = p.get("bug_transitions")
-                if raw:
+                if raw is not None:
                     return {state: set(targets) for state, targets in raw.items()}
     except Exception:
         pass

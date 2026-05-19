@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import mimetypes
+import shutil
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -340,6 +342,61 @@ def bug_report(
 
 # ── Create from run failure ───────────────────────────────────────────────────
 
+_PYTEST_ARTIFACTS = ROOT / "reports" / "artifacts"
+_KNOWN_ARTIFACTS = [
+    ("screenshot_full_page.png", "screenshot", "image/png"),
+    ("console.log",              "log",        "text/plain"),
+    ("api_calls.log",            "log",        "text/plain"),
+    ("trace.zip",                "log",        "application/zip"),
+]
+
+
+def _attach_run_artifacts(bug_id: str, product: str, run: dict, nodeids: list[str], reporter: str) -> None:
+    """Copy pytest artifacts and the run JSON report into bug artifact storage."""
+    # Run-level: JSON report
+    report_rel = run.get("report_path", "")
+    if report_rel:
+        report_file = ROOT / report_rel
+        if report_file.exists():
+            aid = str(uuid.uuid4())
+            dest = _bm.artifact_storage_path(product, bug_id, aid, report_file.name)
+            shutil.copy2(report_file, dest)
+            _bm.add_artifact(
+                bug_id=bug_id, filename=report_file.name,
+                artifact_type="report", mime_type="application/json",
+                size_bytes=dest.stat().st_size,
+                storage_path=str(dest.relative_to(ROOT)),
+                uploaded_by=reporter,
+            )
+
+    # Per-test: screenshot, console log, api log, trace
+    for nodeid in nodeids:
+        if not nodeid:
+            continue
+        safe = (nodeid
+                .replace("/", "_")
+                .replace("::", "__")
+                .replace("[", "_")
+                .replace("]", ""))
+        adir = _PYTEST_ARTIFACTS / safe
+        if not adir.is_dir():
+            continue
+        for filename, art_type, mime in _KNOWN_ARTIFACTS:
+            src = adir / filename
+            if not src.exists():
+                continue
+            aid = str(uuid.uuid4())
+            dest = _bm.artifact_storage_path(product, bug_id, aid, filename)
+            shutil.copy2(src, dest)
+            _bm.add_artifact(
+                bug_id=bug_id, filename=filename,
+                artifact_type=art_type, mime_type=mime,
+                size_bytes=dest.stat().st_size,
+                storage_path=str(dest.relative_to(ROOT)),
+                uploaded_by=reporter,
+            )
+
+
 @router.post("/bugs/from-run/{run_id}")
 def create_bug_from_run(
     run_id: str,
@@ -366,7 +423,7 @@ def create_bug_from_run(
     raw_cat = f.get("category") or f.get("classification", "")
     bug_type = "regression" if raw_cat in ("flaky", "regression") else "functional"
 
-    return _bm.create(
+    bug = _bm.create(
         product=run["product"],
         title=title,
         description=description,
@@ -377,6 +434,11 @@ def create_bug_from_run(
         linked_run_id=run_id,
         bug_type=bug_type,
     )
+
+    nodeids = [f2.get("test_id", "") for f2 in failures]
+    _attach_run_artifacts(bug["id"], run["product"], run, nodeids, current_user.get("name", ""))
+
+    return bug
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
