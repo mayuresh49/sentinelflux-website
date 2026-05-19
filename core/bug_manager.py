@@ -53,7 +53,12 @@ def _get_statuses(product: str | None = None) -> list[dict]:
 
 
 def _get_transitions(product: str | None = None) -> dict[str, set[str]]:
-    """Return the configured transitions for a product, falling back to defaults."""
+    """Return the configured transitions for a product, falling back to defaults.
+
+    When no custom transitions are saved, builds the fallback from _DEFAULT_TRANSITIONS
+    filtered to the product's actual configured statuses so the dropdown matches
+    the Bug Workflow matrix exactly.
+    """
     if not product or not _CONFIG_PATH.exists():
         return _DEFAULT_TRANSITIONS
     try:
@@ -63,6 +68,13 @@ def _get_transitions(product: str | None = None) -> dict[str, set[str]]:
                 raw = p.get("bug_transitions")
                 if raw:
                     return {state: set(targets) for state, targets in raw.items()}
+                custom_statuses = p.get("bug_statuses")
+                if custom_statuses:
+                    state_names = {s["name"] for s in custom_statuses}
+                    return {
+                        s: _DEFAULT_TRANSITIONS.get(s, set()) & state_names
+                        for s in state_names
+                    }
     except Exception:
         pass
     return _DEFAULT_TRANSITIONS
