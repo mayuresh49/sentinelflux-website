@@ -1,5 +1,18 @@
 # Completed work items — append only, newest first
 
+- id: runs-latest-first-and-nav-link
+  date: 2026-05-19
+  title: "Fix: runs latest-first ordering + test plan → run navigation link"
+  outcome: >
+    Removed reversed() from runs_page and failures_page — all_runs() already
+    returns DESC; reversed() was making the /runs page show oldest first.
+    Added ?highlight=<run_id> to runs_page: finds the run's position in the
+    filtered list, jumps to the correct page, renders an indigo ring on the card,
+    and scrolls to it via JS scrollIntoView. Run cards have id="run-{id}" anchors.
+    Run IDs in Test Plans → Execution → Automated Run History are now links:
+    open /runs?product=...&highlight=<id>#run-<id> in a new tab. Client sort
+    switched from localeCompare to direct > comparison (locale-safe for ISO dates).
+
 - id: insights-error-surfacing
   date: 2026-05-19
   title: "Insights: surface run errors in UI instead of silently dropping them"

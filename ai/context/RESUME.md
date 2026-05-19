@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-19)
 
+- **Fix: runs show latest first + test plan → run navigation** (`dashboard/routers/pages.py`, `dashboard/templates/runs.html`, `dashboard/templates/test_plans.html`): `reversed(rm.all_runs())` in `runs_page` and `failures_page` was flipping `all_runs()`'s DESC order to ASC (oldest first) — removed both `reversed()` calls. Added `?highlight=<run_id>` param to `runs_page`: auto-calculates the page the run lives on, renders it, and scrolls to the card via JS `scrollIntoView`. Run cards now have `id="run-{{ run.id }}"` anchors with an indigo ring when highlighted. Run IDs in Test Plans → Execution → Automated Run History are now clickable links opening `/runs?product=...&highlight=<run_id>#run-<run_id>` in a new tab. Client-side sort changed from `localeCompare` to direct `>` string comparison (locale-safe for ISO dates).
+
+## Previous: Insights run error surfacing (2026-05-19)
+
 - **Insights: run error surfacing** (`dashboard/routers/insights.py`, `dashboard/templates/insights.html`): `_run_agent_task` previously swallowed all exceptions silently. Now wraps the full run in try/except, sets in-memory `_run_state[agent_type]` to `{state: error, error: msg}` on any failure (no client, no insights parsed, exception). `/api/insights/runs` now returns `state` dict alongside `runs`. UI polling detects `state === 'error'` and shows error toast immediately instead of waiting 40 polls. Error banner below run-control bar shows the last failure message persistently. Added already-running guard on trigger endpoint.
 
 ## Previous: Product Insights module (2026-05-19)
