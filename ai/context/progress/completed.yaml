@@ -1,5 +1,15 @@
 # Completed work items — append only, newest first
 
+- id: vapt-findings-test-data
+  date: 2026-05-19
+  title: "Data: VAPT reportportal engagement morphed with realistic findings"
+  outcome: >
+    eng-25d78fab7eae.json injected with 5 findings (Critical/High/Medium/Low ×
+    open/still_open/accepted_risk/fixed) to exercise findings flow in dashboard UI.
+    Infra scan: 0→3 failed, 8→5 passed. Web scan: 0→2 failed, 30→28 passed.
+    Three test_log entries updated confirmed_secure→finding. Full description,
+    evidence, and remediation text on each finding.
+
 - id: vapt-infra-bug-fixes
   date: 2026-05-19
   title: "VAPT infra scan: xfail fix, real AXFR test, multi-target parametrize"

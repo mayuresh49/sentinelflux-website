@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (34)  
+Last updated: 2026-05-19 (35)  
 Framework version: 0.1.0
 
 ---
@@ -42,6 +42,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Data: VAPT findings test data** (`data/vapt_findings/reportportal/eng-25d78fab7eae.json`): Morphed the Q2 2026 Security Assessment engagement with 5 realistic findings to exercise the full findings flow in the dashboard UI. F-001: Sensitive Ports Exposed — Redis 6379/Mongo 27017 (Critical, open, infra). F-002: No Rate Limiting on Login (High, still_open, web). F-003: SSH on Default Port 22 (Medium, accepted_risk, infra). F-004: CORS Wildcard on Authenticated Endpoints (Medium, open, web). F-005: Server Version Disclosure (Low, fixed, infra). Infra scan updated to 3 failed / 5 passed; web scan to 2 failed / 28 passed. Three infra test_log entries flipped from confirmed_secure → finding. All findings include full description, evidence, and remediation text.
+
+## Previous: VAPT infra scan bug fixes + multi-target (2026-05-19)
 
 - **VAPT infra scan: bug fixes + multi-target** (`products/reportportal/tests/vapt_infra/`, `core/vapt_test_generator.py`, `ai/context/progress/backlog.yaml`): Three bugs fixed across generated test files and generator templates. (1) `pytest.xfail` → `pytest.fail` for `test_INFRA_sensitive_service_ports_not_exposed` and `test_INFRA_ssh_port_not_on_default` — exposed ports and SSH-on-22 are real security findings, not "expected" failures. (2) Zone transfer test now sends a raw DNS-over-TCP AXFR packet (struct + socket, no new deps) and reads RCODE + ancount from response — only fails if transfer actually succeeds; a locked-down nameserver passes even with port 53 open. (3) `conftest.py` replaced `vapt_infra_targets` + single-host `vapt_host` session fixtures with `_resolve_targets()` + `pytest_generate_tests` — all `vapt_host`-dependent tests now run once per IP when multiple targets are entered in the UI. `vapt_domain` downgraded to function scope; `vapt_https_port` stays session-scoped. Backlog item `V-01` added for future authenticated SSH (grey-box) scanning.
 
