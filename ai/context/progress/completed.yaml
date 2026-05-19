@@ -1,5 +1,15 @@
 # Completed work items — append only, newest first
 
+- id: bugs-configurable-transitions
+  date: 2026-05-19
+  title: "Bugs: configurable per-product state transitions"
+  outcome: >
+    BugManager reads bug_transitions from config.yaml per product (falls back
+    to defaults). New GET /api/bugs/{id}/transitions endpoint. loadTransitions()
+    in bugs.html calls the API instead of hardcoded JS map. Config > Bug Workflow
+    tab: checkbox matrix to configure allowed transitions per product, with Save
+    and Reset to Defaults actions stored in config.yaml.
+
 - id: bugs-transition-dropdown-update-button
   date: 2026-05-19
   title: "Bugs: transition dropdown + explicit Update Bug button"

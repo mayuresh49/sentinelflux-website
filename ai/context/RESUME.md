@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (44)  
+Last updated: 2026-05-19 (45)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Bugs: configurable per-product state transitions** (`core/bug_manager.py`, `dashboard/routers/bugs.py`, `dashboard/routers/config/_bugs.py` (new), `dashboard/routers/config/__init__.py`, `dashboard/templates/config.html`, `dashboard/templates/partials/config_bug_transitions.html` (new), `dashboard/templates/bugs.html`): `BugManager` now reads `bug_transitions` from `config.yaml` per product, falling back to hardcoded defaults. New `GET /api/bugs/{id}/transitions` endpoint returns product-aware allowed transitions. `loadTransitions()` in `bugs.html` calls the endpoint instead of a hardcoded JS map. Config page gains a "Bug Workflow" admin tab with a checkbox matrix (from-state rows × to-state columns) to configure allowed transitions per product, with Save and Reset to Defaults actions.
+
+## Previous: Bugs UI improvements (2026-05-19)
 
 - **Bugs: transition dropdown + Update Bug button** (`dashboard/templates/bugs.html`): Replaced flat transition button row with a compact `<select>` dropdown ("Move to…") that fires the existing transition modal. Removed `@blur` auto-save from all textarea/text-input fields in the Details tab; added explicit "Update Bug" button that PATCHes all text fields in one call. Select dropdowns (assignee, priority, severity, component, type) still auto-save on `@change`.
 
