@@ -499,6 +499,20 @@ def _execute_vapt_scan(product: str, eng_id: str, scan_id: str,
                        summary_error=f"No {scan_type} test suite for '{product}' — generate tests first")
         return
 
+    # Pre-flight: infra_int requires SSH credentials in scope
+    if scan_type == "infra_int":
+        _pre_eng = _vm.get(product, eng_id)
+        _scope = (_pre_eng or {}).get("scope", {})
+        if not _scope.get("ssh_username", "").strip() or not _scope.get("ssh_key_path", "").strip():
+            _vm.patch_scan(product, eng_id, scan_id,
+                           status="failed",
+                           finished_at=datetime.now(timezone.utc).isoformat(),
+                           summary_error=(
+                               "SSH credentials not configured — set SSH Username and SSH Key Path "
+                               "in the Scope tab before running an Internal Infrastructure scan"
+                           ))
+            return
+
     cmd = [
         sys.executable, "-m", "pytest",
         str(test_path),
