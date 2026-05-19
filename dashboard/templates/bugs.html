@@ -1,0 +1,900 @@
+{% extends "base.html" %}
+{% block title %}Bugs{% endblock %}
+
+{% block content %}
+<div x-data="bugsApp()" x-init="init()" class="flex gap-4 h-[calc(100vh-5rem)] overflow-hidden">
+
+  <!-- ── Left panel: bug list ─────────────────────────────────────────────── -->
+  <div class="w-80 shrink-0 flex flex-col bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+
+    <!-- Header + New Bug -->
+    <div class="px-4 pt-4 pb-3 border-b border-slate-100">
+      <div class="flex items-center justify-between mb-3">
+        <h1 class="text-base font-bold text-slate-900">Bugs</h1>
+        <button @click="openCreateModal()"
+                class="flex items-center gap-1 text-xs font-medium bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1.5 rounded-lg transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          New Bug
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="space-y-1.5">
+        <select x-model="filterProduct" @change="loadBugs()"
+                class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200">
+          <option value="">All Products</option>
+          {% for p in all_products %}
+          <option value="{{ p }}" {{ 'selected' if p == filter_product else '' }}>{{ p }}</option>
+          {% endfor %}
+        </select>
+        <div class="flex gap-1.5">
+          <select x-model="filterState" @change="loadBugs()"
+                  class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200">
+            <option value="">All States</option>
+            <option value="new">New</option>
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+            <option value="deferred">Deferred</option>
+            <option value="wont_fix">Won't Fix</option>
+          </select>
+          <select x-model="filterPriority" @change="loadBugs()"
+                  class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200">
+            <option value="">All Priorities</option>
+            {% for p in config_priorities %}
+            <option value="{{ p.name }}">{{ p.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- State count chips -->
+      <div class="flex flex-wrap gap-1 mt-2">
+        <template x-for="(count, state) in stateCounts" :key="state">
+          <button @click="filterState = (filterState === state ? '' : state); loadBugs()"
+                  :class="filterState === state ? stateChipActive(state) : 'bg-slate-100 text-slate-500 hover:bg-slate-200'"
+                  class="text-[10px] font-medium px-1.5 py-0.5 rounded transition-colors"
+                  x-text="`${state.replace('_',' ')} ${count}`">
+          </button>
+        </template>
+      </div>
+    </div>
+
+    <!-- Bug list -->
+    <div class="flex-1 overflow-y-auto divide-y divide-slate-50">
+      <template x-if="loading">
+        <div class="py-10 text-center text-slate-400 text-xs">Loading…</div>
+      </template>
+      <template x-if="!loading && bugs.length === 0">
+        <div class="py-10 text-center">
+          <p class="text-slate-400 text-sm">No bugs found.</p>
+          <p class="text-slate-400 text-xs mt-1">Enable Bug Tracker in Configurations → Products,<br>then click "New Bug".</p>
+        </div>
+      </template>
+      <template x-for="bug in bugs" :key="bug.id">
+        <div @click="selectBug(bug)"
+             :class="selectedBug && selectedBug.id === bug.id ? 'bg-rose-50 border-l-2 border-rose-500' : 'hover:bg-slate-50 border-l-2 border-transparent'"
+             class="px-3 py-2.5 cursor-pointer transition-colors">
+          <div class="flex items-center gap-1.5 mb-1">
+            <span :class="priorityDot(bug.priority)" class="w-2 h-2 rounded-full shrink-0"></span>
+            <span class="text-[10px] font-medium" :class="stateColor(bug.state)" x-text="bug.state.replace('_',' ')"></span>
+            <span class="ml-auto text-[10px] text-slate-400 font-mono" x-text="bug.id.slice(0,8)"></span>
+          </div>
+          <p class="text-xs font-medium text-slate-800 leading-tight line-clamp-2" x-text="bug.title"></p>
+          <div class="flex items-center gap-1.5 mt-1">
+            <span class="text-[10px] text-slate-400" x-text="bug.product"></span>
+            <template x-if="bug.component">
+              <span class="text-[10px] bg-slate-100 text-slate-500 px-1 rounded" x-text="bug.component"></span>
+            </template>
+            <span class="ml-auto text-[10px] text-slate-400" x-text="bug.created_at ? bug.created_at.slice(0,10) : ''"></span>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- ── Right panel: detail ──────────────────────────────────────────────── -->
+  <div class="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+
+    <!-- Empty state -->
+    <template x-if="!selectedBug">
+      <div class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <svg class="w-12 h-12 text-slate-200 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          </svg>
+          <p class="text-slate-400 text-sm">Select a bug to view details</p>
+        </div>
+      </div>
+    </template>
+
+    <!-- Detail view -->
+    <template x-if="selectedBug">
+      <div class="flex-1 flex flex-col overflow-hidden" :id="`bug-${selectedBug.id}`">
+
+        <!-- Detail header -->
+        <div class="px-5 pt-4 pb-3 border-b border-slate-100">
+          <div class="flex items-start gap-3">
+            <div class="flex-1 min-w-0">
+              <template x-if="!editingTitle">
+                <h2 class="text-base font-bold text-slate-900 leading-tight cursor-pointer hover:text-rose-700"
+                    @click="editingTitle = true; editTitleVal = selectedBug.title"
+                    x-text="selectedBug.title"></h2>
+              </template>
+              <template x-if="editingTitle">
+                <div class="flex gap-2 items-center">
+                  <input x-model="editTitleVal" @keydown.enter="saveTitle()" @keydown.escape="editingTitle = false"
+                         class="flex-1 text-base font-bold border border-rose-300 rounded px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-rose-200">
+                  <button @click="saveTitle()" class="text-xs text-white bg-rose-600 hover:bg-rose-700 px-2 py-1 rounded">Save</button>
+                  <button @click="editingTitle = false" class="text-xs text-slate-500 hover:text-slate-700 px-2 py-1 rounded hover:bg-slate-100">Cancel</button>
+                </div>
+              </template>
+              <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+                <span :class="stateBadgeClass(selectedBug.state)"
+                      class="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                      x-text="selectedBug.state.replace('_',' ')"></span>
+                <span :class="priorityBadgeClass(selectedBug.priority)"
+                      class="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                      x-text="selectedBug.priority"></span>
+                <span class="text-[10px] text-slate-400" x-text="selectedBug.severity"></span>
+                <span class="text-[10px] text-slate-400">·</span>
+                <span class="text-[10px] text-slate-400" x-text="selectedBug.bug_type"></span>
+                <span class="text-[10px] font-mono text-slate-300 ml-auto" x-text="selectedBug.id.slice(0,12)"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- State transition buttons -->
+          <div class="flex items-center gap-1.5 mt-3 flex-wrap">
+            <span class="text-[10px] text-slate-400 font-medium">Transition:</span>
+            <template x-for="t in allowedTransitions" :key="t">
+              <button @click="doTransition(t)"
+                      :class="transitionBtnClass(t)"
+                      class="text-[10px] font-medium px-2.5 py-1 rounded-lg border transition-colors"
+                      x-text="t.replace('_',' ').replace('wont fix','Won\'t Fix')">
+              </button>
+            </template>
+            <template x-if="allowedTransitions.length === 0">
+              <span class="text-[10px] text-slate-300 italic">No transitions available</span>
+            </template>
+            <div class="ml-auto flex gap-1.5">
+              <a :href="`/api/bugs/${selectedBug.id}/report?format=pdf`" target="_blank"
+                 class="text-[10px] font-medium text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Export PDF
+              </a>
+              <template x-if="{{ 'true' if current_user.admin else 'false' }}">
+                <button @click="deleteBug()"
+                        class="text-[10px] font-medium text-red-500 hover:text-red-700 border border-red-200 hover:border-red-300 px-2.5 py-1 rounded-lg transition-colors">
+                  Delete
+                </button>
+              </template>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab bar -->
+        <div class="flex border-b border-slate-100 px-5">
+          <template x-for="tab in ['Details','Artifacts','History','Comments']" :key="tab">
+            <button @click="activeTab = tab"
+                    :class="activeTab === tab ? 'border-rose-500 text-rose-600 font-medium' : 'border-transparent text-slate-400 hover:text-slate-600'"
+                    class="text-xs border-b-2 px-3 py-2.5 transition-colors">
+              <span x-text="tab"></span>
+              <template x-if="tab === 'Artifacts'">
+                <span class="ml-1 text-[10px] bg-slate-100 text-slate-500 rounded px-1" x-text="artifacts.length"></span>
+              </template>
+              <template x-if="tab === 'Comments'">
+                <span class="ml-1 text-[10px] bg-slate-100 text-slate-500 rounded px-1" x-text="comments.length"></span>
+              </template>
+            </button>
+          </template>
+        </div>
+
+        <!-- Tab content -->
+        <div class="flex-1 overflow-y-auto p-5">
+
+          <!-- ── Details tab ── -->
+          <div x-show="activeTab === 'Details'" class="space-y-4">
+            <!-- Meta fields grid -->
+            <div class="grid grid-cols-2 gap-3">
+              <!-- Assignee -->
+              <div>
+                <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Assignee</label>
+                <select x-model="selectedBug.assignee" @change="patchField('assignee', selectedBug.assignee)"
+                        class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-200">
+                  <option value="">Unassigned</option>
+                  {% for u in config_users %}
+                  <option value="{{ u.name }}">{{ u.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <!-- Priority -->
+              <div>
+                <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Priority</label>
+                <select x-model="selectedBug.priority" @change="patchField('priority', selectedBug.priority)"
+                        class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-200">
+                  {% for p in config_priorities %}
+                  <option value="{{ p.name }}">{{ p.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <!-- Severity -->
+              <div>
+                <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Severity</label>
+                <select x-model="selectedBug.severity" @change="patchField('severity', selectedBug.severity)"
+                        class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-200">
+                  <option value="blocker">Blocker</option>
+                  <option value="critical">Critical</option>
+                  <option value="major">Major</option>
+                  <option value="minor">Minor</option>
+                  <option value="trivial">Trivial</option>
+                </select>
+              </div>
+              <!-- Component -->
+              <div>
+                <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Component</label>
+                <select x-model="selectedBug.component" @change="patchField('component', selectedBug.component)"
+                        class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-200">
+                  <option value="">—</option>
+                  <option value="api">API</option>
+                  <option value="web">Web</option>
+                  <option value="mobile">Mobile</option>
+                  <option value="security">Security</option>
+                  <option value="vapt">VAPT</option>
+                  <option value="performance">Performance</option>
+                </select>
+              </div>
+              <!-- Type -->
+              <div>
+                <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Type</label>
+                <select x-model="selectedBug.bug_type" @change="patchField('bug_type', selectedBug.bug_type)"
+                        class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-200">
+                  <option value="functional">Functional</option>
+                  <option value="performance">Performance</option>
+                  <option value="security">Security</option>
+                  <option value="ui">UI</option>
+                  <option value="regression">Regression</option>
+                  <option value="data">Data</option>
+                </select>
+              </div>
+              <!-- Environment -->
+              <div>
+                <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Environment</label>
+                <input x-model="selectedBug.environment" @blur="patchField('environment', selectedBug.environment)"
+                       class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-200"
+                       placeholder="e.g. qa, staging">
+              </div>
+            </div>
+
+            <!-- Linked info -->
+            <div class="flex items-center gap-4 text-xs text-slate-500">
+              <template x-if="selectedBug.linked_tc_id">
+                <span>Test Case: <span class="font-mono font-medium text-indigo-600" x-text="selectedBug.linked_tc_id"></span></span>
+              </template>
+              <template x-if="selectedBug.linked_run_id">
+                <a :href="`/runs?highlight=${selectedBug.linked_run_id}`" target="_blank"
+                   class="text-indigo-500 hover:underline font-mono text-xs" x-text="`Run: ${selectedBug.linked_run_id.slice(0,12)}`"></a>
+              </template>
+              <template x-if="!selectedBug.linked_tc_id && !selectedBug.linked_run_id">
+                <span class="text-slate-300 text-xs italic">No linked test case or run</span>
+              </template>
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Description</label>
+              <textarea x-model="selectedBug.description" @blur="patchField('description', selectedBug.description)"
+                        rows="3"
+                        class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+                        placeholder="Describe the bug…"></textarea>
+            </div>
+
+            <!-- Steps to Reproduce -->
+            <div>
+              <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Steps to Reproduce</label>
+              <textarea x-model="selectedBug.steps_to_reproduce" @blur="patchField('steps_to_reproduce', selectedBug.steps_to_reproduce)"
+                        rows="4"
+                        class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none font-mono"
+                        placeholder="1. Navigate to…&#10;2. Click…&#10;3. Observe…"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Expected Result</label>
+                <textarea x-model="selectedBug.expected_result" @blur="patchField('expected_result', selectedBug.expected_result)"
+                          rows="3"
+                          class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+                          placeholder="What should happen…"></textarea>
+              </div>
+              <div>
+                <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Actual Result</label>
+                <textarea x-model="selectedBug.actual_result" @blur="patchField('actual_result', selectedBug.actual_result)"
+                          rows="3"
+                          class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+                          placeholder="What actually happened…"></textarea>
+              </div>
+            </div>
+
+            <!-- Resolution fields -->
+            <template x-if="['resolved','closed'].includes(selectedBug.state)">
+              <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+                <div>
+                  <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Root Cause</label>
+                  <textarea x-model="selectedBug.root_cause" @blur="patchField('root_cause', selectedBug.root_cause)"
+                            rows="2"
+                            class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+                            placeholder="Root cause analysis…"></textarea>
+                </div>
+                <div>
+                  <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Fix Notes</label>
+                  <textarea x-model="selectedBug.fix_notes" @blur="patchField('fix_notes', selectedBug.fix_notes)"
+                            rows="2"
+                            class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+                            placeholder="What was fixed and where…"></textarea>
+                </div>
+              </div>
+            </template>
+
+            <!-- Reporter + dates -->
+            <div class="flex items-center gap-4 text-[10px] text-slate-400 pt-1 border-t border-slate-50">
+              <span>Reporter: <b class="text-slate-600" x-text="selectedBug.reporter || '—'"></b></span>
+              <span>Created: <b class="text-slate-600" x-text="selectedBug.created_at ? selectedBug.created_at.slice(0,16).replace('T',' ') + ' UTC' : '—'"></b></span>
+              <template x-if="selectedBug.resolved_at">
+                <span>Resolved: <b class="text-slate-600" x-text="selectedBug.resolved_at.slice(0,16).replace('T',' ') + ' UTC'"></b></span>
+              </template>
+            </div>
+          </div>
+
+          <!-- ── Artifacts tab ── -->
+          <div x-show="activeTab === 'Artifacts'" class="space-y-4">
+
+            <!-- Upload zone -->
+            <div class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:border-rose-300 transition-colors"
+                 @dragover.prevent @drop.prevent="handleDrop($event)"
+                 :class="uploading ? 'opacity-50 pointer-events-none' : ''">
+              <svg class="w-8 h-8 text-slate-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+              </svg>
+              <p class="text-xs text-slate-500">Drag &amp; drop files here, or</p>
+              <label class="mt-1 inline-block text-xs text-rose-600 hover:text-rose-700 font-medium cursor-pointer">
+                Browse files
+                <input type="file" multiple class="hidden" @change="uploadFiles($event.target.files)">
+              </label>
+              <p class="text-[10px] text-slate-300 mt-1">Screenshots, Videos, Logs, HAR, Documents · Max 100 MB each</p>
+              <template x-if="uploading">
+                <p class="text-xs text-rose-500 mt-2">Uploading…</p>
+              </template>
+            </div>
+
+            <!-- Artifact list -->
+            <template x-if="artifacts.length === 0">
+              <p class="text-xs text-slate-400 text-center py-4">No artifacts attached yet.</p>
+            </template>
+
+            <!-- Screenshots grid -->
+            <template x-if="screenshots().length > 0">
+              <div>
+                <h3 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-2">Screenshots</h3>
+                <div class="grid grid-cols-4 gap-2">
+                  <template x-for="a in screenshots()" :key="a.id">
+                    <div class="relative group rounded-lg overflow-hidden border border-slate-200 bg-slate-50 aspect-video">
+                      <img :src="`/api/bugs/${selectedBug.id}/artifacts/${a.id}`"
+                           :alt="a.filename"
+                           class="w-full h-full object-cover cursor-pointer"
+                           @click="openLightbox(a)">
+                      <div class="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/30 transition-colors flex items-center justify-center">
+                        <button @click.stop="deleteArtifact(a.id)"
+                                class="hidden group-hover:flex text-white bg-red-500/80 hover:bg-red-600 rounded p-1 transition-colors">
+                          <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                          </svg>
+                        </button>
+                      </div>
+                      <p class="absolute bottom-0 left-0 right-0 text-[9px] text-white bg-slate-900/50 px-1 py-0.5 truncate" x-text="a.filename"></p>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+
+            <!-- Videos -->
+            <template x-if="videos().length > 0">
+              <div>
+                <h3 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-2">Videos</h3>
+                <div class="space-y-2">
+                  <template x-for="a in videos()" :key="a.id">
+                    <div class="border border-slate-200 rounded-lg overflow-hidden">
+                      <video controls class="w-full max-h-48 bg-black" :src="`/api/bugs/${selectedBug.id}/artifacts/${a.id}`"></video>
+                      <div class="flex items-center justify-between px-2 py-1.5 bg-slate-50">
+                        <span class="text-[10px] text-slate-500 truncate" x-text="a.filename"></span>
+                        <button @click="deleteArtifact(a.id)" class="text-[10px] text-red-400 hover:text-red-600">Remove</button>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+
+            <!-- Logs + HAR + Documents (table) -->
+            <template x-if="otherArtifacts().length > 0">
+              <div>
+                <h3 class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-2">Logs, HAR &amp; Documents</h3>
+                <div class="space-y-1">
+                  <template x-for="a in otherArtifacts()" :key="a.id">
+                    <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+                      <span :class="artifactTypeColor(a.artifact_type)"
+                            class="text-[9px] font-medium px-1.5 py-0.5 rounded shrink-0" x-text="a.artifact_type"></span>
+                      <span class="text-xs text-slate-700 truncate flex-1 font-mono" x-text="a.filename"></span>
+                      <span class="text-[10px] text-slate-400 shrink-0" x-text="formatBytes(a.size_bytes)"></span>
+                      <a :href="`/api/bugs/${selectedBug.id}/artifacts/${a.id}`"
+                         :download="a.filename"
+                         class="text-[10px] text-indigo-500 hover:underline shrink-0">Download</a>
+                      <button @click="deleteArtifact(a.id)" class="text-[10px] text-red-400 hover:text-red-600 shrink-0">Remove</button>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- ── History tab ── -->
+          <div x-show="activeTab === 'History'" class="space-y-3">
+            <template x-if="history.length === 0">
+              <p class="text-xs text-slate-400 text-center py-8">No state transitions yet.</p>
+            </template>
+            <template x-for="h in history" :key="h.id">
+              <div class="flex items-start gap-3">
+                <div class="w-2 h-2 rounded-full bg-indigo-400 mt-1.5 shrink-0"></div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs font-medium text-slate-700"
+                          x-text="`${h.from_state.replace('_',' ')} → ${h.to_state.replace('_',' ')}`"></span>
+                    <span class="text-[10px] text-slate-400" x-text="h.changed_by"></span>
+                    <span class="text-[10px] text-slate-300" x-text="h.changed_at ? h.changed_at.slice(0,16).replace('T',' ') + ' UTC' : ''"></span>
+                  </div>
+                  <template x-if="h.comment">
+                    <p class="text-xs text-slate-500 mt-0.5 italic" x-text="h.comment"></p>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- ── Comments tab ── -->
+          <div x-show="activeTab === 'Comments'" class="space-y-3">
+            <template x-for="c in comments" :key="c.id">
+              <div class="border-l-2 border-slate-200 pl-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-semibold text-slate-700" x-text="c.author"></span>
+                  <span class="text-[10px] text-slate-400" x-text="c.created_at ? c.created_at.slice(0,16).replace('T',' ') + ' UTC' : ''"></span>
+                </div>
+                <p class="text-xs text-slate-600 mt-0.5 leading-relaxed" x-text="c.body"></p>
+              </div>
+            </template>
+            <template x-if="comments.length === 0">
+              <p class="text-xs text-slate-400 py-4">No comments yet.</p>
+            </template>
+            <!-- Add comment -->
+            <div class="pt-3 border-t border-slate-100 space-y-2">
+              <textarea x-model="newComment" rows="2"
+                        class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+                        placeholder="Add a comment…"></textarea>
+              <button @click="submitComment()"
+                      :disabled="!newComment.trim()"
+                      class="text-xs font-medium bg-slate-700 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded-lg transition-colors">
+                Add Comment
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </template>
+  </div>
+
+</div>
+
+<!-- ── Create Bug Modal ──────────────────────────────────────────────────────── -->
+<div x-show="showCreateModal" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center"
+     @keydown.escape.window="showCreateModal = false">
+  <div class="absolute inset-0 bg-slate-900/40" @click="showCreateModal = false"></div>
+  <div class="relative bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <h2 class="text-sm font-bold text-slate-900">New Bug</h2>
+      <button @click="showCreateModal = false" class="text-slate-400 hover:text-slate-600">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="px-6 py-4 space-y-3">
+      <div>
+        <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">Title *</label>
+        <input x-model="createForm.title" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200" placeholder="Short summary of the bug">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">Product *</label>
+          <select x-model="createForm.product"
+                  class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200">
+            <option value="">Select product</option>
+            {% for p in all_products %}
+            <option value="{{ p }}">{{ p }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">Priority</label>
+          <select x-model="createForm.priority"
+                  class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200">
+            {% for p in config_priorities %}
+            <option value="{{ p.name }}">{{ p.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">Severity</label>
+          <select x-model="createForm.severity"
+                  class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200">
+            <option value="blocker">Blocker</option>
+            <option value="critical">Critical</option>
+            <option value="major" selected>Major</option>
+            <option value="minor">Minor</option>
+            <option value="trivial">Trivial</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">Component</label>
+          <select x-model="createForm.component"
+                  class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200">
+            <option value="">—</option>
+            <option value="api">API</option>
+            <option value="web">Web</option>
+            <option value="mobile">Mobile</option>
+            <option value="security">Security</option>
+            <option value="performance">Performance</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">Description</label>
+        <textarea x-model="createForm.description" rows="2"
+                  class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+                  placeholder="Describe the bug…"></textarea>
+      </div>
+      <div>
+        <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">Steps to Reproduce</label>
+        <textarea x-model="createForm.steps_to_reproduce" rows="3"
+                  class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none font-mono"
+                  placeholder="1. …"></textarea>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">Expected Result</label>
+          <textarea x-model="createForm.expected_result" rows="2"
+                    class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+                    placeholder="What should happen"></textarea>
+        </div>
+        <div>
+          <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">Actual Result</label>
+          <textarea x-model="createForm.actual_result" rows="2"
+                    class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+                    placeholder="What actually happened"></textarea>
+        </div>
+      </div>
+      <div>
+        <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">Assignee</label>
+        <select x-model="createForm.assignee"
+                class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200">
+          <option value="">Unassigned</option>
+          {% for u in config_users %}
+          <option value="{{ u.name }}">{{ u.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+        <button @click="showCreateModal = false"
+                class="text-xs font-medium text-slate-600 hover:text-slate-800 px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors">
+          Cancel
+        </button>
+        <button @click="submitCreate()"
+                :disabled="!createForm.title.trim() || !createForm.product"
+                class="text-xs font-medium bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors">
+          Create Bug
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Transition Modal ──────────────────────────────────────────────────────── -->
+<div x-show="showTransitionModal" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center"
+     @keydown.escape.window="showTransitionModal = false">
+  <div class="absolute inset-0 bg-slate-900/40" @click="showTransitionModal = false"></div>
+  <div class="relative bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-sm mx-4 p-5 space-y-4">
+    <h3 class="text-sm font-bold text-slate-900">
+      Transition to "<span x-text="pendingTransition && pendingTransition.replace('_',' ')"></span>"
+    </h3>
+    <div>
+      <label class="block text-[10px] font-medium text-slate-500 uppercase tracking-wide mb-1">
+        Comment <span x-show="pendingTransition === 'wont_fix' || pendingTransition === 'deferred'" class="text-red-500">*</span>
+      </label>
+      <textarea x-model="transitionComment" rows="3"
+                class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
+                :placeholder="pendingTransition === 'wont_fix' ? 'Reason for closing as Won\'t Fix…' : pendingTransition === 'deferred' ? 'Reason for deferring…' : 'Optional comment…'"></textarea>
+    </div>
+    <div class="flex justify-end gap-2">
+      <button @click="showTransitionModal = false"
+              class="text-xs font-medium text-slate-600 px-4 py-2 rounded-lg hover:bg-slate-100 transition-colors">Cancel</button>
+      <button @click="confirmTransition()"
+              :disabled="(pendingTransition === 'wont_fix' || pendingTransition === 'deferred') && !transitionComment.trim()"
+              class="text-xs font-medium bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors">
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Screenshot lightbox ───────────────────────────────────────────────────── -->
+<div x-show="lightboxArtifact" x-cloak
+     class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80"
+     @click="lightboxArtifact = null" @keydown.escape.window="lightboxArtifact = null">
+  <div class="relative max-w-4xl max-h-[90vh] mx-4" @click.stop>
+    <img :src="lightboxArtifact ? `/api/bugs/${selectedBug.id}/artifacts/${lightboxArtifact.id}` : ''"
+         :alt="lightboxArtifact && lightboxArtifact.filename"
+         class="max-w-full max-h-[85vh] rounded-xl shadow-2xl object-contain">
+    <div class="flex items-center justify-between mt-2 px-1">
+      <span class="text-white/70 text-xs" x-text="lightboxArtifact && lightboxArtifact.filename"></span>
+      <button @click="lightboxArtifact = null" class="text-white/70 hover:text-white text-xs">Close</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function bugsApp() {
+  return {
+    bugs: [],
+    selectedBug: null,
+    loading: false,
+    filterProduct: '{{ filter_product }}',
+    filterState: '',
+    filterPriority: '',
+    stateCounts: {},
+
+    activeTab: 'Details',
+    editingTitle: false,
+    editTitleVal: '',
+
+    artifacts: [],
+    history: [],
+    comments: [],
+    allowedTransitions: [],
+    newComment: '',
+    uploading: false,
+
+    showCreateModal: false,
+    createForm: { title: '', product: '{{ filter_product }}', priority: '{{ config_priorities[0].name if config_priorities else "P2" }}', severity: 'major', component: '', description: '', steps_to_reproduce: '', expected_result: '', actual_result: '', assignee: '' },
+
+    showTransitionModal: false,
+    pendingTransition: null,
+    transitionComment: '',
+
+    lightboxArtifact: null,
+
+    async init() {
+      await this.loadBugs();
+      const params = new URLSearchParams(location.search);
+      const highlight = params.get('highlight');
+      if (highlight) {
+        const found = this.bugs.find(b => b.id === highlight);
+        if (found) this.selectBug(found);
+      }
+    },
+
+    async loadBugs() {
+      this.loading = true;
+      const q = new URLSearchParams();
+      if (this.filterProduct) q.set('product', this.filterProduct);
+      if (this.filterState)   q.set('state', this.filterState);
+      if (this.filterPriority) q.set('priority', this.filterPriority);
+      try {
+        const r = await fetch('/api/bugs?' + q.toString());
+        this.bugs = r.ok ? await r.json() : [];
+      } catch { this.bugs = []; }
+      this.loading = false;
+      this._calcStateCounts();
+    },
+
+    _calcStateCounts() {
+      const c = {};
+      this.bugs.forEach(b => { c[b.state] = (c[b.state] || 0) + 1; });
+      this.stateCounts = c;
+    },
+
+    async selectBug(bug) {
+      this.selectedBug = bug;
+      this.activeTab = 'Details';
+      this.editingTitle = false;
+      this.newComment = '';
+      await Promise.all([this.loadArtifacts(), this.loadHistory(), this.loadComments(), this.loadTransitions()]);
+    },
+
+    async loadArtifacts() {
+      const r = await fetch(`/api/bugs/${this.selectedBug.id}/artifacts`);
+      this.artifacts = r.ok ? await r.json() : [];
+    },
+    async loadHistory() {
+      const r = await fetch(`/api/bugs/${this.selectedBug.id}/history`);
+      this.history = r.ok ? await r.json() : [];
+    },
+    async loadComments() {
+      const r = await fetch(`/api/bugs/${this.selectedBug.id}/comments`);
+      this.comments = r.ok ? await r.json() : [];
+    },
+    async loadTransitions() {
+      const r = await fetch(`/api/bugs/${this.selectedBug.id}`);
+      if (r.ok) {
+        const b = await r.json();
+        const map = {new:['open','deferred','wont_fix'],open:['in_progress','deferred','wont_fix'],in_progress:['resolved','open'],resolved:['closed','open'],closed:['open'],deferred:['open'],wont_fix:[]};
+        this.allowedTransitions = map[b.state] || [];
+        this.selectedBug = b;
+      }
+    },
+
+    openCreateModal() {
+      this.createForm = { title: '', product: this.filterProduct || '', priority: '{{ config_priorities[0].name if config_priorities else "P2" }}', severity: 'major', component: '', description: '', steps_to_reproduce: '', expected_result: '', actual_result: '', assignee: '' };
+      this.showCreateModal = true;
+    },
+
+    async submitCreate() {
+      if (!this.createForm.title.trim() || !this.createForm.product) return;
+      const r = await fetch('/api/bugs', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(this.createForm) });
+      if (r.ok) {
+        this.showCreateModal = false;
+        sfToast('Bug created', 'info');
+        await this.loadBugs();
+        const bug = await r.json().catch(() => null);
+        if (bug) { const found = this.bugs.find(b => b.id === bug.id); if (found) this.selectBug(found); }
+      } else {
+        sfToast('Failed to create bug', 'error');
+      }
+    },
+
+    async saveTitle() {
+      if (!this.editTitleVal.trim()) return;
+      await this.patchField('title', this.editTitleVal.trim());
+      this.editingTitle = false;
+    },
+
+    async patchField(field, value) {
+      const r = await fetch(`/api/bugs/${this.selectedBug.id}`, {
+        method: 'PATCH', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({[field]: value}),
+      });
+      if (r.ok) {
+        this.selectedBug = await r.json();
+        const idx = this.bugs.findIndex(b => b.id === this.selectedBug.id);
+        if (idx !== -1) this.bugs.splice(idx, 1, this.selectedBug);
+      }
+    },
+
+    doTransition(toState) {
+      this.pendingTransition = toState;
+      this.transitionComment = '';
+      this.showTransitionModal = true;
+    },
+
+    async confirmTransition() {
+      const r = await fetch(`/api/bugs/${this.selectedBug.id}/transition`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ to_state: this.pendingTransition, comment: this.transitionComment }),
+      });
+      this.showTransitionModal = false;
+      if (r.ok) {
+        sfToast(`Bug moved to ${this.pendingTransition.replace('_',' ')}`, 'info');
+        await this.loadBugs();
+        await this.loadTransitions();
+        await this.loadHistory();
+      } else {
+        const err = await r.json().catch(() => ({}));
+        sfToast(err.detail || 'Transition failed', 'error');
+      }
+    },
+
+    async submitComment() {
+      if (!this.newComment.trim()) return;
+      const r = await fetch(`/api/bugs/${this.selectedBug.id}/comments`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ body: this.newComment.trim() }),
+      });
+      if (r.ok) { this.newComment = ''; await this.loadComments(); }
+    },
+
+    async uploadFiles(files) {
+      this.uploading = true;
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('file', file);
+        const r = await fetch(`/api/bugs/${this.selectedBug.id}/artifacts`, { method: 'POST', body: fd });
+        if (!r.ok) sfToast(`Failed to upload ${file.name}`, 'error');
+      }
+      this.uploading = false;
+      await this.loadArtifacts();
+      sfToast(`${files.length} artifact${files.length > 1 ? 's' : ''} uploaded`, 'info');
+    },
+
+    async handleDrop(e) {
+      const files = e.dataTransfer.files;
+      if (files.length) await this.uploadFiles(files);
+    },
+
+    async deleteArtifact(aid) {
+      if (!await sfConfirm('Remove this artifact?')) return;
+      await fetch(`/api/bugs/${this.selectedBug.id}/artifacts/${aid}`, { method: 'DELETE' });
+      await this.loadArtifacts();
+    },
+
+    async deleteBug() {
+      if (!await sfConfirm('Permanently delete this bug and all its artifacts?')) return;
+      const r = await fetch(`/api/bugs/${this.selectedBug.id}`, { method: 'DELETE' });
+      if (r.ok) {
+        sfToast('Bug deleted', 'info');
+        this.selectedBug = null;
+        await this.loadBugs();
+      }
+    },
+
+    openLightbox(a) { this.lightboxArtifact = a; },
+
+    screenshots() { return this.artifacts.filter(a => a.artifact_type === 'screenshot'); },
+    videos()      { return this.artifacts.filter(a => a.artifact_type === 'video'); },
+    otherArtifacts() { return this.artifacts.filter(a => !['screenshot','video'].includes(a.artifact_type)); },
+
+    formatBytes(b) {
+      if (b < 1024) return b + ' B';
+      if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+      return (b/1048576).toFixed(1) + ' MB';
+    },
+
+    stateColor(s) {
+      const m = {new:'text-sky-600',open:'text-amber-600',in_progress:'text-violet-600',resolved:'text-emerald-600',closed:'text-slate-400',deferred:'text-yellow-600',wont_fix:'text-red-500'};
+      return m[s] || 'text-slate-500';
+    },
+    stateBadgeClass(s) {
+      const m = {new:'bg-sky-100 text-sky-700',open:'bg-amber-100 text-amber-700',in_progress:'bg-violet-100 text-violet-700',resolved:'bg-emerald-100 text-emerald-700',closed:'bg-slate-100 text-slate-500',deferred:'bg-yellow-100 text-yellow-700',wont_fix:'bg-red-100 text-red-700'};
+      return m[s] || 'bg-slate-100 text-slate-500';
+    },
+    stateChipActive(s) {
+      const m = {new:'bg-sky-600 text-white',open:'bg-amber-500 text-white',in_progress:'bg-violet-600 text-white',resolved:'bg-emerald-600 text-white',closed:'bg-slate-500 text-white',deferred:'bg-yellow-500 text-white',wont_fix:'bg-red-500 text-white'};
+      return m[s] || 'bg-slate-600 text-white';
+    },
+    priorityDot(p) {
+      const m = {P0:'bg-red-500',P1:'bg-orange-400',P2:'bg-amber-400',P3:'bg-slate-300'};
+      return m[p] || 'bg-slate-300';
+    },
+    priorityBadgeClass(p) {
+      const m = {P0:'bg-red-100 text-red-700',P1:'bg-orange-100 text-orange-700',P2:'bg-amber-100 text-amber-700',P3:'bg-slate-100 text-slate-500'};
+      return m[p] || 'bg-slate-100 text-slate-500';
+    },
+    transitionBtnClass(t) {
+      const m = {open:'border-amber-300 text-amber-700 hover:bg-amber-50',in_progress:'border-violet-300 text-violet-700 hover:bg-violet-50',resolved:'border-emerald-300 text-emerald-700 hover:bg-emerald-50',closed:'border-slate-300 text-slate-600 hover:bg-slate-50',deferred:'border-yellow-300 text-yellow-700 hover:bg-yellow-50',wont_fix:'border-red-300 text-red-600 hover:bg-red-50'};
+      return m[t] || 'border-slate-200 text-slate-600 hover:bg-slate-50';
+    },
+    artifactTypeColor(t) {
+      const m = {log:'bg-slate-100 text-slate-600',har:'bg-blue-100 text-blue-700',document:'bg-indigo-100 text-indigo-700',report:'bg-emerald-100 text-emerald-700'};
+      return m[t] || 'bg-slate-100 text-slate-500';
+    },
+  };
+}
+</script>
+{% endblock %}
