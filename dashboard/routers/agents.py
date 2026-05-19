@@ -26,9 +26,12 @@ _AGENT_REGISTRY = [
 ]
 
 
+_PUBLIC_REGISTRY = [a for a in _AGENT_REGISTRY if a["domain"] != "product"]
+
+
 @router.get("/")
 def list_agents():
-    return {"agents": _AGENT_REGISTRY, "total": len(_AGENT_REGISTRY)}
+    return {"agents": _PUBLIC_REGISTRY, "total": len(_PUBLIC_REGISTRY)}
 
 
 @router.get("/status")
@@ -52,7 +55,7 @@ def agent_status():
 
 @router.get("/{agent_name}")
 def get_agent(agent_name: str):
-    meta = next((a for a in _AGENT_REGISTRY if a["name"] == agent_name), None)
+    meta = next((a for a in _PUBLIC_REGISTRY if a["name"] == agent_name), None)
     if not meta:
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Agent not found")

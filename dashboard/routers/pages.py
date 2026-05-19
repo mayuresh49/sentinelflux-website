@@ -91,7 +91,7 @@ def _queued_gaps() -> list[dict]:
 @router.get("/", response_class=HTMLResponse)
 async def home(request: Request, product: str | None = None,
                current_user: dict = Depends(_require_auth)):
-    from dashboard.routers.agents import _AGENT_REGISTRY
+    from dashboard.routers.agents import _PUBLIC_REGISTRY
     all_entries = _alog.all()
     visible = user_products(current_user, _list_products())
     if product and product not in visible:
@@ -113,14 +113,14 @@ async def home(request: Request, product: str | None = None,
             "description": a["description"],
             "status": status_map[a["name"]]["status"] if a["name"] in status_map else "idle",
         }
-        for a in _AGENT_REGISTRY
+        for a in _PUBLIC_REGISTRY
     ]
     return templates.TemplateResponse(request, "index.html", context=_ctx(
         request, current_user,
         total_activities=len(scoped),
         pending_approvals=len(pending),
         requires_human_count=len(pending),
-        agent_count=len(_AGENT_REGISTRY),
+        agent_count=len(_PUBLIC_REGISTRY),
         recent=recent,
         pending_ids=pending_ids,
         pending_items=pending[:3],
@@ -284,7 +284,7 @@ async def agents_page(request: Request, current_user: dict = Depends(_require_au
     import yaml
 
     from dashboard.agent_meta import AGENT_META
-    from dashboard.routers.agents import _AGENT_REGISTRY
+    from dashboard.routers.agents import _PUBLIC_REGISTRY as _AGENT_REGISTRY
     from utils.paths import ROOT as _ROOT
 
     config_path = _ROOT / "ai" / "context" / "agent_config.yaml"
