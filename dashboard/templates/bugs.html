@@ -140,19 +140,17 @@
             </div>
           </div>
 
-          <!-- State transition buttons -->
+          <!-- State transition dropdown -->
           <div class="flex items-center gap-1.5 mt-3 flex-wrap">
             <span class="text-[10px] text-slate-400 font-medium">Transition:</span>
-            <template x-for="t in allowedTransitions" :key="t">
-              <button @click="doTransition(t)"
-                      :class="transitionBtnClass(t)"
-                      class="text-[10px] font-medium px-2.5 py-1 rounded-lg border transition-colors"
-                      x-text="t.replace('_',' ').replace('wont fix','Won\'t Fix')">
-              </button>
-            </template>
-            <template x-if="allowedTransitions.length === 0">
-              <span class="text-[10px] text-slate-300 italic">No transitions available</span>
-            </template>
+            <select @change="if($event.target.value){ doTransition($event.target.value); $nextTick(()=>{ $event.target.value=''; }) }"
+                    :disabled="allowedTransitions.length === 0"
+                    class="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200 disabled:opacity-40 disabled:cursor-not-allowed">
+              <option value="" x-text="allowedTransitions.length ? 'Move to…' : 'No transitions'"></option>
+              <template x-for="t in allowedTransitions" :key="t">
+                <option :value="t" x-text="t.replace('_',' ').replace('wont fix','Won\'t Fix')"></option>
+              </template>
+            </select>
             <div class="ml-auto flex gap-1.5">
               <a :href="`/api/bugs/${selectedBug.id}/report?format=pdf`" target="_blank"
                  class="text-[10px] font-medium text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-300 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1">
@@ -258,7 +256,7 @@
               <!-- Environment -->
               <div>
                 <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Environment</label>
-                <input x-model="selectedBug.environment" @blur="patchField('environment', selectedBug.environment)"
+                <input x-model="selectedBug.environment"
                        class="w-full text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-rose-200"
                        placeholder="e.g. qa, staging">
               </div>
@@ -281,7 +279,7 @@
             <!-- Description -->
             <div>
               <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Description</label>
-              <textarea x-model="selectedBug.description" @blur="patchField('description', selectedBug.description)"
+              <textarea x-model="selectedBug.description"
                         rows="3"
                         class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
                         placeholder="Describe the bug…"></textarea>
@@ -290,7 +288,7 @@
             <!-- Steps to Reproduce -->
             <div>
               <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Steps to Reproduce</label>
-              <textarea x-model="selectedBug.steps_to_reproduce" @blur="patchField('steps_to_reproduce', selectedBug.steps_to_reproduce)"
+              <textarea x-model="selectedBug.steps_to_reproduce"
                         rows="4"
                         class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none font-mono"
                         placeholder="1. Navigate to…&#10;2. Click…&#10;3. Observe…"></textarea>
@@ -299,14 +297,14 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Expected Result</label>
-                <textarea x-model="selectedBug.expected_result" @blur="patchField('expected_result', selectedBug.expected_result)"
+                <textarea x-model="selectedBug.expected_result"
                           rows="3"
                           class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
                           placeholder="What should happen…"></textarea>
               </div>
               <div>
                 <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Actual Result</label>
-                <textarea x-model="selectedBug.actual_result" @blur="patchField('actual_result', selectedBug.actual_result)"
+                <textarea x-model="selectedBug.actual_result"
                           rows="3"
                           class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
                           placeholder="What actually happened…"></textarea>
@@ -318,20 +316,28 @@
               <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
                 <div>
                   <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Root Cause</label>
-                  <textarea x-model="selectedBug.root_cause" @blur="patchField('root_cause', selectedBug.root_cause)"
+                  <textarea x-model="selectedBug.root_cause"
                             rows="2"
                             class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
                             placeholder="Root cause analysis…"></textarea>
                 </div>
                 <div>
                   <label class="block text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-1">Fix Notes</label>
-                  <textarea x-model="selectedBug.fix_notes" @blur="patchField('fix_notes', selectedBug.fix_notes)"
+                  <textarea x-model="selectedBug.fix_notes"
                             rows="2"
                             class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-2 focus:outline-none focus:ring-2 focus:ring-rose-200 resize-none"
                             placeholder="What was fixed and where…"></textarea>
                 </div>
               </div>
             </template>
+
+            <!-- Update Bug button -->
+            <div class="flex justify-end pt-2 border-t border-slate-100">
+              <button @click="updateBug()"
+                      class="text-xs font-medium bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg transition-colors">
+                Update Bug
+              </button>
+            </div>
 
             <!-- Reporter + dates -->
             <div class="flex items-center gap-4 text-[10px] text-slate-400 pt-1 border-t border-slate-50">
@@ -779,6 +785,24 @@ function bugsApp() {
         this.selectedBug = await r.json();
         const idx = this.bugs.findIndex(b => b.id === this.selectedBug.id);
         if (idx !== -1) this.bugs.splice(idx, 1, this.selectedBug);
+      }
+    },
+
+    async updateBug() {
+      const fields = ['description','steps_to_reproduce','expected_result','actual_result','root_cause','fix_notes','environment'];
+      const payload = {};
+      fields.forEach(f => { if (this.selectedBug[f] !== undefined) payload[f] = this.selectedBug[f]; });
+      const r = await fetch(`/api/bugs/${this.selectedBug.id}`, {
+        method: 'PATCH', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload),
+      });
+      if (r.ok) {
+        this.selectedBug = await r.json();
+        const idx = this.bugs.findIndex(b => b.id === this.selectedBug.id);
+        if (idx !== -1) this.bugs.splice(idx, 1, this.selectedBug);
+        sfToast('Bug updated', 'info');
+      } else {
+        sfToast('Failed to update bug', 'error');
       }
     },
 
