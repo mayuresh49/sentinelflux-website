@@ -340,15 +340,6 @@ def _run_post_suite(run_id: str, product: str, domain: str, report_path: Path) -
             run_id,
             analyzed=True,
             failure_categories=summary.get("blockers", []),
-            post_suite_summary={
-                "blockers_count": summary.get("blockers_count", 0),
-                "failure_count": summary.get("failure_count", 0),
-                "regression_count": summary.get("regression_count", 0),
-                "flaky_candidates": summary.get("flaky_candidates", 0),
-                "coverage_gaps": summary.get("coverage_gaps", 0),
-                "locator_heals": summary.get("locator_heals", 0),
-                "requires_human": summary.get("requires_human", False),
-            },
         )
     except Exception:
         pass  # analysis is best-effort; raw failures already stored from report parse
