@@ -166,6 +166,34 @@ def delete_scan(eng_id: str, scan_id: str, product: str,
     return _vm.get(product, eng_id)
 
 
+# ── screenshot serving ────────────────────────────────────────────────────────
+
+@router.get("/visual/engagement/{eng_id}/screenshot")
+def get_screenshot(eng_id: str, product: str, page_path: str,
+                   type: str = "baseline", scan_id: str | None = None,
+                   current_user: dict = Depends(require_user)) -> Response:
+    _check_product_access(product, current_user)
+    eng = _vm.get(product, eng_id)
+    if not eng:
+        raise HTTPException(404, detail="Engagement not found")
+
+    disk_path: str | None = None
+    if type == "baseline":
+        info = eng.get("baselines", {}).get(page_path)
+        if info:
+            disk_path = info.get("screenshot_path")
+    elif type == "scan" and scan_id:
+        scan = next((s for s in eng.get("scans", []) if s["scan_id"] == scan_id), None)
+        if scan:
+            row = next((r for r in scan.get("pages_results", []) if r.get("url") == page_path), None)
+            if row:
+                disk_path = row.get("screenshot_path")
+
+    if not disk_path or not Path(disk_path).exists():
+        raise HTTPException(404, detail="Screenshot not found")
+    return Response(Path(disk_path).read_bytes(), media_type="image/png")
+
+
 # ── report ────────────────────────────────────────────────────────────────────
 
 @router.get("/visual/engagement/{eng_id}/report")

@@ -19,6 +19,34 @@
 {% block content %}
 <div class="max-w-7xl mx-auto space-y-6" x-data="visualApp()" x-init="init()">
 
+  <!-- Compare lightbox -->
+  <div x-show="compareModal.open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" @keydown.escape.window="compareModal.open = false">
+    <div class="absolute inset-0 bg-slate-900/60" @click="compareModal.open = false"></div>
+    <div class="relative bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-slate-100 shrink-0">
+        <div class="flex items-center gap-3">
+          <span class="font-mono text-sm text-slate-700" x-text="compareModal.page"></span>
+          <template x-if="compareModal.diff_pct !== null">
+            <span class="text-xs px-2 py-0.5 rounded-full font-medium"
+                  :class="compareModal.passed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                  x-text="compareModal.diff_pct + '% diff'"></span>
+          </template>
+        </div>
+        <button @click="compareModal.open = false" class="text-slate-400 hover:text-slate-600 text-lg leading-none">&times;</button>
+      </div>
+      <div class="grid grid-cols-2 gap-0 overflow-auto flex-1">
+        <div class="border-r border-slate-200 p-4 flex flex-col gap-2">
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Baseline</p>
+          <img :src="compareModal.baselineUrl" class="rounded border border-slate-200 w-full object-contain" alt="Baseline screenshot" loading="lazy"/>
+        </div>
+        <div class="p-4 flex flex-col gap-2">
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Current</p>
+          <img :src="compareModal.currentUrl" class="rounded border border-slate-200 w-full object-contain" alt="Current screenshot" loading="lazy"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="flex items-center justify-between flex-wrap gap-3">
     <div>
       <h1 class="text-2xl font-bold text-slate-900">Visual Regression</h1>
@@ -106,7 +134,9 @@
           </div>
         </div>
       </template>
-      <div x-show="product && engagements.length === 0" class="text-center py-8 text-sm text-slate-400">No suites yet.</div>
+      <div x-show="product && engagements.length === 0" class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center">
+        <p class="text-sm text-slate-400">No suites yet.</p>
+      </div>
     </div>
 
     <!-- Detail panel -->
@@ -170,6 +200,10 @@
                           <span :class="pr.passed ? 'text-slate-400' : 'text-red-600 font-medium'" x-text="pr.diff_pct + '% diff'"></span>
                         </template>
                         <span x-show="!pr.baseline_exists" class="text-amber-500">no baseline</span>
+                        <template x-if="pr.baseline_exists && pr.screenshot_path">
+                          <button @click.stop="openCompare(pr, scan.scan_id)"
+                                  class="ml-auto text-indigo-600 hover:text-indigo-800 underline-offset-2 hover:underline">View</button>
+                        </template>
                       </div>
                     </template>
                   </div>
@@ -223,6 +257,7 @@ function visualApp() {
     selectedEng: null,
     showCreate: false,
     createForm: { name: '', base_url: '', pages_raw: '/\n/login', threshold_pct: 1.0 },
+    compareModal: { open: false, page: '', diff_pct: null, passed: true, baselineUrl: '', currentUrl: '' },
 
     async init() {
       if (this.product) await this.loadEngagements();
@@ -306,6 +341,18 @@ function visualApp() {
     baselineCount(eng) {
       if (!eng?.baselines) return 0;
       return Object.keys(eng.baselines).length;
+    },
+
+    openCompare(pr, scanId) {
+      const base = `/api/visual/engagement/${this.selectedEng.id}/screenshot?product=${this.product}&page_path=${encodeURIComponent(pr.url)}`;
+      this.compareModal = {
+        open: true,
+        page: pr.url,
+        diff_pct: pr.diff_pct ?? null,
+        passed: pr.passed,
+        baselineUrl: `${base}&type=baseline`,
+        currentUrl: `${base}&type=scan&scan_id=${scanId}`,
+      };
     },
   };
 }

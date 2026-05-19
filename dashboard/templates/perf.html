@@ -158,7 +158,9 @@ GET /api/users"
           </div>
         </div>
       </template>
-      <div x-show="product && engagements.length === 0" class="text-center py-8 text-sm text-slate-400">No test suites yet. Create one above.</div>
+      <div x-show="product && engagements.length === 0" class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center">
+        <p class="text-sm text-slate-400">No test suites yet. Create one above.</p>
+      </div>
     </div>
 
     <!-- Detail panel -->
