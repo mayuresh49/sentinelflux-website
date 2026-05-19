@@ -52,8 +52,8 @@
       "status": "completed",
       "is_revalidation": false,
       "total": 36,
-      "passed": 30,
-      "failed": 0,
+      "passed": 28,
+      "failed": 2,
       "skipped": 6,
       "duration": 1.17,
       "finished_at": "2026-05-18T06:36:14.328805+00:00",
@@ -68,8 +68,8 @@
       "status": "completed",
       "is_revalidation": false,
       "total": 15,
-      "passed": 8,
-      "failed": 0,
+      "passed": 5,
+      "failed": 3,
       "skipped": 7,
       "duration": 0.14,
       "finished_at": "2026-05-18T11:55:03.781540+00:00",
@@ -105,8 +105,8 @@
           "title": "Infra Sensitive Service Ports Not Exposed",
           "owasp_ref": "A05",
           "owasp_category": "Security Misconfiguration",
-          "severity": "Medium",
-          "status": "confirmed_secure"
+          "severity": "Critical",
+          "status": "finding"
         },
         {
           "test_id": "tests/vapt_infra/test_vapt_infra_ports.py::test_INFRA_ssh_port_not_on_default",
@@ -114,7 +114,7 @@
           "owasp_ref": "A05",
           "owasp_category": "Security Misconfiguration",
           "severity": "Medium",
-          "status": "confirmed_secure"
+          "status": "finding"
         },
         {
           "test_id": "tests/vapt_infra/test_vapt_infra_ports.py::test_INFRA_no_telnet_service",
@@ -145,8 +145,8 @@
           "title": "Infra Version Disclosure In Headers",
           "owasp_ref": "A05",
           "owasp_category": "Security Misconfiguration",
-          "severity": "Medium",
-          "status": "confirmed_secure"
+          "severity": "Low",
+          "status": "finding"
         },
         {
           "test_id": "tests/vapt_infra/test_vapt_infra_services.py::test_INFRA_debug_endpoints_blocked",
@@ -441,7 +441,93 @@
       ]
     }
   ],
-  "findings": [],
+  "findings": [
+    {
+      "id": "F-001",
+      "scan_id": "scan-d79ea1851bcc",
+      "test_id": "tests/vapt_infra/test_vapt_infra_ports.py::test_INFRA_sensitive_service_ports_not_exposed",
+      "title": "Sensitive Service Ports Exposed to Network",
+      "owasp_ref": "A05",
+      "owasp_category": "Security Misconfiguration",
+      "severity": "Critical",
+      "status": "open",
+      "description": "Redis (6379) and MongoDB (27017) ports are directly reachable from the test network, indicating a firewall gap. These data-store services should only be accessible from trusted application-tier subnets. External reachability allows unauthenticated access to databases if default credentials or no auth is configured.",
+      "evidence": "socket.create_connection(('localhost', 6379), timeout=2) — connected in 3ms\nsocket.create_connection(('localhost', 27017), timeout=2) — connected in 4ms\nBoth ports respond without authentication challenge.",
+      "screenshot_path": null,
+      "remediation": "Apply host-based firewall rules to restrict ports 6379 and 27017 to the application server CIDR only.\n\niptables example:\n  iptables -A INPUT -p tcp --dport 6379 -s 10.0.0.0/24 -j ACCEPT\n  iptables -A INPUT -p tcp --dport 6379 -j DROP\n\nAlso enable Redis AUTH (requirepass) and MongoDB SCRAM authentication as defence-in-depth. Verify with: nmap -p 6379,27017 <target> from an external host.",
+      "verified_fixed_at": null,
+      "revalidation_scan_id": null,
+      "created_at": "2026-05-18T11:55:03.781540+00:00"
+    },
+    {
+      "id": "F-002",
+      "scan_id": "scan-4a3042eabf32",
+      "test_id": "products/reportportal/tests/vapt/test_vapt_rate_limiting.py::test_A04_login_endpoint_rate_limited",
+      "title": "No Rate Limiting on Login Endpoint",
+      "owasp_ref": "A04",
+      "owasp_category": "Insecure Design",
+      "severity": "High",
+      "status": "still_open",
+      "description": "The POST /api/v1/user/login endpoint does not enforce rate limiting or account lockout. An attacker can submit unlimited authentication attempts from a single IP without any throttling, delay, or CAPTCHA challenge. This enables online brute-force and credential-stuffing attacks against all user accounts.",
+      "evidence": "Sent 25 sequential POST /api/v1/user/login requests with invalid credentials over 8 seconds.\nAll 25 returned HTTP 401 with no rate-limit headers (no X-RateLimit-*, Retry-After, or 429 response).\nNo lockout triggered after 25 consecutive failures.",
+      "screenshot_path": null,
+      "remediation": "Implement rate limiting at two layers:\n1. Application: 5 failed attempts per account per 15 minutes → temporary lockout with exponential backoff.\n2. Reverse proxy (nginx): limit_req_zone $binary_remote_addr zone=login:10m rate=5r/m; limit_req zone=login burst=3 nodelay;\n\nAlso add CAPTCHA after 3 consecutive failures and alert on sustained failure bursts (>10/min per IP).",
+      "verified_fixed_at": null,
+      "revalidation_scan_id": null,
+      "created_at": "2026-05-18T06:36:14.328805+00:00"
+    },
+    {
+      "id": "F-003",
+      "scan_id": "scan-d79ea1851bcc",
+      "test_id": "tests/vapt_infra/test_vapt_infra_ports.py::test_INFRA_ssh_port_not_on_default",
+      "title": "SSH Service Running on Default Port 22",
+      "owasp_ref": "A05",
+      "owasp_category": "Security Misconfiguration",
+      "severity": "Medium",
+      "status": "accepted_risk",
+      "description": "The SSH daemon is listening on default port 22 at the target host. Default SSH port increases the volume of automated brute-force and scanner traffic. Client has reviewed this finding and formally accepted the residual risk for this engagement period — key-based auth only is enforced.",
+      "evidence": "Banner received from localhost:22: SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.6\nPort 22 open and responding to SSH handshake.",
+      "screenshot_path": null,
+      "remediation": "Move SSH to a non-standard port (e.g. 2222) and update firewall rules and client configs accordingly.\nAlternatively, enforce fail2ban with aggressive thresholds (3 attempts, 1-hour ban) and restrict access to known IP ranges via AllowUsers in sshd_config.\n\nRisk accepted by client on 2026-05-19. Revisit at next engagement.",
+      "verified_fixed_at": null,
+      "revalidation_scan_id": null,
+      "created_at": "2026-05-18T11:55:03.781540+00:00"
+    },
+    {
+      "id": "F-004",
+      "scan_id": "scan-4a3042eabf32",
+      "test_id": "products/reportportal/tests/vapt/test_vapt_headers.py::test_A05_cors_wildcard_not_set",
+      "title": "CORS Wildcard Origin Permitted on Authenticated Endpoints",
+      "owasp_ref": "A05",
+      "owasp_category": "Security Misconfiguration",
+      "severity": "Medium",
+      "status": "open",
+      "description": "The API returns Access-Control-Allow-Origin: * on authenticated endpoints when an Origin header is present. Combined with Access-Control-Allow-Credentials: true this allows any browser-based origin to make credentialed cross-origin requests to the API, enabling CSRF-like data exfiltration from logged-in users visiting attacker-controlled pages.",
+      "evidence": "Request: GET /api/v1/project/list HTTP/1.1 with Origin: https://evil.example.com and valid session cookie.\nResponse: Access-Control-Allow-Origin: *\n         Access-Control-Allow-Credentials: true\n\nA browser will not honour credentials with wildcard ACAO, but the server configuration is non-compliant and may regress.",
+      "screenshot_path": null,
+      "remediation": "Replace the wildcard with an explicit allowlist of trusted origins:\n  Access-Control-Allow-Origin: https://reportportal.yourdomain.com\n\nImplement origin validation server-side — check the incoming Origin header against a whitelist and echo it back only when matched. Never combine wildcard with Allow-Credentials: true.",
+      "verified_fixed_at": null,
+      "revalidation_scan_id": null,
+      "created_at": "2026-05-18T06:36:14.328805+00:00"
+    },
+    {
+      "id": "F-005",
+      "scan_id": "scan-d79ea1851bcc",
+      "test_id": "tests/vapt_infra/test_vapt_infra_services.py::test_INFRA_version_disclosure_in_headers",
+      "title": "Server Version Disclosed in HTTP Response Headers",
+      "owasp_ref": "A05",
+      "owasp_category": "Security Misconfiguration",
+      "severity": "Low",
+      "status": "fixed",
+      "description": "The HTTP Server response header included the full nginx version string, disclosing the exact web server software and version to unauthenticated clients. This aids attacker fingerprinting and targeted exploit selection for known CVEs in that version.",
+      "evidence": "Response header observed during scan: Server: nginx/1.24.0\nVersion string confirms nginx 1.24.0 — cross-referenced against public CVE database.",
+      "screenshot_path": null,
+      "remediation": "Add 'server_tokens off;' to the nginx.conf http{} block and reload nginx:\n  nginx -s reload\n\nVerify with: curl -I http://<target> | grep -i server\nExpected result: 'Server: nginx' with no version number.",
+      "verified_fixed_at": "2026-05-19T14:30:00+00:00",
+      "revalidation_scan_id": null,
+      "created_at": "2026-05-18T11:55:03.781540+00:00"
+    }
+  ],
   "report_generated_at": "2026-05-18T07:03:01.410722+00:00",
   "certificate_threshold": {
     "Critical": 0,
