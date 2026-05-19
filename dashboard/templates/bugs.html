@@ -22,13 +22,6 @@
 
       <!-- Filters -->
       <div class="space-y-1.5">
-        <select x-model="filterProduct" @change="loadBugs()"
-                class="w-full text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200">
-          <option value="">All Products</option>
-          {% for p in all_products %}
-          <option value="{{ p }}" {{ 'selected' if p == filter_product else '' }}>{{ p }}</option>
-          {% endfor %}
-        </select>
         <div class="flex gap-1.5">
           <select x-model="filterState" @change="loadBugs()"
                   class="flex-1 text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-rose-200">
@@ -497,8 +490,6 @@
     </template>
   </div>
 
-</div>
-
 <!-- ── Create Bug Modal ──────────────────────────────────────────────────────── -->
 <div x-show="showCreateModal" x-cloak
      class="fixed inset-0 z-50 flex items-center justify-center"
@@ -604,8 +595,7 @@
           Cancel
         </button>
         <button @click="submitCreate()"
-                :disabled="!createForm.title.trim() || !createForm.product"
-                class="text-xs font-medium bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition-colors">
+                class="text-xs font-medium bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg transition-colors">
           Create Bug
         </button>
       </div>
@@ -656,6 +646,8 @@
     </div>
   </div>
 </div>
+
+</div><!-- /bugsApp -->
 
 {% endblock %}
 
@@ -757,16 +749,18 @@ function bugsApp() {
     },
 
     async submitCreate() {
-      if (!this.createForm.title.trim() || !this.createForm.product) return;
+      if (!this.createForm.title.trim()) { sfToast('Title is required', 'warn'); return; }
+      if (!this.createForm.product) { sfToast('Please select a product', 'warn'); return; }
       const r = await fetch('/api/bugs', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(this.createForm) });
       if (r.ok) {
+        const bug = await r.json().catch(() => null);
         this.showCreateModal = false;
         sfToast('Bug created', 'info');
         await this.loadBugs();
-        const bug = await r.json().catch(() => null);
         if (bug) { const found = this.bugs.find(b => b.id === bug.id); if (found) this.selectBug(found); }
       } else {
-        sfToast('Failed to create bug', 'error');
+        const err = await r.json().catch(() => ({}));
+        sfToast('Failed to create bug: ' + (err.detail || r.status), 'error');
       }
     },
 
