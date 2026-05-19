@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (35)  
+Last updated: 2026-05-19 (36)  
 Framework version: 0.1.0
 
 ---
@@ -31,6 +31,7 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 | Accessibility Testing | Working | Playwright + axe-core CDN injection, WCAG 2.1 A/AA/AAA, per-page violations by impact, multi-scan history, PDF report. `core/a11y_manager.py`, `/a11y` page. |
 | API Contract Validation | Working | Loads OpenAPI spec (URL or file), validates status codes + jsonschema per endpoint, skips path-param routes, PDF report. `core/contract_manager.py`, `/contract` page. |
 | Visual Regression | Working | Playwright screenshot capture, Pillow pixel diff, configurable threshold %, baseline management, PDF report. `core/visual_manager.py`, `/visual` page. |
+| Bug Tracker | Working | Full defect lifecycle: state machine (new→open→in_progress→resolved→closed/wont_fix/deferred), artifact storage (screenshot/video/log/HAR/doc), comments, history, PDF incident report. `core/bug_manager.py`, `/bugs` page. Per-product `bugs_enabled` flag. |
 | Storage | Working | SQLite WAL mode (`data/sentinelflux.db` via `core/db.py`). Runs, schedules, approvals, pipeline jobs, activity log, quarantine all in DB. Per-product run config YAML still at `data/product_config/<product>.yaml`. |
 | Dashboard | Working | FastAPI + Jinja2 + HTMX + Alpine.js + Tailwind. 20 pages/routers. Start: `uvicorn dashboard.app:app --reload` |
 | Runs | Working | Trigger/schedule pytest runs from dashboard, parse JSON reports, auto-analyze failures. `/runs` page |
@@ -42,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Bugs module** (`core/bug_manager.py`, `core/db.py`, `dashboard/routers/bugs.py`, `dashboard/templates/bugs.html`, `dashboard/templates/bug_report_pdf.html`, `utils/constants.py`, `dashboard/app.py`, `dashboard/routers/pages.py`, `dashboard/templates/base.html`, `dashboard/routers/config/_products.py`, `dashboard/templates/partials/config_products.html`, `dashboard/templates/failures.html`, `ai/context/progress/backlog.yaml`): Full defect tracking module. Four new SQLite tables: `bugs` (full metadata — product, title, description, priority P0-P3, severity blocker-trivial, state, bug_type, component, environment, build_version, reporter, assignee, steps/expected/actual/root_cause/fix_notes, tags, linked_tc_id, linked_run_id, linked_plan_id), `bug_state_history` (every transition recorded), `bug_comments`, `bug_artifacts` (type/mime/size/storage_path). `BugManager`: create/get/list/patch/delete, `transition()` with enforced state machine (new→open→in_progress→resolved→closed, plus deferred/wont_fix paths with reopen support), get_history, add/list comments, add/list/delete artifacts, counts_by_state. 14 REST endpoints under `/api/bugs`: list, create, get, patch, delete (admin), transition with comment, history, comments, artifact upload (multipart, 100 MB cap, auto-inferred type), artifact download/serve, artifact delete, HTML/PDF incident report, `POST /api/bugs/from-run/{run_id}` pre-fills from test failure. `bugs.html`: split-panel UI — left list with state/priority filters + state count chips; right detail with 4 tabs: Details (inline editing of all fields via blur-patch), Artifacts (drag-and-drop upload, screenshot thumbnail grid + lightbox, inline video player, download table for logs/HAR/docs), History (timeline), Comments (threaded + add form). State transition modal with required comment for wont_fix/deferred. Create Bug modal. Export PDF button → WeasyPrint incident report. `bugs_enabled` product flag added — Config → Products toggle + sidebar nav item. Failures page gets "File Bug" button per row that calls `from-run` endpoint and opens `/bugs?highlight=<id>` in new tab. Backlog item P6-01 added for future S3 artifact storage migration.
+
+## Previous: Data: VAPT findings test data (2026-05-19)
 
 - **Data: VAPT findings test data** (`data/vapt_findings/reportportal/eng-25d78fab7eae.json`): Morphed the Q2 2026 Security Assessment engagement with 5 realistic findings to exercise the full findings flow in the dashboard UI. F-001: Sensitive Ports Exposed — Redis 6379/Mongo 27017 (Critical, open, infra). F-002: No Rate Limiting on Login (High, still_open, web). F-003: SSH on Default Port 22 (Medium, accepted_risk, infra). F-004: CORS Wildcard on Authenticated Endpoints (Medium, open, web). F-005: Server Version Disclosure (Low, fixed, infra). Infra scan updated to 3 failed / 5 passed; web scan to 2 failed / 28 passed. Three infra test_log entries flipped from confirmed_secure → finding. All findings include full description, evidence, and remediation text.
 
