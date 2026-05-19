@@ -48,7 +48,7 @@
   </td>
 </tr>
 {% endif %}
-{% if total is defined %}
+{% if total is defined and request.headers.get('HX-Request') %}
 <div id="activities-pagination-top" hx-swap-oob="true"
      class="flex items-center justify-between px-1 py-3 text-xs text-slate-500">
   <span>{{ total }} entr{{ 'y' if total == 1 else 'ies' }} · page {{ page }} of {{ total_pages }}</span>
