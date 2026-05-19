@@ -1,5 +1,13 @@
 # Completed work items — append only, newest first
 
+- id: bugs-id-display-plan-link
+  date: 2026-05-19
+  title: "Bugs: Bug ID display + test plan link in Details panel"
+  outcome: >
+    Details tab shows Bug ID row at top. Linked info row includes test plan
+    link (/test-plans?highlight=) and updated empty-state label. Config/label/
+    priority panels tightened to py-3 padding.
+
 - id: activities-pagination-oob-fix
   date: 2026-05-19
   title: "Fix: activities OOB pagination triple-render on initial page load"

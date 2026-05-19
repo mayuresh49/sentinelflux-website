@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (49)  
+Last updated: 2026-05-19 (50)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Bugs: Bug ID display + test plan link in Details panel** (`dashboard/templates/bugs.html`, `dashboard/templates/config.html`, `dashboard/templates/partials/config_labels.html`, `dashboard/templates/partials/config_priorities.html`): Details tab now shows a Bug ID row at the top (mono font, slate styling). Linked info row adds a test plan link (`/test-plans?highlight=`) and updates the empty-state label to mention plan. Config and label/priority panels get tighter `py-3` padding.
+
+## Previous: Activities OOB pagination fix (2026-05-19)
 
 - **Fix: activities OOB pagination triple-render** (`dashboard/templates/partials/activities_rows.html`): OOB pagination blocks in the partial were rendering as raw HTML on full-page loads (browser ejects `<div>` from `<tbody>` into visible page), causing 3 pagination controls to appear. Guarded the entire OOB section with `request.headers.get('HX-Request')` so OOB swaps only fire during HTMX requests; initial page load shows the pagination rendered directly in `activities.html`.
 
