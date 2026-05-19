@@ -27,18 +27,21 @@ _vm = VaptManager()
 _VAPT_SUBDIRS: dict[str, str] = {
     "web": "vapt",
     "infra": "vapt_infra",
+    "infra_int": "vapt_infra_int",
     "mobile": "vapt_mobile",
 }
 
 _SCAN_TYPE_LABELS: dict[str, str] = {
     "web": "Web Application",
-    "infra": "Infrastructure",
+    "infra": "Infrastructure (External)",
+    "infra_int": "Infrastructure (Internal)",
     "mobile": "Mobile Application",
 }
 
 _METHODOLOGY_LABELS: dict[str, str] = {
     "web": "OWASP WSTG v4.2",
     "infra": "OWASP Top 10 / CIS Benchmarks",
+    "infra_int": "CIS Benchmarks / NIST SP 800-123 / SSH Hardening",
     "mobile": "OWASP MASVS / MASTG",
 }
 
@@ -81,10 +84,13 @@ _OWASP_RULES: list[tuple[list[str], str, str]] = [
     (["cors", "x_frame", "hsts", "csp", "content_type_options", "server_version",
       "expose", "info_disclosure", "server_header", "header", "clickjack",
       "referrer_policy", "html_comment",
-      # Infra
+      # Infra (external)
       "default_server", "debug_endpoint", "backup_file",
       "spf_record", "dmarc_record", "zone_transfer",
       "sensitive_port", "service_port", "no_telnet", "no_ftp",
+      # Infra (internal — SSH grey-box)
+      "permit_root_login", "permit_root", "password_auth", "max_auth_tries",
+      "allow_users", "suid_sgid", "sensitive_file_perm", "file_perm", "audit_log",
       # Mobile M2 — storage
       "m2_sensitive", "m2_login", "m2_session", "m2_no_sensitive", "cache_control",
       "no_cacheable", "not_cacheable"],
@@ -174,6 +180,8 @@ class UpdateScopeBody(BaseModel):
     out_of_scope: list[str] = []
     infra_targets: list[str] = []
     mobile_app_path: str = ""
+    ssh_username: str = ""
+    ssh_key_path: str = ""
     environment: str = ""
     start_date: str = ""
     end_date: str = ""
@@ -505,13 +513,20 @@ def _execute_vapt_scan(product: str, eng_id: str, scan_id: str,
         cmd.append("--screenshot=only-on-failure")
 
     run_env = {**os.environ}
-    if scan_type in ("infra", "mobile"):
+    if scan_type in ("infra", "infra_int", "mobile"):
         eng = _vm.get(product, eng_id)
         scope = (eng or {}).get("scope", {})
-        if scan_type == "infra":
+        if scan_type in ("infra", "infra_int"):
             targets = scope.get("infra_targets", [])
             if targets:
                 run_env["VAPT_INFRA_TARGETS"] = ",".join(str(t) for t in targets)
+        if scan_type == "infra_int":
+            ssh_user = scope.get("ssh_username", "")
+            ssh_key = scope.get("ssh_key_path", "")
+            if ssh_user:
+                run_env["VAPT_SSH_USER"] = ssh_user
+            if ssh_key:
+                run_env["VAPT_SSH_KEY_PATH"] = ssh_key
         elif scan_type == "mobile":
             app_path = scope.get("mobile_app_path", "")
             if app_path:

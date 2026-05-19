@@ -64,6 +64,8 @@ class VaptManager:
                 "out_of_scope": [],
                 "infra_targets": [],
                 "mobile_app_path": "",
+                "ssh_username": "",
+                "ssh_key_path": "",
                 "environment": "",
                 "start_date": "",
                 "end_date": "",

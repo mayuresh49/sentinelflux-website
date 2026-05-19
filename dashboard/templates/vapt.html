@@ -148,7 +148,7 @@
         <div class="px-5 py-2.5 border-b border-slate-100 flex items-center gap-2">
           <span class="text-xs text-slate-400 font-medium mr-1">Scan Type:</span>
           <div class="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
-            <template x-for="[st, label] in [['web','Web App'],['infra','Infrastructure'],['mobile','Mobile App']]" :key="st">
+            <template x-for="[st, label] in [['web','Web App'],['infra','External Infra'],['infra_int','Internal Infra'],['mobile','Mobile App']]" :key="st">
               <button @click="setScanType(st)"
                       :class="scanTypeSel === st ? 'bg-white shadow text-slate-800 font-medium' : 'text-slate-500 hover:text-slate-700'"
                       class="text-xs px-3 py-1.5 rounded-md transition-all" x-text="label"></button>
@@ -253,6 +253,28 @@
                        class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-400"
                        placeholder="/path/to/app.apk  or  /path/to/app.ipa"/>
               </div>
+              <div class="md:col-span-2" x-show="scopeForm.test_types.includes('infra_int')">
+                <div class="border border-emerald-200 rounded-lg p-3 bg-emerald-50 space-y-3">
+                  <p class="text-xs font-semibold text-emerald-700">SSH Credentials (Internal Infrastructure Scan)</p>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs font-medium text-slate-600 mb-1">SSH Username</label>
+                      <input x-model="scopeSshUsername" type="text" :disabled="!!selectedEng?.scope?.finalized_at"
+                             class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-400"
+                             placeholder="e.g. ubuntu"/>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium text-slate-600 mb-1">
+                        SSH Private Key Path
+                        <span class="ml-1 text-slate-400 font-normal">(absolute path on server — key material is never stored)</span>
+                      </label>
+                      <input x-model="scopeSshKeyPath" type="text" :disabled="!!selectedEng?.scope?.finalized_at"
+                             class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-400"
+                             placeholder="/home/ubuntu/.ssh/id_rsa"/>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div x-show="!selectedEng?.scope?.finalized_at" class="flex items-center gap-2 pt-2">
               <button @click="saveScope()" class="text-sm font-medium bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg transition-colors">Save Scope</button>
@@ -346,7 +368,7 @@
                               ? 'bg-indigo-600 text-white'
                               : 'bg-white text-slate-600 border border-slate-200 hover:border-indigo-300 hover:text-indigo-600'"
                             class="text-xs px-2 py-1 rounded transition-colors">
-                      <span x-text="tpl.filename.replace(/test_vapt_(infra_|mobile_)?/,'').replace('.py','')"></span>
+                      <span x-text="tpl.filename.replace(/test_vapt_(infra_int_|infra_|mobile_)?/,'').replace('.py','')"></span>
                       <span class="opacity-60 ml-1" x-text="'(' + tpl.test_count + ')'"></span>
                     </button>
                   </template>
@@ -374,7 +396,7 @@
               <button @click="triggerScan(false)" :disabled="scanning"
                       class="flex items-center gap-1.5 text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg disabled:opacity-40 transition-colors">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Run <span x-text="{'web':'Web App','infra':'Infra','mobile':'Mobile'}[scanTypeSel]"></span> Scan
+                Run <span x-text="{'web':'Web App','infra':'External Infra','infra_int':'Internal Infra','mobile':'Mobile'}[scanTypeSel]"></span> Scan
               </button>
               <button @click="triggerScan(true)" :disabled="scanning || !hasOpenFindings"
                       class="flex items-center gap-1.5 text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded-lg disabled:opacity-40 transition-colors">
@@ -391,7 +413,7 @@
                   <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2 flex-wrap">
                       <span :class="s.is_revalidation ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'" class="px-1.5 py-0.5 rounded font-medium" x-text="s.is_revalidation ? 'Re-validation' : 'Initial'"></span>
-                      <span :class="scanTypeClass(s.scan_type||'web')" class="px-1.5 py-0.5 rounded font-medium capitalize" x-text="{'web':'Web App','infra':'Infrastructure','mobile':'Mobile'}[s.scan_type||'web'] || s.scan_type"></span>
+                      <span :class="scanTypeClass(s.scan_type||'web')" class="px-1.5 py-0.5 rounded font-medium capitalize" x-text="{'web':'Web App','infra':'External Infra','infra_int':'Internal Infra','mobile':'Mobile'}[s.scan_type||'web'] || s.scan_type"></span>
                       <span :class="scanStatusClass(s.status)" class="px-1.5 py-0.5 rounded font-medium" x-text="s.status"></span>
                     </div>
                     <div class="flex items-center gap-3 text-slate-500">
@@ -643,6 +665,8 @@ function vaptApp() {
     scopeOutOfScope: '',
     scopeInfraTargets: '',
     scopeMobileAppPath: '',
+    scopeSshUsername: '',
+    scopeSshKeyPath: '',
     certThreshold: { Critical: 0, High: 0 },
     tabs: [
       { id: 'scope', label: 'Scope' },
@@ -745,7 +769,7 @@ function vaptApp() {
     },
 
     async regenerateTests() {
-      const label = {'web':'Web App','infra':'Infrastructure','mobile':'Mobile App'}[this.scanTypeSel] || this.scanTypeSel;
+      const label = {'web':'Web App','infra':'External Infra','infra_int':'Internal Infra','mobile':'Mobile App'}[this.scanTypeSel] || this.scanTypeSel;
       const isRegen = !!this.testInfo?.exists;
       const msg = isRegen
         ? 'Regenerate the ' + label + ' test suite for ' + this.product + '? Existing test files will be overwritten.'
@@ -800,6 +824,8 @@ function vaptApp() {
       this.scopeOutOfScope = (s.out_of_scope || []).join('\n');
       this.scopeInfraTargets = (s.infra_targets || []).join('\n');
       this.scopeMobileAppPath = s.mobile_app_path || '';
+      this.scopeSshUsername = s.ssh_username || '';
+      this.scopeSshKeyPath = s.ssh_key_path || '';
     },
 
     async saveScope() {
@@ -809,6 +835,8 @@ function vaptApp() {
         out_of_scope: this.scopeOutOfScope.split('\n').map(s => s.trim()).filter(Boolean),
         infra_targets: this.scopeInfraTargets.split('\n').map(s => s.trim()).filter(Boolean),
         mobile_app_path: this.scopeMobileAppPath.trim(),
+        ssh_username: this.scopeSshUsername.trim(),
+        ssh_key_path: this.scopeSshKeyPath.trim(),
       };
       const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/scope?product=' + this.product, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
@@ -832,7 +860,7 @@ function vaptApp() {
     },
 
     async triggerScan(isRevalidation) {
-      const typeLabel = {'web':'Web App','infra':'Infrastructure','mobile':'Mobile App'}[this.scanTypeSel] || this.scanTypeSel;
+      const typeLabel = {'web':'Web App','infra':'External Infra','infra_int':'Internal Infra','mobile':'Mobile App'}[this.scanTypeSel] || this.scanTypeSel;
       const label = isRevalidation ? typeLabel + ' re-validation scan' : typeLabel + ' security scan';
       const ok = await sfConfirm('Start a ' + label + ' for ' + this.product + '?');
       if (!ok) return;
@@ -886,7 +914,7 @@ function vaptApp() {
     },
 
     async issueCertificate() {
-      const label = {'web':'Web App','infra':'Infrastructure','mobile':'Mobile App'}[this.scanTypeSel] || this.scanTypeSel;
+      const label = {'web':'Web App','infra':'External Infra','infra_int':'Internal Infra','mobile':'Mobile App'}[this.scanTypeSel] || this.scanTypeSel;
       const ok = await sfConfirm('Issue the ' + label + ' VAPT certificate for this engagement? This action is permanent.');
       if (!ok) return;
       const r = await fetch('/api/vapt/engagement/' + this.selectedEng.id + '/certificate?product=' + this.product + '&scan_type=' + this.scanTypeSel, { method: 'POST' });
@@ -946,7 +974,7 @@ function vaptApp() {
       return m[s] || 'bg-slate-100 text-slate-600';
     },
     scanTypeClass(st) {
-      const m = { web:'bg-violet-100 text-violet-700', infra:'bg-teal-100 text-teal-700', mobile:'bg-cyan-100 text-cyan-700' };
+      const m = { web:'bg-violet-100 text-violet-700', infra:'bg-teal-100 text-teal-700', infra_int:'bg-emerald-100 text-emerald-700', mobile:'bg-cyan-100 text-cyan-700' };
       return m[st] || 'bg-slate-100 text-slate-600';
     },
     sevClass(sev) {

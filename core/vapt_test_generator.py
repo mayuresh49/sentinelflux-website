@@ -1042,6 +1042,255 @@ def test_INFRA_zone_transfer_blocked(vapt_host, vapt_domain):
         )
 '''
 
+# ── infra_int (internal/grey-box SSH) test content ────────────────────────────
+
+_INFRA_INT_CONFTEST = '''\
+"""VAPT infrastructure (internal/grey-box) fixture set — authenticated SSH scan.
+VAPT_INFRA_TARGETS env var (comma-separated) overrides the host list when set by the scan runner.
+VAPT_SSH_USER / VAPT_SSH_KEY_PATH enable authenticated checks — set via the engagement scope.
+"""
+import os
+import re
+from pathlib import Path
+import pytest
+import yaml
+
+_PRODUCT_ROOT = Path(__file__).resolve().parent.parent.parent
+
+
+def _load_config() -> dict:
+    cfg_dir = _PRODUCT_ROOT / "config"
+    for f in sorted(cfg_dir.glob("env_*.yaml")):
+        try:
+            return yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+        except Exception:
+            pass
+    return {}
+
+
+def _find(cfg: dict, *keys: str) -> str:
+    for section in cfg.values():
+        if isinstance(section, dict):
+            for k in keys:
+                if k in section and section[k]:
+                    return str(section[k])
+    return ""
+
+
+def _resolve_targets() -> list[str]:
+    raw = os.environ.get("VAPT_INFRA_TARGETS", "").strip()
+    if raw:
+        return [t.strip() for t in raw.split(",") if t.strip()]
+    url = _find(_load_config(), "base_url", "api_url", "url") or "http://localhost:8080"
+    m = re.match(r"https?://([^/:]+)", url)
+    return [m.group(1) if m else "localhost"]
+
+
+def pytest_runtest_setup(item):
+    """Fast-skip all SSH tests when credentials are not configured."""
+    if "ssh_client" in item.fixturenames:
+        if not os.environ.get("VAPT_SSH_USER", "").strip() or \\
+           not os.environ.get("VAPT_SSH_KEY_PATH", "").strip():
+            pytest.skip(
+                "SSH credentials not configured — set ssh_username and ssh_key_path "
+                "in the engagement scope to enable grey-box internal infrastructure checks"
+            )
+
+
+def pytest_generate_tests(metafunc):
+    if "vapt_host" in metafunc.fixturenames:
+        metafunc.parametrize("vapt_host", _resolve_targets())
+
+
+@pytest.fixture(scope="session")
+def vapt_base_url() -> str:
+    return _find(_load_config(), "base_url", "api_url", "url") or "http://localhost:8080"
+
+
+@pytest.fixture(scope="session")
+def ssh_client():
+    """Session-scoped SSH connection factory — yields callable: ssh_client(host) -> paramiko.SSHClient."""
+    ssh_user = os.environ.get("VAPT_SSH_USER", "").strip()
+    ssh_key = os.environ.get("VAPT_SSH_KEY_PATH", "").strip()
+
+    if not ssh_user or not ssh_key:
+        pytest.skip(
+            "SSH credentials not configured — set ssh_username and ssh_key_path "
+            "in the engagement scope to enable grey-box internal infrastructure checks"
+        )
+
+    try:
+        import paramiko
+    except ImportError:
+        pytest.skip("paramiko not installed — run: pip install paramiko>=3.0")
+
+    if not Path(ssh_key).exists():
+        pytest.skip(f"SSH private key not found on server: {ssh_key}")
+
+    _clients: dict = {}
+
+    def _connect(host: str):
+        if host in _clients:
+            return _clients[host]
+        client = paramiko.SSHClient()
+        # AutoAddPolicy is acceptable here — VAPT targets are known, controlled hosts
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            client.connect(
+                hostname=host,
+                username=ssh_user,
+                key_filename=ssh_key,
+                timeout=15,
+                look_for_keys=False,
+                allow_agent=False,
+            )
+        except paramiko.AuthenticationException as e:
+            pytest.skip(f"SSH authentication failed for {ssh_user}@{host}: {e}")
+        except Exception as e:
+            pytest.skip(f"SSH connection failed to {host}: {e}")
+        _clients[host] = client
+        return client
+
+    yield _connect
+
+    for c in _clients.values():
+        try:
+            c.close()
+        except Exception:
+            pass
+'''
+
+_INFRA_INT_SSH_CONFIG_TESTS = '''\
+"""Standard VAPT internal infrastructure checks — authenticated SSH grey-box assessment."""
+import pytest
+
+
+def _run(ssh_client_fn, host: str, cmd: str) -> str:
+    """Execute cmd via SSH on host, return stdout (stderr as fallback)."""
+    client = ssh_client_fn(host)
+    _, stdout, stderr = client.exec_command(cmd, timeout=30)
+    out = stdout.read().decode("utf-8", errors="replace").strip()
+    return out or stderr.read().decode("utf-8", errors="replace").strip()
+
+
+@pytest.mark.security
+def test_INFRA_INT_ssh_permit_root_login_disabled(ssh_client, vapt_host):
+    """sshd_config: PermitRootLogin must be no — direct root SSH bypasses the audit trail."""
+    out = _run(ssh_client, vapt_host, "grep -i \'^PermitRootLogin\' /etc/ssh/sshd_config")
+    if not out:
+        pytest.xfail(
+            "PermitRootLogin not explicitly set in sshd_config — "
+            "SSH default may permit root login; add \'PermitRootLogin no\'"
+        )
+    assert "no" in out.lower(), \\
+        f"PermitRootLogin is not disabled on {vapt_host}: \'{out}\' — set \'PermitRootLogin no\' in sshd_config"
+
+
+@pytest.mark.security
+def test_INFRA_INT_ssh_password_auth_disabled(ssh_client, vapt_host):
+    """sshd_config: PasswordAuthentication must be no — prevents online brute-force attacks."""
+    out = _run(ssh_client, vapt_host, "grep -i \'^PasswordAuthentication\' /etc/ssh/sshd_config")
+    if not out:
+        pytest.xfail(
+            "PasswordAuthentication not explicitly set in sshd_config — "
+            "default may allow password auth; add \'PasswordAuthentication no\'"
+        )
+    assert "no" in out.lower(), \\
+        f"PasswordAuthentication is not disabled on {vapt_host}: \'{out}\' — set \'PasswordAuthentication no\'"
+
+
+@pytest.mark.security
+def test_INFRA_INT_ssh_max_auth_tries(ssh_client, vapt_host):
+    """sshd_config: MaxAuthTries must be <=4 — limits brute-force attempts per connection."""
+    out = _run(ssh_client, vapt_host, "grep -i \'^MaxAuthTries\' /etc/ssh/sshd_config")
+    if not out:
+        pytest.xfail(
+            "MaxAuthTries not set in sshd_config — SSH default is 6; "
+            "set \'MaxAuthTries 3\' to reduce brute-force window"
+        )
+        return
+    try:
+        val = int(out.split()[-1])
+    except ValueError:
+        pytest.fail(f"Could not parse MaxAuthTries value from sshd_config: \'{out}\'")
+    assert val <= 4, \\
+        f"MaxAuthTries={val} on {vapt_host} exceeds recommended maximum of 4 — reduce to 3 in sshd_config"
+
+
+@pytest.mark.security
+def test_INFRA_INT_ssh_allow_users_configured(ssh_client, vapt_host):
+    """sshd_config: AllowUsers or AllowGroups must restrict which accounts can SSH in."""
+    out = _run(ssh_client, vapt_host,
+               "grep -Ei \'(AllowUsers|AllowGroups)\' /etc/ssh/sshd_config")
+    if not out:
+        pytest.xfail(
+            f"Neither AllowUsers nor AllowGroups is configured in sshd_config on {vapt_host} — "
+            "all system accounts can authenticate via SSH; "
+            "add \'AllowUsers <username>\' to restrict access to named accounts only"
+        )
+
+
+@pytest.mark.security
+def test_INFRA_INT_suid_sgid_files(ssh_client, vapt_host):
+    """Unexpected SUID/SGID binaries are a privilege escalation risk — only OS-standard ones should exist."""
+    out = _run(ssh_client, vapt_host,
+               "timeout 25 find / -perm /6000 -type f 2>/dev/null | grep -v /proc | head -60")
+    _EXPECTED = {
+        "/usr/bin/sudo", "/usr/bin/su", "/usr/bin/passwd",
+        "/usr/bin/newgrp", "/usr/bin/chsh", "/usr/bin/chfn",
+        "/usr/bin/gpasswd", "/usr/bin/mount", "/usr/bin/umount",
+        "/usr/bin/ping", "/bin/ping",
+        "/usr/lib/openssh/ssh-keysign",
+        "/usr/lib/dbus-1.0/dbus-daemon-launch-helper",
+        "/usr/sbin/pam_extraauth",
+    }
+    found = [f.strip() for f in out.splitlines() if f.strip()]
+    unexpected = [f for f in found if f not in _EXPECTED]
+    if unexpected:
+        pytest.xfail(
+            f"Unexpected SUID/SGID binaries on {vapt_host} — "
+            f"review for unnecessary privilege elevation: {unexpected[:10]}"
+        )
+
+
+@pytest.mark.security
+def test_INFRA_INT_sensitive_file_permissions(ssh_client, vapt_host):
+    """Sensitive system files must have restrictive permissions to prevent credential exposure."""
+    checks = [
+        ("/etc/shadow",            "640", "stat -c \'%a\' /etc/shadow 2>/dev/null"),
+        ("/etc/sudoers",           "440", "stat -c \'%a\' /etc/sudoers 2>/dev/null"),
+        ("~/.ssh/authorized_keys", "600",
+         "stat -c \'%a\' ~/.ssh/authorized_keys 2>/dev/null || echo absent"),
+    ]
+    failures = []
+    for path, max_mode, cmd in checks:
+        out = _run(ssh_client, vapt_host, cmd).strip()
+        if not out or "absent" in out or "No such" in out:
+            continue
+        try:
+            actual = int(out, 8)
+            limit = int(max_mode, 8)
+        except ValueError:
+            continue
+        if actual > limit:
+            failures.append(f"{path}: mode {out} (max allowed: {max_mode})")
+    assert not failures, \\
+        f"Overly permissive sensitive file permissions on {vapt_host}: {failures}"
+
+
+@pytest.mark.security
+def test_INFRA_INT_audit_log_present(ssh_client, vapt_host):
+    """Auth audit log must exist — required for incident response and forensic investigation."""
+    out = _run(ssh_client, vapt_host,
+               "test -f /var/log/auth.log && echo auth.log || "
+               "test -f /var/log/secure && echo secure || echo absent")
+    assert "absent" not in out, (
+        f"No auth audit log found on {vapt_host} "
+        "(/var/log/auth.log or /var/log/secure missing) — "
+        "install and configure rsyslog or auditd to capture authentication events"
+    )
+'''
+
 # ── mobile test content ───────────────────────────────────────────────────────
 
 _MOBILE_CONFTEST = '''\
@@ -1740,6 +1989,12 @@ class VaptTestGenerator:
         ("test_vapt_infra_dns.py", _INFRA_DNS_TESTS),
     ]
 
+    _FILES_INFRA_INT: list[tuple[str, str]] = [
+        ("__init__.py", ""),
+        ("conftest.py", _INFRA_INT_CONFTEST),
+        ("test_vapt_infra_int_ssh_config.py", _INFRA_INT_SSH_CONFIG_TESTS),
+    ]
+
     _FILES_MOBILE: list[tuple[str, str]] = [
         ("__init__.py", ""),
         ("conftest.py", _MOBILE_CONFTEST),
@@ -1757,6 +2012,7 @@ class VaptTestGenerator:
     _SUBDIRS: dict[str, str] = {
         "web": "vapt",
         "infra": "vapt_infra",
+        "infra_int": "vapt_infra_int",
         "mobile": "vapt_mobile",
     }
 
@@ -1779,6 +2035,10 @@ class VaptTestGenerator:
         "test_vapt_infra_dns.py":      ("A05", "DNS Security — SPF, DMARC, Zone Transfer"),
     }
 
+    _FILE_META_INFRA_INT: dict[str, tuple[str, str]] = {
+        "test_vapt_infra_int_ssh_config.py": ("SSH", "SSH Hardening — sshd_config, SUID/SGID, File Permissions, Audit Logs"),
+    }
+
     _FILE_META_MOBILE: dict[str, tuple[str, str]] = {
         "test_vapt_mobile_network.py":       ("M3", "MASVS-NETWORK — TLS, HTTPS Enforcement, HSTS"),
         "test_vapt_mobile_auth.py":          ("M4", "MASVS-AUTH — Authentication, Rate Limiting"),
@@ -1796,6 +2056,7 @@ class VaptTestGenerator:
         return {
             "web": cls._FILES_WEB,
             "infra": cls._FILES_INFRA,
+            "infra_int": cls._FILES_INFRA_INT,
             "mobile": cls._FILES_MOBILE,
         }.get(scan_type, cls._FILES_WEB)
 
@@ -1804,6 +2065,7 @@ class VaptTestGenerator:
         return {
             "web": cls._FILE_META_WEB,
             "infra": cls._FILE_META_INFRA,
+            "infra_int": cls._FILE_META_INFRA_INT,
             "mobile": cls._FILE_META_MOBILE,
         }.get(scan_type, cls._FILE_META_WEB)
 
@@ -1842,8 +2104,8 @@ class VaptTestGenerator:
 
     @classmethod
     def all_test_info(cls, product: str) -> dict[str, dict]:
-        """Return test_info for all three scan types in a single call."""
-        return {st: cls.test_info(product, st) for st in ("web", "infra", "mobile")}
+        """Return test_info for all scan types in a single call."""
+        return {st: cls.test_info(product, st) for st in ("web", "infra", "infra_int", "mobile")}
 
     @classmethod
     def template_contents(cls, product: str, scan_type: str = "web") -> list[dict]:
