@@ -1,5 +1,13 @@
 # Completed work items — append only, newest first
 
+- id: activities-top-pagination
+  date: 2026-05-19
+  title: "Activities: top pagination with HTMX OOB sync"
+  outcome: >
+    Added activities-pagination-top div above the table in activities.html.
+    activities_rows.html partial now emits two hx-swap-oob blocks so both
+    top and bottom pagination controls update together on every HTMX swap.
+
 - id: bugs-custom-statuses-workflow
   date: 2026-05-19
   title: "Bugs: custom statuses per product with configurable workflow"

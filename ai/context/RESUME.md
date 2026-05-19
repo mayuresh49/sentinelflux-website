@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (46)  
+Last updated: 2026-05-19 (47)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Activities: top pagination added and synced via HTMX OOB** (`dashboard/templates/activities.html`, `dashboard/templates/partials/activities_rows.html`): Added a second pagination control above the table (`id="activities-pagination-top"`). The partial now emits two `hx-swap-oob` blocks — one for each pagination div — so both are updated in sync on every HTMX page/filter change. Initial page load renders both via Jinja2 using plain `href` links; after any HTMX swap both switch to `hx-get` powered links.
+
+## Previous: Bugs custom statuses + workflow (2026-05-19)
 
 - **Bugs: custom statuses per product with configurable workflow** (`core/bug_manager.py`, `dashboard/routers/config/_bugs.py`, `dashboard/routers/pages.py`, `dashboard/templates/config.html`, `dashboard/templates/bugs.html`, `dashboard/templates/partials/config_bug_statuses.html` (new), `dashboard/templates/partials/config_bug_transitions.html`): Per-product `bug_statuses` list in `config.yaml` — each entry has `name`, `label`, `color`. `_get_statuses(product)` in BugManager falls back to 7 hardcoded defaults. Config > Bug Workflow tab split into two sections: Statuses (add/remove custom statuses with name, label, color) + Transitions matrix (renders with product's actual statuses). `bugs.html` filter dropdown server-rendered from product statuses; JS color maps replaced by `_COLOR_PALETTE` data + `_statusMeta()` lookup; `stateLabel()` for display text; transition modal drops hardcoded wont_fix/deferred logic.
 
