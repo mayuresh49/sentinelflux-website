@@ -70,6 +70,18 @@
         </div>
       </div>
 
+      <!-- Error banner -->
+      <div x-show="runState[persona.key] === 'error' && runError[persona.key]"
+           class="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-start gap-3">
+        <svg class="w-4 h-4 text-red-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+        <div>
+          <p class="text-sm font-semibold text-red-700">Last run failed</p>
+          <p class="text-xs text-red-600 mt-0.5" x-text="runError[persona.key]"></p>
+        </div>
+      </div>
+
       <!-- Status filter chips -->
       <div class="flex gap-1.5 flex-wrap items-center">
         <span class="text-xs text-slate-400 font-medium mr-1">Filter:</span>
@@ -219,6 +231,8 @@ function insightsPage() {
     statusFilter: 'active',
     insights: [],
     runs: { product_manager: null, dev_architect: null, qa_architect: null, ux_architect: null },
+    runState: { product_manager: 'idle', dev_architect: 'idle', qa_architect: 'idle', ux_architect: 'idle' },
+    runError: { product_manager: null, dev_architect: null, qa_architect: null, ux_architect: null },
     running: { product_manager: false, dev_architect: false, qa_architect: false, ux_architect: false },
     loading: true,
 
@@ -251,6 +265,12 @@ function insightsPage() {
         const rd = await rr.json();
         this.insights = id.insights || [];
         this.runs = { ...this.runs, ...(rd.runs || {}) };
+        if (rd.state) {
+          for (const [k, v] of Object.entries(rd.state)) {
+            this.runState[k] = v.state || 'idle';
+            this.runError[k] = v.error || null;
+          }
+        }
       } catch (e) {
         sfToast('Failed to load insights', 'error');
       }
@@ -298,6 +318,13 @@ function insightsPage() {
       try {
         const rr = await fetch('/api/insights/runs');
         const rd = await rr.json();
+        const state = (rd.state || {})[agentType] || {};
+        if (state.state === 'error') {
+          await this.fetchAll();
+          this.running[agentType] = false;
+          sfToast('Review failed: ' + (state.error || 'Unknown error'), 'error');
+          return;
+        }
         const latest = (rd.runs || {})[agentType];
         if (latest && latest !== prevRunAt) {
           await this.fetchAll();
