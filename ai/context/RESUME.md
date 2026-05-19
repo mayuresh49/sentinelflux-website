@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (53)  
+Last updated: 2026-05-19 (54)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **UX: Config > Products screen redesign** (`dashboard/templates/partials/config_products.html`): Replaced single overloaded row (6 toggle buttons + bug code form + actions all inline) with a two-row card layout. Row 1: product name/badges (left) + Bug Code field + Deactivate/Delete (right). Row 2: module toggle chips — colored fill = enabled, gray outline = disabled, no "On/Off" text, tooltip states the action. Modules: VAPT (violet), Performance (blue), Accessibility (sky), Contract (emerald), Visual Regression (pink), Bug Tracker (rose).
+
+## Previous: align transition fallback with product statuses (2026-05-19)
 
 - **Fix: align transition fallback with product's configured statuses** (`core/bug_manager.py`): When `bug_transitions` is unconfigured (`{}`), now builds fallback by intersecting `_DEFAULT_TRANSITIONS` with the product's actual status names (instead of returning raw defaults). This ensures the Move To dropdown matches the Bug Workflow matrix exactly — e.g. `resolved` is excluded from `in_progress` targets if the product has no `resolved` status; custom states (`qa_test`, `ready_for_deployment`) get empty sets until explicitly configured via the matrix.
 

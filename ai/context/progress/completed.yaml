@@ -1,5 +1,14 @@
 # Completed work items — append only, newest first
 
+- id: config-products-ux-redesign
+  date: 2026-05-19
+  title: "UX: Config > Products screen — two-row layout with module toggle chips"
+  outcome: >
+    Replaced clumsy single-row layout (6 toggle buttons + inline bug code form +
+    actions all wrapping) with two-row card. Row 1: name/badges + bug code + danger
+    actions. Row 2: module chips (colored=enabled, gray=disabled, tooltip=action).
+    Removes ambiguous "VAPT On/Off" labels.
+
 - id: bugs-transition-fallback-product-statuses
   date: 2026-05-19
   title: "Fix: align transition fallback with product's configured statuses"
