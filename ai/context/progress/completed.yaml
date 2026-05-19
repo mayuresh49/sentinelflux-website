@@ -1,5 +1,15 @@
 # Completed work items — append only, newest first
 
+- id: bugs-custom-statuses-workflow
+  date: 2026-05-19
+  title: "Bugs: custom statuses per product with configurable workflow"
+  outcome: >
+    Per-product bug_statuses in config.yaml (name/label/color). _get_statuses()
+    falls back to 7 default states. Config > Bug Workflow: Statuses section
+    (CRUD with color picker) + Transitions matrix (uses actual product statuses).
+    bugs.html: filter dropdown server-rendered; JS color maps data-driven via
+    _COLOR_PALETTE + _statusMeta(); stateLabel() replaces all replace('_',' ').
+
 - id: bugs-configurable-transitions
   date: 2026-05-19
   title: "Bugs: configurable per-product state transitions"

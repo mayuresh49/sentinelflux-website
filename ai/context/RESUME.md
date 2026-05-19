@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (45)  
+Last updated: 2026-05-19 (46)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,14 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Bugs: custom statuses per product with configurable workflow** (`core/bug_manager.py`, `dashboard/routers/config/_bugs.py`, `dashboard/routers/pages.py`, `dashboard/templates/config.html`, `dashboard/templates/bugs.html`, `dashboard/templates/partials/config_bug_statuses.html` (new), `dashboard/templates/partials/config_bug_transitions.html`): Per-product `bug_statuses` list in `config.yaml` — each entry has `name`, `label`, `color`. `_get_statuses(product)` in BugManager falls back to 7 hardcoded defaults. Config > Bug Workflow tab split into two sections: Statuses (add/remove custom statuses with name, label, color) + Transitions matrix (renders with product's actual statuses). `bugs.html` filter dropdown server-rendered from product statuses; JS color maps replaced by `_COLOR_PALETTE` data + `_statusMeta()` lookup; `stateLabel()` for display text; transition modal drops hardcoded wont_fix/deferred logic.
+
+## Previous: AppExplorerAgent (2026-05-19)
+
+- **AppExplorerAgent — eliminate test generation hallucination** (`ai/skills/app_exploration.py` (new), `ai/agents/app_explorer_agent.py` (new), `sentinelflux/commands/explore_cmd.py` (new), `ai/prompts/prompt_templates.py`, `ai/skills/test_case_doc_kb.py`, `ai/skills/test_script_gen.py`, `ai/agents/doc_gen_agent.py`, `ai/agents/script_gen_agent.py`, `ai/pipeline/orchestrator.py`, `ai/agents/__init__.py`, `dashboard/routers/agents.py`, `dashboard/agent_meta.py`, `sentinelflux/cli.py`): New pre-generation exploration phase. `AppExplorationSkill` uses Playwright to crawl the running application — extracts form fields with DOM-verified CSS selectors ranked by stability (data-testid > id > name > aria-label > placeholder), buttons, navigation links, and real validation error messages (by submitting empty forms). Outputs: (1) `LIVE APPLICATION EXPLORATION CONTEXT` block injected into both doc-gen and script-gen prompts, grounding the LLM to verified elements only; (2) `locators/web/<page>.json` with primary + alternative selectors; (3) `pages/web/<page>.py` page object skeleton with real selectors (never overwrites existing). Pipeline: `--explore --base-url http://... --explore-pages /path1,/path2 --login-url /auth/login` runs exploration as Phase 0 before doc/script gen. Prompt rules updated: LLM told to use ONLY fields/selectors from exploration context; script rule added that page.fill/click must use DOM-verified selectors. `sentinelflux explore` CLI command for standalone exploration without full pipeline. Registered in all 4 agent checklist locations.
+
+## Previous: Bugs configurable state transitions (2026-05-19)
 
 - **Bugs: configurable per-product state transitions** (`core/bug_manager.py`, `dashboard/routers/bugs.py`, `dashboard/routers/config/_bugs.py` (new), `dashboard/routers/config/__init__.py`, `dashboard/templates/config.html`, `dashboard/templates/partials/config_bug_transitions.html` (new), `dashboard/templates/bugs.html`): `BugManager` now reads `bug_transitions` from `config.yaml` per product, falling back to hardcoded defaults. New `GET /api/bugs/{id}/transitions` endpoint returns product-aware allowed transitions. `loadTransitions()` in `bugs.html` calls the endpoint instead of a hardcoded JS map. Config page gains a "Bug Workflow" admin tab with a checkbox matrix (from-state rows × to-state columns) to configure allowed transitions per product, with Save and Reset to Defaults actions.
 
