@@ -1,5 +1,13 @@
 # Completed work items — append only, newest first
 
+- id: activities-pagination-oob-fix
+  date: 2026-05-19
+  title: "Fix: activities OOB pagination triple-render on initial page load"
+  outcome: >
+    Gated OOB pagination blocks in activities_rows.html with HX-Request header
+    check. Raw full-page renders no longer eject the divs from tbody into the
+    visible page; OOB swaps fire only during HTMX requests.
+
 - id: test-plan-report-open-bugs
   date: 2026-05-19
   title: "Test plan report: open bugs section with product-aware closed-state detection"

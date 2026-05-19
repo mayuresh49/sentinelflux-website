@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (48)  
+Last updated: 2026-05-19 (49)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Fix: activities OOB pagination triple-render** (`dashboard/templates/partials/activities_rows.html`): OOB pagination blocks in the partial were rendering as raw HTML on full-page loads (browser ejects `<div>` from `<tbody>` into visible page), causing 3 pagination controls to appear. Guarded the entire OOB section with `request.headers.get('HX-Request')` so OOB swaps only fire during HTMX requests; initial page load shows the pagination rendered directly in `activities.html`.
+
+## Previous: Test plan report open bugs (2026-05-19)
 
 - **Test plan report: open bugs section + product-aware closed-state detection** (`core/bug_manager.py`, `dashboard/routers/test_plans.py`, `dashboard/templates/test_plan_report_pdf.html`): `BugManager.list_bugs()` gains a `linked_plan_id` filter. `_DEFAULT_STATUSES` now carries `is_open: True/False` on each entry (new/open/in_progress/deferred = open; resolved/closed/wont_fix = closed). New `BugManager.closed_state_names(product)` method reads `is_open` from the product's configured statuses (custom statuses without the field default to open). Report renderer calls `closed_state_names` instead of a hardcoded set, then passes `open_bugs` to the template. PDF/HTML report includes an "Open Bugs" table (ID, title, priority, severity, state, component, linked TC) between the run history and scope sections. Badge styles added for all bug states.
 
