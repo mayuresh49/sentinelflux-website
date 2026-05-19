@@ -1,5 +1,20 @@
 # Completed work items — append only, newest first
 
+- id: ui-padding-standardisation
+  date: 2026-05-19
+  title: "UI: standardise padding/spacing across all dashboard pages"
+  outcome: >
+    All right/detail panels: border-slate-100 + shadow-sm. Section headers: px-5 py-3.
+    Tab content: p-6. Config page: removed max-w-5xl constraint + title block, tightened
+    mt/space-y. Covers 15+ templates and 2 partials.
+
+- id: bugs-sequential-numbers
+  date: 2026-05-19
+  title: "Bugs: sequential bug numbers with per-product code (BUG-XX-001)"
+  outcome: >
+    bug_seq + bug_number columns in DB. _get_bug_code() reads per-product code from config.
+    Inline bug_code editor in Config > Products. PDF report shows bug_number over UUID.
+
 - id: bugs-id-display-plan-link
   date: 2026-05-19
   title: "Bugs: Bug ID display + test plan link in Details panel"
