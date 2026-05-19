@@ -115,7 +115,7 @@
 
     <!-- Detail panel -->
     <div class="lg:col-span-2" x-show="selectedEng">
-      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+      <div class="bg-white border border-slate-100 rounded-xl overflow-hidden shadow-sm">
         <div x-data="{ tab: 'scans' }" class="h-full">
           <div class="border-b border-slate-100 px-5 flex items-center gap-1 pt-2">
             <button @click="tab = 'scans'" :class="tab === 'scans' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'"
@@ -134,7 +134,7 @@
           </div>
 
           <!-- Scans tab -->
-          <div x-show="tab === 'scans'" class="p-5 space-y-3">
+          <div x-show="tab === 'scans'" class="p-6 space-y-3">
             <div x-show="!selectedEng?.scans?.length" class="text-sm text-slate-400 text-center py-6">No scans run yet. Click "Run Scan" to start.</div>
             <template x-for="scan in [...(selectedEng?.scans || [])].reverse()" :key="scan.scan_id">
               <div class="border border-slate-200 rounded-xl p-4">
@@ -169,7 +169,7 @@
           </div>
 
           <!-- Violations tab -->
-          <div x-show="tab === 'violations'" class="p-5 space-y-4">
+          <div x-show="tab === 'violations'" class="p-6 space-y-4">
             <p class="text-xs text-slate-500">Showing violations from the most recent completed scan.</p>
             <template x-for="pr in latestScanResults()" :key="pr.url">
               <div class="border border-slate-200 rounded-xl overflow-hidden">
@@ -201,7 +201,7 @@
           </div>
 
           <!-- Report tab -->
-          <div x-show="tab === 'report'" class="p-5 space-y-4">
+          <div x-show="tab === 'report'" class="p-6 space-y-4">
             <p class="text-sm text-slate-600">Download a PDF accessibility report for this suite.</p>
             <a :href="'/api/a11y/engagement/' + selectedEng?.id + '/report?product=' + product + '&format=pdf'"
                target="_blank"

@@ -8,6 +8,7 @@ from typing import Any
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response
 from pydantic import BaseModel
 
+from core.bug_manager import BugManager
 from core.run_manager import RunManager
 from core.test_plan_manager import TestPlanManager
 from dashboard.routers.auth import require_user, user_products
@@ -16,6 +17,7 @@ from utils.paths import ROOT as _ROOT
 router = APIRouter(tags=["test-plans"])
 _tpm = TestPlanManager()
 _rm = RunManager()
+_bm = BugManager()
 
 _PRODUCTS_DIR = _ROOT / "products"
 
@@ -369,6 +371,12 @@ def _render_plan_report_html(plan_id: str) -> str:
             tcs_by_domain[d] = []
         tcs_by_domain[d].append(tc)
 
+    _TERMINAL = {"closed", "wont_fix"}
+    open_bugs = [
+        b for b in _bm.list_bugs(linked_plan_id=plan_id)
+        if b.get("state") not in _TERMINAL
+    ]
+
     env = Environment(autoescape=True,
                       loader=FileSystemLoader(str(_ROOT / "dashboard" / "templates")))
     tpl = env.get_template("test_plan_report_pdf.html")
@@ -379,6 +387,7 @@ def _render_plan_report_html(plan_id: str) -> str:
         domains=domains_seen,
         tcs_by_domain=tcs_by_domain,
         runs=runs,
+        open_bugs=open_bugs,
         generated_at=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
     )
 

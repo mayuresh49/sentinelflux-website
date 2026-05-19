@@ -15,13 +15,13 @@ _BUGS_DIR = ROOT / "data" / "bugs"
 _CONFIG_PATH = ROOT / "data" / "config.yaml"
 
 _DEFAULT_STATUSES: list[dict] = [
-    {"name": "new",         "label": "New",         "color": "sky"},
-    {"name": "open",        "label": "Open",        "color": "amber"},
-    {"name": "in_progress", "label": "In Progress", "color": "violet"},
-    {"name": "resolved",    "label": "Resolved",    "color": "emerald"},
-    {"name": "closed",      "label": "Closed",      "color": "slate"},
-    {"name": "deferred",    "label": "Deferred",    "color": "yellow"},
-    {"name": "wont_fix",    "label": "Won't Fix",   "color": "red"},
+    {"name": "new",         "label": "New",         "color": "sky",     "is_open": True},
+    {"name": "open",        "label": "Open",        "color": "amber",   "is_open": True},
+    {"name": "in_progress", "label": "In Progress", "color": "violet",  "is_open": True},
+    {"name": "resolved",    "label": "Resolved",    "color": "emerald", "is_open": False},
+    {"name": "closed",      "label": "Closed",      "color": "slate",   "is_open": False},
+    {"name": "deferred",    "label": "Deferred",    "color": "yellow",  "is_open": True},
+    {"name": "wont_fix",    "label": "Won't Fix",   "color": "red",     "is_open": False},
 ]
 
 # Default state transitions: state → set of allowed next states
@@ -148,6 +148,7 @@ class BugManager:
         component: str | None = None,
         linked_run_id: str | None = None,
         linked_tc_id: str | None = None,
+        linked_plan_id: str | None = None,
     ) -> list[dict]:
         clauses, params = [], []
         if product:
@@ -164,6 +165,8 @@ class BugManager:
             clauses.append("linked_run_id = ?"); params.append(linked_run_id)
         if linked_tc_id:
             clauses.append("linked_tc_id = ?"); params.append(linked_tc_id)
+        if linked_plan_id:
+            clauses.append("linked_plan_id = ?"); params.append(linked_plan_id)
         where = ("WHERE " + " AND ".join(clauses)) if clauses else ""
         rows = self._conn().execute(
             f"SELECT * FROM bugs {where} ORDER BY created_at DESC", params

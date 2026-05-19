@@ -86,7 +86,7 @@
   </div>
 
   <!-- ── Right panel: detail ──────────────────────────────────────────────── -->
-  <div class="flex-1 min-w-0 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+  <div class="flex-1 min-w-0 bg-white border border-slate-100 rounded-xl shadow-sm overflow-hidden flex flex-col">
 
     <!-- Empty state -->
     <template x-if="!selectedBug">
@@ -105,7 +105,7 @@
       <div class="flex-1 flex flex-col overflow-hidden" :id="`bug-${selectedBug.id}`">
 
         <!-- Detail header -->
-        <div class="px-5 pt-4 pb-3 border-b border-slate-100">
+        <div class="px-5 py-3 border-b border-slate-100">
           <div class="flex items-start gap-3">
             <div class="flex-1 min-w-0">
               <template x-if="!editingTitle">
@@ -183,7 +183,7 @@
         </div>
 
         <!-- Tab content -->
-        <div class="flex-1 overflow-y-auto p-5">
+        <div class="flex-1 overflow-y-auto p-6">
 
           <!-- ── Details tab ── -->
           <div x-show="activeTab === 'Details'" class="space-y-4">
