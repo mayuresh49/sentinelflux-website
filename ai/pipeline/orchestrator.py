@@ -45,6 +45,30 @@ def _find_highest_tc_id(docs_dir: Path, prefix: str) -> int:
     return highest
 
 
+def _extract_pages_from_doc(doc_text: str) -> list[str]:
+    """
+    Parse the reviewed test case doc for page paths mentioned in Pre-conditions blocks.
+
+    Looks for patterns like "Starting URL: /path" or "Navigate to /path".
+    Returns deduplicated list of relative paths (max 10) for the explorer to visit.
+    """
+    import re
+    patterns = [
+        r"(?:Starting\s+URL|Application\s+URL|URL)[:\s]+(/[^\s,\n\"']+)",
+        r"Navigate\s+to\s+(?:the\s+)?(?:exact\s+URL\s+)?(/[^\s,\n\"']+)",
+        r"Go\s+to\s+(/[^\s,\n\"']+)",
+    ]
+    seen: set[str] = set()
+    pages: list[str] = []
+    for pat in patterns:
+        for m in re.finditer(pat, doc_text, re.IGNORECASE):
+            path = m.group(1).rstrip(".,;)")
+            if path not in seen:
+                seen.add(path)
+                pages.append(path)
+    return pages[:10]
+
+
 class TestPipelineOrchestrator:
     def __init__(self, ai_client, kb_loader=None):
         from ai.knowledge_base.kb_loader import KnowledgeBaseLoader
@@ -65,16 +89,25 @@ class TestPipelineOrchestrator:
         tc_prefix: str = "",
         tc_start: int = 1,
         source: str = "",
+        explore: bool = False,
+        base_url: str = "",
+        login_url: str = "",
+        credentials: dict = None,
+        explore_pages: list[str] = None,
     ) -> dict[str, Path]:
         """
-        Full pipeline: generate doc then script for a feature + domain.
+        Full pipeline: doc gen → doc review → (optional explore) → script gen → script review.
 
-        skip_doc=True  — reuse existing doc, only regenerate script.
+        Exploration runs AFTER doc review so the finalized doc drives page discovery.
+        If explore=True and explore_pages is empty, page URLs are extracted from the reviewed doc.
+
+        explore=True    — run AppExplorerAgent after doc review; requires base_url.
+        skip_doc=True   — reuse existing doc, only regenerate script.
         skip_script=True — regenerate doc only, never touch existing test script.
 
         Returns dict with keys 'doc' and 'script' (script may be None when skipped).
         """
-        _log.info("Pipeline start — feature=%s domain=%s", feature_name, domain)
+        _log.info("Pipeline start — feature=%s domain=%s explore=%s", feature_name, domain, explore)
         product = str(output_base).split("products/")[-1].split("/")[0] if output_base and "products/" in str(output_base) else None
 
         try:
@@ -90,6 +123,8 @@ class TestPipelineOrchestrator:
                     output_base=output_base, tc_prefix=tc_prefix, tc_start=tc_start,
                     source=source,
                 )
+
+            # Doc review runs before exploration so the finalized doc drives page discovery
             self._review_doc(out_doc, domain)
             test_case_doc = out_doc.read_text(encoding="utf-8")
 
@@ -106,8 +141,28 @@ class TestPipelineOrchestrator:
                 )
                 return {"doc": out_doc, "script": None}
 
+            # Exploration: runs AFTER doc review, BEFORE script gen.
+            # The reviewed doc is the source of truth for which pages to visit.
+            # If explore_pages not given, extract URLs from the finalized doc.
+            exploration_context = ""
+            if explore:
+                pages_to_explore = explore_pages or _extract_pages_from_doc(test_case_doc)
+                if pages_to_explore:
+                    exploration_context = self._run_exploration(
+                        base_url=base_url,
+                        login_url=login_url,
+                        credentials=credentials or {},
+                        pages=pages_to_explore,
+                        domain=domain,
+                        product=product,
+                        output_base=output_base,
+                    )
+                else:
+                    _log.warning("Exploration skipped — no pages found in doc and --explore-pages not set")
+
             out_script = self._generate_script(
                 test_case_doc, feature_name, domain, output_base=output_base, tc_prefix=tc_prefix,
+                exploration_context=exploration_context,
             )
             self._normalize_script_fn_ids(out_script, out_doc, tc_prefix)
             self._review_script(out_script, domain)
@@ -140,6 +195,43 @@ class TestPipelineOrchestrator:
             raise
 
     # --- steps ---
+
+    def _run_exploration(
+        self,
+        base_url: str,
+        login_url: str,
+        credentials: dict,
+        pages: list[str],
+        domain: str,
+        product: str | None,
+        output_base: Path | None,
+    ) -> str:
+        """Run AppExplorerAgent — returns the combined exploration context string."""
+        from ai.agents.app_explorer_agent import AppExplorerAgent
+        from ai.agents.base_agent import AgentContext
+
+        if not base_url or not pages:
+            _log.warning("Exploration skipped — base_url or pages not provided")
+            return ""
+
+        ctx = AgentContext(domain=domain, product=product, output_base=output_base or ROOT_DIR)
+        agent = AppExplorerAgent(context=ctx)
+        try:
+            result = agent.run(
+                base_url=base_url,
+                pages=pages,
+                login_url=login_url,
+                credentials=credentials or {},
+            )
+            if result.get("success"):
+                _log.info(
+                    "Exploration complete — %d page(s) explored",
+                    result.get("pages_explored", 0),
+                )
+                return result.get("exploration_context", "")
+        except Exception as exc:
+            _log.warning("Exploration failed (non-fatal) — continuing without it: %s", exc)
+        return ""
 
     def _generate_doc(
         self,
@@ -346,11 +438,15 @@ class TestPipelineOrchestrator:
         domain: str,
         output_base: Path = None,
         tc_prefix: str = "",
+        exploration_context: str = "",
     ) -> Path:
         from ai.agents import AgentContext, ScriptGenAgent
 
         base = output_base if output_base else ROOT_DIR
-        ctx = AgentContext(domain=domain, output_base=base).extend(tc_prefix=tc_prefix)
+        ctx = AgentContext(domain=domain, output_base=base).extend(
+            tc_prefix=tc_prefix,
+            exploration_context=exploration_context,
+        )
         agent = ScriptGenAgent(ai_client=self._script_client, kb_loader=self.kb_loader, context=ctx)
         result = agent.run(test_case_doc=test_case_doc, feature_name=feature_name)
         return result["script_path"]
@@ -455,6 +551,18 @@ def _parse_args(argv=None):
     parser.add_argument("--source", default="",
                         help="API source for richer test generation: path to OpenAPI spec, "
                              "service code file, or a URL. Auto-detected by extension/content.")
+    parser.add_argument("--explore", action="store_true",
+                        help="Explore the running app before generating — discovers real UI elements and flows. "
+                             "Requires --base-url and --explore-pages.")
+    parser.add_argument("--base-url", default="",
+                        help="App root URL for exploration, e.g. http://localhost:8080")
+    parser.add_argument("--login-url", default="",
+                        help="Login page path for authentication before exploring, e.g. /auth/login")
+    parser.add_argument("--explore-pages", default="",
+                        help="Comma-separated list of page paths to explore, e.g. /pim/addEmployee,/leave/apply")
+    parser.add_argument("--credentials", default="",
+                        help="Credentials for login as username:password (avoid shell history — prefer env vars "
+                             "SF_EXPLORE_USER and SF_EXPLORE_PASS)")
 
     return parser.parse_args(argv)
 
@@ -495,6 +603,22 @@ def main(argv=None):
     tc_prefix = args.tc_prefix or ""
     source = args.source or ""
 
+    # Exploration args
+    explore = args.explore
+    base_url = args.base_url or ""
+    login_url = args.login_url or ""
+    explore_pages = [p.strip() for p in args.explore_pages.split(",") if p.strip()] if args.explore_pages else []
+    credentials: dict = {}
+    if args.credentials and ":" in args.credentials:
+        u, p = args.credentials.split(":", 1)
+        credentials = {"username": u, "password": p}
+    else:
+        import os
+        sf_user = os.environ.get("SF_EXPLORE_USER", "")
+        sf_pass = os.environ.get("SF_EXPLORE_PASS", "")
+        if sf_user and sf_pass:
+            credentials = {"username": sf_user, "password": sf_pass}
+
     # Auto-detect tc_start from existing docs when prefix is known and user did not
     # explicitly override the default (1).  This prevents ID collisions across modules.
     tc_start = args.tc_start
@@ -505,6 +629,14 @@ def main(argv=None):
             tc_start = detected + 1
             _log.info("Auto-detected tc_start=%d for prefix %s (highest existing: %d)",
                       tc_start, tc_prefix, detected)
+
+    _explore_kwargs = dict(
+        explore=explore,
+        base_url=base_url,
+        login_url=login_url,
+        credentials=credentials,
+        explore_pages=explore_pages,
+    )
 
     if args.doc:
         doc_path = Path(args.doc).resolve()
@@ -519,6 +651,7 @@ def main(argv=None):
             tc_prefix=tc_prefix,
             tc_start=tc_start,
             source=source,
+            **_explore_kwargs,
         )
     elif args.increment:
         stem = Path(args.increment).stem
@@ -533,6 +666,7 @@ def main(argv=None):
             tc_prefix=tc_prefix,
             tc_start=tc_start,
             source=source,
+            **_explore_kwargs,
         )
     else:
         orchestrator.run(
@@ -543,6 +677,7 @@ def main(argv=None):
             tc_prefix=tc_prefix,
             tc_start=tc_start,
             source=source,
+            **_explore_kwargs,
         )
 
 

@@ -4,6 +4,7 @@ from sentinelflux.commands import (
     analyze_cmd,
     dashboard_cmd,
     doctor_cmd,
+    explore_cmd,
     generate_cmd,
     init_cmd,
     run_cmd,
@@ -19,6 +20,7 @@ app = typer.Typer(
 app.command("init")(init_cmd.run)
 app.command("run")(run_cmd.run)
 app.command("generate")(generate_cmd.run)
+app.command("explore")(explore_cmd.run)
 app.command("doctor")(doctor_cmd.run)
 app.command("analyze")(analyze_cmd.run)
 app.command("dashboard")(dashboard_cmd.run)

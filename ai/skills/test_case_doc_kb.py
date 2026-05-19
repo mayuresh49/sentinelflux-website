@@ -48,6 +48,7 @@ class TestCaseDocumentationSkill:
         feature_name: str = None,
         tc_prefix: str = "",
         tc_start: int = 1,
+        exploration_context: str = "",
     ) -> str:
         """Generate UI test case doc. If feature_name given, injects full page + business rule context."""
         if feature_name:
@@ -56,11 +57,13 @@ class TestCaseDocumentationSkill:
             kb_context = self.kb_loader.get_ui_context()
 
         tc_id_instruction = _build_tc_id_instruction(tc_prefix, tc_start) if tc_prefix else ""
+        formatted_exploration = f"\n{exploration_context}\n" if exploration_context else ""
         prompt = TEST_CASE_DOC_PROMPT.format(
             page_url=page_url,
             form_description=form_description,
             kb_context=kb_context,
             tc_id_instruction=tc_id_instruction,
+            exploration_context=formatted_exploration,
         )
         return self.ai_client.generate(prompt, max_tokens=6000, temperature=0.2).strip()
 

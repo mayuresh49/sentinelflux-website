@@ -46,12 +46,14 @@ class ScriptGenAgent(BaseAgent):
         product = self.ctx.product or None
         type_instruction = get_generation_type_instruction(product=product)
         categories_instruction = get_generation_categories_instruction(product=product)
+        exploration_context = self.ctx.get("exploration_context", "")
         code = skill.generate_script(
             test_case_doc, self.ctx.domain, feature_name,
             tc_prefix=tc_prefix,
             test_type_instruction=type_instruction,
             categories_instruction=categories_instruction,
             output_base=self.ctx.output_base,
+            exploration_context=exploration_context,
         )
 
         try:

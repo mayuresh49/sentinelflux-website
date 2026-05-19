@@ -60,11 +60,13 @@ Generate a detailed test case document for the form located at {page_url}.
 
 Knowledge Base Context:
 {kb_context}
-
+{exploration_context}
 STRICT RULES — violating these will produce incorrect documentation:
-1. ONLY test fields that are explicitly listed in the Knowledge Base Context above. Do NOT invent fields.
-2. Do NOT use knowledge from your training data about this application. Rely solely on the KB context.
-3. If a field is not in the KB context, it does not exist on this form — do not include it.
+1. ONLY test fields that are explicitly listed in the Knowledge Base Context or the Live Exploration Context above.
+   If a Live Exploration Context is present, it overrides KB on field names, selectors, and validation messages — it is ground truth.
+   Do NOT invent fields from training data.
+2. Do NOT use knowledge from your training data about this application. Rely solely on the KB and exploration contexts.
+3. If a field is not listed in either context, it does not exist on this form — do not include it.
 4. Use exact test credentials and data from the KB (e.g. actual usernames, passwords, known field values).
 5. Describe expected results based only on documented business rules, not assumptions.
 6. Begin the document with a "Fields in Scope" section listing every KB-documented field, its type, whether it is required, and its validation rule.
@@ -173,7 +175,7 @@ Feature: {feature_name}
 
 --- AVAILABLE PAGE OBJECTS ---
 {page_catalog}
-
+{exploration_context}
 --- TEST CASE DOCUMENT ---
 {test_case_doc}
 
@@ -194,6 +196,7 @@ Feature: {feature_name}
 - NEVER write an authenticate() helper that takes hardcoded username/password strings. For authenticated API calls use the {{product}}_client fixture (e.g. orangehrm_client). For unauthenticated API calls use {{product}}_api_base_url + requests. Pass {{product}}_credentials fixture when credentials are needed as test input.
 - NEVER use rest_client for product-specific tests — it reads a generic config. Use {{product}}_client for authenticated calls and {{product}}_api_base_url for raw requests.
 - All page object constructors require base_url as the second argument. Never instantiate a page object without passing the URL fixture: PageClass(page, {{product}}_base_url).
+- If a LIVE APPLICATION EXPLORATION CONTEXT section is present above: every page.fill(), page.click(), and page.locator() call MUST use a selector from that context. Do NOT invent CSS selectors — if no page object exists for this feature, call page methods directly using the selectors from the exploration context.
 {test_type_instruction}
 {categories_instruction}
 Output the complete Python file content starting with imports.

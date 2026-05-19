@@ -342,6 +342,7 @@ class TestScriptGenSkill:
         test_type_instruction: str = "",
         categories_instruction: str = "",
         output_base: Path | None = None,
+        exploration_context: str = "",
     ) -> str:
         """Generate a runnable pytest file from a test case markdown document."""
         _fallback = "web" if domain == "a11y" else "api"
@@ -351,6 +352,7 @@ class TestScriptGenSkill:
             if tc_prefix else ""
         )
         page_catalog = _discover_page_objects(output_base, domain)
+        formatted_exploration = f"\n--- LIVE APPLICATION EXPLORATION CONTEXT ---\n{exploration_context}\n" if exploration_context else ""
         prompt = TEST_SCRIPT_GEN_PROMPT.format(
             domain=domain,
             feature_name=feature_name,
@@ -360,6 +362,7 @@ class TestScriptGenSkill:
             test_type_instruction=test_type_instruction,
             categories_instruction=categories_instruction,
             page_catalog=page_catalog,
+            exploration_context=formatted_exploration,
         )
         code = self.ai_client.generate(prompt, max_tokens=5000, temperature=0.1).strip()
         return _clean_code_output(code)

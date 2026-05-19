@@ -1,6 +1,35 @@
 """Static agent metadata: responsibilities, I/O, and configurable parameters."""
 
 AGENT_META: dict = {
+    "app_explorer": {
+        "responsibility": (
+            "Crawls a running web application using Playwright to discover real UI structure — "
+            "form fields with verified CSS selectors, buttons, navigation links, and validation messages. "
+            "Outputs: (1) an exploration context string injected into doc/script gen prompts to prevent selector hallucination; "
+            "(2) locators/web/<page>.json with primary+alternative selectors ranked by stability "
+            "(data-testid > id > name > aria-label > placeholder); "
+            "(3) a page object .py skeleton with methods using real DOM selectors (never overwrites existing hand-written POs). "
+            "Also captures real validation error messages by submitting empty forms. "
+            "Run before doc/script generation with --explore to ground the LLM in actual application structure."
+        ),
+        "inputs": [
+            "base_url — app root URL (e.g. http://localhost:8080)",
+            "pages — list of URL paths to explore",
+            "login_url — login page path (optional, for authenticated pages)",
+            "credentials — dict with username + password keys (optional)",
+        ],
+        "outputs": [
+            "exploration_context string (injected into doc/script gen prompts)",
+            "data/explorations/<product>/<page_slug>.json — structured discovery result",
+            "locators/web/<page_slug>.json — primary + alternative selectors per element",
+            "pages/web/<page_slug>.py — page object skeleton (not overwritten if exists)",
+        ],
+        "config_params": [
+            {"name": "headless", "type": "bool", "default": True, "description": "Run browser headless"},
+            {"name": "update_locators", "type": "bool", "default": True, "description": "Write locator JSON files"},
+            {"name": "generate_page_objects", "type": "bool", "default": True, "description": "Write page object skeletons"},
+        ],
+    },
     "doc_gen": {
         "responsibility": "Reads the Knowledge Base (product YAML files + any increments) and generates a structured Markdown test case document covering all testable scenarios for a given feature and domain.",
         "inputs": ["KB YAML files", "Feature name", "Domain"],

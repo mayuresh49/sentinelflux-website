@@ -7,6 +7,7 @@ from core.activity_log import ActivityLog
 router = APIRouter(prefix="/agents", tags=["agents"])
 
 _AGENT_REGISTRY = [
+    {"name": "app_explorer", "description": "Crawls the running app with Playwright to discover real UI elements, selectors, and flows — grounds doc/script generation in verified DOM structure", "domain": "web,mobile", "requires_ai": False},
     {"name": "doc_gen", "description": "Generates test case docs from KB", "domain": "all", "requires_ai": True},
     {"name": "doc_review", "description": "Reviews generated docs, rewrites thin or malformed test cases", "domain": "all", "requires_ai": True},
     {"name": "script_gen", "description": "Generates pytest scripts from test case docs", "domain": "all", "requires_ai": True},

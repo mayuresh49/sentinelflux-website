@@ -1,3 +1,4 @@
+from ai.agents.app_explorer_agent import AppExplorerAgent
 from ai.agents.base_agent import AgentContext, BaseAgent
 from ai.agents.coverage_gap_agent import CoverageGapAgent
 from ai.agents.doc_gen_agent import DocGenAgent
@@ -20,6 +21,7 @@ from ai.agents.sentinel_orchestrator import SentinelOrchestrator
 
 __all__ = [
     "AgentContext",
+    "AppExplorerAgent",
     "BaseAgent",
     "DocGenAgent",
     "DocReviewAgent",
