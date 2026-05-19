@@ -446,8 +446,8 @@
 
           <!-- ── FINDINGS TAB ──────────────────────────────────────── -->
           <div x-show="activeTab === 'findings'" class="space-y-4">
-            <div x-show="!selectedEng?.findings?.length" class="text-sm text-slate-400 py-4">No findings recorded. Run a scan to populate findings.</div>
-            <div x-show="selectedEng?.findings?.length">
+            <div x-show="!scanTypeFindings.length" class="text-sm text-slate-400 py-4">No findings recorded for this scan type. Run a scan to populate findings.</div>
+            <div x-show="scanTypeFindings.length">
               <!-- Filters -->
               <div class="flex items-center gap-2 flex-wrap mb-3">
                 <select x-model="filterSev" class="text-xs border border-slate-200 rounded px-2 py-1.5 bg-white">
@@ -466,7 +466,7 @@
                   <option value="">All OWASP</option>
                   <template x-for="c in uniqueOwaspRefs" :key="c"><option :value="c" x-text="c"></option></template>
                 </select>
-                <span class="text-xs text-slate-400 ml-auto" x-text="filteredFindings.length + ' of ' + (selectedEng?.findings?.length||0) + ' findings'"></span>
+                <span class="text-xs text-slate-400 ml-auto" x-text="filteredFindings.length + ' of ' + scanTypeFindings.length + ' findings'"></span>
               </div>
               <!-- Findings table -->
               <div class="space-y-2">
@@ -557,7 +557,7 @@
                 <template x-for="[sev, color] in [['Critical','red'],['High','orange'],['Medium','yellow'],['Low','green']]" :key="sev">
                   <div :class="'bg-' + color + '-50 border border-' + color + '-200 rounded-lg p-3 text-center'">
                     <div class="text-lg font-bold" :class="'text-' + color + '-600'"
-                         x-text="scanTypeFindings().filter(f => f.severity===sev && ['open','still_open'].includes(f.status)).length"></div>
+                         x-text="scanTypeFindings.filter(f => f.severity===sev && ['open','still_open'].includes(f.status)).length"></div>
                     <div class="text-xs" :class="'text-' + color + '-700'" x-text="sev + ' (open)'"></div>
                   </div>
                 </template>
@@ -678,18 +678,23 @@ function vaptApp() {
     ],
     owaspCategories: ['A01','A02','A03','A04','A05','A06','A07','A08','A09','A10'],
 
+    get scanTypeFindings() {
+      const scans = (this.selectedEng?.scans || []).filter(s => (s.scan_type || 'web') === this.scanTypeSel);
+      const ids = new Set(scans.map(s => s.scan_id));
+      return (this.selectedEng?.findings || []).filter(f => ids.has(f.scan_id));
+    },
     get filteredFindings() {
-      let f = (this.selectedEng?.findings || []).map(x => ({ ...x, _open: x._open || false }));
+      let f = this.scanTypeFindings.map(x => ({ ...x, _open: x._open || false }));
       if (this.filterSev) f = f.filter(x => x.severity === this.filterSev);
       if (this.filterStatus) f = f.filter(x => x.status === this.filterStatus);
       if (this.filterOwasp) f = f.filter(x => x.owasp_ref === this.filterOwasp);
       return f;
     },
     get uniqueOwaspRefs() {
-      return [...new Set((this.selectedEng?.findings||[]).map(f => f.owasp_ref))].sort();
+      return [...new Set(this.scanTypeFindings.map(f => f.owasp_ref))].sort();
     },
     get hasOpenFindings() {
-      return (this.selectedEng?.findings||[]).some(f => ['open','still_open'].includes(f.status));
+      return this.scanTypeFindings.some(f => ['open','still_open'].includes(f.status));
     },
 
     init() {
@@ -732,12 +737,6 @@ function vaptApp() {
       this.showTemplates = false;
       this.certCheck = null;
       await this.loadTestInfo();
-    },
-
-    scanTypeFindings() {
-      const scans = (this.selectedEng?.scans || []).filter(s => (s.scan_type || 'web') === this.scanTypeSel);
-      const ids = new Set(scans.map(s => s.scan_id));
-      return (this.selectedEng?.findings || []).filter(f => ids.has(f.scan_id));
     },
 
     currentCertInfo() {
