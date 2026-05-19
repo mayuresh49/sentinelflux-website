@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (56)  
+Last updated: 2026-05-19 (57)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Pipeline hardening for SPA exploration** (`ai/skills/app_exploration.py`, `scripts/run_pipeline.sh`): Three robustness fixes to `AppExplorationSkill` for OrangeHRM ESS pipeline run: (1) Default `timeout_ms` raised 15s→30s — SPA initial loads need headroom. (2) Fixed 1s `wait_for_timeout` after navigation replaced with `_wait_for_spa()` helper that tries `networkidle` (10s, best-effort) then a 500ms DOM-settle pause. (3) Login verification added: `_login()` now checks URL after submit — warns if still on login page (silent failure was exploring the login form instead of actual pages); `networkidle` timeout guarded with 3s fallback. `run_pipeline.sh` updated to expose `SF_EXPLORE` / `SF_BASE_URL` / `SF_LOGIN_URL` / `SF_EXPLORE_PAGES` env-var flags (credentials stay out of shell history via `SF_EXPLORE_USER` / `SF_EXPLORE_PASS` read directly by the orchestrator).
+
+## Previous: Bug Workflow matrix ↔ Move To dropdown parity (2026-05-19)
 
 - **Fix: Bug Workflow matrix ↔ Move To dropdown parity** (`dashboard/routers/config/_bugs.py`): `_load_product_transitions` now filters targets to only states present in the product's status list (same intersection logic as `_get_transitions`). Before this fix the config UI matrix and the runtime dropdown used different fallback paths — matrix could show `resolved` as a target for `in_progress` even when `resolved` wasn't a product status. Now both are guaranteed identical: custom states with no configured transitions show empty in both places.
 
