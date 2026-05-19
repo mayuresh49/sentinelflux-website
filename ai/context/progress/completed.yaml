@@ -1,5 +1,15 @@
 # Completed work items — append only, newest first
 
+- id: vapt-ssh-multi-auth
+  date: 2026-05-19
+  title: "VAPT SSH multi-auth: key path, key paste, password"
+  outcome: >
+    Scope gains ssh_auth_method + ssh_key_content + ssh_password. UI shows
+    the matching credential input per radio selection. Runner injects the
+    right env vars. Conftest handles all three auth paths; key_paste writes
+    a chmod-600 temp file, connects, deletes immediately. Pre-flight checks
+    the correct field per method. Generator template updated.
+
 - id: vapt-ssh-section-visibility
   date: 2026-05-19
   title: "VAPT scope: SSH credentials section always visible"

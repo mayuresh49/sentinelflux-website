@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (42)  
+Last updated: 2026-05-19 (43)  
 Framework version: 0.1.0
 
 ---
@@ -26,7 +26,7 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 | AI Agents (post-suite) | Working | ResultAnalyzer, FlakyDetector, RegressionGuard, CoverageGap, LocatorHealer, QuarantineManager via `ai/agents/sentinel_orchestrator.py` |
 | DocReviewAgent | Working | Post-generation quality gate — audits batched headings, missing sections, thin steps; rewrites via LLM. Auto-runs after DocGenAgent in pipeline. `ai/agents/doc_review_agent.py` |
 | Remote Runner | Working | Pull-based runner daemon (`sentinelflux runner`) polls `/api/runner/claim`, executes pytest, POSTs JSON report back. Bearer token auth. Decouples test execution from app server. |
-| VAPT | Working | Full engagement lifecycle: scope → scan → findings → PDF report/certificate, per scan type (web/infra/infra_int/mobile). External infra (black-box socket/TLS/DNS) + internal infra (grey-box SSH via paramiko). SSH credentials (key-path only) in scope. `core/vapt_manager.py`, `/vapt` dashboard page. |
+| VAPT | Working | Full engagement lifecycle: scope → scan → findings → PDF report/certificate, per scan type (web/infra/infra_int/mobile). External infra (black-box) + internal infra (grey-box SSH). SSH auth: key_path (server path) / key_paste (PEM textarea) / password. `core/vapt_manager.py`, `/vapt` dashboard page. |
 | Performance Testing | Working | Load/stress/spike/soak profiles, httpx+asyncio engine, VUs/duration/ramp-up/endpoints, p50/p75/p95/p99/throughput/error-rate metrics, threshold checks, PDF report. `core/perf_manager.py`, `/perf` page. |
 | Accessibility Testing | Working | Playwright + axe-core CDN injection, WCAG 2.1 A/AA/AAA, per-page violations by impact, multi-scan history, PDF report. `core/a11y_manager.py`, `/a11y` page. |
 | API Contract Validation | Working | Loads OpenAPI spec (URL or file), validates status codes + jsonschema per endpoint, skips path-param routes, PDF report. `core/contract_manager.py`, `/contract` page. |
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **VAPT SSH multi-auth: key path, key paste, password** (`core/vapt_manager.py`, `dashboard/routers/vapt.py`, `products/reportportal/tests/vapt_infra_int/conftest.py`, `core/vapt_test_generator.py`, `dashboard/templates/vapt.html`): Scope gains `ssh_auth_method` (key_path | key_paste | password), `ssh_key_content`, `ssh_password`. UI: radio selector switches between server key path input, PEM textarea (paste), and password field. Runner injects the matching env var (`VAPT_SSH_KEY_PATH` / `VAPT_SSH_KEY_CONTENT` / `VAPT_SSH_PASSWORD`) plus `VAPT_SSH_AUTH_METHOD`. Conftest handles all three: key_paste writes content to a `tempfile.mkstemp` PEM file (chmod 600), connects, then deletes the temp file immediately. Pre-flight check validates the correct field per method. Generator template updated to match.
+
+## Previous: Runs DB columns + stuck-run fix (2026-05-19)
 
 - **Runs: missing DB columns + stuck-run fix** (`core/db.py`, `dashboard/routers/runs.py`): `progress_total`, `progress_done`, `summary_error` were missing from `test_runs` schema — `patch_run` calls in `_execute_run` silently threw `OperationalError`, leaving runs stuck in `running` and "Collecting tests…" never advancing. Added columns to `CREATE TABLE` (fresh installs) + `ALTER TABLE` migrations (existing DBs). `apply_schema` now swallows `duplicate column name` so restarts are idempotent. Manually recovered `run_26a4ee07`. Root cause of `exitcode: 3` (pytest INTERRUPTED) is uvicorn `--reload` sending SIGTERM to child processes — open issue.
 
