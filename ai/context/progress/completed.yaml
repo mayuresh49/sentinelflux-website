@@ -1,5 +1,35 @@
 # Completed work items — append only, newest first
 
+- id: insights-error-surfacing
+  date: 2026-05-19
+  title: "Insights: surface run errors in UI instead of silently dropping them"
+  outcome: >
+    _run_agent_task wrapped in try/except; sets in-memory _run_state dict to
+    {state: error, error: msg} on any failure (no client, empty insights, exception).
+    /api/insights/runs returns state dict alongside runs timestamps.
+    Polling detects state=error immediately and shows error toast.
+    Error banner added below run-control bar showing last failure message.
+    Already-running guard added to trigger endpoint.
+
+- id: product-insights-module
+  date: 2026-05-19
+  title: "Product Insights: AI expert review from 4 perspectives (master-admin only)"
+  outcome: >
+    /insights page (master-admin gated) with 4 AI review agents: ProductManagerAgent,
+    DevArchitectAgent, QAArchitectAgent, UXArchitectAgent. Each reads relevant codebase
+    context (RESUME.md, db.py, conftest.py, base.html, backlog.yaml) and calls the LLM
+    to produce 5–8 structured insights (title, description, recommendation, category,
+    priority). New product_insights SQLite table with id, agent_type, title, description,
+    recommendation, category, priority, status, run_id, run_at, updated_at columns.
+    InsightsManager CRUD in core/insights_manager.py. API router at /api/insights/ with
+    GET /, GET /runs, POST /run/{agent_type}, PATCH /{insight_id}, DELETE /agent/{agent_type}.
+    UI: persona tab selector with active-count badges, run-control bar with last-run
+    timestamp, status filter chips (active/planned/punted/discarded), 2-col card grid
+    with expandable descriptions, inline status transitions (Plan/Punt/Restore/Discard),
+    polling every 3 s until run_at changes. All 4 agents registered in agents/__init__.py,
+    _AGENT_REGISTRY (agents.py), and AGENT_META (agent_meta.py). Nav item in base.html
+    gated by master_admin flag.
+
 - id: test-plans-report-export
   date: 2026-05-18
   title: "Test Plans: execution report (PDF/HTML export) + latest runs on top"

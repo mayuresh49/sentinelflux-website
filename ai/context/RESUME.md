@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-18 (27)  
+Last updated: 2026-05-19 (28)  
 Framework version: 0.1.0
 
 ---
@@ -42,6 +42,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Insights: run error surfacing** (`dashboard/routers/insights.py`, `dashboard/templates/insights.html`): `_run_agent_task` previously swallowed all exceptions silently. Now wraps the full run in try/except, sets in-memory `_run_state[agent_type]` to `{state: error, error: msg}` on any failure (no client, no insights parsed, exception). `/api/insights/runs` now returns `state` dict alongside `runs`. UI polling detects `state === 'error'` and shows error toast immediately instead of waiting 40 polls. Error banner below run-control bar shows the last failure message persistently. Added already-running guard on trigger endpoint.
+
+## Previous: Product Insights module (2026-05-19)
 
 - **Product Insights module** (`ai/agents/product_review_agents.py`, `core/insights_manager.py`, `dashboard/routers/insights.py`, `dashboard/templates/insights.html`): Master-admin-only `/insights` page showing AI-driven expert review from 4 perspectives — Product Manager, Dev Architect, QA Architect, UX Architect. Each agent reads relevant codebase context (RESUME.md, db.py, conftest.py, base.html, backlog.yaml) and calls the LLM to produce 5–8 structured insights (title, description, recommendation, category, priority). Insights stored in new `product_insights` SQLite table. UI: persona tab selector with active-count badges, run-control bar with last-run timestamp, status filter chips (active/planned/punted/discarded), card grid with expandable descriptions, inline status transitions, polling-based run completion detection. All 4 agents registered in `__init__.py`, `_AGENT_REGISTRY`, and `AGENT_META`. Nav item gated by `master_admin` flag in `base.html`.
 
