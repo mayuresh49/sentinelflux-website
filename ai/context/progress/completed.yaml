@@ -1,5 +1,20 @@
 # Completed work items — append only, newest first
 
+- id: runs-page-500-fix
+  date: 2026-05-19
+  title: "Fix: /runs page 500 crash — failure_categories list guard"
+  outcome: >
+    run_9d157fc3 had failure_categories stored as [] (list) instead of dict.
+    Template now uses `is mapping` guard falling back to {}. _run_post_suite
+    only writes failure_categories when blockers is a dict.
+
+- id: bugs-export-endpoint
+  date: 2026-05-19
+  title: "Feat: Bug export — CSV/Excel via GET /api/bugs/export"
+  outcome: >
+    Streams all visible bugs with 23 columns (linked IDs, timestamps, metadata).
+    format=csv (default) or format=xlsx (openpyxl). Product/state/priority filters supported.
+
 - id: config-products-ux-redesign
   date: 2026-05-19
   title: "UX: Config > Products screen — two-row layout with module toggle chips"

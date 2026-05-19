@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (54)  
+Last updated: 2026-05-19 (55)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,11 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **Fix: /runs page 500 crash** (`dashboard/templates/runs.html`, `dashboard/routers/runs.py`): `failure_categories` was stored as `[]` (list) for one run because `_run_post_suite` passed `summary.get("blockers", [])` directly. Template now uses `is mapping` guard (falls back to `{}`). `runs.py` only writes `failure_categories` when `blockers` is a dict.
+- **Feat: Bug export endpoint** (`dashboard/routers/bugs.py`): `GET /api/bugs/export?format=csv|xlsx` — streams all visible bugs with 23 columns (linked IDs, timestamps, metadata). XLSX via openpyxl, CSV via stdlib.
+
+## Previous: Config > Products screen redesign (2026-05-19)
 
 - **UX: Config > Products screen redesign** (`dashboard/templates/partials/config_products.html`): Replaced single overloaded row (6 toggle buttons + bug code form + actions all inline) with a two-row card layout. Row 1: product name/badges (left) + Bug Code field + Deactivate/Delete (right). Row 2: module toggle chips — colored fill = enabled, gray outline = disabled, no "On/Off" text, tooltip states the action. Modules: VAPT (violet), Performance (blue), Accessibility (sky), Contract (emerald), Visual Regression (pink), Bug Tracker (rose).
 
