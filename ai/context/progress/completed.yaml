@@ -1,5 +1,20 @@
 # Completed work items — append only, newest first
 
+- id: V-01
+  date: 2026-05-19
+  title: "VAPT: Infrastructure (Internal) — grey-box SSH scan"
+  outcome: >
+    New infra_int scan type alongside existing external infra. Test suite:
+    vapt_infra_int/ with 7 SSH hardening checks via paramiko factory fixture
+    (sshd_config: PermitRootLogin/PasswordAuthentication/MaxAuthTries/AllowUsers,
+    SUID/SGID files, sensitive file permissions, audit log presence). Scope model
+    adds ssh_username + ssh_key_path (key-path only, no plaintext creds). Runner
+    injects VAPT_SSH_USER / VAPT_SSH_KEY_PATH env vars to pytest subprocess.
+    Generator adds _INFRA_INT_CONFTEST + _INFRA_INT_SSH_CONFIG_TESTS templates.
+    Dashboard: Internal Infra button in scan type selector, SSH credentials
+    section in scope tab (conditionally shown when infra_int in test_types,
+    finalize-lockable). 8 files changed, 3 new files.
+
 - id: vapt-findings-test-data
   date: 2026-05-19
   title: "Data: VAPT reportportal engagement morphed with realistic findings"

@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (37)  
+Last updated: 2026-05-19 (38)  
 Framework version: 0.1.0
 
 ---
@@ -26,7 +26,7 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 | AI Agents (post-suite) | Working | ResultAnalyzer, FlakyDetector, RegressionGuard, CoverageGap, LocatorHealer, QuarantineManager via `ai/agents/sentinel_orchestrator.py` |
 | DocReviewAgent | Working | Post-generation quality gate — audits batched headings, missing sections, thin steps; rewrites via LLM. Auto-runs after DocGenAgent in pipeline. `ai/agents/doc_review_agent.py` |
 | Remote Runner | Working | Pull-based runner daemon (`sentinelflux runner`) polls `/api/runner/claim`, executes pytest, POSTs JSON report back. Bearer token auth. Decouples test execution from app server. |
-| VAPT | Working | Full engagement lifecycle: scope → scan → findings → PDF report/certificate, per scan type (web/infra/mobile). Infra targets and mobile APK path in scope. APK static analysis via androguard. `core/vapt_manager.py`, `/vapt` dashboard page. |
+| VAPT | Working | Full engagement lifecycle: scope → scan → findings → PDF report/certificate, per scan type (web/infra/infra_int/mobile). External infra (black-box socket/TLS/DNS) + internal infra (grey-box SSH via paramiko). SSH credentials (key-path only) in scope. `core/vapt_manager.py`, `/vapt` dashboard page. |
 | Performance Testing | Working | Load/stress/spike/soak profiles, httpx+asyncio engine, VUs/duration/ramp-up/endpoints, p50/p75/p95/p99/throughput/error-rate metrics, threshold checks, PDF report. `core/perf_manager.py`, `/perf` page. |
 | Accessibility Testing | Working | Playwright + axe-core CDN injection, WCAG 2.1 A/AA/AAA, per-page violations by impact, multi-scan history, PDF report. `core/a11y_manager.py`, `/a11y` page. |
 | API Contract Validation | Working | Loads OpenAPI spec (URL or file), validates status codes + jsonschema per endpoint, skips path-param routes, PDF report. `core/contract_manager.py`, `/contract` page. |
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-19)
+
+- **VAPT: Infrastructure (Internal) grey-box SSH scan — V-01** (`products/reportportal/tests/vapt_infra_int/`, `core/vapt_test_generator.py`, `dashboard/routers/vapt.py`, `core/vapt_manager.py`, `dashboard/templates/vapt.html`, `requirements.txt`): New `infra_int` scan type alongside existing external `infra`. Test suite has 7 SSH hardening checks (PermitRootLogin, PasswordAuthentication, MaxAuthTries, AllowUsers/AllowGroups, SUID/SGID files, sensitive file permissions, audit log). paramiko session fixture yields factory callable `ssh_client(host)` to avoid scope mismatch with function-parametrized `vapt_host`. `pytest_runtest_setup` hook fast-skips all SSH tests when env vars missing. Scope model adds `ssh_username` + `ssh_key_path` (key-path only). Runner injects `VAPT_SSH_USER`/`VAPT_SSH_KEY_PATH` env vars. Generator templates added. Dashboard: "Internal Infra" scan type selector button, SSH credentials section in scope tab (shown only when `infra_int` in test_types, finalize-lockable). `paramiko>=3.0` added to requirements.
+
+## Previous: Runs UX fixes (2026-05-19)
 
 - **Runs UX: errored status + Re-run + queued indicator** (`dashboard/templates/runs.html`, `dashboard/routers/pages.py`): Diagnosed three runs stuck as errored — root cause was server restart killing FastAPI BackgroundTasks mid-execution (trigger: plan). Fixed three UX gaps: (1) `errored` runs now show orange badge/dot and a Re-run button (previously only `completed`/`failed` had one); (2) `queued` run cards now show a pulsing "Waiting to start…" inline indicator (previously only `running` had a progress row); (3) `any_running` banner/auto-refresh scoped to current page runs instead of full filtered list (was showing banner even when in-progress run was on another page). Also added `errored` option to the status filter dropdown.
 

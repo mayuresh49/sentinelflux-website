@@ -214,7 +214,7 @@
     - dashboard/routers/vapt.py
     - dashboard/templates/vapt.html
   priority: medium
-  status: todo
+  status: done
   notes: >
     Current infra scan is black-box only (socket/HTTP/TLS, no credentials).
     Authenticated scanning requires paramiko and a new test file covering:
