@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-19 (51)  
+Last updated: 2026-05-19 (52)  
 Framework version: 0.1.0
 
 ---
@@ -44,7 +44,8 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-19)
 
-- **Bugs: auto-attach run artifacts on bug creation; fix transition config fallback** (`dashboard/routers/bugs.py`, `core/bug_manager.py`): `create_bug_from_run` now calls `_attach_run_artifacts` after creating the bug — copies screenshot, console log, API log, trace.zip, and the JSON run report from `reports/artifacts/<safe_nodeid>/` into bug artifact storage. `_get_transitions` fix: `if raw is not None` (was `if raw`) so an explicitly empty `bug_transitions: {}` is honoured rather than falling back to defaults; correctly reflects Config > Bug Workflow settings in the Move To dropdown.
+- **Fix: revert transition fallback regression** (`core/bug_manager.py`): `if raw is not None` broke `bug_transitions: {}` (empty = not yet configured) — returned no transitions from any state, including New. Reverted to `if raw:` so empty dict correctly falls back to `_DEFAULT_TRANSITIONS`. **Note:** `if raw:` is correct — `bug_transitions_save` always writes a populated dict; `{}` only appears as an unconfigured placeholder.
+- **Bugs: auto-attach run artifacts on bug creation** (`dashboard/routers/bugs.py`): `create_bug_from_run` now calls `_attach_run_artifacts` after creating the bug — copies screenshot, console log, API log, trace.zip, and the JSON run report from `reports/artifacts/<safe_nodeid>/` into bug artifact storage.
 
 ## Previous: UI padding + bug sequential numbers (2026-05-19)
 
