@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-20 (59)  
+Last updated: 2026-05-20 (60)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-20)
+
+- **Feat: sentinelflux.in marketing website + GitHub Pages deploy** (`website/index.html`, `website/CNAME`, `.github/workflows/deploy-website.yml`): Static landing page created for sentinelflux.in. Single-file HTML with Tailwind CDN — hero with fake dashboard preview, 8 module cards (REST/GraphQL, Web UI, VAPT, Performance, Accessibility, API Contract, Visual Regression, Bug Tracker), three feature deep-dives (AI pipeline, self-healing locators, AI agents), how-it-works (3 steps), and install CTA. `CNAME` set to `sentinelflux.in`. GitHub Actions workflow (`deploy-website.yml`) auto-deploys `website/` to `gh-pages` branch on push to main. GoDaddy DNS: 4 A records to GitHub Pages IPs + CNAME www → mayuresh49.github.io.
+
+## Previous: nav reorder + icon audit (2026-05-20)
 
 - **Refactor: sidebar nav reorder + icon audit** (`dashboard/templates/base.html`): Replaced the `nav_items` loop + scattered conditional blocks with explicit grouped items separated by thin dividers. New order follows standard QA portal conventions — Core workflow (Dashboard → Test Plans → Docs → Scripts → Runs → Quality → Failures) → Specialized modules (Bugs, VAPT, Perf, A11y, Contract, Visual) → Workflow (Assignments, Approvals, Activities) → AI (Agents, KB) → Admin (Config, Users, Insights). Fixed six icon issues: Test Plans → calendar (was duplicate of Assignments), Bugs → x-circle (was warning triangle identical to Failures), API Contract → terminal (was document, same as Docs), Activities → clock (was plain clipboard), Knowledge Base → open book (was database cylinder), Agents → sparkle (was monitor).
 
