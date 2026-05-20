@@ -558,18 +558,33 @@ async function triggerPipeline() {
 
   if (!feature && !increment_file) { sfToast('Enter a feature name or increment file', 'warn'); return; }
 
-  const res = await fetch('/ui/pipeline/trigger', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ product, feature, domain, increment_file, source, local_url, doc_model, script_model, skip_script }),
-  });
-  if (res.ok) {
-    const html = await res.text();
-    const list = document.getElementById('pipeline-jobs');
-    list.innerHTML = html + list.innerHTML;
-    // Clear placeholder if present
-    list.querySelectorAll('.text-center').forEach(el => el.closest('.bg-white')?.remove());
+  let res;
+  try {
+    res = await fetch('/ui/pipeline/trigger', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ product, feature, domain, increment_file, source, local_url, doc_model, script_model, skip_script }),
+    });
+  } catch (e) {
+    sfToast('Network error: ' + e.message, 'error');
+    return;
   }
+  if (!res.ok) {
+    let detail = 'Server error ' + res.status;
+    try { const j = await res.json(); detail = j.detail || detail; } catch (_) {}
+    sfToast('Pipeline error: ' + detail, 'error');
+    return;
+  }
+  const html = await res.text();
+  const list = document.getElementById('pipeline-jobs');
+  // Insert without destroying existing running-job DOM (keeps HTMX polling alive)
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  const newJob = temp.firstElementChild;
+  list.insertBefore(newJob, list.firstChild);
+  if (typeof htmx !== 'undefined') htmx.process(newJob);
+  // Remove empty-state placeholder if present
+  list.querySelectorAll(':scope > .bg-white > .text-center').forEach(el => el.closest('.bg-white')?.remove());
 }
 
 async function uploadDocx() {

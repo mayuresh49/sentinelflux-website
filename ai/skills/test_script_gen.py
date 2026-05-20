@@ -287,6 +287,43 @@ Example test (OrangeHRM):
 }
 
 
+def _build_api_constraints(kb_loader: KnowledgeBaseLoader, feature_name: str) -> str:
+    """Build an endpoint allowlist + response code constraints for API script gen.
+    Prevents the LLM from asserting undocumented paths or status codes.
+    """
+    try:
+        specs = kb_loader.load_api_specs()
+        endpoints = specs.get("rest_api", {}).get("endpoints", [])
+        base_url = specs.get("rest_api", {}).get("base_url", "")
+        if not endpoints:
+            return ""
+        if feature_name:
+            fn_lower = feature_name.lower().replace("_", " ")
+            fn_prefix = feature_name.lower().split("_")[0]
+            relevant = [
+                e for e in endpoints
+                if fn_lower in e.get("name", "").lower().replace("_", " ")
+                or fn_prefix in e.get("path", "").lower()
+                or any(feature_name.lower() in a.lower() for a in e.get("feature_aliases", []))
+            ] or endpoints  # fallback to all if no feature match
+        else:
+            relevant = endpoints
+
+        lines = [
+            "--- API CONSTRAINTS (authoritative — do not deviate) ---",
+            f"Base URL: use the {{product}}_api_base_url fixture (do NOT hardcode '{base_url}')",
+            "Allowed endpoints and permitted response codes:",
+        ]
+        for e in relevant:
+            lines.append(f"  {e['method']} {e['path']}")
+            codes = e.get("response_codes")
+            if codes:
+                lines.append(f"    permitted status codes: {codes}")
+        return "\n".join(lines)
+    except Exception:
+        return ""
+
+
 def _discover_page_objects(output_base: Path | None, domain: str) -> str:
     """
     Scan the product's pages directory and return a catalog of importable page classes.
@@ -353,6 +390,8 @@ class TestScriptGenSkill:
         )
         page_catalog = _discover_page_objects(output_base, domain)
         formatted_exploration = f"\n--- LIVE APPLICATION EXPLORATION CONTEXT ---\n{exploration_context}\n" if exploration_context else ""
+        raw_constraints = _build_api_constraints(self.kb_loader, feature_name) if domain == "api" and self.kb_loader else ""
+        formatted_constraints = f"\n{raw_constraints}\n" if raw_constraints else ""
         prompt = TEST_SCRIPT_GEN_PROMPT.format(
             domain=domain,
             feature_name=feature_name,
@@ -363,6 +402,7 @@ class TestScriptGenSkill:
             categories_instruction=categories_instruction,
             page_catalog=page_catalog,
             exploration_context=formatted_exploration,
+            api_constraints=formatted_constraints,
         )
         code = self.ai_client.generate(prompt, max_tokens=5000, temperature=0.1).strip()
         return _clean_code_output(code)

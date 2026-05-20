@@ -74,6 +74,7 @@ STRICT RULES — violating these will produce incorrect documentation:
 8. NEVER write a one-liner as the full test case body. Every section listed below is mandatory for each TC.
 9. Minimum 3 numbered Steps per test case. Never collapse multiple actions into a single step.
 10. Pre-conditions must list at minimum: the user role, the application URL, and any prerequisite data state.
+11. If a selector is listed for a field in the KB context (e.g. selector='input[name="username"]'), copy it verbatim into the Test Data table under a "Selector" column and quote it exactly in the relevant Step. Do NOT alter or invent selectors — the script generator will use them directly.
 {tc_id_instruction}
 Format EVERY test case using EXACTLY this structure:
 
@@ -120,7 +121,7 @@ API Context:
 STRICT RULES — violating these will produce incorrect documentation:
 1. If Source Context is provided above, treat it as the authoritative specification. Use exact endpoint paths, methods, parameters, schemas, and status codes from it.
 2. If no Source Context, rely solely on KB/API Context — do NOT invent fields or codes from training data.
-3. Do NOT invent request fields, error codes, or behaviors not present in any provided context.
+3. Do NOT invent request fields, error codes, or behaviors not present in any provided context. If an "ALLOWED RESPONSE CODES" section is present in the API Context, ONLY generate test cases for those exact codes — do not add any other status code.
 4. Begin the document with an explicit "Endpoint Scope" section listing: HTTP method, full path, all request fields (name / type / required or optional / constraints), and every documented response code with its meaning.
 5. When Source Context is an OpenAPI spec, generate one test case per documented response code.
 6. NEVER write a heading that spans multiple TCs (e.g. "### PREFIX-010 to PREFIX-015"). Each test case MUST have its own numbered heading and complete content — no placeholders, no "see index above".
@@ -176,6 +177,7 @@ Feature: {feature_name}
 --- AVAILABLE PAGE OBJECTS ---
 {page_catalog}
 {exploration_context}
+{api_constraints}
 --- TEST CASE DOCUMENT ---
 {test_case_doc}
 
@@ -197,6 +199,8 @@ Feature: {feature_name}
 - NEVER use rest_client for product-specific tests — it reads a generic config. Use {{product}}_client for authenticated calls and {{product}}_api_base_url for raw requests.
 - All page object constructors require base_url as the second argument. Never instantiate a page object without passing the URL fixture: PageClass(page, {{product}}_base_url).
 - If a LIVE APPLICATION EXPLORATION CONTEXT section is present above: every page.fill(), page.click(), and page.locator() call MUST use a selector from that context. Do NOT invent CSS selectors — if no page object exists for this feature, call page methods directly using the selectors from the exploration context.
+- If a field's selector is noted in the test case document (e.g. selector='input[name="username"]'), use that exact selector string in the corresponding page.fill()/page.click()/page.locator() call. Do NOT alter it.
+- For API tests: if an "API CONSTRAINTS" section is present above, ONLY use the endpoint paths listed there. Do NOT construct variant paths (e.g. adding /validate, /search suffixes) not in that list. ONLY assert the response codes listed for each endpoint — asserting any other code is a hallucination.
 {test_type_instruction}
 {categories_instruction}
 Output the complete Python file content starting with imports.

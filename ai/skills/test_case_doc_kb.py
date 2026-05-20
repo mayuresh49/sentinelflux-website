@@ -79,6 +79,10 @@ class TestCaseDocumentationSkill:
             matching = [
                 p for p in pages
                 if any(t in p["name"].lower() for t in tokens)
+                or any(
+                    any(t in alias.lower() for t in tokens)
+                    for alias in p.get("feature_aliases", [])
+                )
             ]
             if matching:
                 parts.append("=== PAGE DETAILS ===")
@@ -90,6 +94,8 @@ class TestCaseDocumentationSkill:
                         for f in page["fields"]:
                             req = "required" if f.get("required") else "optional"
                             line = f"  - {f['label']} ({req})"
+                            if f.get("selector"):
+                                line += f", selector='{f['selector']}'"
                             if f.get("max_length"):
                                 line += f", max_length={f['max_length']}"
                             if f.get("validation"):
@@ -186,10 +192,13 @@ class TestCaseDocumentationSkill:
             try:
                 specs = self.kb_loader.load_api_specs()
                 endpoints = specs.get("rest_api", {}).get("endpoints", [])
+                fn_lower = feature_name.lower().replace("_", " ")
+                fn_prefix = feature_name.lower().split("_")[0]
                 matching = [
                     e for e in endpoints
-                    if feature_name.lower().replace("_", " ") in e["name"].lower().replace("_", " ")
-                    or feature_name.lower().split("_")[0] in e["path"].lower()
+                    if fn_lower in e["name"].lower().replace("_", " ")
+                    or fn_prefix in e["path"].lower()
+                    or any(feature_name.lower() in a.lower() for a in e.get("feature_aliases", []))
                 ]
                 if matching:
                     parts.append("\n=== MATCHING ENDPOINT DETAILS ===")
@@ -203,6 +212,14 @@ class TestCaseDocumentationSkill:
                             parts.append("  Negative cases:")
                             for nc in e["negative_cases"]:
                                 parts.append(f"    - {nc}")
+                    # Response code allowlist — prevents LLM from asserting undocumented codes
+                    rc_lines = [
+                        f"  {e['method']} {e['path']}: {e['response_codes']}"
+                        for e in matching if e.get("response_codes")
+                    ]
+                    if rc_lines:
+                        parts.append("\n=== ALLOWED RESPONSE CODES (ONLY assert these — never add others) ===")
+                        parts.extend(rc_lines)
             except Exception:
                 pass
 

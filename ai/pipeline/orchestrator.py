@@ -166,6 +166,13 @@ class TestPipelineOrchestrator:
             )
             self._normalize_script_fn_ids(out_script, out_doc, tc_prefix)
             self._review_script(out_script, domain)
+            suspicious = self._validate_script_paths(out_script, domain)
+            if suspicious:
+                _log.warning(
+                    "Path validation: %d path(s) in generated script not found in KB — "
+                    "possible hallucinations: %s",
+                    len(suspicious), suspicious,
+                )
 
             if increment_file:
                 self._log_increment(increment_file, feature_name, domain, out_doc, out_script)
@@ -413,6 +420,30 @@ class TestPipelineOrchestrator:
                 )
         except Exception as exc:
             _log.warning("DocReview skipped (non-fatal): %s", exc)
+
+    def _validate_script_paths(self, script_path: Path, domain: str) -> list[str]:
+        """Return URL path strings in the generated script not found in the KB.
+        Logged as warnings so the developer can spot hallucinated endpoints.
+        """
+        if domain != "api" or not self.kb_loader:
+            return []
+        try:
+            import re
+            text = script_path.read_text(encoding="utf-8")
+            found = re.findall(r"""['"](/[\w/{}.\-]+)['"]""", text)
+            specs = self.kb_loader.load_api_specs()
+            allowed = [e["path"] for e in specs.get("rest_api", {}).get("endpoints", [])]
+
+            def _matches(path: str) -> bool:
+                for allowed_path in allowed:
+                    pattern = re.sub(r"\{[^}]+\}", "[^/]+", re.escape(allowed_path))
+                    if re.fullmatch(pattern, path):
+                        return True
+                return False
+
+            return [p for p in set(found) if not _matches(p)]
+        except Exception:
+            return []
 
     def _review_script(self, script_path: Path, domain: str) -> None:
         """Run ScriptReviewAgent on a freshly generated script — best-effort, never raises."""
