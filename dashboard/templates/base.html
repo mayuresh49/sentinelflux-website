@@ -45,37 +45,88 @@
     </div>
 
     <nav class="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
-      {% set nav_items = [
-        ("/", "Dashboard", "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"),
-        ("/approvals", "Approvals", "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"),
-        ("/quality", "Quality", "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"),
-        ("/docs", "Test Cases Docs", "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"),
-        ("/scripts", "Test Scripts", "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"),
-        ("/runs", "Runs", "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 4l2 2 4-4"),
-        ("/failures", "Failures", "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"),
-        ("/agents", "Agents", "M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"),
-        ("/assignments", "Assignments", "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"),
-        ("/kb", "Knowledge Base", "M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"),
-        ("/activities", "Activities", "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"),
-        ("/test-plans", "Test Plans", "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"),
-        ("/config", "Configurations", "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"),
-      ] %}
-      {% set _vapt_active = request.url.path == '/vapt' %}
       {% set _prod = request.query_params.get('product', '') %}
-      {% for href, label, icon_path in nav_items %}
-        {% set is_active = request.url.path == href %}
-        <a href="{{ href }}{% if _prod %}?product={{ _prod }}{% endif %}"
-           class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
-                  {{ 'bg-indigo-600 text-white font-medium nav-active' if is_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
-          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-            <path stroke-linecap="round" stroke-linejoin="round" d="{{ icon_path }}"/>
-          </svg>
-          <span>{{ label }}</span>
-          {% if label == "Approvals" and pending_count > 0 %}
-            <span class="ml-auto bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium leading-none">{{ pending_count }}</span>
-          {% endif %}
-        </a>
-      {% endfor %}
+      {% set _vapt_active = request.url.path == '/vapt' %}
+      {% set _perf_active = request.url.path == '/perf' %}
+      {% set _a11y_active = request.url.path == '/a11y' %}
+      {% set _contract_active = request.url.path == '/contract' %}
+      {% set _visual_active = request.url.path == '/visual' %}
+      {% set _bugs_active = request.url.path == '/bugs' %}
+      {% set is_users_active = request.url.path == '/admin/users' %}
+      {% set _insights_active = request.url.path == '/insights' %}
+
+      {# ── Core workflow ── #}
+      <a href="/{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="/test-plans{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/test-plans' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <span>Test Plans</span>
+      </a>
+      <a href="/docs{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/docs' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <span>Test Cases Docs</span>
+      </a>
+      <a href="/scripts{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/scripts' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+        </svg>
+        <span>Test Scripts</span>
+      </a>
+      <a href="/runs{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/runs' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 4l2 2 4-4"/>
+        </svg>
+        <span>Runs</span>
+      </a>
+      <a href="/quality{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/quality' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        <span>Quality</span>
+      </a>
+      <a href="/failures{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/failures' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <span>Failures</span>
+      </a>
+
+      {# ── Specialized Testing Modules ── #}
+      {% if bugs_access or vapt_access or perf_access or a11y_access or contract_access or visual_access %}
+      <div class="border-t border-slate-700/40 my-1.5 mx-1"></div>
+      {% endif %}
+      {% if bugs_access %}
+      <a href="/bugs{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if _bugs_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span>Bugs</span>
+      </a>
+      {% endif %}
       {% if vapt_access %}
       <a href="/vapt{% if _prod %}?product={{ _prod }}{% endif %}"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
@@ -87,7 +138,6 @@
       </a>
       {% endif %}
       {% if perf_access %}
-      {% set _perf_active = request.url.path == '/perf' %}
       <a href="/perf{% if _prod %}?product={{ _prod }}{% endif %}"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
                 {{ 'bg-indigo-600 text-white font-medium nav-active' if _perf_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
@@ -98,7 +148,6 @@
       </a>
       {% endif %}
       {% if a11y_access %}
-      {% set _a11y_active = request.url.path == '/a11y' %}
       <a href="/a11y{% if _prod %}?product={{ _prod }}{% endif %}"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
                 {{ 'bg-indigo-600 text-white font-medium nav-active' if _a11y_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
@@ -109,18 +158,16 @@
       </a>
       {% endif %}
       {% if contract_access %}
-      {% set _contract_active = request.url.path == '/contract' %}
       <a href="/contract{% if _prod %}?product={{ _prod }}{% endif %}"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
                 {{ 'bg-indigo-600 text-white font-medium nav-active' if _contract_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
         <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
         </svg>
         <span>API Contract</span>
       </a>
       {% endif %}
       {% if visual_access %}
-      {% set _visual_active = request.url.path == '/visual' %}
       <a href="/visual{% if _prod %}?product={{ _prod }}{% endif %}"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
                 {{ 'bg-indigo-600 text-white font-medium nav-active' if _visual_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
@@ -130,19 +177,67 @@
         <span>Visual Regression</span>
       </a>
       {% endif %}
-      {% if bugs_access %}
-      {% set _bugs_active = request.url.path == '/bugs' %}
-      <a href="/bugs{% if _prod %}?product={{ _prod }}{% endif %}"
+
+      {# ── Workflow ── #}
+      <div class="border-t border-slate-700/40 my-1.5 mx-1"></div>
+      <a href="/assignments{% if _prod %}?product={{ _prod }}{% endif %}"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
-                {{ 'bg-indigo-600 text-white font-medium nav-active' if _bugs_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/assignments' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
         <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
         </svg>
-        <span>Bugs</span>
+        <span>Assignments</span>
       </a>
-      {% endif %}
+      <a href="/approvals{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/approvals' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span>Approvals</span>
+        {% if pending_count > 0 %}
+          <span class="ml-auto bg-amber-500 text-white text-xs px-1.5 py-0.5 rounded-full font-medium leading-none">{{ pending_count }}</span>
+        {% endif %}
+      </a>
+      <a href="/activities{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/activities' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span>Activities</span>
+      </a>
+
+      {# ── AI / Intelligence ── #}
+      <div class="border-t border-slate-700/40 my-1.5 mx-1"></div>
+      <a href="/agents{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/agents' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+        </svg>
+        <span>Agents</span>
+      </a>
+      <a href="/kb{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/kb' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+        </svg>
+        <span>Knowledge Base</span>
+      </a>
+
+      {# ── Admin ── #}
+      <div class="border-t border-slate-700/40 my-1.5 mx-1"></div>
+      <a href="/config{% if _prod %}?product={{ _prod }}{% endif %}"
+         class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
+                {{ 'bg-indigo-600 text-white font-medium nav-active' if request.url.path == '/config' else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
+        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <span>Configurations</span>
+      </a>
       {% if current_user and current_user.get('admin') %}
-      {% set is_users_active = request.url.path == '/admin/users' %}
       <a href="/admin/users"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
                 {{ 'bg-indigo-600 text-white font-medium nav-active' if is_users_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
@@ -153,7 +248,6 @@
       </a>
       {% endif %}
       {% if master_admin %}
-      {% set _insights_active = request.url.path == '/insights' %}
       <a href="/insights"
          class="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors relative
                 {{ 'bg-indigo-600 text-white font-medium nav-active' if _insights_active else 'text-slate-400 hover:bg-slate-800 hover:text-white' }}">
