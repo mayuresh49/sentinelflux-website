@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-20 (58)  
+Last updated: 2026-05-20 (59)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,10 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-20)
+
+- **Refactor: sidebar nav reorder + icon audit** (`dashboard/templates/base.html`): Replaced the `nav_items` loop + scattered conditional blocks with explicit grouped items separated by thin dividers. New order follows standard QA portal conventions — Core workflow (Dashboard → Test Plans → Docs → Scripts → Runs → Quality → Failures) → Specialized modules (Bugs, VAPT, Perf, A11y, Contract, Visual) → Workflow (Assignments, Approvals, Activities) → AI (Agents, KB) → Admin (Config, Users, Insights). Fixed six icon issues: Test Plans → calendar (was duplicate of Assignments), Bugs → x-circle (was warning triangle identical to Failures), API Contract → terminal (was document, same as Docs), Activities → clock (was plain clipboard), Knowledge Base → open book (was database cylinder), Agents → sparkle (was monitor).
+
+## Previous: result analyzer DB fix + SF_ENV + browser timeout (2026-05-20)
 
 - **Fix: result analyzer output never written to DB** (`ai/agents/sentinel_orchestrator.py`, `dashboard/routers/runs.py`): `_run_post_suite` was doing `isinstance(summary["blockers"], dict)` — `blockers` is always a list, so `failure_categories` was never updated and all failures stayed `"unanalyzed"` even after analysis ran. Fixed: orchestrator now includes `failure_analysis` (the full `ResultAnalyzerAgent` result: `by_classification` dict + per-failure records) in its summary. `_run_post_suite` reads `failure_analysis.by_classification` for `failure_categories` and `failure_analysis.failures` for per-failure classification, both patched in one `patch_run` call.
 - **Fix: SF_ENV not forwarded to pytest** (`dashboard/routers/runs.py`): `_execute_run` injected `SF_ENV` into subprocess env but never passed `--env` CLI arg, so pytest always defaulted to `env_qa.yaml`. Now adds `--env <value>` to the pytest command when `SF_ENV` is set, ensuring the correct product env profile is loaded.

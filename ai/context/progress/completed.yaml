@@ -1,5 +1,17 @@
 # Completed work items — append only, newest first
 
+- id: nav-reorder-icon-audit
+  date: 2026-05-20
+  title: "Refactor: sidebar nav reorder + icon audit"
+  outcome: >
+    dashboard/templates/base.html: replaced nav_items loop + scattered conditional blocks
+    with explicit grouped items and thin dividers. Order now: core workflow (Dashboard,
+    Test Plans, Docs, Scripts, Runs, Quality, Failures) → specialized modules (Bugs, VAPT,
+    Perf, A11y, Contract, Visual) → workflow (Assignments, Approvals, Activities) → AI
+    (Agents, KB) → admin (Config, Users, Insights). Six icon fixes: Test Plans → calendar,
+    Bugs → x-circle (was same triangle as Failures), API Contract → terminal, Activities →
+    clock, Knowledge Base → open-book, Agents → sparkle.
+
 - id: result-analyzer-db-fix
   date: 2026-05-20
   title: "Fix: result analyzer output never written to DB + SF_ENV forwarding + browser timeout"
