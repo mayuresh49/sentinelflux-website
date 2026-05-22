@@ -223,6 +223,11 @@ class TestPipelineOrchestrator:
 
         ctx = AgentContext(domain=domain, product=product, output_base=output_base or ROOT_DIR)
         agent = AppExplorerAgent(context=ctx)
+        self._alog.append(
+            event_type="agent_run", agent="app_explorer",
+            domain=domain, product=product, status="pending",
+            summary=f"AppExplorer started — {len(pages)} page(s)",
+        )
         try:
             result = agent.run(
                 base_url=base_url,
@@ -235,9 +240,24 @@ class TestPipelineOrchestrator:
                     "Exploration complete — %d page(s) explored",
                     result.get("pages_explored", 0),
                 )
+                self._alog.append(
+                    event_type="agent_run", agent="app_explorer",
+                    domain=domain, product=product, status="success",
+                    summary=f"AppExplorer complete — {result.get('pages_explored', 0)} page(s) explored",
+                )
                 return result.get("exploration_context", "")
+            self._alog.append(
+                event_type="agent_run", agent="app_explorer",
+                domain=domain, product=product, status="error",
+                summary="AppExplorer returned no result",
+            )
         except Exception as exc:
             _log.warning("Exploration failed (non-fatal) — continuing without it: %s", exc)
+            self._alog.append(
+                event_type="agent_run", agent="app_explorer",
+                domain=domain, product=product, status="error",
+                summary=f"AppExplorer failed: {exc}",
+            )
         return ""
 
     def _generate_doc(
@@ -406,6 +426,11 @@ class TestPipelineOrchestrator:
 
     def _review_doc(self, doc_path: Path, domain: str) -> None:
         """Run DocReviewAgent on a freshly generated doc — best-effort, never raises."""
+        self._alog.append(
+            event_type="agent_run", agent="doc_review",
+            domain=domain, status="pending",
+            summary=f"DocReview started — {doc_path.name}",
+        )
         try:
             from ai.agents.base_agent import AgentContext
             from ai.agents.doc_review_agent import DocReviewAgent
@@ -413,13 +438,25 @@ class TestPipelineOrchestrator:
             agent = DocReviewAgent(ai_client=self.ai_client, kb_loader=self.kb_loader, context=ctx)
             kb_context = self.kb_loader.get_all_context() if self.kb_loader else ""
             result = agent.run(doc_path=doc_path, fix=True, kb_context=kb_context)
-            if result.get("issues"):
+            issues = result.get("issues", [])
+            fixed = result.get("fixed", [])
+            if issues:
                 _log.info(
                     "DocReview: %d issue(s) found in %s — %d fixed",
-                    len(result["issues"]), doc_path.name, len(result.get("fixed", [])),
+                    len(issues), doc_path.name, len(fixed),
                 )
+            self._alog.append(
+                event_type="agent_run", agent="doc_review",
+                domain=domain, status="success",
+                summary=f"DocReview complete — {len(issues)} issue(s), {len(fixed)} fixed in {doc_path.name}",
+            )
         except Exception as exc:
             _log.warning("DocReview skipped (non-fatal): %s", exc)
+            self._alog.append(
+                event_type="agent_run", agent="doc_review",
+                domain=domain, status="error",
+                summary=f"DocReview failed: {exc}",
+            )
 
     def _validate_script_paths(self, script_path: Path, domain: str) -> list[str]:
         """Return URL path strings in the generated script not found in the KB.
@@ -447,6 +484,11 @@ class TestPipelineOrchestrator:
 
     def _review_script(self, script_path: Path, domain: str) -> None:
         """Run ScriptReviewAgent on a freshly generated script — best-effort, never raises."""
+        self._alog.append(
+            event_type="agent_run", agent="script_review",
+            domain=domain, status="pending",
+            summary=f"ScriptReview started — {script_path.name}",
+        )
         try:
             from ai.agents.base_agent import AgentContext
             from ai.agents.script_review_agent import ScriptReviewAgent
@@ -454,13 +496,25 @@ class TestPipelineOrchestrator:
             agent = ScriptReviewAgent(ai_client=self.ai_client, kb_loader=self.kb_loader, context=ctx)
             kb_context = self.kb_loader.get_all_context() if self.kb_loader else ""
             result = agent.run(script_path=script_path, fix=True, kb_context=kb_context, domain=domain)
-            if result.get("issues"):
+            issues = result.get("issues", [])
+            fixed = result.get("fixed", [])
+            if issues:
                 _log.info(
                     "ScriptReview: %d issue(s) in %s — %d fixed",
-                    len(result["issues"]), script_path.name, len(result.get("fixed", [])),
+                    len(issues), script_path.name, len(fixed),
                 )
+            self._alog.append(
+                event_type="agent_run", agent="script_review",
+                domain=domain, status="success",
+                summary=f"ScriptReview complete — {len(issues)} issue(s), {len(fixed)} fixed in {script_path.name}",
+            )
         except Exception as exc:
             _log.warning("ScriptReview skipped (non-fatal): %s", exc)
+            self._alog.append(
+                event_type="agent_run", agent="script_review",
+                domain=domain, status="error",
+                summary=f"ScriptReview failed: {exc}",
+            )
 
     def _generate_script(
         self,

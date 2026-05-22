@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Knowledge Base{% endblock %}
 
-{% set increment_template %}feature: feature_name
+{% set increment_template %}product: {{ selected_product }}
+feature: feature_name
 domain: api  # api | web | mobile | security
 description: |
   Describe what changed or what new capability needs testing.
@@ -69,7 +70,7 @@ scenarios:
          this.openapiUrlSaving = false;
        },
      }"
-     x-init="fetchOpenapiUrl(selectedProduct); $watch('selectedProduct', val => fetchOpenapiUrl(val))"
+     x-init="fetchOpenapiUrl(selectedProduct); $watch('selectedProduct', val => { fetchOpenapiUrl(val); if (!val) { showKbUpload = false; showIncrementForm = false; } incrementContent = incrementContent.replace(/^product:.*$/m, `product: ${val}`); })"
      @kb-upload-loading.window="kbUploading = true; kbUploadError = null; kbUploadResult = null"
      @kb-upload-result.window="kbUploadResult = $event.detail; kbUploading = false"
      @kb-upload-error.window="kbUploadError = $event.detail; kbUploading = false">
@@ -103,12 +104,16 @@ scenarios:
     <div class="w-64 shrink-0 flex flex-col bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
       <!-- Current product label + upload button -->
       <div class="px-3 py-2 border-b border-slate-100 flex items-center justify-between gap-2">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide truncate" x-text="selectedProduct || 'No product'"></span>
-        <button @click="showKbUpload = !showKbUpload; kbUploadResult = null; kbUploadError = null"
-                :class="showKbUpload ? 'text-indigo-700 bg-indigo-50' : 'text-slate-400 hover:text-indigo-600'"
-                class="shrink-0 p-1 rounded transition-colors" title="Upload KB file">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide truncate" x-text="selectedProduct || 'No product selected'"></span>
+        <button @click="selectedProduct ? (showKbUpload = !showKbUpload, kbUploadResult = null, kbUploadError = null) : sfToast('Select a product first', 'warn')"
+                :class="showKbUpload ? 'text-indigo-700 bg-indigo-50' : (selectedProduct ? 'text-slate-400 hover:text-indigo-600' : 'text-slate-200 cursor-not-allowed')"
+                class="shrink-0 p-1 rounded transition-colors" :title="selectedProduct ? 'Upload KB file' : 'Select a product first'">
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
         </button>
+      </div>
+      <!-- No product placeholder -->
+      <div x-show="!selectedProduct" class="flex-1 flex items-center justify-center p-4">
+        <p class="text-xs text-slate-400 text-center">Use the product filter above to select a product</p>
       </div>
       <!-- File list -->
       {% for p in products %}
@@ -134,7 +139,7 @@ scenarios:
                  placeholder="https://…/openapi.json"
                  class="flex-1 min-w-0 text-xs font-mono border border-slate-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-300">
           <button @click="saveOpenapiUrl()"
-                  :disabled="openapiUrlSaving"
+                  :disabled="openapiUrlSaving || !selectedProduct"
                   class="shrink-0 text-xs px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded transition-colors font-medium min-w-[2.5rem] text-center">
             <span x-show="openapiUrlSaving">…</span>
             <span x-show="!openapiUrlSaving && openapiUrlSaved" class="text-green-200">✓</span>
@@ -205,7 +210,7 @@ scenarios:
         </div>
         <div id="kb-editor-panel" class="flex-1 overflow-auto">
           <div class="h-full flex items-center justify-center">
-            <p class="text-slate-400 text-sm">Select a file from the list to view and edit.</p>
+            <p class="text-slate-400 text-sm" x-text="selectedProduct ? 'Select a file from the list to view and edit.' : 'Select a product to browse knowledge base files.'"></p>
           </div>
         </div>
       </div>
@@ -223,17 +228,24 @@ scenarios:
          @docx-error.window="docxError = $event.detail; docxUploading = false"
          class="space-y-4">
 
+      <!-- No product banner -->
+      <div x-show="!selectedProduct" class="flex items-center gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700">
+        <svg class="w-4 h-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 3a9 9 0 110 18A9 9 0 0112 3z"/></svg>
+        Select a product using the filter above to create or upload increments.
+      </div>
       <!-- Toolbar -->
       <div class="flex items-center justify-between">
         <p class="text-sm text-slate-500">Drop a feature YAML here to queue for test generation. Processed increments are tracked in <code class="bg-slate-100 px-1 rounded">kb_increments_log.yaml</code>.</p>
         <div class="flex gap-2">
-          <button @click="showDocxUpload = !showDocxUpload"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white text-xs font-medium rounded-lg transition-colors">
+          <button @click="selectedProduct ? (showDocxUpload = !showDocxUpload) : sfToast('Select a product first', 'warn')"
+                  :class="selectedProduct ? 'bg-slate-700 hover:bg-slate-800' : 'bg-slate-300 cursor-not-allowed'"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-lg transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
             Upload Word Document
           </button>
-          <button @click="showIncrementForm = !showIncrementForm"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-lg transition-colors">
+          <button @click="selectedProduct ? (showIncrementForm = !showIncrementForm) : sfToast('Select a product first', 'warn')"
+                  :class="selectedProduct ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-200 cursor-not-allowed'"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-lg transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             New YAML Increment
           </button>
@@ -532,10 +544,12 @@ window.addEventListener('DOMContentLoaded', () => {
 async function createIncrement(filename, content) {
   if (!filename) { sfToast('Enter a filename', 'warn'); return; }
   if (!filename.endsWith('.yaml') && !filename.endsWith('.yml')) { sfToast('Filename must end with .yaml', 'warn'); return; }
+  const productMatch = content.match(/^product:\s*(\S+)/m);
+  const product = productMatch ? productMatch[1].trim() : '';
   const res = await fetch('/api/kb/increments', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ filename, content }),
+    body: JSON.stringify({ filename, content, product }),
   });
   if (res.ok) {
     window.location.reload();
@@ -593,10 +607,12 @@ async function uploadDocx() {
 
   window.dispatchEvent(new CustomEvent('docx-loading'));
 
+  const product = new URLSearchParams(window.location.search).get('product') || '';
   const form = new FormData();
   form.append('file', fileInput.files[0]);
   form.append('output_filename', document.getElementById('docx-output-name')?.value || '');
   form.append('model', document.getElementById('docx-model')?.value || 'mistral:7b-instruct-v0.3-q4_K_M');
+  form.append('product', product);
 
   try {
     const res = await fetch('/api/kb/upload-docx', { method: 'POST', body: form });
@@ -632,10 +648,12 @@ async function uploadKbFile() {
 }
 
 async function saveEditedDocxYaml(filename, yaml) {
+  const productMatch = yaml.match(/^product:\s*(\S+)/m);
+  const product = productMatch ? productMatch[1].trim() : '';
   const res = await fetch('/api/kb/increments', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ filename, content: yaml }),
+    body: JSON.stringify({ filename, content: yaml, product }),
   });
   if (res.ok) {
     window.location.reload();

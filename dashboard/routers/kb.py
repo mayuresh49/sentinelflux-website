@@ -244,6 +244,10 @@ async def upload_docx(
     finally:
         tmp_path.unlink(missing_ok=True)
 
+    # Inject product field if the LLM omitted it
+    if product and not __import__("re").search(r"^product:", yaml_content, __import__("re").MULTILINE):
+        yaml_content = f"product: {product}\n{yaml_content}"
+
     # Derive output filename from upload name if not supplied
     stem = Path(file.filename).stem.lower().replace(" ", "_").replace("-", "_")
     filename = output_filename.strip() or f"{stem}.yaml"

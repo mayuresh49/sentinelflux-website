@@ -506,15 +506,21 @@ async def kb_page(request: Request, product: str | None = None,
     if product and product not in visible:
         product = None
     kb_files = {p: _kb_files(p) for p in visible}
-    selected_product = product if product and product in visible else (visible[0] if visible else "")
+    selected_product = product if product and product in visible else ""
     log = _load_increments_log()
-    increment_files: list[str] = []
+    import yaml as _yaml
+    increments: list[dict] = []
     if _INCREMENTS_DIR.exists():
-        increment_files = sorted(
-            f.name for f in _INCREMENTS_DIR.iterdir()
-            if f.suffix in _TEXT_SUFFIXES and f.name != ".gitkeep"
-        )
-    increments = [{"filename": fn, "processed": fn in log, "log": log.get(fn)} for fn in increment_files]
+        for f in sorted(_INCREMENTS_DIR.iterdir()):
+            if f.suffix not in _TEXT_SUFFIXES or f.name == ".gitkeep":
+                continue
+            try:
+                inc_product = str((_yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("product", "")).strip()
+            except Exception:
+                inc_product = ""
+            if selected_product and inc_product and inc_product != selected_product:
+                continue
+            increments.append({"filename": f.name, "processed": f.name in log, "log": log.get(f.name)})
     recent_jobs = list(reversed(_load_jobs()))[:20]
     return templates.TemplateResponse(request, "kb.html", context=_ctx(
         request, current_user,

@@ -131,12 +131,20 @@ def _reap_orphaned_runs():
     a previous process will never complete, so we error them out immediately.
     """
     from datetime import datetime, timezone
+    from core.db import get_conn
     from core.run_manager import RunManager
     rm = RunManager()
     now = datetime.now(timezone.utc).isoformat()
     for run in rm.all_runs():
         if run.get("status") in ("queued", "running"):
             rm.patch_run(run["id"], status="errored", finished_at=now, errors=1)
+    conn = get_conn()
+    conn.execute(
+        "UPDATE pipeline_jobs SET status = 'failed', finished = ?, output = 'Server restarted'"
+        " WHERE status = 'running'",
+        (now,),
+    )
+    conn.commit()
 
 
 async def _schedule_loop():
