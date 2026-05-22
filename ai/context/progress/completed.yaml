@@ -1,5 +1,19 @@
 # Completed work items — append only, newest first
 
+- id: unit-tests-all-modules
+  date: 2026-05-22
+  title: "Feat: unit tests for all framework modules + fix apply_schema"
+  outcome: >
+    9 new test files, 232 new tests, all 256 tests pass.
+    Modules covered: utils.assertions, utils.ai_assertions (hard+soft), utils.wait, utils.step;
+    BugManager (CRUD, state machine, comments, artifacts, stats); InsightsManager + RoadmapManager;
+    audit_logger; ai_factory (all provider/mode branches + dashboard config);
+    RestClient (URL building, path params, schema validation); AgentContext + BaseAgent (domain helpers);
+    KnowledgeBaseLoader (load/cache/invalidate, context formatters, increments);
+    AnthropicClient + OpenAIClient + MistralClient (sys.modules mocking for optional packages).
+    Also fixed core/db.py: apply_schema now ignores "no such table" on ALTER TABLE so fresh DBs
+    work in tests; CREATE TABLE bugs now includes bug_seq + bug_number columns.
+
 - id: website-github-pages
   date: 2026-05-20
   title: "Feat: sentinelflux.in marketing website + GitHub Pages deploy workflow"

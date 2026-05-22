@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-20 (60)  
+Last updated: 2026-05-22  
 Framework version: 0.1.0
 
 ---
@@ -42,7 +42,12 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ---
 
-## What Was Just Done (2026-05-20)
+## What Was Just Done (2026-05-22)
+
+- **Feat: Unit tests for all framework modules** (`tests/unit/test_utils_modules.py`, `test_core_bug_manager.py`, `test_core_insights_roadmap.py`, `test_core_audit_logger.py`, `test_core_ai_factory.py`, `test_api_rest_client.py`, `test_ai_base_agent.py`, `test_ai_kb_loader.py`, `test_ai_clients.py`): Added 232 new unit tests covering all previously untested core modules. Coverage: `utils.assertions` + `utils.ai_assertions` (hard + soft) + `utils.wait` + `utils.step`; `BugManager` (CRUD, state machine, comments, artifacts, stats); `InsightsManager` + `RoadmapManager`; `audit_logger`; `ai_factory` (all provider/mode branches, dashboard config); `RestClient` (URL building, path params, schema validation); `AgentContext` + `BaseAgent` (domain helpers, registry lookups); `KnowledgeBaseLoader` (load/cache/invalidate, all context formatters, increments); `AnthropicClient` + `OpenAIClient` + `MistralClient` (with sys.modules mocking for optional packages). All 256 tests pass.
+- **Fix: `core/db.apply_schema`** (`core/db.py`): Two schema bugs fixed: (1) `apply_schema` now also ignores "no such table" OperationalErrors so ALTER TABLE migration statements don't break fresh DB initialization in tests; (2) `CREATE TABLE bugs` now includes `bug_seq` and `bug_number` columns so fresh schemas match the migrated schema. These were causing all 24 existing unit tests to fail silently.
+
+## Previous: sentinelflux.in website + GitHub Pages (2026-05-20)
 
 - **Feat: sentinelflux.in marketing website + GitHub Pages deploy** (`website/index.html`, `website/CNAME`, `.github/workflows/deploy-website.yml`): Static landing page created for sentinelflux.in. Single-file HTML with Tailwind CDN — hero with fake dashboard preview, 8 module cards (REST/GraphQL, Web UI, VAPT, Performance, Accessibility, API Contract, Visual Regression, Bug Tracker), three feature deep-dives (AI pipeline, self-healing locators, AI agents), how-it-works (3 steps), and install CTA. `CNAME` set to `sentinelflux.in`. GitHub Actions workflow (`deploy-website.yml`) auto-deploys `website/` to `gh-pages` branch on push to main. GoDaddy DNS: 4 A records to GitHub Pages IPs + CNAME www → mayuresh49.github.io.
 
