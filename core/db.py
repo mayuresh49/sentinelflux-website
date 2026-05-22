@@ -236,7 +236,9 @@ _DDL = [
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
         resolved_at TEXT,
-        closed_at TEXT
+        closed_at TEXT,
+        bug_seq INTEGER NOT NULL DEFAULT 0,
+        bug_number TEXT NOT NULL DEFAULT ''
     )""",
     "CREATE INDEX IF NOT EXISTS idx_bugs_product ON bugs(product, created_at)",
     "CREATE INDEX IF NOT EXISTS idx_bugs_state ON bugs(state)",
@@ -305,7 +307,10 @@ def apply_schema(conn: sqlite3.Connection) -> None:
         try:
             conn.execute(stmt)
         except sqlite3.OperationalError as e:
-            if "duplicate column name" not in str(e).lower():
+            err = str(e).lower()
+            # ALTER TABLE on a not-yet-created table: safe to skip — fresh CREATE TABLE
+            # already includes those columns. Duplicate column: migration already applied.
+            if "duplicate column name" not in err and "no such table" not in err:
                 raise
     conn.commit()
 
