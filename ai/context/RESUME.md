@@ -44,6 +44,18 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-22)
 
+- **Feat: Product-scoped KB page + agent status logging + orphan job cleanup** (`dashboard/templates/kb.html`, `dashboard/routers/pages.py`, `dashboard/routers/kb.py`, `dashboard/app.py`, `ai/pipeline/orchestrator.py`):
+  - KB page now requires product selection — upload button, OpenAPI save, "New YAML Increment", and "Upload Word Document" are all blocked (toast + disabled state) without a product selected. File list and right panel show contextual "select a product" messages.
+  - Increment list filtered by `product:` field in each YAML — tagged increments only show under their product; untagged show for all.
+  - YAML increment template pre-populated with `product: <selected_product>`; `$watch` keeps it in sync on filter change; `createIncrement`, `saveEditedDocxYaml`, and `uploadDocx` all extract/pass product to the API.
+  - DOCX upload endpoint (`kb.py`) injects `product: X` into LLM-generated YAML if absent.
+  - `pages.py`: removed auto-default of `selected_product` to first product — empty when no `?product=X` in URL.
+  - `orchestrator.py`: `_run_exploration`, `_review_doc`, `_review_script` now log to `ActivityLog` with correct agent names (`app_explorer`, `doc_review`, `script_review`) so agents dashboard shows real status.
+  - `app.py` startup: orphaned `pipeline_jobs` rows stuck in `running` are patched to `failed` on server restart (mirrors existing run_manager orphan reaping).
+  - `ess_requirements_orangehrm.yaml`: added `product: orangehrm` field.
+
+## Previous: Unit tests for all framework modules (2026-05-22)
+
 - **Feat: Unit tests for all framework modules** (`tests/unit/test_utils_modules.py`, `test_core_bug_manager.py`, `test_core_insights_roadmap.py`, `test_core_audit_logger.py`, `test_core_ai_factory.py`, `test_api_rest_client.py`, `test_ai_base_agent.py`, `test_ai_kb_loader.py`, `test_ai_clients.py`): Added 232 new unit tests covering all previously untested core modules. Coverage: `utils.assertions` + `utils.ai_assertions` (hard + soft) + `utils.wait` + `utils.step`; `BugManager` (CRUD, state machine, comments, artifacts, stats); `InsightsManager` + `RoadmapManager`; `audit_logger`; `ai_factory` (all provider/mode branches, dashboard config); `RestClient` (URL building, path params, schema validation); `AgentContext` + `BaseAgent` (domain helpers, registry lookups); `KnowledgeBaseLoader` (load/cache/invalidate, all context formatters, increments); `AnthropicClient` + `OpenAIClient` + `MistralClient` (with sys.modules mocking for optional packages). All 256 tests pass.
 - **Fix: `core/db.apply_schema`** (`core/db.py`): Two schema bugs fixed: (1) `apply_schema` now also ignores "no such table" OperationalErrors so ALTER TABLE migration statements don't break fresh DB initialization in tests; (2) `CREATE TABLE bugs` now includes `bug_seq` and `bug_number` columns so fresh schemas match the migrated schema. These were causing all 24 existing unit tests to fail silently.
 

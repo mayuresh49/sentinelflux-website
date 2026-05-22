@@ -1,5 +1,18 @@
 # Completed work items — append only, newest first
 
+- id: kb-product-scoped-ux
+  date: 2026-05-22
+  title: "Feat: product-scoped KB page + agent status logging + orphan pipeline job cleanup"
+  outcome: >
+    KB page blocks all upload/increment actions without product selection (toast + disabled).
+    Increment list filtered by product: field in each YAML. YAML template pre-filled with
+    selected product; $watch keeps it in sync. createIncrement, saveEditedDocxYaml, uploadDocx
+    all pass product to API. DOCX endpoint injects product: field if LLM omits it.
+    pages.py no longer auto-defaults selected_product to first product.
+    orchestrator.py logs app_explorer, doc_review, script_review to ActivityLog so agents
+    dashboard shows real status. app.py startup reaps orphaned pipeline_jobs in running state.
+    ess_requirements_orangehrm.yaml patched with product: orangehrm.
+
 - id: unit-tests-all-modules
   date: 2026-05-22
   title: "Feat: unit tests for all framework modules + fix apply_schema"
