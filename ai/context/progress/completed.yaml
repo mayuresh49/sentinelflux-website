@@ -1,5 +1,19 @@
 # Completed work items — append only, newest first
 
+- id: explorer-kb-output
+  date: 2026-05-23
+  title: "Feat: AppExplorerAgent KB doc + increment generation from dashboard"
+  outcome: >
+    DiscoveredPage.to_kb_yaml_entry() produces ui_pages.yaml-compatible dicts;
+    to_increment_entry() produces increment YAML for a single page.
+    AppExplorerAgent.run() gains write_kb_doc (merges into products/<product>/ai/knowledge_base/ui_pages.yaml,
+    replacing existing entries by URL) and write_increment (writes
+    ai/knowledge_base/increments/explore_<feature>_<product>.yaml combining all pages).
+    POST /api/kb/{product}/explore fires a background thread; GET /api/kb/explore-jobs/{job_id}
+    polls in-memory status. Dashboard KB Increments tab adds "Explore App" panel with
+    Base URL, auth fields, pages textarea, Feature Name, Output Mode select, polling spinner,
+    and "Run Pipeline →" shortcut on completion.
+
 - id: pipeline-feature-name-fix
   date: 2026-05-22
   title: "Fix: pipeline feature name collision + doc_gen/script_gen activity logging"

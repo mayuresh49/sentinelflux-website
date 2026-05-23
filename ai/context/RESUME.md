@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-23  
+Last updated: 2026-05-23 (explorer KB output)  
 Framework version: 0.1.0
 
 ---
@@ -42,12 +42,13 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ---
 
-## What Was Just Done (2026-05-22)
+## What Was Just Done (2026-05-23)
 
-- **Fix: pipeline feature name collision + doc_gen/script_gen activity logging** (`ai/pipeline/orchestrator.py`, `CLAUDE.md`):
-  - Feature name was extracted as `stem.split("_", 2)[2]` — for any `<feature>_orangehrm.yaml` this always yielded `"orangehrm"`, causing every DOCX upload to overwrite the same output files (`orangehrm.md`, `test_orangehrm.py`). Fixed: now strips `_<product>` suffix when `--project` matches (e.g. `ess_requirements_orangehrm` + `--project orangehrm` → feature `ess_requirements`). Each increment YAML now gets unique output files.
-  - `_generate_doc` and `_generate_script` now log pending → success/error to `ActivityLog` with `agent="doc_gen"` / `"script_gen"`. Previously these were invisible to the agents dashboard (always idle) regardless of how many pipeline runs had completed.
-  - `CLAUDE.md`: added AI Pipeline rulebook section — feature name mapping contract, agent logging per method, subprocess DB behavior, quick SQLite diagnostics for silent failures.
+- **Feat: AppExplorerAgent KB doc + increment output + dashboard Explore App panel** (`ai/skills/app_exploration.py`, `ai/agents/app_explorer_agent.py`, `dashboard/routers/kb.py`, `dashboard/templates/kb.html`, `dashboard/agent_meta.py`):
+  - `DiscoveredPage` gains `to_kb_yaml_entry()` (produces `ui_pages.yaml`-compatible dict) and `to_increment_entry()` (produces increment YAML dict for a single page).
+  - `AppExplorerAgent.run()` accepts three new params: `feature_name`, `write_kb_doc`, `write_increment`. When `write_kb_doc=True`, merges discovered pages into `products/<product>/ai/knowledge_base/ui_pages.yaml` (replacing existing entries by URL). When `write_increment=True`, writes `ai/knowledge_base/increments/explore_<feature>_<product>.yaml` combining all crawled pages into one increment YAML.
+  - `POST /api/kb/{product}/explore` + `GET /api/kb/explore-jobs/{job_id}` — runs agent in a background thread (same pattern as pipeline), tracks status in `_EXPLORE_JOBS` in-memory dict.
+  - KB page Increments tab: "Explore App" button (emerald) opens a collapsible panel with Base URL, Login URL, Username/Password, pages textarea (one per line), Feature Name, and Output Mode select (Increment / KB Document / Both). Polls job status every 2.5 s; on completion shows "Run Pipeline →" shortcut for the saved increment.
 
 ## Previous: GCP e2-micro deployment scripts (2026-05-23)
 
