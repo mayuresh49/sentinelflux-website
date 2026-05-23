@@ -44,6 +44,15 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-23)
 
+- **Fix: API endpoint hallucination prevention + performance_management doc+script** (`ai/knowledge_base/kb_loader.py`, `ai/prompts/prompt_templates.py`, `products/orangehrm/docs/test_cases/api/performance_management_requirements.md`, `products/orangehrm/tests/api/test_performance_management_requirements.py`):
+  - Root cause: `get_increments_context()` read `test_scenarios.api` which doesn't exist in increments using the `endpoints[]` schema — LLM received zero endpoint data and fabricated `/api/v2/performance_management_requirements`.
+  - `kb_loader.py`: `get_increments_context()` now renders `endpoints[]` from each increment as an `API CONSTRAINTS FOR <feature>` block (method + path + response codes) and also renders `scenarios[]`. LLM now receives exact allowed paths.
+  - `prompt_templates.py`: `FEATURE_DOC_PROMPT` rule 7 — CRITICAL block explicitly forbidding path fabrication when `API CONSTRAINTS` section is present.
+  - `performance_management_requirements.md`: rewritten with 9 TCs (OH-API-029..037) covering all 4 real endpoints: `POST /performance/configure/kpi`, `PUT /performance/configure/kpi/assign`, `POST /performance/trackers`, `POST /performance/reviews`.
+  - `test_performance_management_requirements.py`: rewritten with correct `orangehrm_client` / `orangehrm_api_base_url` fixtures, real endpoint paths, TC IDs OH-API-029..037.
+
+## Previous: AppExplorerAgent KB doc + dashboard Explore App panel (2026-05-23)
+
 - **Feat: AppExplorerAgent KB doc + increment output + dashboard Explore App panel** (`ai/skills/app_exploration.py`, `ai/agents/app_explorer_agent.py`, `dashboard/routers/kb.py`, `dashboard/templates/kb.html`, `dashboard/agent_meta.py`):
   - `DiscoveredPage` gains `to_kb_yaml_entry()` (produces `ui_pages.yaml`-compatible dict) and `to_increment_entry()` (produces increment YAML dict for a single page).
   - `AppExplorerAgent.run()` accepts three new params: `feature_name`, `write_kb_doc`, `write_increment`. When `write_kb_doc=True`, merges discovered pages into `products/<product>/ai/knowledge_base/ui_pages.yaml` (replacing existing entries by URL). When `write_increment=True`, writes `ai/knowledge_base/increments/explore_<feature>_<product>.yaml` combining all crawled pages into one increment YAML.

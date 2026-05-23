@@ -1,5 +1,16 @@
 # Completed work items — append only, newest first
 
+- id: api-endpoint-hallucination-fix
+  date: 2026-05-23
+  title: "Fix: API endpoint hallucination prevention + performance_management doc+script rewrite"
+  outcome: >
+    get_increments_context() was silently dropping endpoints[] from increment YAMLs that don't
+    use the test_scenarios schema — LLM got no endpoint data and fabricated paths. Fixed:
+    kb_loader now emits "API CONSTRAINTS FOR <feature>" block with method+path+codes from
+    endpoints[]. FEATURE_DOC_PROMPT gets rule 7 blocking path fabrication when constraints
+    present. performance_management_requirements.md rewritten with 9 TCs (OH-API-029..037)
+    using real paths. Script rewritten with orangehrm_client/orangehrm_api_base_url fixtures.
+
 - id: explorer-kb-output
   date: 2026-05-23
   title: "Feat: AppExplorerAgent KB doc + increment generation from dashboard"
