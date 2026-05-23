@@ -341,6 +341,85 @@ class DiscoveredPage:
 
         return "\n".join(lines)
 
+    def to_kb_yaml_entry(self) -> dict:
+        """Produce a ui_pages.yaml-compatible page entry from this exploration result."""
+        elements: list[str] = []
+        for f in self.fields:
+            label = f.label or f.name
+            elements.append(f"{label} ({f.primary_selector})")
+        for b in self.buttons:
+            elements.append(f"[Button] {b.label} ({b.primary_selector})")
+
+        positive = [f"Verify {self.title} loads and all elements are visible"]
+        for f in self.fields:
+            if f.required:
+                label = f.label or f.name
+                positive.append(f"Fill {label} with valid data and submit successfully")
+
+        negative: list[str] = []
+        for f in self.fields:
+            if f.validation_message:
+                label = f.label or f.name
+                negative.append(f"{label} empty: {f.validation_message}")
+            elif f.required:
+                label = f.label or f.name
+                negative.append(f"Leave {label} empty — expect required-field error")
+
+        entry: dict = {
+            "name": self.title,
+            "url": self.url,
+            "description": (
+                f"Discovered via AppExplorerAgent on {self.timestamp[:10] if self.timestamp else 'unknown date'}"
+            ),
+            "elements": elements,
+        }
+        if positive or negative:
+            scenarios: dict = {}
+            if positive:
+                scenarios["positive"] = positive
+            if negative:
+                scenarios["negative"] = negative
+            entry["test_scenarios"] = scenarios
+        return entry
+
+    def to_increment_entry(self, feature_name: str, product: str, domain: str = "web") -> dict:
+        """Produce an increment YAML-compatible dict for this single page."""
+        scenarios: list[dict] = [
+            {
+                "name": "page_loads",
+                "type": "happy_path",
+                "description": f"Verify {self.title} loads without errors",
+            }
+        ]
+        for f in self.fields:
+            if f.required:
+                label = f.label or f.name
+                scenarios.append({
+                    "name": f"fill_{f.name}",
+                    "type": "happy_path",
+                    "description": f"Fill {label} with valid data",
+                })
+        if any(f.validation_message for f in self.fields):
+            scenarios.append({
+                "name": "validation_errors",
+                "type": "error",
+                "description": "Submit empty form — required-field errors appear for all mandatory fields",
+            })
+
+        return {
+            "product": product,
+            "feature": feature_name,
+            "domain": domain,
+            "description": f"UI exploration of {self.title} at {self.url}\n",
+            "ui_changes": [{
+                "component": self.title,
+                "url": self.url,
+                "fields": [f"{f.label or f.name} ({f.primary_selector})" for f in self.fields],
+                "buttons": [b.label for b in self.buttons],
+            }],
+            "scenarios": scenarios,
+        }
+
 
 class AppExplorationSkill:
     """Playwright-based page structure discovery."""

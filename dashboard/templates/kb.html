@@ -243,6 +243,12 @@ scenarios:
             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
             Upload Word Document
           </button>
+          <button @click="selectedProduct ? window.dispatchEvent(new CustomEvent('toggle-explore-panel')) : sfToast('Select a product first', 'warn')"
+                  :class="selectedProduct ? 'bg-emerald-700 hover:bg-emerald-800' : 'bg-slate-300 cursor-not-allowed'"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-lg transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            Explore App
+          </button>
           <button @click="selectedProduct ? (showIncrementForm = !showIncrementForm) : sfToast('Select a product first', 'warn')"
                   :class="selectedProduct ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-200 cursor-not-allowed'"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-lg transition-colors">
@@ -299,6 +305,107 @@ scenarios:
       </div>
 
     </div><!-- end DOCX scope -->
+
+    <!-- Explore App panel -->
+    <div x-data="{
+           show: false,
+           exploring: false,
+           exploreResult: null,
+           exploreError: null,
+         }"
+         @toggle-explore-panel.window="show = !show; exploreResult = null; exploreError = null"
+         @explore-loading.window="exploring = true; exploreResult = null; exploreError = null"
+         @explore-result.window="exploreResult = $event.detail; exploring = false"
+         @explore-error.window="exploreError = $event.detail; exploring = false"
+         x-show="show" x-cloak
+         class="bg-white rounded-xl border border-emerald-100 shadow-sm p-6 space-y-4">
+
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold text-slate-800 text-sm">Explore App — Generate KB from Live Application</h3>
+        <button @click="show = false; exploreResult = null; exploreError = null"
+                class="text-slate-400 hover:text-slate-600 text-xs">✕ Close</button>
+      </div>
+      <p class="text-xs text-slate-500">Playwright crawls the running application, extracts real DOM selectors, and writes a KB document or feature increment YAML ready for test generation.</p>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1 col-span-2">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Base URL <span class="text-red-400">*</span></label>
+          <input id="explore-base-url" type="url" placeholder="http://localhost:8080"
+                 class="text-sm font-mono border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Login URL <span class="text-slate-400 font-normal">(optional)</span></label>
+          <input id="explore-login-url" type="text" placeholder="/auth/login"
+                 class="text-sm font-mono border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Feature Name <span class="text-red-400">*</span></label>
+          <input id="explore-feature-name" type="text" placeholder="e.g. employee_leave"
+                 class="text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Username <span class="text-slate-400 font-normal">(optional)</span></label>
+          <input id="explore-username" type="text" autocomplete="off"
+                 class="text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Password <span class="text-slate-400 font-normal">(optional)</span></label>
+          <input id="explore-password" type="password" autocomplete="off"
+                 class="text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300">
+        </div>
+        <div class="flex flex-col gap-1 col-span-2">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Pages to Explore <span class="text-red-400">*</span> <span class="text-slate-400 font-normal">(one URL path per line)</span></label>
+          <textarea id="explore-pages" rows="4" placeholder="/pim/addEmployee&#10;/leave/viewLeaveList&#10;/auth/login"
+                    class="font-mono text-xs border border-slate-200 rounded-lg p-3 resize-y focus:outline-none focus:ring-2 focus:ring-emerald-300 bg-slate-50"></textarea>
+        </div>
+        <div class="flex flex-col gap-1 col-span-2">
+          <label class="text-xs font-medium text-slate-500 uppercase tracking-wide">Output Mode</label>
+          <select id="explore-output-mode"
+                  class="text-sm border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-300">
+            <option value="increment">Increment YAML — feature increment saved to ai/knowledge_base/increments/</option>
+            <option value="kb_doc">KB Document — merge pages into products/&lt;product&gt;/ai/knowledge_base/ui_pages.yaml</option>
+            <option value="both">Both — write increment YAML and update KB document</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex gap-2 items-center">
+        <button @click="exploreApp(selectedProduct)"
+                :disabled="exploring"
+                class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors">
+          <svg x-show="!exploring" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <svg x-show="exploring" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          <span x-text="exploring ? 'Exploring…' : 'Start Exploration'"></span>
+        </button>
+        <button @click="show = false; exploreResult = null; exploreError = null"
+                class="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
+          Cancel
+        </button>
+        <span x-show="exploring" class="text-xs text-slate-400">Playwright is crawling — this may take 30–60 s</span>
+      </div>
+
+      <div x-show="exploreError" class="text-xs text-red-600 bg-red-50 rounded px-3 py-2" x-text="exploreError"></div>
+      <div x-show="exploreResult && exploreResult.status === 'completed'" class="space-y-2">
+        <p class="text-xs font-medium text-emerald-700">
+          Exploration complete —
+          <span x-text="exploreResult?.result?.pages_explored"></span> page(s) explored.
+        </p>
+        <div x-show="exploreResult?.result?.kb_doc_path" class="text-xs text-slate-600 bg-slate-50 rounded px-3 py-2">
+          KB document updated: <code class="font-mono" x-text="exploreResult?.result?.kb_doc_path"></code>
+        </div>
+        <div x-show="exploreResult?.result?.increment_filename" class="flex items-center gap-3 text-xs text-slate-600 bg-slate-50 rounded px-3 py-2">
+          <span>Increment saved: <code class="font-mono" x-text="exploreResult?.result?.increment_filename"></code></span>
+          <button @click="
+            tab = 'pipeline';
+            document.getElementById('pipeline-feature').value = (exploreResult?.result?.increment_filename || '').replace(/\.ya?ml$/, '');
+            document.getElementById('pipeline-increment').value = exploreResult?.result?.increment_filename || '';
+          "
+                  class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-indigo-600 border border-indigo-200 hover:bg-indigo-50 rounded-lg transition-colors">
+            Run Pipeline →
+          </button>
+        </div>
+      </div>
+    </div><!-- end Explore App panel -->
 
     <!-- New increment form -->
     <div x-show="showIncrementForm" x-cloak
@@ -661,6 +768,62 @@ async function saveEditedDocxYaml(filename, yaml) {
     const err = await res.json();
     sfToast('Save failed: ' + (err.detail || JSON.stringify(err)));
   }
+}
+
+async function exploreApp(product) {
+  if (!product) { sfToast('Select a product first', 'warn'); return; }
+  const baseUrl = (document.getElementById('explore-base-url')?.value || '').trim();
+  if (!baseUrl) { sfToast('Base URL is required', 'warn'); return; }
+  const featureName = (document.getElementById('explore-feature-name')?.value || '').trim();
+  if (!featureName) { sfToast('Feature name is required', 'warn'); return; }
+  const pagesRaw = document.getElementById('explore-pages')?.value || '';
+  const pages = pagesRaw.split('\n').map(s => s.trim()).filter(Boolean);
+  if (!pages.length) { sfToast('Enter at least one page path', 'warn'); return; }
+
+  window.dispatchEvent(new CustomEvent('explore-loading'));
+
+  const body = {
+    base_url: baseUrl,
+    login_url: (document.getElementById('explore-login-url')?.value || '').trim(),
+    username: document.getElementById('explore-username')?.value || '',
+    password: document.getElementById('explore-password')?.value || '',
+    pages,
+    feature_name: featureName,
+    output_mode: document.getElementById('explore-output-mode')?.value || 'increment',
+  };
+
+  try {
+    const res = await fetch(`/api/kb/${product}/explore`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || JSON.stringify(data));
+    _pollExploreJob(data.job_id);
+  } catch (err) {
+    window.dispatchEvent(new CustomEvent('explore-error', { detail: String(err) }));
+  }
+}
+
+let _explorePoller = null;
+function _pollExploreJob(jobId) {
+  if (_explorePoller) clearInterval(_explorePoller);
+  _explorePoller = setInterval(async () => {
+    try {
+      const res = await fetch(`/api/kb/explore-jobs/${jobId}`);
+      const job = await res.json();
+      if (job.status !== 'running') {
+        clearInterval(_explorePoller);
+        _explorePoller = null;
+        if (job.status === 'completed') {
+          window.dispatchEvent(new CustomEvent('explore-result', { detail: job }));
+        } else {
+          window.dispatchEvent(new CustomEvent('explore-error', { detail: job.output || 'Exploration failed' }));
+        }
+      }
+    } catch (_) {}
+  }, 2500);
 }
 </script>
 {% endblock %}

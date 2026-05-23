@@ -6,6 +6,8 @@ import logging
 import re
 from pathlib import Path
 
+import yaml
+
 from ai.agents.base_agent import BaseAgent
 from utils.paths import ROOT as _ROOT_DIR
 
@@ -54,6 +56,9 @@ class AppExplorerAgent(BaseAgent):
         update_locators: bool = True,
         generate_page_objects: bool = True,
         headless: bool = True,
+        feature_name: str = "",
+        write_kb_doc: bool = False,
+        write_increment: bool = False,
     ) -> dict:
         from ai.skills.app_exploration import AppExplorationSkill
         from core.activity_log import ActivityLog
@@ -141,6 +146,81 @@ class AppExplorerAgent(BaseAgent):
         combined_context = "\n\n---\n\n".join(exploration_contexts)
         total_fields = sum(r["fields_found"] for r in results)
 
+        kb_doc_path: str | None = None
+        increment_path: str | None = None
+        increment_filename: str | None = None
+
+        if write_kb_doc and product:
+            kb_dir = _ROOT_DIR / "products" / product / "ai" / "knowledge_base"
+            kb_dir.mkdir(parents=True, exist_ok=True)
+            ui_pages_file = kb_dir / "ui_pages.yaml"
+            existing: dict = {}
+            if ui_pages_file.exists():
+                existing = yaml.safe_load(ui_pages_file.read_text(encoding="utf-8")) or {}
+            pages_list: list = existing.get("pages", [])
+            existing_urls = {p["url"] for p in pages_list if isinstance(p, dict)}
+            for dp in discovered:
+                entry = dp.to_kb_yaml_entry()
+                if dp.url in existing_urls:
+                    pages_list = [p for p in pages_list if p.get("url") != dp.url]
+                pages_list.append(entry)
+            existing["pages"] = pages_list
+            ui_pages_file.write_text(yaml.safe_dump(existing, allow_unicode=True, sort_keys=False), encoding="utf-8")
+            kb_doc_path = str(ui_pages_file.relative_to(_ROOT_DIR))
+            self._log.info("KB doc updated → %s (%d pages total)", kb_doc_path, len(pages_list))
+
+        if write_increment and product and feature_name:
+            inc_dir = _ROOT_DIR / "ai" / "knowledge_base" / "increments"
+            inc_dir.mkdir(parents=True, exist_ok=True)
+            all_scenarios: list[dict] = []
+            ui_changes: list[dict] = []
+            for dp in discovered:
+                all_scenarios.append({
+                    "name": f"page_loads_{_url_to_slug(dp.url)}",
+                    "type": "happy_path",
+                    "description": f"Verify {dp.title} loads without errors",
+                })
+                for f in dp.fields:
+                    if f.required:
+                        all_scenarios.append({
+                            "name": f"fill_{f.name}",
+                            "type": "happy_path",
+                            "description": f"Fill {f.label or f.name} with valid data",
+                        })
+                if any(f.validation_message for f in dp.fields):
+                    all_scenarios.append({
+                        "name": f"validation_{_url_to_slug(dp.url)}",
+                        "type": "error",
+                        "description": f"Submit {dp.title} empty — required-field errors appear",
+                    })
+                ui_changes.append({
+                    "component": dp.title,
+                    "url": dp.url,
+                    "fields": [f"{f.label or f.name} ({f.primary_selector})" for f in dp.fields],
+                    "buttons": [b.label for b in dp.buttons],
+                })
+            slug = re.sub(r"[^\w]", "_", feature_name.lower()).strip("_")
+            slug = re.sub(r"_+", "_", slug)
+            inc_filename = f"explore_{slug}_{product}.yaml"
+            inc_data = {
+                "product": product,
+                "feature": feature_name,
+                "domain": "web",
+                "description": (
+                    f"UI exploration of {len(discovered)} page(s): "
+                    + ", ".join(dp.title for dp in discovered[:3])
+                    + (" ..." if len(discovered) > 3 else "")
+                    + "\n"
+                ),
+                "ui_changes": ui_changes,
+                "scenarios": all_scenarios,
+            }
+            inc_file = inc_dir / inc_filename
+            inc_file.write_text(yaml.safe_dump(inc_data, allow_unicode=True, sort_keys=False), encoding="utf-8")
+            increment_path = str(inc_file.relative_to(_ROOT_DIR))
+            increment_filename = inc_filename
+            self._log.info("Increment saved → %s", increment_path)
+
         self._log.info(
             "AppExplorer complete — %d page(s), %d fields total",
             len(discovered), total_fields,
@@ -157,6 +237,8 @@ class AppExplorerAgent(BaseAgent):
                 f"{', '.join(dp.title for dp in discovered[:3])}"
                 f"{' ...' if len(discovered) > 3 else ''}"
                 f" — {total_fields} fields discovered"
+                + (f"; KB doc updated" if kb_doc_path else "")
+                + (f"; increment saved: {increment_filename}" if increment_filename else "")
             ),
         )
 
@@ -165,4 +247,7 @@ class AppExplorerAgent(BaseAgent):
             "pages_explored": len(discovered),
             "results": results,
             "exploration_context": combined_context,
+            "kb_doc_path": kb_doc_path,
+            "increment_path": increment_path,
+            "increment_filename": increment_filename,
         }
