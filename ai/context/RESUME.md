@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-23 (explorer KB output)  
+Last updated: 2026-05-23 (disable autocomplete on search/URL inputs)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,12 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-23)
+
+- **Fix: disable autocomplete on search/URL inputs** (`dashboard/templates/docs.html`, `kb.html`, `scripts.html`):
+  - Added `autocomplete="off"` to OpenAPI Spec URL input (`kb.html`), Test cases docs search (`docs.html`), and Test scripts search (`scripts.html`).
+  - Prevents browser from autofilling email addresses into these fields.
+
+## Previous: explore route 405 + increment product filter leak (2026-05-23)
 
 - **Fix: explore route 405 + increment product filter leak** (`dashboard/routers/kb.py`, `dashboard/routers/pages.py`):
   - `POST /{product}/explore` and `GET /explore-jobs/{job_id}` were registered after `GET /{product}/{filename}` — Starlette's catch-all two-param GET route captured both, returning 405 on POST and 404 on job polling. Fixed by moving both routes before the `/{product}/{filename}` handlers.

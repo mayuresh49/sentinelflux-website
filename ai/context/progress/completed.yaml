@@ -1,5 +1,13 @@
 # Completed work items — append only, newest first
 
+- id: disable-autocomplete-search-inputs
+  date: 2026-05-23
+  title: "Fix: disable autocomplete on search/URL inputs"
+  outcome: >
+    Added autocomplete="off" to OpenAPI Spec URL (kb.html), Test cases docs search
+    (docs.html), and Test scripts search (scripts.html) to prevent browser from
+    autofilling email addresses into these fields.
+
 - id: explore-route-405-fix
   date: 2026-05-23
   title: "Fix: explore route 405 + increment product filter leak"
