@@ -114,6 +114,9 @@ systemctl enable sentinelflux
 
 echo "==> Configuring Caddy (app.sentinelflux.in → localhost:8765)"
 cp "${APP_DIR}/scripts/Caddyfile.prod" /etc/caddy/Caddyfile
+# Clear any stale autosave/cert cache so Caddy uses the new Caddyfile cleanly
+rm -f /home/caddy/.config/caddy/autosave.json
+rm -rf /home/caddy/.local/share/caddy/certificates
 systemctl enable caddy
 
 echo ""
