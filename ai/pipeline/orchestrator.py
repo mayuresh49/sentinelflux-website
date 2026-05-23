@@ -272,17 +272,36 @@ class TestPipelineOrchestrator:
     ) -> Path:
         from ai.agents import AgentContext, DocGenAgent
 
-        base = output_base if output_base else ROOT_DIR
-        ctx = AgentContext(domain=domain, output_base=base).extend(
-            tc_prefix=tc_prefix, tc_start=tc_start, source=source,
+        product = str(output_base).split("products/")[-1].split("/")[0] if output_base and "products/" in str(output_base) else None
+        self._alog.append(
+            event_type="agent_run", agent="doc_gen",
+            domain=domain, product=product, status="pending",
+            summary=f"DocGen started — {feature_name}",
         )
-        agent = DocGenAgent(ai_client=self.ai_client, kb_loader=self.kb_loader, context=ctx)
-        result = agent.run(feature_name=feature_name, output_path=out_path)
-        doc_path = result["doc_path"]
-        self._clean_doc(doc_path)
-        if tc_prefix:
-            self._normalize_tc_ids(doc_path, tc_prefix, tc_start)
-        return doc_path
+        try:
+            base = output_base if output_base else ROOT_DIR
+            ctx = AgentContext(domain=domain, output_base=base).extend(
+                tc_prefix=tc_prefix, tc_start=tc_start, source=source,
+            )
+            agent = DocGenAgent(ai_client=self.ai_client, kb_loader=self.kb_loader, context=ctx)
+            result = agent.run(feature_name=feature_name, output_path=out_path)
+            doc_path = result["doc_path"]
+            self._clean_doc(doc_path)
+            if tc_prefix:
+                self._normalize_tc_ids(doc_path, tc_prefix, tc_start)
+            self._alog.append(
+                event_type="agent_run", agent="doc_gen",
+                domain=domain, product=product, status="success",
+                summary=f"DocGen complete — {doc_path.name}",
+            )
+            return doc_path
+        except Exception as exc:
+            self._alog.append(
+                event_type="agent_run", agent="doc_gen",
+                domain=domain, product=product, status="error",
+                summary=f"DocGen failed: {exc}",
+            )
+            raise
 
     @staticmethod
     def _clean_doc(doc_path: Path) -> None:
@@ -527,14 +546,34 @@ class TestPipelineOrchestrator:
     ) -> Path:
         from ai.agents import AgentContext, ScriptGenAgent
 
-        base = output_base if output_base else ROOT_DIR
-        ctx = AgentContext(domain=domain, output_base=base).extend(
-            tc_prefix=tc_prefix,
-            exploration_context=exploration_context,
+        product = str(output_base).split("products/")[-1].split("/")[0] if output_base and "products/" in str(output_base) else None
+        self._alog.append(
+            event_type="agent_run", agent="script_gen",
+            domain=domain, product=product, status="pending",
+            summary=f"ScriptGen started — {feature_name}",
         )
-        agent = ScriptGenAgent(ai_client=self._script_client, kb_loader=self.kb_loader, context=ctx)
-        result = agent.run(test_case_doc=test_case_doc, feature_name=feature_name)
-        return result["script_path"]
+        try:
+            base = output_base if output_base else ROOT_DIR
+            ctx = AgentContext(domain=domain, output_base=base).extend(
+                tc_prefix=tc_prefix,
+                exploration_context=exploration_context,
+            )
+            agent = ScriptGenAgent(ai_client=self._script_client, kb_loader=self.kb_loader, context=ctx)
+            result = agent.run(test_case_doc=test_case_doc, feature_name=feature_name)
+            script_path = result["script_path"]
+            self._alog.append(
+                event_type="agent_run", agent="script_gen",
+                domain=domain, product=product, status="success",
+                summary=f"ScriptGen complete — {script_path.name}",
+            )
+            return script_path
+        except Exception as exc:
+            self._alog.append(
+                event_type="agent_run", agent="script_gen",
+                domain=domain, product=product, status="error",
+                summary=f"ScriptGen failed: {exc}",
+            )
+            raise
 
     def _load_increment(self, increment_file: str):
         path = ROOT_DIR / "ai" / "knowledge_base" / "increments" / increment_file
@@ -740,8 +779,12 @@ def main(argv=None):
         )
     elif args.increment:
         stem = Path(args.increment).stem
-        parts = stem.split("_", 2)
-        feature_name = parts[2] if len(parts) > 2 else stem
+        # Strip trailing "_<product>" so each YAML gets a unique output filename.
+        # e.g. "ess_requirements_orangehrm" + project=orangehrm → "ess_requirements"
+        if args.project and stem.endswith(f"_{args.project}"):
+            feature_name = stem[: -(len(args.project) + 1)]
+        else:
+            feature_name = stem
         orchestrator.run(
             feature_name=feature_name,
             domain=args.domain,

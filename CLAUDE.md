@@ -174,6 +174,40 @@ Missing step 4 causes blank detail panels in the `/agents` dashboard.
 
 ---
 
+## AI Pipeline — Rules and Architecture
+
+### Increment YAML → feature name mapping (`ai/pipeline/orchestrator.py` `main()`)
+- Increment file `<feature>_<product>.yaml` (e.g. `ess_requirements_orangehrm.yaml`) strips the `_<product>` suffix when `--project` matches → feature name becomes `ess_requirements`.
+- This produces unique output files per YAML: `docs/test_cases/<domain>/ess_requirements.md` + `tests/<domain>/test_ess_requirements.py`.
+- **Never** use the old `stem.split("_", 2)[2]` logic — it collapsed all per-product YAMLs to the same feature name (`orangehrm`) and overwrote outputs.
+
+### Agent activity logging
+- `_generate_doc` logs `agent="doc_gen"` pending → success/error to `ActivityLog`.
+- `_generate_script` logs `agent="script_gen"` pending → success/error.
+- `_review_doc` logs `agent="doc_review"` pending → success/error.
+- `_review_script` logs `agent="script_review"` pending → success/error.
+- Pipeline router (`dashboard/routers/pipeline.py`) logs `agent="pipeline"` start + completion around the subprocess call.
+- Agents dashboard `GET /api/agents/status` reads `activity_log` table; agents with no entries appear as **idle** — this is expected for agents that have never run since agent logging was added.
+- **When agents show idle after a successful pipeline run**: check `data/sentinelflux.db` → `activity_log` for the run's timestamp. Missing entries = logging was added after that run, or the agent failed silently before its first `_alog.append`.
+
+### Pipeline subprocess behavior
+- Pipeline runs as a child process: `python -m ai.pipeline.orchestrator ...` with `cwd=ROOT_DIR`.
+- The subprocess writes to the same `data/sentinelflux.db` (SQLite WAL mode allows concurrent writes).
+- Subprocess stdout+stderr is captured into `pipeline_jobs.output` column — query with `SELECT output FROM pipeline_jobs WHERE id='...'` to debug silent failures.
+- `doc_review` and `script_review` log nothing to Python's standard logger when no issues are found — absence from the run log does NOT mean they didn't run.
+
+### Diagnosing a pipeline run quickly
+```sql
+-- Last 5 pipeline jobs
+SELECT id, status, feature, domain, started, finished FROM pipeline_jobs ORDER BY started DESC LIMIT 5;
+-- Subprocess output for a specific job
+SELECT output FROM pipeline_jobs WHERE id='<job_id>';
+-- Agent activity from a specific window
+SELECT agent, status, timestamp, summary FROM activity_log WHERE timestamp > '2026-05-22T07:00' ORDER BY timestamp;
+```
+
+---
+
 ## Before Implementing Anything Non-Trivial
 
 1. State approach in 2-3 sentences + main tradeoff
