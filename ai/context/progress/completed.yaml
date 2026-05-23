@@ -1,5 +1,22 @@
 # Completed work items — append only, newest first
 
+- id: session-expired-redirect-fix
+  date: 2026-05-23
+  title: "Fix: session-expired redirect crash in explore fetch"
+  outcome: >
+    exploreApp() called res.json() unconditionally. After a server restart the session
+    is gone; require_user returns 303→/login, fetch follows to HTML, and .json() threw
+    SyntaxError: Unexpected token '<'. Added content-type + res.redirected guard before
+    .json(): redirects now navigate to /login instead of crashing with a parse error.
+
+- id: kb-increments-explore-artifacts
+  date: 2026-05-23
+  title: "Chore: KB increments + explore artifacts committed"
+  outcome: >
+    Committed explore_leaves_orangehrm.yaml and performance_management_requirements_orangehrm.yaml
+    increments, generated locators (leave.json, hc_en_us_articles…json), page objects
+    (leave.py, hc_en_us_articles….py), and explore_leaves.md test doc.
+
 - id: disable-autocomplete-search-inputs
   date: 2026-05-23
   title: "Fix: disable autocomplete on search/URL inputs"

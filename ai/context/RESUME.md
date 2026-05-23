@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-23 (disable autocomplete on search/URL inputs)  
+Last updated: 2026-05-23 (session-expired redirect fix + KB increments push)  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,13 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-23)
+
+- **Fix: session-expired redirect crash in explore fetch** (`dashboard/templates/kb.html`):
+  - `exploreApp()` called `res.json()` unconditionally; after a server restart the session is gone, `require_user` returns 303→`/login`, fetch follows to HTML, and `.json()` threw `SyntaxError: Unexpected token '<'`.
+  - Added content-type + `res.redirected` guard before `.json()`: redirects now send `window.location.href = '/login'` instead of crashing.
+- **Chore: KB increments + explore artifacts** — committed `explore_leaves_orangehrm.yaml`, `performance_management_requirements_orangehrm.yaml`, generated locators (`locators/web/leave.json`, `hc_en_us_articles…`), page objects (`pages/web/leave.py`, `hc_en_us_articles….py`), and `explore_leaves.md` test doc.
+
+## Previous: disable autocomplete on search/URL inputs (2026-05-23)
 
 - **Fix: disable autocomplete on search/URL inputs** (`dashboard/templates/docs.html`, `kb.html`, `scripts.html`):
   - Added `autocomplete="off"` to OpenAPI Spec URL input (`kb.html`), Test cases docs search (`docs.html`), and Test scripts search (`scripts.html`).
