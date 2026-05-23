@@ -44,6 +44,12 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-23)
 
+- **Fix: hard-fail pipeline on hallucinated endpoint paths** (`ai/pipeline/orchestrator.py`):
+  - `_validate_script_paths` now also loads `endpoints[]` from increment YAMLs so increment-defined paths (e.g. `/performance/configure/kpi`) are treated as valid alongside base `api_specs.yaml` paths.
+  - Suspicious paths now raise `ValueError` (caught by `run()`'s outer try/except) — marks pipeline job `failed` with a clear error message instead of silently completing with broken tests.
+
+## Previous: API endpoint hallucination prevention + performance_management fix (2026-05-23)
+
 - **Fix: API endpoint hallucination prevention + performance_management doc+script** (`ai/knowledge_base/kb_loader.py`, `ai/prompts/prompt_templates.py`, `products/orangehrm/docs/test_cases/api/performance_management_requirements.md`, `products/orangehrm/tests/api/test_performance_management_requirements.py`):
   - Root cause: `get_increments_context()` read `test_scenarios.api` which doesn't exist in increments using the `endpoints[]` schema — LLM received zero endpoint data and fabricated `/api/v2/performance_management_requirements`.
   - `kb_loader.py`: `get_increments_context()` now renders `endpoints[]` from each increment as an `API CONSTRAINTS FOR <feature>` block (method + path + response codes) and also renders `scenarios[]`. LLM now receives exact allowed paths.

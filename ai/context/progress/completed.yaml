@@ -1,5 +1,14 @@
 # Completed work items — append only, newest first
 
+- id: pipeline-path-validation-hard-fail
+  date: 2026-05-23
+  title: "Fix: pipeline fails hard on hallucinated endpoint paths"
+  outcome: >
+    _validate_script_paths now checks endpoints[] from loaded increment YAMLs in addition
+    to base api_specs.yaml paths. Suspicious paths raise ValueError instead of logging a
+    warning — pipeline job marked failed with actionable error message rather than silently
+    completing with broken tests.
+
 - id: api-endpoint-hallucination-fix
   date: 2026-05-23
   title: "Fix: API endpoint hallucination prevention + performance_management doc+script rewrite"
