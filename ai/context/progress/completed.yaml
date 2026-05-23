@@ -1,5 +1,16 @@
 # Completed work items — append only, newest first
 
+- id: explore-route-405-fix
+  date: 2026-05-23
+  title: "Fix: explore route 405 + increment product filter leak"
+  outcome: >
+    POST /{product}/explore and GET /explore-jobs/{job_id} were registered after
+    GET /{product}/{filename} in kb.py — Starlette's catch-all two-param GET route
+    captured both, returning 405 on the POST and 404 on job polling. Fixed by moving
+    both routes before the /{product}/{filename} handlers. Also fixed increment filter
+    in pages.py: removed the `and inc_product` guard so increments with no product:
+    field are excluded (not leaked) when a product filter is active.
+
 - id: pipeline-path-validation-hard-fail
   date: 2026-05-23
   title: "Fix: pipeline fails hard on hallucinated endpoint paths"

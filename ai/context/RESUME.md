@@ -44,6 +44,12 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 
 ## What Was Just Done (2026-05-23)
 
+- **Fix: explore route 405 + increment product filter leak** (`dashboard/routers/kb.py`, `dashboard/routers/pages.py`):
+  - `POST /{product}/explore` and `GET /explore-jobs/{job_id}` were registered after `GET /{product}/{filename}` — Starlette's catch-all two-param GET route captured both, returning 405 on POST and 404 on job polling. Fixed by moving both routes before the `/{product}/{filename}` handlers.
+  - Increment filter: `and inc_product` guard in `pages.py` let files with no `product:` field through to every product view. Removed so missing-product files are also excluded when a filter is active.
+
+## Previous: Hard-fail pipeline on hallucinated endpoint paths (2026-05-23)
+
 - **Fix: hard-fail pipeline on hallucinated endpoint paths** (`ai/pipeline/orchestrator.py`):
   - `_validate_script_paths` now also loads `endpoints[]` from increment YAMLs so increment-defined paths (e.g. `/performance/configure/kpi`) are treated as valid alongside base `api_specs.yaml` paths.
   - Suspicious paths now raise `ValueError` (caught by `run()`'s outer try/except) — marks pipeline job `failed` with a clear error message instead of silently completing with broken tests.
