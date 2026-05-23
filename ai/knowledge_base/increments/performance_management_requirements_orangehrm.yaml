@@ -1,0 +1,85 @@
+feature: performance_management_module
+domain: api
+description: |
+  The Performance Management module of OrangeHRM manages KPIs, goals, competencies, performance trackers, reviews/appraisals, and 360-degree multi-rater feedback. It also includes self-service features for employees and managers, notifications, and reports.
+
+endpoints:
+  - name: Configure KPIs
+    path: /performance/configure/kpi
+    method: POST
+    description: Define or update KPIs per Job Title.
+    auth_required: true
+    request_body: |
+      {
+        "jobTitleId": <int>,
+        "kpiList": [
+          {
+            "name": <string>,
+            "description": <string>
+          }
+        ]
+      }
+    response_codes: [200, 400, 401, 404]
+
+  - name: Assign KPIs by Job Title
+    path: /performance/configure/kpi/assign
+    method: PUT
+    description: Assign KPIs to a specific Job Title.
+    auth_required: true
+    request_body: |
+      {
+        "jobTitleId": <int>,
+        "kpiIds": [<int>, <int>]
+      }
+    response_codes: [200, 400, 401, 404]
+
+  - name: Create Performance Tracker
+    path: /performance/trackers
+    method: POST
+    description: Log continuous feedback for employees.
+    auth_required: true
+    request_body: |
+      {
+        "employeeId": <int>,
+        "trackerData": [
+          {
+            "kpiId": <int>,
+            "value": <float>
+          }
+        ]
+      }
+    response_codes: [200, 400, 401, 404]
+
+  - name: Create Performance Review
+    path: /performance/reviews
+    method: POST
+    description: Create a performance review for an employee.
+    auth_required: true
+    request_body: |
+      {
+        "employeeId": <int>,
+        "reviewData": [
+          {
+            "kpiId": <int>,
+            "rating": <float>
+          }
+        ]
+      }
+    response_codes: [200, 400, 401, 404]
+
+scenarios:
+  - name: KPI Configuration
+    type: happy_path
+    description: Verify that KPIs can be configured and assigned to Job Titles.
+
+  - name: Performance Tracker Creation
+    type: happy_path
+    description: Ensure continuous feedback can be logged for employees.
+
+  - name: Review Creation
+    type: happy_path
+    description: Confirm successful creation of performance reviews.
+
+  - name: 360-Degree Review Completion
+    type: edge_case
+    description: Test the completion of a 360-degree review with multiple reviewers.
