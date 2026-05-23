@@ -3,9 +3,12 @@
 # Run as root: bash scripts/gcp-setup.sh
 #
 # What this does vs server-setup.sh:
-#   - Uses python3/python3-venv (Debian 13 ships Python 3.12 as plain python3)
+#   - Uses python3/python3-venv (Debian 13 ships Python 3.13 as plain python3)
+#   - Installs Caddy via apt (cloudsmith repo) — not the shell installer which fails on Debian 13
+#   - Creates /home/caddy dirs so Caddy can store Let's Encrypt certs
 #   - Adds 512 MB swap (e2-micro has only 1 GB RAM)
 #   - Generates SSH deploy key ON the VM — prints public key for GitHub
+#   - Installs deps from requirements.txt (more reliable than pip install -e '.[all]')
 #   - Skips Playwright install (use remote runner for Playwright-based tests)
 #   - Caddy auto-provisions TLS for app.sentinelflux.in via Let's Encrypt
 set -euo pipefail
@@ -29,8 +32,16 @@ if [ ! -f /swapfile ]; then
     echo '/swapfile none swap sw 0 0' >> /etc/fstab
 fi
 
-echo "==> Installing Caddy"
-curl -fsSL https://caddyserver.com/install.sh | bash
+echo "==> Installing Caddy (via apt — shell installer fails on Debian 13)"
+apt-get install -y debian-keyring debian-archive-keyring apt-transport-https
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | tee /etc/apt/sources.list.d/caddy-stable.list
+apt-get update -qq
+apt-get install -y caddy
+
+echo "==> Creating Caddy home dirs for TLS cert storage"
+mkdir -p /home/caddy/.local/share/caddy /home/caddy/.config/caddy
+chown -R caddy:caddy /home/caddy
 
 echo "==> Configuring firewall"
 ufw allow OpenSSH
@@ -88,6 +99,7 @@ sudo -u "${APP_USER}" bash -c "
     cd ${APP_DIR}
     python3 -m venv .venv
     .venv/bin/pip install --quiet --upgrade pip
+    .venv/bin/pip install --quiet -r requirements.txt
     .venv/bin/pip install --quiet -e '.[all]'
 "
 
