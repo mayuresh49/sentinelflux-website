@@ -178,10 +178,21 @@ class KnowledgeBaseLoader:
             feature = inc.get("feature", {})
             if isinstance(feature, str):
                 feature = {"name": feature}
-            ctx.append(f"\n- {feature.get('name', 'Unnamed')} (v{feature.get('version', '?')})")
+            feature_name = feature.get("name", "Unnamed")
+            ctx.append(f"\n- {feature_name} (v{feature.get('version', '?')})")
             ctx.append(f"  Status: {feature.get('status', 'unknown')}")
+            # Emit endpoint constraints so the LLM cannot fabricate paths
+            endpoints = inc.get("endpoints", [])
+            if endpoints:
+                ctx.append(f"\n  API CONSTRAINTS FOR {feature_name} — ONLY these paths are valid:")
+                for ep in endpoints:
+                    codes = ep.get("response_codes", [])
+                    ctx.append(f"    {ep.get('method','GET')} {ep.get('path','')} → codes {codes}")
+                ctx.append("  NEVER use any path not listed above.")
             for scenario in inc.get("test_scenarios", {}).get("api", [])[:3]:
                 ctx.append(f"    • [api] {scenario}")
+            for scenario in inc.get("scenarios", [])[:4]:
+                ctx.append(f"    • {scenario.get('type','scenario')}: {scenario.get('name','')} — {scenario.get('description','')}")
             for scenario in inc.get("test_scenarios", {}).get("ui", [])[:2]:
                 ctx.append(f"    • [ui] {scenario}")
         return "\n".join(ctx)

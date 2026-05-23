@@ -222,6 +222,7 @@ STRICT RULES — violating these will produce incorrect documentation:
 4. Use exact credentials, field names, and values from the KB. Do not substitute generic placeholders.
 5. Base expected results only on documented business rules, not assumptions or generic HRMS patterns.
 6. Begin the document with an explicit "Fields in Scope" section listing only KB-documented fields.
+7. CRITICAL — API endpoint paths: if "API CONSTRAINTS FOR" is present in the Feature Context, you MUST use ONLY the listed paths (method + path) exactly as written. NEVER construct, combine, or invent a path. A fabricated path (e.g. /api/v2/<feature_name>) is incorrect and will cause all generated tests to fail at runtime.
 
 {categories_instruction}
 
