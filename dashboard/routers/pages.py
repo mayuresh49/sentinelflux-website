@@ -518,7 +518,7 @@ async def kb_page(request: Request, product: str | None = None,
                 inc_product = str((_yaml.safe_load(f.read_text(encoding="utf-8")) or {}).get("product", "")).strip()
             except Exception:
                 inc_product = ""
-            if selected_product and inc_product and inc_product != selected_product:
+            if selected_product and inc_product != selected_product:
                 continue
             increments.append({"filename": f.name, "processed": f.name in log, "log": log.get(f.name)})
     recent_jobs = list(reversed(_load_jobs()))[:20]

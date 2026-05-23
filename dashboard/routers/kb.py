@@ -127,6 +127,95 @@ def save_openapi_url(product: str, body: OpenapiUrlBody, current_user: dict = De
     return {"status": "saved"}
 
 
+class ExploreBody(BaseModel):
+    base_url: str
+    login_url: str = ""
+    username: str = ""
+    password: str = ""
+    pages: list[str] = []
+    feature_name: str = ""
+    output_mode: str = "increment"  # "kb_doc" | "increment" | "both"
+
+
+@router.post("/{product}/explore")
+def start_explore(product: str, body: ExploreBody, current_user: dict = Depends(require_user)):
+    _check_product_access(product, current_user)
+    if not body.base_url:
+        raise HTTPException(400, "base_url is required")
+    if not body.pages:
+        raise HTTPException(400, "At least one page path is required")
+
+    job_id = str(uuid.uuid4())[:8]
+    _EXPLORE_JOBS[job_id] = {
+        "id": job_id,
+        "product": product,
+        "status": "running",
+        "started": datetime.now(timezone.utc).isoformat(),
+        "output": "",
+        "result": None,
+    }
+    write_kb = body.output_mode in ("kb_doc", "both")
+    write_inc = body.output_mode in ("increment", "both")
+    threading.Thread(
+        target=_run_explore,
+        args=(job_id, product, body.base_url, body.login_url,
+              body.username, body.password, body.pages,
+              body.feature_name, write_kb, write_inc),
+        daemon=True,
+    ).start()
+    return {"job_id": job_id, "status": "running"}
+
+
+def _run_explore(
+    job_id: str,
+    product: str,
+    base_url: str,
+    login_url: str,
+    username: str,
+    password: str,
+    pages: list[str],
+    feature_name: str,
+    write_kb_doc: bool,
+    write_increment: bool,
+) -> None:
+    from ai.agents.app_explorer_agent import AppExplorerAgent
+    from ai.agents.base_agent import AgentContext
+
+    try:
+        ctx = AgentContext(domain="web", product=product)
+        agent = AppExplorerAgent(context=ctx)
+        credentials = {"username": username, "password": password} if username else {}
+        result = agent.run(
+            base_url=base_url,
+            login_url=login_url,
+            credentials=credentials,
+            pages=pages,
+            feature_name=feature_name,
+            write_kb_doc=write_kb_doc,
+            write_increment=write_increment,
+        )
+        summary_parts = [f"Explored {result.get('pages_explored', 0)} page(s)."]
+        if write_kb_doc and result.get("kb_doc_path"):
+            summary_parts.append(f"KB doc updated: {result['kb_doc_path']}")
+        if write_increment and result.get("increment_filename"):
+            summary_parts.append(f"Increment saved: {result['increment_filename']}")
+        _EXPLORE_JOBS[job_id].update({
+            "status": "completed" if result.get("success") else "failed",
+            "output": " ".join(summary_parts),
+            "result": result,
+        })
+    except Exception as exc:
+        _EXPLORE_JOBS[job_id].update({"status": "failed", "output": str(exc)})
+
+
+@router.get("/explore-jobs/{job_id}")
+def get_explore_job(job_id: str, current_user: dict = Depends(require_user)):
+    job = _EXPLORE_JOBS.get(job_id)
+    if not job:
+        raise HTTPException(404, "Job not found")
+    return job
+
+
 @router.get("/{product}/{filename}")
 def get_file(product: str, filename: str, current_user: dict = Depends(require_user)):
     _check_product_access(product, current_user)
@@ -269,92 +358,4 @@ async def upload_docx(
         job_id = queue_pipeline_for_increment(product, domain, filename)
         result["pipeline_job_id"] = job_id
     return result
-
-
-class ExploreBody(BaseModel):
-    base_url: str
-    login_url: str = ""
-    username: str = ""
-    password: str = ""
-    pages: list[str] = []
-    feature_name: str = ""
-    output_mode: str = "increment"  # "kb_doc" | "increment" | "both"
-
-
-@router.post("/{product}/explore")
-def start_explore(product: str, body: ExploreBody, current_user: dict = Depends(require_user)):
-    _check_product_access(product, current_user)
-    if not body.base_url:
-        raise HTTPException(400, "base_url is required")
-    if not body.pages:
-        raise HTTPException(400, "At least one page path is required")
-
-    job_id = str(uuid.uuid4())[:8]
-    _EXPLORE_JOBS[job_id] = {
-        "id": job_id,
-        "product": product,
-        "status": "running",
-        "started": datetime.now(timezone.utc).isoformat(),
-        "output": "",
-        "result": None,
-    }
-    write_kb = body.output_mode in ("kb_doc", "both")
-    write_inc = body.output_mode in ("increment", "both")
-    threading.Thread(
-        target=_run_explore,
-        args=(job_id, product, body.base_url, body.login_url,
-              body.username, body.password, body.pages,
-              body.feature_name, write_kb, write_inc),
-        daemon=True,
-    ).start()
-    return {"job_id": job_id, "status": "running"}
-
-
-def _run_explore(
-    job_id: str,
-    product: str,
-    base_url: str,
-    login_url: str,
-    username: str,
-    password: str,
-    pages: list[str],
-    feature_name: str,
-    write_kb_doc: bool,
-    write_increment: bool,
-) -> None:
-    from ai.agents.app_explorer_agent import AppExplorerAgent
-    from ai.agents.base_agent import AgentContext
-
-    try:
-        ctx = AgentContext(domain="web", product=product)
-        agent = AppExplorerAgent(context=ctx)
-        credentials = {"username": username, "password": password} if username else {}
-        result = agent.run(
-            base_url=base_url,
-            login_url=login_url,
-            credentials=credentials,
-            pages=pages,
-            feature_name=feature_name,
-            write_kb_doc=write_kb_doc,
-            write_increment=write_increment,
-        )
-        summary_parts = [f"Explored {result.get('pages_explored', 0)} page(s)."]
-        if write_kb_doc and result.get("kb_doc_path"):
-            summary_parts.append(f"KB doc updated: {result['kb_doc_path']}")
-        if write_increment and result.get("increment_filename"):
-            summary_parts.append(f"Increment saved: {result['increment_filename']}")
-        _EXPLORE_JOBS[job_id].update({
-            "status": "completed" if result.get("success") else "failed",
-            "output": " ".join(summary_parts),
-            "result": result,
-        })
-    except Exception as exc:
-        _EXPLORE_JOBS[job_id].update({"status": "failed", "output": str(exc)})
-
-
-@router.get("/explore-jobs/{job_id}")
-def get_explore_job(job_id: str, current_user: dict = Depends(require_user)):
-    job = _EXPLORE_JOBS.get(job_id)
-    if not job:
-        raise HTTPException(404, "Job not found")
     return job
