@@ -135,7 +135,7 @@ scenarios:
       <div class="px-3 py-3 border-t border-slate-100 shrink-0">
         <label class="text-xs font-medium text-slate-400 uppercase tracking-wide block mb-1.5">OpenAPI Spec URL</label>
         <div class="flex gap-1 items-center">
-          <input type="text" x-model="openapiUrl"
+          <input type="text" x-model="openapiUrl" autocomplete="off"
                  placeholder="https://…/openapi.json"
                  class="flex-1 min-w-0 text-xs font-mono border border-slate-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-300">
           <button @click="saveOpenapiUrl()"
@@ -798,6 +798,10 @@ async function exploreApp(product) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
+    if (res.redirected || !(res.headers.get('content-type') || '').includes('application/json')) {
+      window.location.href = '/login';
+      return;
+    }
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || JSON.stringify(data));
     _pollExploreJob(data.job_id);
