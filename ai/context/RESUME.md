@@ -2,7 +2,7 @@
 
 > **READ THIS FIRST.** Any AI tool working on this project should read this file before anything else.
 
-Last updated: 2026-05-22  
+Last updated: 2026-05-23  
 Framework version: 0.1.0
 
 ---
@@ -43,6 +43,22 @@ Solo-built test automation framework covering API, UI, Mobile (scaffold), and Se
 ---
 
 ## What Was Just Done (2026-05-22)
+
+- **Fix: pipeline feature name collision + doc_gen/script_gen activity logging** (`ai/pipeline/orchestrator.py`, `CLAUDE.md`):
+  - Feature name was extracted as `stem.split("_", 2)[2]` — for any `<feature>_orangehrm.yaml` this always yielded `"orangehrm"`, causing every DOCX upload to overwrite the same output files (`orangehrm.md`, `test_orangehrm.py`). Fixed: now strips `_<product>` suffix when `--project` matches (e.g. `ess_requirements_orangehrm` + `--project orangehrm` → feature `ess_requirements`). Each increment YAML now gets unique output files.
+  - `_generate_doc` and `_generate_script` now log pending → success/error to `ActivityLog` with `agent="doc_gen"` / `"script_gen"`. Previously these were invisible to the agents dashboard (always idle) regardless of how many pipeline runs had completed.
+  - `CLAUDE.md`: added AI Pipeline rulebook section — feature name mapping contract, agent logging per method, subprocess DB behavior, quick SQLite diagnostics for silent failures.
+
+## Previous: GCP e2-micro deployment scripts (2026-05-23)
+
+- **Chore: GCP e2-micro deployment scripts** (`scripts/gcp-setup.sh` (new), `scripts/Caddyfile.prod`, `scripts/sentinelflux.service`, `scripts/deploy.sh`):
+  - `gcp-setup.sh`: GCP-specific bootstrap — adds 512 MB swap (safety net for 1 GB RAM), installs WeasyPrint system libs (Cairo/Pango), skips Playwright install (runs via remote runner only), sets up SSH deploy key for private repo clone, configures `~/.ssh/config` to route `github.com` through the deploy key, clones `git@github.com:mayuresh49/sentinelflux-app.git`, installs deps, registers Caddy + systemd service. Exits with step-by-step instructions if deploy key is missing.
+  - `Caddyfile.prod`: domain updated from `sentinelflux.in` → `app.sentinelflux.in` (marketing site stays on GitHub Pages; dashboard on GCP subdomain).
+  - `sentinelflux.service`: workers reduced 2 → 1 to fit e2-micro 1 GB RAM.
+  - `deploy.sh`: `git pull` now passes `GIT_SSH_COMMAND` with the deploy key so pulls work from the private repo on the VM.
+  - Separate private repo created: `github.com/mayuresh49/sentinelflux-app` (full framework codebase, private). Public `sentinelflux` repo retains marketing site + GitHub Pages.
+
+## Previous: Product-scoped KB page + agent status logging (2026-05-22)
 
 - **Feat: Product-scoped KB page + agent status logging + orphan job cleanup** (`dashboard/templates/kb.html`, `dashboard/routers/pages.py`, `dashboard/routers/kb.py`, `dashboard/app.py`, `ai/pipeline/orchestrator.py`):
   - KB page now requires product selection — upload button, OpenAPI save, "New YAML Increment", and "Upload Word Document" are all blocked (toast + disabled state) without a product selected. File list and right panel show contextual "select a product" messages.

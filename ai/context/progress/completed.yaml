@@ -1,5 +1,29 @@
 # Completed work items — append only, newest first
 
+- id: pipeline-feature-name-fix
+  date: 2026-05-22
+  title: "Fix: pipeline feature name collision + doc_gen/script_gen activity logging"
+  outcome: >
+    Feature name extraction used stem.split("_",2)[2] — collapsed all per-product YAMLs
+    to the product name (e.g. "orangehrm"), overwriting the same output files on every
+    DOCX upload. Fixed to strip "_<product>" suffix when --project matches, giving unique
+    output files per feature (ess_requirements_orangehrm → ess_requirements).
+    _generate_doc and _generate_script now log pending/success/error to ActivityLog
+    with agent="doc_gen"/"script_gen" so the agents dashboard shows real status.
+    CLAUDE.md updated with AI Pipeline rulebook section covering naming contract,
+    agent logging, subprocess DB behavior, and SQLite diagnostics.
+
+- id: gcp-deployment-scripts
+  date: 2026-05-23
+  title: "Chore: GCP e2-micro deployment scripts + private repo split"
+  outcome: >
+    gcp-setup.sh: GCP-specific bootstrap with swap, WeasyPrint libs, SSH deploy key
+    setup, no Playwright (remote runner handles Playwright-based tests).
+    Caddyfile.prod updated to app.sentinelflux.in. sentinelflux.service workers 2→1.
+    deploy.sh uses GIT_SSH_COMMAND for private repo pulls.
+    Private repo sentinelflux-app created and pushed. Public sentinelflux repo
+    retains marketing site only.
+
 - id: kb-product-scoped-ux
   date: 2026-05-22
   title: "Feat: product-scoped KB page + agent status logging + orphan pipeline job cleanup"
