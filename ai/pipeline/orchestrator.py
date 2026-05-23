@@ -168,10 +168,10 @@ class TestPipelineOrchestrator:
             self._review_script(out_script, domain)
             suspicious = self._validate_script_paths(out_script, domain)
             if suspicious:
-                _log.warning(
-                    "Path validation: %d path(s) in generated script not found in KB — "
-                    "possible hallucinations: %s",
-                    len(suspicious), suspicious,
+                raise ValueError(
+                    f"Hallucinated endpoint path(s) detected in {out_script.name} — "
+                    f"not in KB or increment endpoints: {suspicious}. "
+                    "Fix the increment YAML to include these paths, or regenerate."
                 )
 
             if increment_file:
@@ -478,8 +478,11 @@ class TestPipelineOrchestrator:
             )
 
     def _validate_script_paths(self, script_path: Path, domain: str) -> list[str]:
-        """Return URL path strings in the generated script not found in the KB.
-        Logged as warnings so the developer can spot hallucinated endpoints.
+        """Return URL path strings in the generated script not found in the KB or increments.
+
+        Checks both api_specs.yaml base endpoints and any endpoints[] defined in loaded
+        increment YAMLs — so increment-specific paths are treated as valid.
+        Returns an empty list when validation cannot run (non-api domain, no kb_loader).
         """
         if domain != "api" or not self.kb_loader:
             return []
@@ -487,8 +490,16 @@ class TestPipelineOrchestrator:
             import re
             text = script_path.read_text(encoding="utf-8")
             found = re.findall(r"""['"](/[\w/{}.\-]+)['"]""", text)
+
+            # Paths from base api_specs
             specs = self.kb_loader.load_api_specs()
             allowed = [e["path"] for e in specs.get("rest_api", {}).get("endpoints", [])]
+
+            # Paths from increment YAMLs (e.g. /performance/configure/kpi)
+            for inc in self.kb_loader.load_increments():
+                for ep in inc.get("endpoints", []):
+                    if ep.get("path"):
+                        allowed.append(ep["path"])
 
             def _matches(path: str) -> bool:
                 for allowed_path in allowed:
