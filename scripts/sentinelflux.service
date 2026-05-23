@@ -7,7 +7,7 @@ User=sentinelflux
 WorkingDirectory=/home/sentinelflux/app
 EnvironmentFile=/home/sentinelflux/app/.env
 ExecStart=/home/sentinelflux/app/.venv/bin/python -m uvicorn dashboard.app:app \
-    --host 127.0.0.1 --port 8765 --workers 2
+    --host 127.0.0.1 --port 8765 --workers 1
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal
