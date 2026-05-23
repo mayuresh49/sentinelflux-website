@@ -1,6 +1,0 @@
-{
-  "provider": "ollama",
-  "base_url": "http://localhost:11434",
-  "model": "qwen2.5-coder:14b-instruct-q4_K_M",
-  "api_key": ""
-}

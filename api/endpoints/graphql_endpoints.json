@@ -1,5 +1,0 @@
-{
-  "countries_list": {
-    "query": "query Countries($code: ID!) { country(code: $code) { code name native phone emoji currency languages { code name native rtl } } }"
-  }
-}
