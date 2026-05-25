@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Regression Testing — SentinelFlux</title>
+    <meta name="description" content="Pixel-diff screenshots against baseline with configurable thresholds and highlighted diff regions.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #be185d 0%, #ec4899 50%, #f9a8d4 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; } [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(190,24,93,0.08) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(236,72,153,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(236,72,153,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+
+        /* Slider comparison */
+        #compare-container { position:relative; overflow:hidden; border-radius:12px; }
+        #baseline-img { position:absolute; top:0; left:0; width:100%; height:100%; }
+        #current-clip { position:absolute; top:0; right:0; bottom:0; overflow:hidden; transition: width 0.05s linear; }
+        #slider-line  { position:absolute; top:0; bottom:0; width:2px; background:#ec4899; cursor:ew-resize; transform:translateX(-50%); }
+        .diff-region { position:absolute; border:2px solid #f43f5e; background:rgba(244,63,94,0.15); border-radius:3px; opacity:0; transition: opacity 0.4s ease; }
+        .diff-region.show { opacity:1; }
+
+        @keyframes scanPulse { 0%,100%{opacity:0.6} 50%{opacity:1} }
+        #scan-line { animation: scanPulse 1.5s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex items-center gap-5">
+            <a href="/#modules" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">← All Modules</a>
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Request Access</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero-glow hero-grid pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div data-animate="fade-in" class="inline-flex items-center gap-2 bg-pink-50 text-pink-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-pink-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+            Testing Module — Visual Regression
+        </div>
+        <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
+            See Every Pixel Change<br><span class="gradient-text">Before Users Do</span>
+        </h1>
+        <p data-animate data-delay="2" class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            Pixel-diff screenshots compared against your approved baseline. Configurable thresholds fail CI when visual changes exceed your tolerance.
+        </p>
+    </div>
+</section>
+
+<!-- ANIMATED DEMO -->
+<section class="py-8 px-6 pb-20">
+    <div class="max-w-5xl mx-auto">
+        <div data-animate class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+                <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+                <span class="ml-3 text-slate-400 text-xs mono">sentinelflux run --product myapp --domain visual --threshold 1.0</span>
+                <div class="ml-auto flex items-center gap-1.5 text-pink-400 text-xs">
+                    <div class="w-1.5 h-1.5 rounded-full bg-pink-400 pulse-dot"></div>comparing
+                </div>
+            </div>
+            <div class="p-5">
+                <!-- Page selector -->
+                <div class="flex gap-2 mb-4 flex-wrap">
+                    <button id="pg-1" onclick="selectPage(0)" class="text-xs px-3 py-1.5 rounded-lg border border-pink-700 bg-pink-900/20 text-pink-300 mono">Dashboard</button>
+                    <button id="pg-2" onclick="selectPage(1)" class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-500 mono">Login Page</button>
+                    <button id="pg-3" onclick="selectPage(2)" class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-500 mono">Settings</button>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <!-- Comparison view -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Visual Diff</div>
+                            <div class="flex items-center gap-3 text-xs">
+                                <span class="text-slate-400">← Baseline</span>
+                                <span class="text-pink-400 font-medium">Current →</span>
+                            </div>
+                        </div>
+                        <!-- Comparison container (SVG-based mockup) -->
+                        <div id="compare-container" class="relative bg-slate-800 rounded-xl overflow-hidden" style="height:220px">
+                            <!-- Baseline "screenshot" (SVG wireframe) -->
+                            <svg id="baseline-img" viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+                                <rect width="400" height="220" fill="#1e293b"/>
+                                <rect x="0" y="0" width="400" height="32" fill="#334155"/>
+                                <rect x="12" y="10" width="60" height="12" rx="3" fill="#475569"/>
+                                <rect x="300" y="10" width="40" height="12" rx="3" fill="#475569"/>
+                                <rect x="348" y="10" width="40" height="12" rx="3" fill="#4f46e5"/>
+                                <!-- Grid of stat cards -->
+                                <rect x="12" y="44" width="85" height="50" rx="6" fill="#334155"/>
+                                <rect x="108" y="44" width="85" height="50" rx="6" fill="#334155"/>
+                                <rect x="204" y="44" width="85" height="50" rx="6" fill="#334155"/>
+                                <rect x="300" y="44" width="88" height="50" rx="6" fill="#334155"/>
+                                <!-- Content area -->
+                                <rect x="12" y="106" width="240" height="100" rx="6" fill="#334155"/>
+                                <rect x="264" y="106" width="124" height="100" rx="6" fill="#334155"/>
+                                <!-- Text lines -->
+                                <rect x="22" y="116" width="80" height="8" rx="2" fill="#475569"/>
+                                <rect x="22" y="132" width="200" height="6" rx="2" fill="#3b4a62"/>
+                                <rect x="22" y="144" width="160" height="6" rx="2" fill="#3b4a62"/>
+                            </svg>
+                            <!-- Current "screenshot" (slightly different) -->
+                            <div id="current-clip" style="width:50%">
+                                <svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;position:absolute;right:0;top:0;min-width:400px">
+                                    <rect width="400" height="220" fill="#1e293b"/>
+                                    <rect x="0" y="0" width="400" height="32" fill="#334155"/>
+                                    <rect x="12" y="10" width="60" height="12" rx="3" fill="#475569"/>
+                                    <rect x="300" y="10" width="40" height="12" rx="3" fill="#475569"/>
+                                    <!-- Button color changed: indigo → rose -->
+                                    <rect x="348" y="10" width="40" height="12" rx="3" fill="#e11d48"/>
+                                    <!-- Stat cards - one moved slightly -->
+                                    <rect x="12" y="44" width="85" height="50" rx="6" fill="#334155"/>
+                                    <rect x="108" y="44" width="85" height="50" rx="6" fill="#334155"/>
+                                    <rect x="204" y="44" width="85" height="50" rx="6" fill="#334155"/>
+                                    <rect x="300" y="44" width="88" height="50" rx="6" fill="#334155"/>
+                                    <!-- Content area - different height -->
+                                    <rect x="12" y="106" width="240" height="80" rx="6" fill="#334155"/>
+                                    <rect x="264" y="106" width="124" height="100" rx="6" fill="#334155"/>
+                                    <!-- Text lines -->
+                                    <rect x="22" y="116" width="80" height="8" rx="2" fill="#475569"/>
+                                    <rect x="22" y="132" width="200" height="6" rx="2" fill="#3b4a62"/>
+                                    <rect x="22" y="144" width="160" height="6" rx="2" fill="#3b4a62"/>
+                                    <!-- Extra element added -->
+                                    <rect x="12" y="194" width="240" height="16" rx="4" fill="#7c3aed" opacity="0.4"/>
+                                </svg>
+                            </div>
+                            <!-- Slider line -->
+                            <div id="slider-line" style="left:50%"></div>
+                            <!-- Slider label -->
+                            <div class="absolute top-2 left-2 text-xs text-slate-400 bg-slate-900/70 px-2 py-0.5 rounded">Baseline</div>
+                            <div class="absolute top-2 right-2 text-xs text-pink-400 bg-slate-900/70 px-2 py-0.5 rounded">Current</div>
+                            <!-- Diff regions -->
+                            <div id="dr-1" class="diff-region" style="top:7px; right:0px; width:95px; height:24px"></div>
+                            <div id="dr-2" class="diff-region" style="top:180px; left:9px; width:245px; height:26px"></div>
+                            <div id="dr-3" class="diff-region" style="top:100px; left:9px; width:245px; height:12px"></div>
+                        </div>
+                        <div class="flex items-center gap-3 mt-2.5 text-xs">
+                            <div id="diff-pct" class="font-bold text-rose-400 mono text-base">0.00%</div>
+                            <div class="text-slate-500">pixel diff</div>
+                            <div id="threshold-badge" class="ml-auto px-2 py-0.5 rounded text-xs font-semibold bg-slate-700 text-slate-400">threshold: 1.0%</div>
+                            <div id="result-badge" class="px-2 py-0.5 rounded text-xs font-semibold hidden"></div>
+                        </div>
+                    </div>
+
+                    <!-- Diff details -->
+                    <div>
+                        <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2.5">Changed Regions</div>
+                        <div id="diff-regions-list" class="space-y-2 mb-4"></div>
+                        <div id="action-panel" class="hidden bg-slate-800 rounded-xl p-3.5 border border-slate-700">
+                            <div class="text-xs text-slate-400 font-semibold mb-2">Actions</div>
+                            <div class="space-y-2">
+                                <button class="w-full text-xs py-2 px-3 rounded-lg bg-rose-900/40 border border-rose-700 text-rose-300 font-medium text-left">✗ Reject — Block this build</button>
+                                <button class="w-full text-xs py-2 px-3 rounded-lg bg-emerald-900/30 border border-emerald-800 text-emerald-300 font-medium text-left">✓ Accept — Update baseline</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-slate-50 py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Visual changes don't sneak through anymore</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">Pixel-diff every page on every CI run with a one-click approve/reject workflow.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div data-animate data-delay="1" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-pink-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Pixel-Level Comparison</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Full-page screenshots diffed pixel by pixel against your approved baseline. Changed regions highlighted with bounding boxes.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>PNG diff with region overlay</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Percentage diff calculation</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Side-by-side slider view</li>
+                </ul>
+            </div>
+            <div data-animate data-delay="2" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-pink-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Configurable Thresholds</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Set per-page or global thresholds. A 0.5% threshold catches button colour changes; a 5% threshold ignores dynamic ads.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Per-page threshold config</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Exclusion masks for dynamic areas</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>CI fail on threshold breach</li>
+                </ul>
+            </div>
+            <div data-animate data-delay="3" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-pink-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Approve / Reject Workflow</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Intentional design changes are a click to approve, which updates the baseline. Accidental regressions are rejected to block the build.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>One-click baseline update</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Review in dashboard</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Baseline version history</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 px-6">
+    <div data-animate class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Every deploy, visually verified</h2>
+        <p class="text-slate-500 mb-8">No more "it looked fine in staging" surprises. Visual regressions blocked before they reach users.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-pink-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-pink-700 transition-colors">Request Early Access</a>
+            <a href="/#modules" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-colors">← View All Modules</a>
+        </div>
+    </div>
+</section>
+
+<footer class="border-t border-slate-100 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-semibold text-slate-900">SentinelFlux</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+            <a href="/#modules" class="hover:text-slate-900 transition-colors">All Modules</a>
+            <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="hover:text-slate-900 transition-colors">Dashboard</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-slate-900 transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+
+    const pages = [
+        {
+            btnId: 'pg-1', label: 'Dashboard', threshold: 1.0,
+            diffPct: 2.34,
+            regions: [
+                { id:'dr-1', label:'Nav button colour changed', detail:'CTA button: #4f46e5 → #e11d48', severity:'Medium' },
+                { id:'dr-2', label:'New banner element added', detail:'Marketing banner appeared below content', severity:'High' },
+                { id:'dr-3', label:'Card height reduced', detail:'Main content card: 100px → 80px height', severity:'Low' },
+            ]
+        },
+        {
+            btnId: 'pg-2', label: 'Login Page', threshold: 0.5,
+            diffPct: 0.12,
+            regions: []
+        },
+        {
+            btnId: 'pg-3', label: 'Settings', threshold: 2.0,
+            diffPct: 1.87,
+            regions: [
+                { id:'dr-1', label:'Form layout shifted', detail:'Input fields realigned, 4px left offset', severity:'Low' },
+                { id:'dr-2', label:'Save button position', detail:'Button moved to right side of form', severity:'Medium' },
+            ]
+        }
+    ];
+
+    let currentPage = 0;
+    let sliderPos = 50;
+    let sliderDir = -1;
+    let pageTimer = null;
+
+    function updateSlider() {
+        sliderPos += sliderDir * 0.8;
+        if (sliderPos <= 20) sliderDir = 1;
+        if (sliderPos >= 80) sliderDir = -1;
+        const clip = document.getElementById('current-clip');
+        const line = document.getElementById('slider-line');
+        clip.style.width = (100 - sliderPos) + '%';
+        line.style.left = sliderPos + '%';
+    }
+
+    function animateCounter(target, duration) {
+        const el = document.getElementById('diff-pct');
+        const start = performance.now();
+        const update = (now) => {
+            const p = Math.min((now - start) / duration, 1);
+            el.textContent = (target * p).toFixed(2) + '%';
+            if (p < 1) requestAnimationFrame(update);
+            else el.textContent = target.toFixed(2) + '%';
+        };
+        requestAnimationFrame(update);
+    }
+
+    function selectPage(idx) {
+        currentPage = idx;
+        if (pageTimer) clearInterval(pageTimer);
+        pages.forEach((p, i) => {
+            const btn = document.getElementById(p.btnId);
+            btn.className = i === idx
+                ? 'text-xs px-3 py-1.5 rounded-lg border border-pink-700 bg-pink-900/20 text-pink-300 mono'
+                : 'text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-500 mono';
+        });
+
+        const pg = pages[idx];
+        // Reset
+        ['dr-1','dr-2','dr-3'].forEach(id => document.getElementById(id).classList.remove('show'));
+        document.getElementById('diff-regions-list').innerHTML = '';
+        document.getElementById('action-panel').classList.add('hidden');
+        document.getElementById('result-badge').classList.add('hidden');
+        document.getElementById('threshold-badge').textContent = 'threshold: ' + pg.threshold + '%';
+
+        animateCounter(pg.diffPct, 1200);
+
+        // Show diff regions with delay
+        pg.regions.forEach((r, i) => {
+            setTimeout(() => {
+                document.getElementById(r.id)?.classList.add('show');
+                const row = document.createElement('div');
+                row.className = 'flex items-start gap-2.5 text-xs p-2.5 bg-slate-800 border border-slate-700 rounded-lg';
+                const sCol = r.severity === 'High' ? 'bg-rose-900/60 text-rose-300' : r.severity === 'Medium' ? 'bg-amber-900/60 text-amber-300' : 'bg-slate-700 text-slate-400';
+                row.innerHTML = `<span class="${sCol} px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0">${r.severity}</span><div><div class="text-slate-300 font-medium">${r.label}</div><div class="text-slate-500 mt-0.5">${r.detail}</div></div>`;
+                document.getElementById('diff-regions-list').appendChild(row);
+            }, i * 500 + 400);
+        });
+
+        // Show result badge + action panel
+        setTimeout(() => {
+            const rb = document.getElementById('result-badge');
+            rb.classList.remove('hidden');
+            const failed = pg.diffPct > pg.threshold;
+            rb.textContent = failed ? 'FAILED' : 'PASSED';
+            rb.className = 'px-2 py-0.5 rounded text-xs font-semibold ' + (failed ? 'bg-rose-900/60 text-rose-300' : 'bg-emerald-900/60 text-emerald-300');
+            if (failed) document.getElementById('action-panel').classList.remove('hidden');
+        }, pg.regions.length * 500 + 800);
+
+        pageTimer = setInterval(() => selectPage((currentPage + 1) % pages.length), 6000);
+    }
+
+    // Animate slider
+    setInterval(updateSlider, 30);
+    selectPage(0);
+
+    const obs2 = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs2.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs2.observe(el));
+</script>
+</body>
+</html>

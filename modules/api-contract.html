@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Contract Testing — SentinelFlux</title>
+    <meta name="description" content="Validates real API responses against your OpenAPI spec — status code, body schema, and field types.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; } [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(5,150,105,0.08) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+        .field-row { opacity:0; transform:translateY(4px); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .field-row.show { opacity:1; transform:none; }
+        .match-icon { transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex items-center gap-5">
+            <a href="/#modules" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">← All Modules</a>
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Request Access</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero-glow hero-grid pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div data-animate="fade-in" class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-emerald-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+            Testing Module — API Contract
+        </div>
+        <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
+            Your API Never Drifts<br><span class="gradient-text">From Its Contract</span>
+        </h1>
+        <p data-animate data-delay="2" class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            Real API responses validated field-by-field against your OpenAPI spec — status codes, body schemas, and type mismatches caught automatically.
+        </p>
+    </div>
+</section>
+
+<!-- ANIMATED DEMO -->
+<section class="py-8 px-6 pb-20">
+    <div class="max-w-5xl mx-auto">
+        <div data-animate class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+                <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+                <span class="ml-3 text-slate-400 text-xs mono">sentinelflux run --product myapp --domain contract --spec openapi.yaml</span>
+                <div class="ml-auto flex items-center gap-1.5 text-emerald-400 text-xs">
+                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></div>validating
+                </div>
+            </div>
+            <!-- Endpoint selector -->
+            <div class="px-5 py-3 border-b border-slate-800 flex gap-2 flex-wrap">
+                <button id="ep-1" onclick="selectEndpoint(0)" class="text-xs px-3 py-1.5 rounded-lg border border-emerald-700 bg-emerald-900/30 text-emerald-300 mono">GET /users/{id}</button>
+                <button id="ep-2" onclick="selectEndpoint(1)" class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-500 mono">POST /orders</button>
+                <button id="ep-3" onclick="selectEndpoint(2)" class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-500 mono">GET /products</button>
+            </div>
+            <div class="flex" style="min-height:320px">
+                <!-- OpenAPI spec -->
+                <div class="flex-1 p-4 border-r border-slate-800">
+                    <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">OpenAPI Spec (expected)</div>
+                    <div id="spec-panel" class="mono text-xs space-y-0.5"></div>
+                </div>
+                <!-- Actual response + validation -->
+                <div class="flex-1 p-4">
+                    <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">Actual Response</div>
+                    <div id="resp-panel" class="mono text-xs space-y-0.5 mb-4"></div>
+                    <div class="border-t border-slate-800 pt-3">
+                        <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2">Validation Results</div>
+                        <div id="validation-panel" class="space-y-1.5"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-slate-50 py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Catch contract breaks before consumers do</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">One spec. Every API tested against it on every CI run.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div data-animate data-delay="1" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-emerald-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">OpenAPI 3.0 Support</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Point SentinelFlux at your openapi.yaml. It validates every endpoint's status code, content type, and response body schema automatically.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>OpenAPI 3.0 + Swagger 2.0</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Nested schema validation</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Required field enforcement</li>
+                </ul>
+            </div>
+            <div data-animate data-delay="2" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-emerald-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Breaking Change Detection</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Removed fields, type changes, new required properties — all caught before they reach dependent consumers downstream.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Field removal detection</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Type mismatch (string → int)</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Unexpected status codes</li>
+                </ul>
+            </div>
+            <div data-animate data-delay="3" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-emerald-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">CI-Ready Output</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">pytest-compatible output with clear failure messages. Plug into your pipeline — exits non-zero on any schema violation.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Runs in any CI pipeline</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>HTML + JSON reports</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Dashboard violation history</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 px-6">
+    <div data-animate class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Never ship a broken API contract</h2>
+        <p class="text-slate-500 mb-8">Validate every endpoint against your spec on every deploy. Breaking changes caught before consumers.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-emerald-700 transition-colors">Request Early Access</a>
+            <a href="/#modules" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-colors">← View All Modules</a>
+        </div>
+    </div>
+</section>
+
+<footer class="border-t border-slate-100 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-semibold text-slate-900">SentinelFlux</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+            <a href="/#modules" class="hover:text-slate-900 transition-colors">All Modules</a>
+            <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="hover:text-slate-900 transition-colors">Dashboard</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-slate-900 transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+
+    const endpoints = [
+        {
+            label: 'GET /users/{id}', btnId: 'ep-1',
+            spec: [
+                {line: 'status: 200', color:'#94a3b8'},
+                {line: 'schema:', color:'#94a3b8'},
+                {line: '  id: integer (required)', color:'#94a3b8'},
+                {line: '  name: string (required)', color:'#94a3b8'},
+                {line: '  email: string (required)', color:'#94a3b8'},
+                {line: '  role: string', color:'#94a3b8'},
+                {line: '  created_at: string', color:'#94a3b8'},
+            ],
+            resp: [
+                {line: '{', color:'#94a3b8'},
+                {line: '  "id": 42,', color:'#86efac'},
+                {line: '  "name": "Alice",', color:'#86efac'},
+                {line: '  "email": "alice@co.com",', color:'#86efac'},
+                {line: '  "role": 1,', color:'#fca5a5'},
+                {line: '  "created_at": "2025-01-01"', color:'#86efac'},
+                {line: '}', color:'#94a3b8'},
+            ],
+            checks: [
+                { label:'status 200',     pass:true  },
+                { label:'id: integer',    pass:true  },
+                { label:'name: string',   pass:true  },
+                { label:'email: string',  pass:true  },
+                { label:'role: string',   pass:false, msg:'got integer' },
+                { label:'created_at',     pass:true  },
+            ]
+        },
+        {
+            label: 'POST /orders', btnId: 'ep-2',
+            spec: [
+                {line: 'status: 201', color:'#94a3b8'},
+                {line: 'schema:', color:'#94a3b8'},
+                {line: '  order_id: string (required)', color:'#94a3b8'},
+                {line: '  total: number (required)', color:'#94a3b8'},
+                {line: '  status: string (required)', color:'#94a3b8'},
+                {line: '  items: array (required)', color:'#94a3b8'},
+            ],
+            resp: [
+                {line: '{', color:'#94a3b8'},
+                {line: '  "order_id": "ORD-001",', color:'#86efac'},
+                {line: '  "total": 129.99,', color:'#86efac'},
+                {line: '  "status": "pending",', color:'#86efac'},
+                {line: '  "items": [...]', color:'#86efac'},
+                {line: '}', color:'#94a3b8'},
+            ],
+            checks: [
+                { label:'status 201',     pass:true },
+                { label:'order_id: string', pass:true },
+                { label:'total: number',  pass:true },
+                { label:'status: string', pass:true },
+                { label:'items: array',   pass:true },
+            ]
+        },
+        {
+            label: 'GET /products', btnId: 'ep-3',
+            spec: [
+                {line: 'status: 200', color:'#94a3b8'},
+                {line: 'schema:', color:'#94a3b8'},
+                {line: '  products: array (required)', color:'#94a3b8'},
+                {line: '  total_count: integer', color:'#94a3b8'},
+                {line: '  page: integer', color:'#94a3b8'},
+            ],
+            resp: [
+                {line: '{', color:'#94a3b8'},
+                {line: '  "items": [...],', color:'#fca5a5'},
+                {line: '  "count": 42', color:'#86efac'},
+                {line: '}', color:'#94a3b8'},
+            ],
+            checks: [
+                { label:'status 200',          pass:true  },
+                { label:'products: array',      pass:false, msg:'field renamed to "items"' },
+                { label:'total_count: integer', pass:false, msg:'field missing' },
+                { label:'page: integer',        pass:false, msg:'field missing' },
+            ]
+        }
+    ];
+
+    let currentEp = 0;
+    let animTimer = null;
+
+    function renderLines(panelId, lines) {
+        const el = document.getElementById(panelId);
+        el.innerHTML = '';
+        lines.forEach((l, i) => {
+            setTimeout(() => {
+                const d = document.createElement('div');
+                d.className = 'field-row';
+                d.style.color = l.color;
+                d.textContent = l.line;
+                el.appendChild(d);
+                requestAnimationFrame(() => d.classList.add('show'));
+            }, i * 60);
+        });
+    }
+
+    function renderChecks(ep, delay) {
+        setTimeout(() => {
+            const vp = document.getElementById('validation-panel');
+            vp.innerHTML = '';
+            ep.checks.forEach((c, i) => {
+                setTimeout(() => {
+                    const d = document.createElement('div');
+                    d.className = 'field-row flex items-center gap-2 text-xs py-1 px-2 rounded-lg ' + (c.pass ? 'bg-emerald-950/40' : 'bg-rose-950/40');
+                    d.innerHTML = `<span class="${c.pass ? 'text-emerald-400' : 'text-rose-400'} font-bold">${c.pass ? '✓' : '✗'}</span><span class="mono ${c.pass ? 'text-slate-300' : 'text-slate-400'}">${c.label}</span>${c.msg ? `<span class="ml-auto text-rose-400 text-[10px]">${c.msg}</span>` : ''}`;
+                    vp.appendChild(d);
+                    requestAnimationFrame(() => d.classList.add('show'));
+                }, i * 120);
+            });
+        }, delay);
+    }
+
+    function selectEndpoint(idx) {
+        currentEp = idx;
+        if (animTimer) clearInterval(animTimer);
+        endpoints.forEach((ep, i) => {
+            const btn = document.getElementById(ep.btnId);
+            if (i === idx) {
+                btn.className = 'text-xs px-3 py-1.5 rounded-lg border border-emerald-700 bg-emerald-900/30 text-emerald-300 mono';
+            } else {
+                btn.className = 'text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-500 mono';
+            }
+        });
+        const ep = endpoints[idx];
+        document.getElementById('validation-panel').innerHTML = '';
+        renderLines('spec-panel', ep.spec);
+        renderLines('resp-panel', ep.resp);
+        renderChecks(ep, ep.resp.length * 60 + 200);
+
+        animTimer = setInterval(() => selectEndpoint((currentEp + 1) % endpoints.length), 5000);
+    }
+
+    selectEndpoint(0);
+</script>
+</body>
+</html>
