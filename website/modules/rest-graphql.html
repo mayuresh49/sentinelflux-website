@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REST & GraphQL Testing — SentinelFlux</title>
+    <meta name="description" content="Schema validation, data-driven tests, full CRUD coverage, and curl logs on failure — all AI-generated from your knowledge base.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #818cf8 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; } [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; } [data-delay="4"] { transition-delay: 0.24s; }
+
+        /* Terminal animations */
+        .tc-item { transition: all 0.3s ease; }
+        .tc-item.active { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4); }
+        .resp-line { opacity: 0; transform: translateX(-6px); transition: opacity 0.25s ease, transform 0.25s ease; }
+        .resp-line.show { opacity: 1; transform: none; }
+        .schema-badge { opacity: 0; transform: translateX(-4px); transition: opacity 0.2s ease, transform 0.2s ease; }
+        .schema-badge.show { opacity: 1; transform: none; }
+
+        @keyframes requestSend {
+            0%   { width: 0%; } 100% { width: 100%; }
+        }
+        .progress-bar { animation: requestSend 0.6s ease forwards; }
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(79,70,229,0.10) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex items-center gap-5">
+            <a href="/#modules" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">
+                ← All Modules
+            </a>
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                Request Access
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-glow hero-grid pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div data-animate="fade-in" class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-indigo-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z"/></svg>
+            Testing Module — REST & GraphQL
+        </div>
+        <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
+            API Testing That<br><span class="gradient-text">Actually Knows Your Schema</span>
+        </h1>
+        <p data-animate data-delay="2" class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            AI-generated CRUD test suites with schema validation, data-driven parameterization, and full curl reproduction on every failure.
+        </p>
+    </div>
+</section>
+
+<!-- ANIMATED DEMO -->
+<section class="py-8 px-6 pb-20">
+    <div class="max-w-5xl mx-auto">
+        <div data-animate class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <!-- Window bar -->
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+                <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+                <span class="ml-3 text-slate-400 text-xs mono">sentinelflux run --product restfulbooker --domain api</span>
+                <div class="ml-auto flex items-center gap-1.5 text-xs text-indigo-400">
+                    <div class="w-1.5 h-1.5 rounded-full bg-indigo-400 pulse-dot"></div>running
+                </div>
+            </div>
+            <div class="flex" style="min-height:360px">
+                <!-- Test case list -->
+                <div class="w-52 shrink-0 border-r border-slate-800 p-3 space-y-1.5">
+                    <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide px-2 mb-3">Test Cases</div>
+                    <div id="tc-001" class="tc-item px-3 py-2.5 rounded-lg border border-transparent text-xs">
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span id="tc-001-icon" class="w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center shrink-0 text-[9px]">…</span>
+                            <span class="text-slate-300 font-medium">TC-001</span>
+                        </div>
+                        <div class="text-slate-500 pl-6">GET /bookings</div>
+                    </div>
+                    <div id="tc-002" class="tc-item px-3 py-2.5 rounded-lg border border-transparent text-xs">
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span id="tc-002-icon" class="w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center shrink-0 text-[9px]">…</span>
+                            <span class="text-slate-300 font-medium">TC-002</span>
+                        </div>
+                        <div class="text-slate-500 pl-6">POST /bookings</div>
+                    </div>
+                    <div id="tc-003" class="tc-item px-3 py-2.5 rounded-lg border border-transparent text-xs">
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span id="tc-003-icon" class="w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center shrink-0 text-[9px]">…</span>
+                            <span class="text-slate-300 font-medium">TC-003</span>
+                        </div>
+                        <div class="text-slate-500 pl-6">PUT /bookings/1</div>
+                    </div>
+                    <div id="tc-004" class="tc-item px-3 py-2.5 rounded-lg border border-transparent text-xs">
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span id="tc-004-icon" class="w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center shrink-0 text-[9px]">…</span>
+                            <span class="text-slate-300 font-medium">TC-004</span>
+                        </div>
+                        <div class="text-slate-500 pl-6">DELETE /bookings/1</div>
+                    </div>
+                    <div id="tc-005" class="tc-item px-3 py-2.5 rounded-lg border border-transparent text-xs">
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span id="tc-005-icon" class="w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center shrink-0 text-[9px]">…</span>
+                            <span class="text-slate-300 font-medium">TC-005</span>
+                        </div>
+                        <div class="text-slate-500 pl-6">GET /booking/99 (404)</div>
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-xs text-slate-600 mb-1">Progress</div>
+                        <div class="h-1 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-full bg-indigo-500 rounded-full transition-all duration-500" style="width:0%"></div>
+                        </div>
+                        <div id="progress-label" class="text-xs text-slate-500 mt-1">0 / 5</div>
+                    </div>
+                </div>
+                <!-- Request/response panel -->
+                <div class="flex-1 p-5 overflow-hidden">
+                    <div id="req-method" class="text-xs font-bold mb-2 flex items-center gap-2">
+                        <span id="method-badge" class="px-2 py-0.5 rounded text-xs font-bold">GET</span>
+                        <span id="req-path" class="text-slate-400 mono">/api/v1/bookings</span>
+                        <span id="status-badge" class="ml-auto px-2 py-0.5 rounded text-xs font-bold opacity-0 transition-opacity duration-300"></span>
+                    </div>
+                    <!-- Response body -->
+                    <div id="response-panel" class="bg-slate-800/60 rounded-xl p-4 mono text-xs mb-4 min-h-[120px] overflow-hidden">
+                        <div id="resp-lines" class="space-y-0.5"></div>
+                    </div>
+                    <!-- Schema validation -->
+                    <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2">Schema Validation</div>
+                    <div id="schema-checks" class="space-y-1.5"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-slate-50 py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Everything API testing demands</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">Generated from your knowledge base — no manual test writing required.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div data-animate data-delay="1" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-indigo-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Schema Validation</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Every response validated against your OpenAPI or GraphQL schema — field presence, types, and formats checked automatically.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>OpenAPI 3.0 + Swagger 2.0</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>GraphQL query + mutation tests</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Nested object & array validation</li>
+                </ul>
+            </div>
+            <div data-animate data-delay="2" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-indigo-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75.125.875-8.25h16.5l.875 8.25M6 18.375V6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75v11.625m-12 0h12"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Data-Driven Tests</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">One test template, many data sets. AI generates valid and invalid parameter combinations from your KB — edge cases included.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Boundary value analysis</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Positive & negative scenarios</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>pytest parametrize output</li>
+                </ul>
+            </div>
+            <div data-animate data-delay="3" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-indigo-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Curl Log on Failure</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Every failed test emits a ready-to-paste curl command — reproduce it instantly in your terminal without digging through logs.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Headers, body & auth included</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Saved to test artifacts</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>AI failure classification</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 px-6">
+    <div data-animate class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Start testing your APIs with AI</h2>
+        <p class="text-slate-500 mb-8">Drop in your OpenAPI spec, point SentinelFlux at your API, and get a full test suite in minutes.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-indigo-700 transition-colors">
+                Request Early Access
+            </a>
+            <a href="/#modules" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-colors">
+                ← View All Modules
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-slate-100 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-semibold text-slate-900">SentinelFlux</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+            <a href="/#modules" class="hover:text-slate-900 transition-colors">All Modules</a>
+            <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="hover:text-slate-900 transition-colors">Dashboard</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-slate-900 transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    // Scroll-reveal
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+
+    // Test case animation
+    const tests = [
+        {
+            id: 'tc-001', method: 'GET', path: '/api/v1/bookings', status: 200, statusText: '200 OK',
+            respLines: [
+                '{', '  "bookings": [', '    { "bookingid": 1 },', '    { "bookingid": 2 },', '    { "bookingid": 3 }', '  ]', '}'
+            ],
+            schema: [
+                { field: 'bookings: array', pass: true },
+                { field: 'bookingid: integer', pass: true },
+                { field: 'totalcount: integer', pass: false, msg: 'missing field' },
+            ]
+        },
+        {
+            id: 'tc-002', method: 'POST', path: '/api/v1/bookings', status: 201, statusText: '201 Created',
+            respLines: [
+                '{', '  "bookingid": 12,', '  "booking": {', '    "firstname": "James",', '    "lastname": "Brown",', '    "totalprice": 111,', '    "checkin": "2025-01-01"', '  }', '}'
+            ],
+            schema: [
+                { field: 'bookingid: integer', pass: true },
+                { field: 'firstname: string', pass: true },
+                { field: 'totalprice: number', pass: true },
+            ]
+        },
+        {
+            id: 'tc-003', method: 'PUT', path: '/api/v1/bookings/1', status: 200, statusText: '200 OK',
+            respLines: [
+                '{', '  "firstname": "James",', '  "lastname": "Brown",', '  "totalprice": 200,', '  "depositpaid": true', '}'
+            ],
+            schema: [
+                { field: 'firstname: string', pass: true },
+                { field: 'totalprice: number', pass: true },
+                { field: 'depositpaid: boolean', pass: true },
+            ]
+        },
+        {
+            id: 'tc-004', method: 'DELETE', path: '/api/v1/bookings/1', status: 201, statusText: '201 Created',
+            respLines: [ '"Created"' ],
+            schema: [
+                { field: 'response body: string', pass: true },
+            ]
+        },
+        {
+            id: 'tc-005', method: 'GET', path: '/api/v1/bookings/99', status: 404, statusText: '404 Not Found',
+            respLines: [ '"Not Found"' ],
+            schema: [
+                { field: 'status 404: expected', pass: true },
+                { field: 'error body: string', pass: true },
+            ]
+        },
+    ];
+
+    const methodColors = { GET: 'bg-blue-900 text-blue-300', POST: 'bg-emerald-900 text-emerald-300', PUT: 'bg-amber-900 text-amber-300', DELETE: 'bg-rose-900 text-rose-300' };
+    const statusColors = { 200: 'bg-emerald-900 text-emerald-300', 201: 'bg-emerald-900 text-emerald-300', 404: 'bg-amber-900 text-amber-300', 500: 'bg-rose-900 text-rose-300' };
+
+    let currentIdx = 0;
+    let passedCount = 0;
+    let phase = 'idle';
+
+    function setIcon(id, state) {
+        const el = document.getElementById(id + '-icon');
+        if (!el) return;
+        if (state === 'running') { el.className = 'w-4 h-4 rounded-full bg-indigo-500 flex items-center justify-center shrink-0 text-[9px] pulse-dot'; el.textContent = '…'; }
+        else if (state === 'pass') { el.className = 'w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center shrink-0 text-[9px] text-white'; el.textContent = '✓'; }
+        else if (state === 'fail') { el.className = 'w-4 h-4 rounded-full bg-rose-500 flex items-center justify-center shrink-0 text-[9px] text-white'; el.textContent = '✗'; }
+        else { el.className = 'w-4 h-4 rounded-full bg-slate-700 flex items-center justify-center shrink-0 text-[9px] text-slate-500'; el.textContent = '…'; }
+    }
+
+    function runTest(t) {
+        // Highlight active
+        document.querySelectorAll('.tc-item').forEach(el => el.classList.remove('active'));
+        document.getElementById(t.id).classList.add('active');
+        setIcon(t.id, 'running');
+
+        // Set method/path
+        const mb = document.getElementById('method-badge');
+        mb.textContent = t.method;
+        mb.className = 'px-2 py-0.5 rounded text-xs font-bold mono ' + (methodColors[t.method] || 'bg-slate-700 text-slate-300');
+        document.getElementById('req-path').textContent = t.path;
+        const sb = document.getElementById('status-badge');
+        sb.style.opacity = '0';
+
+        // Clear
+        const respEl = document.getElementById('resp-lines');
+        const schemaEl = document.getElementById('schema-checks');
+        respEl.innerHTML = '';
+        schemaEl.innerHTML = '';
+
+        // After short delay, show response
+        setTimeout(() => {
+            sb.textContent = t.statusText;
+            sb.className = 'ml-auto px-2 py-0.5 rounded text-xs font-bold mono transition-opacity duration-300 ' + (statusColors[t.status] || 'bg-slate-700 text-slate-300');
+            sb.style.opacity = '1';
+
+            t.respLines.forEach((line, i) => {
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.className = 'resp-line';
+                    div.style.color = line.startsWith('"') ? '#86efac' : '#94a3b8';
+                    div.textContent = line;
+                    respEl.appendChild(div);
+                    requestAnimationFrame(() => div.classList.add('show'));
+                }, i * 60);
+            });
+
+            // Schema checks
+            setTimeout(() => {
+                t.schema.forEach((check, i) => {
+                    setTimeout(() => {
+                        const div = document.createElement('div');
+                        div.className = 'schema-badge flex items-center gap-2 text-xs py-1.5 px-3 rounded-lg ' + (check.pass ? 'bg-emerald-950/50 border border-emerald-900' : 'bg-rose-950/50 border border-rose-900');
+                        div.innerHTML = `<span class="${check.pass ? 'text-emerald-400' : 'text-rose-400'} font-bold">${check.pass ? '✓' : '✗'}</span><span class="mono text-slate-300">${check.field}</span>${check.msg ? `<span class="ml-auto text-rose-400 text-[10px]">${check.msg}</span>` : ''}`;
+                        schemaEl.appendChild(div);
+                        requestAnimationFrame(() => div.classList.add('show'));
+                    }, i * 150);
+                });
+
+                // Mark done
+                setTimeout(() => {
+                    const hasFail = t.schema.some(c => !c.pass);
+                    setIcon(t.id, hasFail ? 'fail' : 'pass');
+                    passedCount++;
+                    document.getElementById('progress-bar').style.width = (passedCount / tests.length * 100) + '%';
+                    document.getElementById('progress-label').textContent = passedCount + ' / ' + tests.length;
+                }, t.schema.length * 150 + 200);
+            }, t.respLines.length * 60 + 300);
+        }, 600);
+    }
+
+    function cycleTests() {
+        if (currentIdx === 0) { passedCount = 0; document.getElementById('progress-bar').style.width = '0%'; document.getElementById('progress-label').textContent = '0 / ' + tests.length; tests.forEach(t => setIcon(t.id, 'idle')); }
+        runTest(tests[currentIdx]);
+        currentIdx = (currentIdx + 1) % tests.length;
+    }
+
+    cycleTests();
+    setInterval(cycleTests, 3500);
+</script>
+</body>
+</html>

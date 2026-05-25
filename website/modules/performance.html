@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Testing — SentinelFlux</title>
+    <meta name="description" content="Load, stress, spike, and soak testing with p50/p75/p95/p99 metrics and configurable thresholds.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 50%, #60a5fa 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; } [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(29,78,216,0.08) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+
+        .metric-card { transition: all 0.4s ease; }
+        .phase-btn { transition: all 0.3s ease; }
+        .phase-btn.active { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.4); color: #93c5fd; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex items-center gap-5">
+            <a href="/#modules" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">← All Modules</a>
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Request Access</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero-glow hero-grid pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div data-animate="fade-in" class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-blue-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+            Testing Module — Performance
+        </div>
+        <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
+            Know Your Breaking Point<br><span class="gradient-text">Before Users Do</span>
+        </h1>
+        <p data-animate data-delay="2" class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            Load, stress, spike, and soak tests with p50/p75/p95/p99 metrics — generated from your KB and configurable thresholds that fail CI when violated.
+        </p>
+    </div>
+</section>
+
+<!-- ANIMATED DEMO -->
+<section class="py-8 px-6 pb-20">
+    <div class="max-w-5xl mx-auto">
+        <div data-animate class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+                <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+                <span class="ml-3 text-slate-400 text-xs mono">sentinelflux run --product myapp --domain performance --profile load</span>
+                <div class="ml-auto flex items-center gap-1.5 text-xs text-blue-400">
+                    <div class="w-1.5 h-1.5 rounded-full bg-blue-400 pulse-dot"></div>
+                    <span id="phase-label">ramp-up</span>
+                </div>
+            </div>
+            <div class="p-5">
+                <!-- Phase selector -->
+                <div class="flex gap-2 mb-4 flex-wrap">
+                    <button id="btn-load"   class="phase-btn active border border-slate-700 text-slate-400 text-xs px-3 py-1.5 rounded-lg mono">Load</button>
+                    <button id="btn-stress" class="phase-btn border border-slate-700 text-slate-400 text-xs px-3 py-1.5 rounded-lg mono">Stress</button>
+                    <button id="btn-spike"  class="phase-btn border border-slate-700 text-slate-400 text-xs px-3 py-1.5 rounded-lg mono">Spike</button>
+                    <button id="btn-soak"   class="phase-btn border border-slate-700 text-slate-400 text-xs px-3 py-1.5 rounded-lg mono">Soak</button>
+                </div>
+
+                <!-- Chart -->
+                <div class="bg-slate-800/60 rounded-xl p-4 mb-4 relative">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="text-xs text-slate-400 font-semibold">Response Time (ms) vs Virtual Users</div>
+                        <div class="flex items-center gap-3 text-xs">
+                            <span class="flex items-center gap-1"><span class="inline-block w-3 h-0.5 bg-blue-400"></span>p50</span>
+                            <span class="flex items-center gap-1"><span class="inline-block w-3 h-0.5 bg-violet-400"></span>p75</span>
+                            <span class="flex items-center gap-1"><span class="inline-block w-3 h-0.5 bg-amber-400"></span>p95</span>
+                            <span class="flex items-center gap-1"><span class="inline-block w-3 h-0.5 bg-rose-400"></span>p99</span>
+                        </div>
+                    </div>
+                    <svg id="perf-chart" width="100%" height="180" viewBox="0 0 600 180" preserveAspectRatio="none">
+                        <!-- Grid lines -->
+                        <line x1="0" y1="45" x2="600" y2="45" stroke="#334155" stroke-width="0.5" stroke-dasharray="4,4"/>
+                        <line x1="0" y1="90" x2="600" y2="90" stroke="#334155" stroke-width="0.5" stroke-dasharray="4,4"/>
+                        <line x1="0" y1="135" x2="600" y2="135" stroke="#334155" stroke-width="0.5" stroke-dasharray="4,4"/>
+                        <!-- Y-axis labels -->
+                        <text x="4" y="42" fill="#475569" font-size="9" font-family="monospace">800ms</text>
+                        <text x="4" y="87" fill="#475569" font-size="9" font-family="monospace">400ms</text>
+                        <text x="4" y="132" fill="#475569" font-size="9" font-family="monospace">200ms</text>
+                        <!-- Paths drawn by JS -->
+                        <path id="path-p50" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linejoin="round"/>
+                        <path id="path-p75" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linejoin="round"/>
+                        <path id="path-p95" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linejoin="round"/>
+                        <path id="path-p99" fill="none" stroke="#f87171" stroke-width="2" stroke-linejoin="round"/>
+                        <!-- Threshold line -->
+                        <line id="threshold-line" x1="0" y1="67" x2="600" y2="67" stroke="#f43f5e" stroke-width="1" stroke-dasharray="6,3" opacity="0.6"/>
+                        <text x="4" y="62" fill="#f87171" font-size="9" font-family="monospace">SLA 600ms</text>
+                    </svg>
+                </div>
+
+                <!-- Metric cards -->
+                <div class="grid grid-cols-4 gap-2.5">
+                    <div class="metric-card bg-slate-800 rounded-xl p-3 border border-slate-700">
+                        <div class="text-xs text-blue-400 font-semibold mono mb-1">p50</div>
+                        <div id="metric-p50" class="text-xl font-bold text-white mono">—</div>
+                        <div class="text-xs text-slate-500 mt-0.5">median</div>
+                    </div>
+                    <div class="metric-card bg-slate-800 rounded-xl p-3 border border-slate-700">
+                        <div class="text-xs text-violet-400 font-semibold mono mb-1">p75</div>
+                        <div id="metric-p75" class="text-xl font-bold text-white mono">—</div>
+                        <div class="text-xs text-slate-500 mt-0.5">typical</div>
+                    </div>
+                    <div class="metric-card bg-slate-800 rounded-xl p-3 border border-slate-700">
+                        <div class="text-xs text-amber-400 font-semibold mono mb-1">p95</div>
+                        <div id="metric-p95" class="text-xl font-bold text-white mono">—</div>
+                        <div class="text-xs text-slate-500 mt-0.5">slow users</div>
+                    </div>
+                    <div class="metric-card bg-slate-800 rounded-xl p-3 border border-slate-700">
+                        <div class="text-xs text-rose-400 font-semibold mono mb-1">p99</div>
+                        <div id="metric-p99" class="text-xl font-bold text-white mono">—</div>
+                        <div class="text-xs text-slate-500 mt-0.5">worst case</div>
+                    </div>
+                </div>
+                <!-- VU + RPS row -->
+                <div class="grid grid-cols-3 gap-2.5 mt-2.5">
+                    <div class="bg-slate-800/60 rounded-xl p-3 border border-slate-700/60 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Virtual Users</div>
+                        <div id="metric-vu" class="text-lg font-bold text-white mono">0</div>
+                    </div>
+                    <div class="bg-slate-800/60 rounded-xl p-3 border border-slate-700/60 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Req/s</div>
+                        <div id="metric-rps" class="text-lg font-bold text-white mono">0</div>
+                    </div>
+                    <div class="bg-slate-800/60 rounded-xl p-3 border border-slate-700/60 text-center">
+                        <div class="text-xs text-slate-400 mb-1">Error Rate</div>
+                        <div id="metric-err" class="text-lg font-bold text-emerald-400 mono">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-slate-50 py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Every load profile your system needs</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">Generated k6 scripts from your KB — no manual scripting required.</p>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div data-animate data-delay="1" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-blue-200 hover:shadow-md transition-all">
+                <div class="text-blue-600 text-xs font-bold uppercase tracking-widest mb-2">Load</div>
+                <h3 class="font-semibold text-slate-900 mb-1.5 text-sm">Sustained Traffic</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Ramp to expected peak, sustain for minutes. Validates your baseline SLA under normal conditions.</p>
+            </div>
+            <div data-animate data-delay="2" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-violet-200 hover:shadow-md transition-all">
+                <div class="text-violet-600 text-xs font-bold uppercase tracking-widest mb-2">Stress</div>
+                <h3 class="font-semibold text-slate-900 mb-1.5 text-sm">Beyond Capacity</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Ramp past your SLA limit to find where degradation begins and whether recovery is clean.</p>
+            </div>
+            <div data-animate data-delay="3" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-amber-200 hover:shadow-md transition-all">
+                <div class="text-amber-600 text-xs font-bold uppercase tracking-widest mb-2">Spike</div>
+                <h3 class="font-semibold text-slate-900 mb-1.5 text-sm">Sudden Burst</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Instant 10x traffic increase to test autoscaling, connection pool exhaustion, and queue behaviour.</p>
+            </div>
+            <div data-animate data-delay="4" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-emerald-200 hover:shadow-md transition-all">
+                <div class="text-emerald-600 text-xs font-bold uppercase tracking-widest mb-2">Soak</div>
+                <h3 class="font-semibold text-slate-900 mb-1.5 text-sm">Memory Leaks</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Moderate load over hours to surface memory leaks, connection pool exhaustion, and gradual degradation.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 px-6">
+    <div data-animate class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Confidence before every release</h2>
+        <p class="text-slate-500 mb-8">Set your p95 SLA threshold once. Every CI run enforces it automatically.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-blue-700 transition-colors">Request Early Access</a>
+            <a href="/#modules" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-colors">← View All Modules</a>
+        </div>
+    </div>
+</section>
+
+<footer class="border-t border-slate-100 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-semibold text-slate-900">SentinelFlux</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+            <a href="/#modules" class="hover:text-slate-900 transition-colors">All Modules</a>
+            <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="hover:text-slate-900 transition-colors">Dashboard</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-slate-900 transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+
+    // Load profile data points [p50, p75, p95, p99, vu, rps, errPct]
+    const profiles = {
+        load: {
+            label: 'Load Test — Ramp Up',
+            frames: [
+                [120,180,280,400, 10, 45, 0],
+                [140,200,310,450, 25, 90, 0],
+                [160,230,350,510, 50,180, 0],
+                [180,260,390,560, 100,360, 0.2],
+                [185,270,400,580, 100,360, 0.2],
+                [182,265,395,570, 100,355, 0.1],
+            ]
+        },
+        stress: {
+            label: 'Stress Test — Beyond Capacity',
+            frames: [
+                [180,260,390,560, 100, 360, 0.1],
+                [230,330,510,730, 150, 520, 1.2],
+                [310,450,690,990, 200, 640, 3.5],
+                [420,600,920,1300,250, 720, 8.1],
+                [390,560,870,1240,200, 680, 6.2],
+                [280,400,620,900, 150, 500, 2.1],
+            ]
+        },
+        spike: {
+            label: 'Spike Test — Sudden Burst',
+            frames: [
+                [150,210,320,480, 50, 180, 0],
+                [640,920,1400,1900,500,1600,12.4],
+                [580,840,1280,1740,500,1540,9.8],
+                [320,460,700,1000,200, 700, 2.1],
+                [170,240,365,520, 50, 185, 0.1],
+                [155,215,330,490, 50, 182, 0],
+            ]
+        },
+        soak: {
+            label: 'Soak Test — Memory Leak',
+            frames: [
+                [155,215,330,470, 50, 185, 0],
+                [162,228,348,495, 50, 183, 0],
+                [171,244,369,523, 50, 181, 0.1],
+                [188,267,402,572, 50, 179, 0.3],
+                [210,299,451,641, 50, 176, 0.8],
+                [238,338,511,728, 50, 172, 1.6],
+            ]
+        }
+    };
+
+    let currentProfile = 'load';
+    let frameIdx = 0;
+    let animTimer = null;
+    const W = 600, H = 180, maxMs = 1000;
+
+    function yForMs(ms) { return H - (ms / maxMs) * H * 0.85 - 10; }
+
+    function buildPath(points) {
+        if (!points.length) return '';
+        return points.map((p, i) => {
+            const x = (i / (points.length - 1)) * W;
+            const y = yForMs(p);
+            return (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1);
+        }).join(' ');
+    }
+
+    function animateNumber(id, target, suffix) {
+        const el = document.getElementById(id);
+        const current = parseFloat(el.textContent) || 0;
+        const diff = target - current;
+        const steps = 12;
+        let step = 0;
+        const t = setInterval(() => {
+            step++;
+            const v = current + diff * (step / steps);
+            el.textContent = (suffix === '%') ? v.toFixed(1) + '%' : Math.round(v) + (suffix || '');
+            if (step >= steps) { clearInterval(t); el.textContent = (suffix === '%') ? target.toFixed(1) + '%' : Math.round(target) + (suffix || ''); }
+        }, 30);
+    }
+
+    function renderFrame() {
+        const p = profiles[currentProfile];
+        const f = p.frames[frameIdx];
+        document.getElementById('phase-label').textContent = p.label;
+
+        // Accumulate path
+        const allFrames = p.frames.slice(0, frameIdx + 1);
+        ['p50','p75','p95','p99'].forEach((key, ki) => {
+            const pts = allFrames.map(fr => fr[ki]);
+            document.getElementById('path-' + key).setAttribute('d', buildPath(pts));
+        });
+
+        animateNumber('metric-p50', f[0], 'ms');
+        animateNumber('metric-p75', f[1], 'ms');
+        animateNumber('metric-p95', f[2], 'ms');
+        animateNumber('metric-p99', f[3], 'ms');
+        animateNumber('metric-vu',  f[4], '');
+        animateNumber('metric-rps', f[5], '');
+        animateNumber('metric-err', f[6], '%');
+        const errEl = document.getElementById('metric-err');
+        errEl.className = f[6] > 1 ? 'text-lg font-bold text-rose-400 mono' : f[6] > 0 ? 'text-lg font-bold text-amber-400 mono' : 'text-lg font-bold text-emerald-400 mono';
+    }
+
+    function startAnimation() {
+        if (animTimer) clearInterval(animTimer);
+        frameIdx = 0;
+        // Clear paths
+        ['p50','p75','p95','p99'].forEach(k => document.getElementById('path-' + k).setAttribute('d', ''));
+        renderFrame();
+        animTimer = setInterval(() => {
+            frameIdx++;
+            if (frameIdx >= profiles[currentProfile].frames.length) { frameIdx = 0; ['p50','p75','p95','p99'].forEach(k => document.getElementById('path-' + k).setAttribute('d', '')); }
+            renderFrame();
+        }, 1200);
+    }
+
+    ['load','stress','spike','soak'].forEach(p => {
+        document.getElementById('btn-' + p).addEventListener('click', () => {
+            document.querySelectorAll('.phase-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + p).classList.add('active');
+            currentProfile = p;
+            startAnimation();
+        });
+    });
+
+    startAnimation();
+</script>
+</body>
+</html>

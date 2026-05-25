@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web UI Testing — SentinelFlux</title>
+    <meta name="description" content="Page Object Model with 3-tier self-healing locators, AI-generated Playwright scripts, and screenshot-on-failure.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; } [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(124,58,237,0.08) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(139,92,246,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(139,92,246,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+
+        /* Browser mock */
+        .ui-elem { transition: box-shadow 0.3s ease, background 0.3s ease; }
+        .ui-elem.highlight { box-shadow: 0 0 0 2px #8b5cf6, 0 0 12px rgba(139,92,246,0.4); background: rgba(139,92,246,0.06) !important; }
+
+        /* Test step */
+        .step-row { transition: all 0.3s ease; border-left: 2px solid transparent; }
+        .step-row.running { border-left-color: #8b5cf6; background: rgba(139,92,246,0.06); }
+        .step-row.done    { border-left-color: #10b981; }
+        .step-row.fail    { border-left-color: #f43f5e; }
+
+        /* Locator healing */
+        .heal-tier { transition: all 0.4s ease; }
+        .heal-tier.active { border-color: rgba(139,92,246,0.5); box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
+
+        @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+
+        @keyframes click-ripple {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(2.2); opacity: 0; }
+        }
+        .click-ripple { animation: click-ripple 0.5s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex items-center gap-5">
+            <a href="/#modules" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">← All Modules</a>
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Request Access</a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-glow hero-grid pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div data-animate="fade-in" class="inline-flex items-center gap-2 bg-violet-50 text-violet-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-violet-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0H3"/></svg>
+            Testing Module — Web UI
+        </div>
+        <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
+            Tests That Survive<br><span class="gradient-text">Every UI Change</span>
+        </h1>
+        <p data-animate data-delay="2" class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            AI-generated Playwright scripts using Page Object Model, with 3-tier self-healing locators that adapt when your UI evolves.
+        </p>
+    </div>
+</section>
+
+<!-- ANIMATED DEMO -->
+<section class="py-8 px-6 pb-20">
+    <div class="max-w-5xl mx-auto">
+        <div data-animate class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <!-- Window bar -->
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+                <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+                <span class="ml-3 text-slate-400 text-xs mono">orangehrm · web · LoginPage</span>
+                <div class="ml-auto flex items-center gap-1.5 text-xs text-violet-400">
+                    <div class="w-1.5 h-1.5 rounded-full bg-violet-400 pulse-dot"></div>running
+                </div>
+            </div>
+            <div class="flex" style="min-height:380px">
+                <!-- Mock browser -->
+                <div class="flex-1 p-4 border-r border-slate-800">
+                    <div class="text-xs text-slate-500 mono mb-3 flex items-center gap-2">
+                        <span class="px-2 py-0.5 bg-slate-800 rounded text-slate-400">http://localhost:8080/web/index.php</span>
+                    </div>
+                    <!-- Mock login page UI -->
+                    <div class="bg-slate-800 rounded-xl p-5" style="min-height:260px">
+                        <div class="text-center mb-5">
+                            <div class="w-10 h-10 bg-violet-600 rounded-xl mx-auto mb-2 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+                            </div>
+                            <div class="text-slate-200 font-semibold text-sm">OrangeHRM Login</div>
+                        </div>
+                        <div class="space-y-3">
+                            <div id="ui-username" class="ui-elem bg-slate-700 rounded-lg px-3 py-2.5">
+                                <div class="text-xs text-slate-400 mb-1">Username</div>
+                                <div id="ui-username-val" class="text-sm text-slate-300 mono h-4"></div>
+                            </div>
+                            <div id="ui-password" class="ui-elem bg-slate-700 rounded-lg px-3 py-2.5">
+                                <div class="text-xs text-slate-400 mb-1">Password</div>
+                                <div id="ui-password-val" class="text-sm text-slate-300 mono h-4"></div>
+                            </div>
+                            <div id="ui-login-btn" class="ui-elem bg-violet-600 rounded-lg px-4 py-2.5 text-center cursor-pointer">
+                                <span class="text-white text-sm font-semibold">Login</span>
+                            </div>
+                            <div id="ui-dashboard" class="hidden bg-emerald-900/30 border border-emerald-700 rounded-lg px-4 py-3 text-center">
+                                <div class="text-emerald-300 text-xs font-semibold">Dashboard loaded ✓</div>
+                                <div class="text-emerald-400/70 text-xs mt-0.5">Welcome, Admin</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Test steps sidebar -->
+                <div class="w-60 shrink-0 p-4">
+                    <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">Test Steps</div>
+                    <div class="space-y-1">
+                        <div id="step-1" class="step-row text-xs px-3 py-2 rounded-r-lg">
+                            <div class="flex items-center gap-2">
+                                <span id="step-1-icon" class="text-slate-600">○</span>
+                                <span class="text-slate-400">Navigate to login</span>
+                            </div>
+                        </div>
+                        <div id="step-2" class="step-row text-xs px-3 py-2 rounded-r-lg">
+                            <div class="flex items-center gap-2">
+                                <span id="step-2-icon" class="text-slate-600">○</span>
+                                <span class="text-slate-400">Fill username</span>
+                            </div>
+                        </div>
+                        <div id="step-3" class="step-row text-xs px-3 py-2 rounded-r-lg">
+                            <div class="flex items-center gap-2">
+                                <span id="step-3-icon" class="text-slate-600">○</span>
+                                <span class="text-slate-400">Fill password</span>
+                            </div>
+                        </div>
+                        <div id="step-4" class="step-row text-xs px-3 py-2 rounded-r-lg">
+                            <div class="flex items-center gap-2">
+                                <span id="step-4-icon" class="text-slate-600">○</span>
+                                <span class="text-slate-400">Click Login button</span>
+                            </div>
+                        </div>
+                        <div id="step-5" class="step-row text-xs px-3 py-2 rounded-r-lg">
+                            <div class="flex items-center gap-2">
+                                <span id="step-5-icon" class="text-slate-600">○</span>
+                                <span class="text-slate-400">Assert dashboard visible</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Locator info -->
+                    <div class="mt-5 p-3 bg-slate-800 rounded-xl border border-slate-700">
+                        <div class="text-xs text-slate-500 font-semibold mb-2">Active Locator</div>
+                        <div id="locator-text" class="text-xs mono text-violet-300 break-all"></div>
+                        <div id="locator-tier" class="text-xs text-slate-500 mt-1.5"></div>
+                    </div>
+
+                    <div id="pass-badge" class="hidden mt-4 bg-emerald-900/40 border border-emerald-700 rounded-xl p-3 text-center">
+                        <div class="text-emerald-300 text-xs font-bold">PASSED ✓</div>
+                        <div class="text-emerald-400/70 text-xs mt-0.5">1.24s</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-slate-50 py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Built for real-world UI churn</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">Your tests don't need to break every time design ships a change.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div data-animate data-delay="1" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-violet-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Page Object Model</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Every page gets its own class — selectors and interactions in one place. Change a locator once, fix all tests at once.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>AI-generated POM classes</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Actions separated from assertions</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Fixture-based setup & teardown</li>
+                </ul>
+            </div>
+            <div data-animate data-delay="2" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-violet-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">3-Tier Self-Healing</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Primary locator breaks → try alternatives → AI healer re-discovers from live DOM → queued for your approval.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>data-testid → id → aria-label</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Human approval before commit</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>AppExplorerAgent pre-crawls DOM</li>
+                </ul>
+            </div>
+            <div data-animate data-delay="3" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-violet-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Screenshot on Failure</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Automatic screenshot at the moment of failure, captured into test artifacts and surfaced in the dashboard with the AI diagnosis.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Full-page & viewport captures</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Stored alongside test run</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>AI interprets the failure state</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 px-6">
+    <div data-animate class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Stop rewriting broken locators</h2>
+        <p class="text-slate-500 mb-8">Let AI generate your test scripts and heal them when your UI evolves.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-violet-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-violet-700 transition-colors">Request Early Access</a>
+            <a href="/#modules" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-colors">← View All Modules</a>
+        </div>
+    </div>
+</section>
+
+<footer class="border-t border-slate-100 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-semibold text-slate-900">SentinelFlux</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+            <a href="/#modules" class="hover:text-slate-900 transition-colors">All Modules</a>
+            <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="hover:text-slate-900 transition-colors">Dashboard</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-slate-900 transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+
+    const steps = [
+        { id: 'step-1', elem: null, locator: 'page.goto(url)', tier: 'Navigation', action: null },
+        { id: 'step-2', elem: 'ui-username', locator: '[data-testid="txt-username"]', tier: 'Tier 1 — data-testid', action: () => typeText('ui-username-val', 'admin') },
+        { id: 'step-3', elem: 'ui-password', locator: '[data-testid="txt-password"]', tier: 'Tier 1 — data-testid', action: () => typeText('ui-password-val', '••••••••') },
+        { id: 'step-4', elem: 'ui-login-btn', locator: '[data-testid="btn-login"]', tier: 'Tier 1 — data-testid', action: null },
+        { id: 'step-5', elem: null, locator: 'expect(dashboard).toBeVisible()', tier: 'Assertion', action: () => { document.getElementById('ui-dashboard').classList.remove('hidden'); } },
+    ];
+
+    function typeText(id, text) {
+        const el = document.getElementById(id);
+        el.textContent = '';
+        let i = 0;
+        const t = setInterval(() => {
+            el.textContent += text[i];
+            i++;
+            if (i >= text.length) clearInterval(t);
+        }, 80);
+    }
+
+    function setStepState(id, state) {
+        const row = document.getElementById(id);
+        const icon = document.getElementById(id + '-icon');
+        row.classList.remove('running', 'done', 'fail');
+        if (state === 'running') { row.classList.add('running'); icon.textContent = '▶'; icon.className = 'text-violet-400 text-xs'; }
+        else if (state === 'done')  { row.classList.add('done');    icon.textContent = '✓'; icon.className = 'text-emerald-400 text-xs'; }
+        else if (state === 'fail')  { row.classList.add('fail');    icon.textContent = '✗'; icon.className = 'text-rose-400 text-xs'; }
+        else { icon.textContent = '○'; icon.className = 'text-slate-600 text-xs'; }
+    }
+
+    function highlightElem(id) {
+        document.querySelectorAll('.ui-elem').forEach(e => e.classList.remove('highlight'));
+        if (id) document.getElementById(id)?.classList.add('highlight');
+    }
+
+    let currentStep = 0;
+
+    function runStep() {
+        if (currentStep >= steps.length) {
+            document.getElementById('pass-badge').classList.remove('hidden');
+            setTimeout(reset, 2500);
+            return;
+        }
+        const s = steps[currentStep];
+        setStepState(s.id, 'running');
+        if (s.elem) highlightElem(s.elem);
+        document.getElementById('locator-text').textContent = s.locator;
+        document.getElementById('locator-tier').textContent = s.tier;
+        if (s.action) setTimeout(s.action, 300);
+        setTimeout(() => {
+            setStepState(s.id, 'done');
+            if (s.elem) highlightElem(null);
+            currentStep++;
+            setTimeout(runStep, 500);
+        }, 1400);
+    }
+
+    function reset() {
+        document.getElementById('pass-badge').classList.add('hidden');
+        document.getElementById('ui-dashboard').classList.add('hidden');
+        document.getElementById('ui-username-val').textContent = '';
+        document.getElementById('ui-password-val').textContent = '';
+        document.getElementById('locator-text').textContent = '';
+        document.getElementById('locator-tier').textContent = '';
+        highlightElem(null);
+        steps.forEach(s => setStepState(s.id, 'idle'));
+        currentStep = 0;
+        setTimeout(runStep, 800);
+    }
+
+    setTimeout(runStep, 800);
+</script>
+</body>
+</html>

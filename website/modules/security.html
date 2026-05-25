@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Testing (VAPT) — SentinelFlux</title>
+    <meta name="description" content="OWASP A01–A10, 31 automated security checks, PDF compliance report and certificate.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #fb7185 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; } [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(225,29,72,0.08) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(244,63,94,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(244,63,94,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+
+        .owasp-card { transition: all 0.4s ease; }
+        .owasp-card.scanning { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.05); }
+        .owasp-card.pass     { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.05); }
+        .owasp-card.finding  { border-color: rgba(244,63,94,0.4);  background: rgba(244,63,94,0.06); }
+
+        @keyframes scanLine { 0% { width: 0; } 100% { width: 100%; } }
+        .scan-bar { animation: scanLine 0.8s ease forwards; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex items-center gap-5">
+            <a href="/#modules" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">← All Modules</a>
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Request Access</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero-glow hero-grid pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div data-animate="fade-in" class="inline-flex items-center gap-2 bg-rose-50 text-rose-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-rose-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            Testing Module — Security (VAPT)
+        </div>
+        <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
+            OWASP Top 10 Coverage,<br><span class="gradient-text">Fully Automated</span>
+        </h1>
+        <p data-animate data-delay="2" class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            31 security checks across all OWASP A01–A10 categories, with a PDF compliance report and certificate — no manual penetration testing setup.
+        </p>
+    </div>
+</section>
+
+<!-- ANIMATED DEMO -->
+<section class="py-8 px-6 pb-20">
+    <div class="max-w-5xl mx-auto">
+        <div data-animate class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+                <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+                <span class="ml-3 text-slate-400 text-xs mono">sentinelflux run --product reportportal --domain vapt</span>
+                <div class="ml-auto flex items-center gap-3 text-xs">
+                    <span class="text-slate-500">Findings: <span id="finding-count" class="text-rose-400 font-bold">0</span></span>
+                    <span class="text-slate-500">Passed: <span id="pass-count" class="text-emerald-400 font-bold">0</span></span>
+                    <div class="flex items-center gap-1.5 text-rose-400 ml-2">
+                        <div class="w-1.5 h-1.5 rounded-full bg-rose-400 pulse-dot"></div>scanning
+                    </div>
+                </div>
+            </div>
+            <div class="p-5">
+                <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-4">OWASP Top 10 — Security Checks</div>
+                <div id="owasp-grid" class="grid grid-cols-2 md:grid-cols-5 gap-2.5"></div>
+                <!-- Findings panel -->
+                <div class="mt-5 bg-slate-800/60 rounded-xl p-4 border border-slate-700">
+                    <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">Live Findings</div>
+                    <div id="findings-list" class="space-y-2 min-h-[60px]"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-slate-50 py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Security coverage that ships with your product</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">No ZAP configuration wizards. No manual attack scripts. Run alongside your functional tests.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div data-animate data-delay="1" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-rose-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">31 OWASP Checks</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Full OWASP A01–A10 coverage: injection, broken auth, XSS, security misconfiguration, insecure design, and more.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>SQL & command injection</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>CSRF, XSS, clickjacking</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Security headers & TLS</li>
+                </ul>
+            </div>
+            <div data-animate data-delay="2" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-rose-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">PDF Compliance Report</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Every run generates a PDF with finding severity, evidence, CVSS score, and remediation guidance — ready to share with stakeholders.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>CVSS v3 severity scoring</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Evidence & reproduction steps</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Compliance certificate included</li>
+                </ul>
+            </div>
+            <div data-animate data-delay="3" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-rose-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Remediation Guidance</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">AI-generated fix recommendations for every finding — with code examples, configuration changes, and priority ordering.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Specific fix recommendations</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Critical → High → Medium ordering</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Re-test after fix verification</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 px-6">
+    <div data-animate class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Ship secure software by default</h2>
+        <p class="text-slate-500 mb-8">OWASP Top 10 on every CI run. No dedicated security team required.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-rose-700 transition-colors">Request Early Access</a>
+            <a href="/#modules" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-colors">← View All Modules</a>
+        </div>
+    </div>
+</section>
+
+<footer class="border-t border-slate-100 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-semibold text-slate-900">SentinelFlux</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+            <a href="/#modules" class="hover:text-slate-900 transition-colors">All Modules</a>
+            <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="hover:text-slate-900 transition-colors">Dashboard</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-slate-900 transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+
+    const owaspCategories = [
+        { id: 'A01', name: 'Broken Access Control', result: 'finding', msg: 'IDOR on /api/users/{id}', severity: 'High' },
+        { id: 'A02', name: 'Cryptographic Failures', result: 'pass' },
+        { id: 'A03', name: 'Injection', result: 'finding', msg: 'SQLi in search param', severity: 'Critical' },
+        { id: 'A04', name: 'Insecure Design', result: 'pass' },
+        { id: 'A05', name: 'Security Misconfiguration', result: 'finding', msg: 'Missing X-Frame-Options', severity: 'Medium' },
+        { id: 'A06', name: 'Vulnerable Components', result: 'pass' },
+        { id: 'A07', name: 'Auth & Identity Failures', result: 'pass' },
+        { id: 'A08', name: 'Software & Data Integrity', result: 'pass' },
+        { id: 'A09', name: 'Logging & Monitoring', result: 'finding', msg: 'No failed login logging', severity: 'Medium' },
+        { id: 'A10', name: 'Server-Side Request Forgery', result: 'pass' },
+    ];
+
+    const grid = document.getElementById('owasp-grid');
+    const findingsList = document.getElementById('findings-list');
+    let findingCount = 0, passCount = 0;
+
+    owaspCategories.forEach(cat => {
+        const card = document.createElement('div');
+        card.id = 'card-' + cat.id;
+        card.className = 'owasp-card rounded-xl p-3 border border-slate-700 bg-slate-800/40';
+        card.innerHTML = `
+            <div class="text-xs font-bold text-slate-400 mono mb-1">${cat.id}</div>
+            <div class="text-xs text-slate-500 leading-snug mb-2">${cat.name}</div>
+            <div id="status-${cat.id}" class="text-xs font-semibold text-slate-600">queued</div>
+        `;
+        grid.appendChild(card);
+    });
+
+    function severityColor(s) {
+        if (s === 'Critical') return 'bg-rose-900/60 text-rose-300';
+        if (s === 'High')     return 'bg-orange-900/60 text-orange-300';
+        if (s === 'Medium')   return 'bg-amber-900/60 text-amber-300';
+        return 'bg-slate-700 text-slate-400';
+    }
+
+    let idx = 0;
+    function scanNext() {
+        if (idx >= owaspCategories.length) {
+            setTimeout(resetScan, 3000);
+            return;
+        }
+        const cat = owaspCategories[idx];
+        const card = document.getElementById('card-' + cat.id);
+        const status = document.getElementById('status-' + cat.id);
+
+        card.classList.remove('pass', 'finding');
+        card.classList.add('scanning');
+        status.textContent = 'scanning...';
+        status.className = 'text-xs font-semibold text-amber-400';
+
+        setTimeout(() => {
+            card.classList.remove('scanning');
+            card.classList.add(cat.result);
+            if (cat.result === 'pass') {
+                status.textContent = 'PASS ✓';
+                status.className = 'text-xs font-semibold text-emerald-400';
+                passCount++;
+                document.getElementById('pass-count').textContent = passCount;
+            } else {
+                status.textContent = 'FINDING ✗';
+                status.className = 'text-xs font-semibold text-rose-400';
+                findingCount++;
+                document.getElementById('finding-count').textContent = findingCount;
+                // Add finding to list
+                const row = document.createElement('div');
+                row.className = 'flex items-start gap-3 text-xs p-2.5 bg-rose-950/40 border border-rose-900/40 rounded-lg';
+                row.innerHTML = `
+                    <span class="${severityColor(cat.severity)} px-1.5 py-0.5 rounded text-[10px] font-bold shrink-0 whitespace-nowrap">${cat.severity}</span>
+                    <span class="text-slate-400 font-medium">${cat.id}</span>
+                    <span class="text-rose-300">${cat.msg}</span>
+                `;
+                findingsList.appendChild(row);
+            }
+            idx++;
+            setTimeout(scanNext, 800);
+        }, 700);
+    }
+
+    function resetScan() {
+        idx = 0; findingCount = 0; passCount = 0;
+        document.getElementById('finding-count').textContent = '0';
+        document.getElementById('pass-count').textContent = '0';
+        findingsList.innerHTML = '';
+        owaspCategories.forEach(cat => {
+            const card = document.getElementById('card-' + cat.id);
+            const status = document.getElementById('status-' + cat.id);
+            card.className = 'owasp-card rounded-xl p-3 border border-slate-700 bg-slate-800/40';
+            status.textContent = 'queued';
+            status.className = 'text-xs font-semibold text-slate-600';
+        });
+        setTimeout(scanNext, 600);
+    }
+
+    setTimeout(scanNext, 800);
+</script>
+</body>
+</html>
