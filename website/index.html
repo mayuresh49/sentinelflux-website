@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SentinelFlux — AI-Powered Test Automation</title>
+    <title>SentinelFlux — AI-Powered Test Automation Framework</title>
     <meta name="description" content="SentinelFlux generates test suites from your knowledge base, heals broken locators automatically, and analyzes failures with AI — covering API, Web, Security, Performance, and more.">
     <meta property="og:title" content="SentinelFlux — AI-Powered Test Automation">
     <meta property="og:description" content="From knowledge base to executable test suite, automatically. 8 testing modules. 11 AI agents. One dashboard.">
@@ -14,17 +14,81 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Animated gradient text */
         .gradient-text {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #db2777 100%);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 40%, #db2777 70%, #4f46e5 100%);
+            background-size: 200% 200%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: gradientFlow 5s ease infinite;
         }
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Hero background */
         .hero-glow {
             background: radial-gradient(ellipse at 50% -10%, rgba(79, 70, 229, 0.12) 0%, transparent 65%);
         }
-        .module-card:hover { transform: translateY(-2px); }
-        .module-card { transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
+        .hero-grid {
+            background-image:
+                linear-gradient(rgba(99,102,241,0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,102,241,0.045) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+
+        /* Module cards */
+        .module-card { transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
+        .module-card:hover { transform: translateY(-3px); }
+
+        /* Dashboard float */
+        .dashboard-float { animation: floatY 7s ease-in-out infinite; }
+        @keyframes floatY {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-9px); }
+        }
+
+        /* Badge pulse ring */
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.25); }
+            50% { box-shadow: 0 0 0 7px rgba(99,102,241,0); }
+        }
+        .badge-pulse { animation: badgePulse 2.8s ease-in-out infinite; }
+
+        /* Scroll-reveal base states */
+        [data-animate] {
+            opacity: 0;
+            transform: translateY(22px);
+            transition: opacity 0.65s ease, transform 0.65s ease;
+        }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+
+        /* Stagger delays */
+        [data-delay="1"] { transition-delay: 0.06s; }
+        [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+        [data-delay="4"] { transition-delay: 0.24s; }
+        [data-delay="5"] { transition-delay: 0.30s; }
+        [data-delay="6"] { transition-delay: 0.36s; }
+        [data-delay="7"] { transition-delay: 0.42s; }
+        [data-delay="8"] { transition-delay: 0.48s; }
+
+        /* Pipeline dot/status smooth transitions */
+        .pipeline-dot    { transition: background-color 0.45s ease; }
+        .pipeline-status { transition: color 0.45s ease; }
+
+        /* CTA glow pulse */
+        @keyframes ctaGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(79,70,229,0); }
+            50% { box-shadow: 0 0 28px 6px rgba(79,70,229,0.18); }
+        }
+        .cta-glow { animation: ctaGlow 3.5s ease-in-out infinite; }
     </style>
 </head>
 <body class="bg-white text-slate-900 antialiased">
@@ -41,66 +105,67 @@
                 <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
             </a>
             <div class="flex items-center gap-5">
-                <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">
-                    Live Dashboard
+                <a href="https://github.com/mayuresh49/sentinelflux" target="_blank" rel="noopener" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub
                 </a>
-                <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-                    Request Access
+                <a href="https://github.com/mayuresh49/sentinelflux" target="_blank" rel="noopener" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                    Get Started
                 </a>
             </div>
         </div>
     </nav>
 
     <!-- HERO -->
-    <section class="hero-glow pt-36 pb-24 px-6">
+    <section class="hero-glow hero-grid pt-36 pb-24 px-6">
         <div class="max-w-4xl mx-auto text-center">
-            <div class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-8 border border-indigo-100">
+            <div data-animate="fade-in" class="badge-pulse inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-8 border border-indigo-100">
                 <svg class="w-3.5 h-3.5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                AI-First Test Automation · Early Access
+                AI-First Test Automation · Open Source · Apache 2.0
             </div>
-            <h1 class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-6 tracking-tight">
+            <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-6 tracking-tight">
                 Ship Faster With<br>
                 <span class="gradient-text">AI-Powered Testing</span>
             </h1>
-            <p class="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p data-animate data-delay="2" class="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
                 SentinelFlux generates test suites from your knowledge base, heals broken locators automatically, and analyzes every failure with AI — covering API, Web, Security, Performance, and more from a single dashboard.
             </p>
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16">
-                <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-indigo-700 transition-colors text-base">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
-                    Request Early Access
+            <div data-animate data-delay="3" class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16">
+                <a href="https://github.com/mayuresh49/sentinelflux" target="_blank" rel="noopener" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-indigo-700 transition-colors text-base">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                    View on GitHub
                 </a>
-                <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-900 text-slate-200 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-800 transition-colors text-base">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
-                    View Live Dashboard
-                </a>
+                <div class="w-full sm:w-auto flex items-center gap-2 bg-slate-900 text-slate-200 mono text-sm px-5 py-3.5 rounded-xl select-all cursor-text">
+                    <span class="text-indigo-400 select-none">$</span>
+                    <span>pip install sentinelflux</span>
+                </div>
             </div>
 
             <!-- Dashboard preview -->
-            <div class="relative mx-auto max-w-5xl">
-                <div class="bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-800">
+            <div data-animate data-delay="4" class="relative mx-auto max-w-5xl">
+                <div class="dashboard-float bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-800">
                     <!-- Window chrome -->
                     <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
                         <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
                         <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
                         <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
-                        <span class="ml-3 text-slate-400 text-xs mono">app.sentinelflux.in — SentinelFlux Dashboard</span>
+                        <span class="ml-3 text-slate-400 text-xs mono">localhost:8000 — SentinelFlux Dashboard</span>
                     </div>
-                    <!-- Dashboard content -->
+                    <!-- Stats -->
                     <div class="p-5 grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div class="bg-slate-800 rounded-xl p-4 border border-slate-700/60">
                             <div class="text-xs text-slate-400 mb-1">Test Runs</div>
-                            <div class="text-2xl font-bold text-white mono">247</div>
+                            <div class="text-2xl font-bold text-white mono" data-counter="247">247</div>
                             <div class="text-xs text-emerald-400 mt-1.5">↑ 94.3% pass rate</div>
                         </div>
                         <div class="bg-slate-800 rounded-xl p-4 border border-slate-700/60">
                             <div class="text-xs text-slate-400 mb-1">AI Agents</div>
-                            <div class="text-2xl font-bold text-white mono">11</div>
+                            <div class="text-2xl font-bold text-white mono" data-counter="11">11</div>
                             <div class="text-xs text-indigo-400 mt-1.5">Post-suite analysis</div>
                         </div>
                         <div class="bg-slate-800 rounded-xl p-4 border border-slate-700/60">
                             <div class="text-xs text-slate-400 mb-1">Test Functions</div>
-                            <div class="text-2xl font-bold text-white mono">169</div>
+                            <div class="text-2xl font-bold text-white mono" data-counter="169">169</div>
                             <div class="text-xs text-violet-400 mt-1.5">AI-generated</div>
                         </div>
                         <div class="bg-slate-800 rounded-xl p-4 border border-slate-700/60">
@@ -129,11 +194,27 @@
                         </div>
                         <div class="bg-slate-800 rounded-xl p-4 border border-slate-700/60">
                             <div class="text-xs text-slate-400 mb-3 font-medium">AI Pipeline</div>
-                            <div class="space-y-2 text-xs">
-                                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></div><span class="text-slate-300">DocGen</span><span class="ml-auto text-slate-500">done</span></div>
-                                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></div><span class="text-slate-300">DocReview</span><span class="ml-auto text-slate-500">done</span></div>
-                                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></div><span class="text-slate-300">ScriptGen</span><span class="ml-auto text-slate-500">done</span></div>
-                                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse shrink-0"></div><span class="text-slate-300">ScriptReview</span><span class="ml-auto text-indigo-400">running</span></div>
+                            <div id="pipeline-steps" class="space-y-2 text-xs">
+                                <div class="pipeline-step flex items-center gap-2">
+                                    <div class="pipeline-dot w-2 h-2 rounded-full bg-emerald-400 shrink-0"></div>
+                                    <span class="text-slate-300">DocGen</span>
+                                    <span class="pipeline-status ml-auto text-slate-500">done</span>
+                                </div>
+                                <div class="pipeline-step flex items-center gap-2">
+                                    <div class="pipeline-dot w-2 h-2 rounded-full bg-emerald-400 shrink-0"></div>
+                                    <span class="text-slate-300">DocReview</span>
+                                    <span class="pipeline-status ml-auto text-slate-500">done</span>
+                                </div>
+                                <div class="pipeline-step flex items-center gap-2">
+                                    <div class="pipeline-dot w-2 h-2 rounded-full bg-emerald-400 shrink-0"></div>
+                                    <span class="text-slate-300">ScriptGen</span>
+                                    <span class="pipeline-status ml-auto text-slate-500">done</span>
+                                </div>
+                                <div class="pipeline-step flex items-center gap-2">
+                                    <div class="pipeline-dot w-2 h-2 rounded-full bg-indigo-400 animate-pulse shrink-0"></div>
+                                    <span class="text-slate-300">ScriptReview</span>
+                                    <span class="pipeline-status ml-auto text-indigo-400">running</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -147,60 +228,60 @@
     <section class="bg-slate-50 py-24 px-6 mt-6">
         <div class="max-w-6xl mx-auto">
             <div class="text-center mb-14">
-                <h2 class="text-3xl font-bold text-slate-900 mb-4">Everything a QA team needs, in one framework</h2>
-                <p class="text-slate-500 max-w-xl mx-auto">Eight testing modules, one CLI, one dashboard. No juggling between tools.</p>
+                <h2 data-animate class="text-3xl font-bold text-slate-900 mb-4">Everything a QA team needs, in one framework</h2>
+                <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">Eight testing modules, one CLI, one dashboard. No juggling between tools.</p>
             </div>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-indigo-300 hover:shadow-md">
+                <div data-animate data-delay="1" class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-indigo-300 hover:shadow-md">
                     <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" /></svg>
                     </div>
                     <div class="font-semibold text-slate-900 text-sm mb-1">REST &amp; GraphQL</div>
                     <div class="text-xs text-slate-500 leading-relaxed">Schema validation, data-driven tests, full CRUD + curl log on failure</div>
                 </div>
-                <div class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-violet-300 hover:shadow-md">
+                <div data-animate data-delay="2" class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-violet-300 hover:shadow-md">
                     <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-5 h-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0H3" /></svg>
                     </div>
                     <div class="font-semibold text-slate-900 text-sm mb-1">Web UI Testing</div>
                     <div class="text-xs text-slate-500 leading-relaxed">Page Object Model with 3-tier self-healing locators via Playwright</div>
                 </div>
-                <div class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-rose-300 hover:shadow-md">
+                <div data-animate data-delay="3" class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-rose-300 hover:shadow-md">
                     <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
                     </div>
                     <div class="font-semibold text-slate-900 text-sm mb-1">Security (VAPT)</div>
                     <div class="text-xs text-slate-500 leading-relaxed">OWASP A01–A10, 31 checks, PDF report + compliance certificate</div>
                 </div>
-                <div class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-blue-300 hover:shadow-md">
+                <div data-animate data-delay="4" class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-blue-300 hover:shadow-md">
                     <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" /></svg>
                     </div>
                     <div class="font-semibold text-slate-900 text-sm mb-1">Performance</div>
                     <div class="text-xs text-slate-500 leading-relaxed">Load, stress, spike, soak — p50/p75/p95/p99 metrics with thresholds</div>
                 </div>
-                <div class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-sky-300 hover:shadow-md">
+                <div data-animate data-delay="5" class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-sky-300 hover:shadow-md">
                     <div class="w-10 h-10 bg-sky-100 rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-5 h-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     </div>
                     <div class="font-semibold text-slate-900 text-sm mb-1">Accessibility</div>
                     <div class="text-xs text-slate-500 leading-relaxed">WCAG 2.1 A/AA/AAA via axe-core, per-page violations by impact</div>
                 </div>
-                <div class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-emerald-300 hover:shadow-md">
+                <div data-animate data-delay="6" class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-emerald-300 hover:shadow-md">
                     <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                     </div>
                     <div class="font-semibold text-slate-900 text-sm mb-1">API Contract</div>
                     <div class="text-xs text-slate-500 leading-relaxed">Validates real responses against your OpenAPI spec — status + body schema</div>
                 </div>
-                <div class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-pink-300 hover:shadow-md">
+                <div data-animate data-delay="7" class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-pink-300 hover:shadow-md">
                     <div class="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-5 h-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                     </div>
                     <div class="font-semibold text-slate-900 text-sm mb-1">Visual Regression</div>
                     <div class="text-xs text-slate-500 leading-relaxed">Pixel-diff screenshots against baseline, configurable threshold alerts</div>
                 </div>
-                <div class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-amber-300 hover:shadow-md">
+                <div data-animate data-delay="8" class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-amber-300 hover:shadow-md">
                     <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 12.75c1.148 0 2.278.08 3.383.237 1.037.146 1.866.966 1.866 2.013 0 3.728-2.35 6.75-5.25 6.75S6.75 18.728 6.75 15c0-1.046.83-1.867 1.866-2.013A24.204 24.204 0 0112 12.75zm0 0c2.883 0 5.647.508 8.207 1.44a23.91 23.91 0 01-1.152 6.06M12 12.75c-2.883 0-5.647.508-8.208 1.44a23.916 23.916 0 001.152 6.061M12 12.75c2.18-.008 4.337-.327 6.383-.945 1.022-.306 2.098.126 2.39 1.096.218.727.04 1.5-.508 2.038l-2.004 2.003c-.82.82-2.046 1.03-3.082.567C14.23 17.177 13.146 17 12 17c-1.146 0-2.23.177-3.179.509-1.036.463-2.262.253-3.082-.567l-2.004-2.003c-.548-.538-.726-1.311-.508-2.038.292-.97 1.368-1.402 2.39-1.096A22.914 22.914 0 0112 12.75z" /></svg>
                     </div>
@@ -214,7 +295,7 @@
     <!-- FEATURE 1: AI PIPELINE -->
     <section class="py-24 px-6">
         <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-center">
-            <div>
+            <div data-animate="slide-left">
                 <div class="text-indigo-600 text-xs font-bold mb-3 uppercase tracking-widest">AI Test Pipeline</div>
                 <h2 class="text-3xl font-bold text-slate-900 mb-5 leading-snug">From Knowledge Base to<br>test suite, automatically</h2>
                 <p class="text-slate-500 leading-relaxed mb-7">Define your product's forms, fields, APIs, and business rules in YAML. SentinelFlux's pipeline reads your KB, generates structured test case docs, reviews them for quality, then writes executable pytest scripts — without hallucinating fields that don't exist.</p>
@@ -237,7 +318,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl">
+            <div data-animate="slide-right" class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl">
                 <div class="text-xs text-slate-500 mb-4 mono font-medium">run_pipeline.sh</div>
                 <pre class="text-sm leading-relaxed overflow-x-auto"><code><span class="text-slate-500"># 1. Drop your KB files</span>
 <span class="text-slate-400">ai/knowledge_base/myapp/</span>
@@ -261,7 +342,7 @@
     <!-- FEATURE 2: SELF-HEALING -->
     <section class="bg-slate-50 py-24 px-6">
         <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-center">
-            <div class="order-2 md:order-1 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+            <div data-animate="slide-left" class="order-2 md:order-1 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                 <div class="text-xs text-slate-500 mb-5 font-semibold uppercase tracking-wide">Locator Healing Strategy</div>
                 <div class="space-y-3">
                     <div class="flex items-center gap-3.5 p-3.5 bg-emerald-50 rounded-xl border border-emerald-200">
@@ -294,7 +375,7 @@
                     </div>
                 </div>
             </div>
-            <div class="order-1 md:order-2">
+            <div data-animate="slide-right" class="order-1 md:order-2">
                 <div class="text-violet-600 text-xs font-bold mb-3 uppercase tracking-widest">Self-Healing Locators</div>
                 <h2 class="text-3xl font-bold text-slate-900 mb-5 leading-snug">Tests that survive UI changes</h2>
                 <p class="text-slate-500 leading-relaxed mb-7">When a locator breaks, SentinelFlux tries ranked alternatives before failing. If all fail, the LocatorHealerAgent re-discovers the element from the live DOM and queues a patch for human approval — so you fix broken tests, not broken code.</p>
@@ -319,7 +400,7 @@
     <!-- FEATURE 3: AI AGENTS -->
     <section class="py-24 px-6">
         <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-14 items-center">
-            <div>
+            <div data-animate="slide-left">
                 <div class="text-rose-600 text-xs font-bold mb-3 uppercase tracking-widest">Post-Suite AI Analysis</div>
                 <h2 class="text-3xl font-bold text-slate-900 mb-5 leading-snug">11 AI agents analyzing<br>every test run</h2>
                 <p class="text-slate-500 leading-relaxed mb-7">After every run, SentinelFlux automatically classifies failures, detects flaky tests, guards against regressions, finds coverage gaps, and delivers strategic product insights — so you know exactly what needs attention before shipping.</p>
@@ -336,7 +417,7 @@
                     <div class="flex items-center gap-2.5 text-slate-700"><div class="w-2 h-2 rounded-full bg-orange-500 shrink-0"></div>CTOAgent</div>
                 </div>
             </div>
-            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200">
+            <div data-animate="slide-right" class="bg-slate-50 rounded-2xl p-6 border border-slate-200">
                 <div class="text-xs text-slate-500 mb-5 font-semibold uppercase tracking-wide">AI Analysis — After Run</div>
                 <div class="space-y-3">
                     <div class="bg-white rounded-xl p-4 border border-slate-200">
@@ -369,20 +450,20 @@
     <section class="bg-slate-50 py-24 px-6">
         <div class="max-w-4xl mx-auto">
             <div class="text-center mb-14">
-                <h2 class="text-3xl font-bold text-slate-900 mb-4">Up and running in three steps</h2>
-                <p class="text-slate-500">Zero to AI-powered test automation, fast.</p>
+                <h2 data-animate class="text-3xl font-bold text-slate-900 mb-4">Up and running in three steps</h2>
+                <p data-animate data-delay="1" class="text-slate-500">Zero to AI-powered test automation, fast.</p>
             </div>
             <div class="grid md:grid-cols-3 gap-8">
-                <div>
+                <div data-animate data-delay="1">
                     <div class="w-11 h-11 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-xl mb-5">1</div>
-                    <h3 class="font-semibold text-slate-900 mb-2">Request Access &amp; Set Up</h3>
-                    <p class="text-sm text-slate-500 mb-4 leading-relaxed">Request access and get your dashboard at app.sentinelflux.in. Scaffold your product directory in one command.</p>
+                    <h3 class="font-semibold text-slate-900 mb-2">Install &amp; Initialise</h3>
+                    <p class="text-sm text-slate-500 mb-4 leading-relaxed">Install the framework and scaffold your product directory structure in one command.</p>
                     <div class="bg-slate-900 rounded-xl px-4 py-3.5 mono text-sm text-slate-300 leading-relaxed">
-                        <span class="text-slate-500"># after access is granted</span><br>
+                        <span class="text-indigo-400">$ </span>pip install sentinelflux<br>
                         <span class="text-indigo-400">$ </span>sentinelflux init
                     </div>
                 </div>
-                <div>
+                <div data-animate data-delay="2">
                     <div class="w-11 h-11 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-xl mb-5">2</div>
                     <h3 class="font-semibold text-slate-900 mb-2">Build Your Knowledge Base</h3>
                     <p class="text-sm text-slate-500 mb-4 leading-relaxed">Describe your application — forms, fields, APIs, business rules — in YAML. This is the AI's source of truth.</p>
@@ -393,14 +474,14 @@
                         api_specs.yaml
                     </div>
                 </div>
-                <div>
+                <div data-animate data-delay="3">
                     <div class="w-11 h-11 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-xl mb-5">3</div>
                     <h3 class="font-semibold text-slate-900 mb-2">Generate, Run &amp; Analyze</h3>
                     <p class="text-sm text-slate-500 mb-4 leading-relaxed">AI writes your docs and scripts. Run from CLI or the dashboard. Agents analyze every failure automatically.</p>
                     <div class="bg-slate-900 rounded-xl px-4 py-3.5 mono text-sm text-slate-300 leading-relaxed">
                         <span class="text-indigo-400">$ </span>sentinelflux generate<br>
                         <span class="text-indigo-400">$ </span>sentinelflux run<br>
-                        <span class="text-slate-500"># open app.sentinelflux.in</span>
+                        <span class="text-slate-500"># open localhost:8000</span>
                     </div>
                 </div>
             </div>
@@ -409,18 +490,18 @@
 
     <!-- CTA -->
     <section class="py-24 px-6">
-        <div class="max-w-2xl mx-auto text-center">
-            <h2 class="text-3xl font-bold text-slate-900 mb-4">Ready to automate your testing with AI?</h2>
-            <p class="text-slate-500 mb-8 text-lg">SentinelFlux is currently in early access. Request access to get your own dashboard at app.sentinelflux.in.</p>
+        <div data-animate class="max-w-2xl mx-auto text-center">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">Open source. Free forever.</h2>
+            <p class="text-slate-500 mb-8 text-lg">Apache 2.0 licensed. Star it, fork it, contribute to it.</p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-indigo-700 transition-colors">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
-                    Request Early Access
+                <a href="https://github.com/mayuresh49/sentinelflux" target="_blank" rel="noopener" class="cta-glow w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-900 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-800 transition-colors">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                    Star on GitHub
                 </a>
-                <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-900 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-800 transition-colors">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
-                    View Live Dashboard
-                </a>
+                <div class="w-full sm:w-auto flex items-center gap-2 bg-indigo-50 border border-indigo-200 text-indigo-900 mono text-sm px-5 py-3.5 rounded-xl select-all cursor-text">
+                    <span class="text-indigo-400 select-none">$</span>
+                    <span>pip install sentinelflux</span>
+                </div>
             </div>
         </div>
     </section>
@@ -436,13 +517,92 @@
                 <span class="text-slate-400 text-sm mono">v0.1.0</span>
             </div>
             <div class="flex items-center gap-6 text-sm text-slate-500">
-                <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="hover:text-slate-900 transition-colors">Dashboard</a>
-                <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="hover:text-slate-900 transition-colors">Request Access</a>
-                <a href="mailto:mayuresh49@gmail.com" class="hover:text-slate-900 transition-colors">Contact</a>
+                <a href="https://github.com/mayuresh49/sentinelflux" target="_blank" rel="noopener" class="hover:text-slate-900 transition-colors">GitHub</a>
+                <a href="https://github.com/mayuresh49/sentinelflux/blob/main/LICENSE" target="_blank" rel="noopener" class="hover:text-slate-900 transition-colors">Apache 2.0</a>
+                <a href="https://github.com/mayuresh49/sentinelflux/issues" target="_blank" rel="noopener" class="hover:text-slate-900 transition-colors">Issues</a>
+                <a href="https://github.com/mayuresh49/sentinelflux/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener" class="hover:text-slate-900 transition-colors">Contributing</a>
             </div>
             <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
         </div>
     </footer>
+
+    <script>
+        // Scroll-reveal via IntersectionObserver
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        document.querySelectorAll('[data-animate]').forEach(el => revealObserver.observe(el));
+
+        // Counter animation for dashboard stats
+        function animateCounter(el, target, duration) {
+            const start = performance.now();
+            const update = (now) => {
+                const progress = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.round(eased * target);
+                if (progress < 1) requestAnimationFrame(update);
+                else el.textContent = target;
+            };
+            requestAnimationFrame(update);
+        }
+
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('[data-counter]').forEach((el, i) => {
+                        setTimeout(() => animateCounter(el, parseInt(el.dataset.counter), 1000), i * 120);
+                    });
+                    counterObserver.disconnect();
+                }
+            });
+        }, { threshold: 0.6 });
+
+        const firstCounter = document.querySelector('[data-counter]');
+        if (firstCounter) counterObserver.observe(firstCounter.closest('.grid') || firstCounter);
+
+        // Live pipeline cycling animation
+        (function cyclePipeline() {
+            const steps = document.querySelectorAll('#pipeline-steps .pipeline-step');
+            if (!steps.length) return;
+
+            const labels = ['DocGen', 'DocReview', 'ScriptGen', 'ScriptReview'];
+            let runningIdx = 3;
+
+            function render() {
+                steps.forEach((step, i) => {
+                    const dot = step.querySelector('.pipeline-dot');
+                    const status = step.querySelector('.pipeline-status');
+                    dot.classList.remove('animate-pulse', 'bg-emerald-400', 'bg-indigo-400', 'bg-slate-600');
+                    if (i < runningIdx) {
+                        dot.classList.add('bg-emerald-400');
+                        status.textContent = 'done';
+                        status.className = 'pipeline-status ml-auto text-slate-500';
+                    } else if (i === runningIdx) {
+                        dot.classList.add('bg-indigo-400', 'animate-pulse');
+                        status.textContent = 'running';
+                        status.className = 'pipeline-status ml-auto text-indigo-400';
+                    } else {
+                        dot.classList.add('bg-slate-600');
+                        status.textContent = 'queued';
+                        status.className = 'pipeline-status ml-auto text-slate-600';
+                    }
+                });
+            }
+
+            render();
+            setInterval(() => {
+                runningIdx = (runningIdx + 1) % (steps.length + 1);
+                if (runningIdx === steps.length) runningIdx = 0;
+                render();
+            }, 2000);
+        })();
+    </script>
 
 </body>
 </html>
