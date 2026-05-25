@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality Dashboard — SentinelFlux</title>
+    <meta name="description" content="Real-time quality metrics across all testing domains — pass rates, open bugs, coverage trends, and module health — in one dashboard.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 50%, #8b5cf6 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; } [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(109,40,217,0.08) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(139,92,246,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(139,92,246,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        @keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:0.3} }
+        .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+        .metric-val { transition: all 0.3s ease; }
+        .module-row { opacity:0; transform:translateX(-6px); transition:opacity 0.3s ease,transform 0.3s ease; }
+        .module-row.show { opacity:1; transform:none; }
+        @keyframes bar-grow { 0%{width:0} 100%{width:var(--w)} }
+        .bar-grow { animation: bar-grow 0.7s ease forwards; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex items-center gap-5">
+            <a href="/#platform" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">← Platform</a>
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Request Access</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero-glow hero-grid pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div data-animate="fade-in" class="inline-flex items-center gap-2 bg-violet-50 text-violet-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-violet-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+            Platform Feature — Quality Dashboard
+        </div>
+        <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
+            Your Product's Quality<br><span class="gradient-text">At a Glance</span>
+        </h1>
+        <p data-animate data-delay="2" class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            Pass rates, coverage, open bugs, and module health — all updating live after every test run. One dashboard for the whole team.
+        </p>
+    </div>
+</section>
+
+<!-- ANIMATED DEMO -->
+<section class="py-8 px-6 pb-20">
+    <div class="max-w-5xl mx-auto">
+        <div data-animate class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+                <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+                <span class="ml-3 text-slate-400 text-xs mono">app.sentinelflux.in — Quality Dashboard</span>
+                <div class="ml-auto flex items-center gap-1.5 text-violet-400 text-xs">
+                    <div class="w-1.5 h-1.5 rounded-full bg-violet-400 pulse-dot"></div>live
+                </div>
+            </div>
+            <div class="p-5 space-y-4">
+                <!-- Top metric cards -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                        <div class="text-xs text-slate-400 mb-1">Pass Rate</div>
+                        <div id="m-passrate" class="text-2xl font-bold text-white mono">—</div>
+                        <div id="m-passrate-sub" class="text-xs text-slate-500 mt-1">last 10 runs</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                        <div class="text-xs text-slate-400 mb-1">Test Functions</div>
+                        <div id="m-tests" class="text-2xl font-bold text-white mono">—</div>
+                        <div class="text-xs text-violet-400 mt-1">AI-generated</div>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                        <div class="text-xs text-slate-400 mb-1">Open Bugs</div>
+                        <div id="m-bugs" class="text-2xl font-bold text-white mono">—</div>
+                        <div id="m-bugs-sub" class="text-xs text-slate-500 mt-1"></div>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                        <div class="text-xs text-slate-400 mb-1">KB Coverage</div>
+                        <div id="m-cov" class="text-2xl font-bold text-white mono">—</div>
+                        <div class="text-xs text-amber-400 mt-1">of scenarios tested</div>
+                    </div>
+                </div>
+
+                <!-- Trend chart + module health -->
+                <div class="grid md:grid-cols-3 gap-3">
+                    <!-- Trend chart -->
+                    <div class="md:col-span-2 bg-slate-800 rounded-xl p-4 border border-slate-700">
+                        <div class="text-xs text-slate-400 font-semibold mb-3">Pass Rate Trend — Last 10 Runs</div>
+                        <svg id="trend-chart" width="100%" height="100" viewBox="0 0 460 100" preserveAspectRatio="none">
+                            <line x1="0" y1="25"  x2="460" y2="25"  stroke="#1e293b" stroke-width="1"/>
+                            <line x1="0" y1="50"  x2="460" y2="50"  stroke="#1e293b" stroke-width="1"/>
+                            <line x1="0" y1="75"  x2="460" y2="75"  stroke="#1e293b" stroke-width="1"/>
+                            <text x="2" y="22"  fill="#334155" font-size="8" font-family="monospace">100%</text>
+                            <text x="2" y="47"  fill="#334155" font-size="8" font-family="monospace">75%</text>
+                            <text x="2" y="72"  fill="#334155" font-size="8" font-family="monospace">50%</text>
+                            <path id="trend-line" fill="none" stroke="#8b5cf6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+                            <path id="trend-fill" fill="url(#trendGrad)" opacity="0.2"/>
+                            <defs>
+                                <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="#8b5cf6"/>
+                                    <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div id="run-dots" class="flex justify-between px-1 mt-1"></div>
+                    </div>
+                    <!-- Module health -->
+                    <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                        <div class="text-xs text-slate-400 font-semibold mb-3">Module Health</div>
+                        <div id="module-health" class="space-y-2.5"></div>
+                    </div>
+                </div>
+
+                <!-- Recent runs table -->
+                <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                    <div class="text-xs text-slate-400 font-semibold mb-3">Recent Runs</div>
+                    <div id="recent-runs" class="space-y-1.5"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-slate-50 py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">One source of truth for quality</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">Product, QA, and management all looking at the same live data.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div data-animate data-delay="1" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-violet-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Live Pass Rate Tracking</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-3">Pass rate trending across last N runs per product, with domain-level breakdowns. Spot regressions before they compound.</p>
+            </div>
+            <div data-animate data-delay="2" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-violet-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Module Health Grid</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-3">Every testing domain has a health indicator — green, amber, or red — based on last run pass rate, open bugs, and flaky count.</p>
+            </div>
+            <div data-animate data-delay="3" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-violet-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Run History & Artifacts</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-3">Full history of every run — duration, pass/fail counts, AI analysis results, screenshots, and generated reports — all linked and searchable.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 px-6">
+    <div data-animate class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Quality visible to the whole team</h2>
+        <p class="text-slate-500 mb-8">Not just in a test report buried in CI — on a dashboard everyone can open right now.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-violet-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-violet-700 transition-colors">View Live Dashboard</a>
+            <a href="/#platform" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-colors">← Back to Platform</a>
+        </div>
+    </div>
+</section>
+
+<footer class="border-t border-slate-100 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-semibold text-slate-900">SentinelFlux</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+            <a href="/#modules" class="hover:text-slate-900 transition-colors">Modules</a>
+            <a href="/#platform" class="hover:text-slate-900 transition-colors">Platform</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-slate-900 transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+
+    const runHistory = [
+        { id:'RUN-247', product:'orangehrm', domain:'web',  passed:28, total:28, dur:'2m 14s', date:'today 09:14' },
+        { id:'RUN-246', product:'restfulbooker', domain:'api', passed:13, total:13, dur:'0m 48s', date:'today 08:55' },
+        { id:'RUN-245', product:'reportportal', domain:'vapt', passed:28, total:31, dur:'4m 02s', date:'yesterday' },
+        { id:'RUN-244', product:'orangehrm', domain:'web', passed:26, total:28, dur:'2m 18s', date:'yesterday' },
+    ];
+
+    const trendData = [72, 78, 80, 85, 81, 88, 91, 89, 93, 95];
+
+    const modules = [
+        { name:'Web UI',    rate:100, color:'emerald' },
+        { name:'API',       rate:100, color:'emerald' },
+        { name:'Security',  rate:90,  color:'amber'   },
+        { name:'Performance', rate:100, color:'emerald' },
+        { name:'Accessibility', rate:75, color:'amber' },
+    ];
+
+    function animateNumber(id, target, suffix, color) {
+        const el = document.getElementById(id);
+        const start = 0;
+        const steps = 20;
+        let step = 0;
+        const t = setInterval(() => {
+            step++;
+            const v = Math.round(start + (target - start) * step / steps);
+            el.textContent = v + (suffix || '');
+            if (color) el.className = 'text-2xl font-bold mono ' + color;
+            if (step >= steps) { clearInterval(t); el.textContent = target + (suffix || ''); }
+        }, 40);
+    }
+
+    function buildChart() {
+        const W = 460, H = 100;
+        const pts = trendData.map((v, i) => {
+            const x = (i / (trendData.length - 1)) * W;
+            const y = H - (v / 100) * H * 0.85 - 8;
+            return [x, y];
+        });
+        const pathD = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+        const fillD = pathD + ' L' + W + ',' + H + ' L0,' + H + ' Z';
+        document.getElementById('trend-line').setAttribute('d', pathD);
+        document.getElementById('trend-fill').setAttribute('d', fillD);
+
+        const dots = document.getElementById('run-dots');
+        trendData.forEach((v, i) => {
+            const d = document.createElement('div');
+            d.className = 'text-[9px] mono text-center';
+            d.style.color = v >= 90 ? '#34d399' : v >= 80 ? '#fbbf24' : '#f87171';
+            d.textContent = v + '%';
+            dots.appendChild(d);
+        });
+    }
+
+    function buildModuleHealth() {
+        const el = document.getElementById('module-health');
+        modules.forEach((m, i) => {
+            setTimeout(() => {
+                const row = document.createElement('div');
+                row.className = 'module-row flex items-center gap-2.5 text-xs';
+                const dotColor = m.color === 'emerald' ? 'bg-emerald-400' : m.color === 'amber' ? 'bg-amber-400' : 'bg-rose-400';
+                const barColor = m.color === 'emerald' ? 'bg-emerald-500' : m.color === 'amber' ? 'bg-amber-500' : 'bg-rose-500';
+                row.innerHTML = `<div class="w-2 h-2 rounded-full ${dotColor} shrink-0"></div>
+                    <span class="text-slate-400 w-24 shrink-0">${m.name}</span>
+                    <div class="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                        <div class="bar-grow h-full ${barColor} rounded-full" style="--w:${m.rate}%;width:0"></div>
+                    </div>
+                    <span class="text-slate-500 w-8 text-right">${m.rate}%</span>`;
+                el.appendChild(row);
+                requestAnimationFrame(() => row.classList.add('show'));
+            }, i * 200);
+        });
+    }
+
+    function buildRecentRuns() {
+        const el = document.getElementById('recent-runs');
+        runHistory.forEach((r, i) => {
+            setTimeout(() => {
+                const row = document.createElement('div');
+                row.className = 'module-row flex items-center gap-3 text-xs py-1.5 border-b border-slate-700/50';
+                const passRate = Math.round(r.passed / r.total * 100);
+                const badgeClass = passRate === 100 ? 'bg-emerald-900/60 text-emerald-300' : passRate >= 80 ? 'bg-amber-900/60 text-amber-300' : 'bg-rose-900/60 text-rose-300';
+                row.innerHTML = `<span class="mono text-slate-500 shrink-0">${r.id}</span>
+                    <span class="text-slate-300">${r.product}</span>
+                    <span class="text-slate-600 px-1.5 py-0.5 rounded bg-slate-700/50">${r.domain}</span>
+                    <span class="${badgeClass} px-2 py-0.5 rounded font-semibold ml-auto shrink-0">${r.passed}/${r.total}</span>
+                    <span class="text-slate-600 mono shrink-0">${r.dur}</span>
+                    <span class="text-slate-600 shrink-0">${r.date}</span>`;
+                el.appendChild(row);
+                requestAnimationFrame(() => row.classList.add('show'));
+            }, i * 200);
+        });
+    }
+
+    setTimeout(() => {
+        animateNumber('m-passrate', 94, '%', 'text-2xl font-bold text-emerald-400 mono');
+        animateNumber('m-tests',    169, '',  'text-2xl font-bold text-white mono');
+        animateNumber('m-bugs',     3,   '',  'text-2xl font-bold text-rose-400 mono');
+        animateNumber('m-cov',      87,  '%', 'text-2xl font-bold text-amber-400 mono');
+        document.getElementById('m-passrate-sub').textContent = '↑ from 89%';
+        document.getElementById('m-passrate-sub').className = 'text-xs text-emerald-400 mt-1';
+        document.getElementById('m-bugs-sub').textContent = '1 critical, 2 medium';
+        buildChart();
+        buildModuleHealth();
+        buildRecentRuns();
+    }, 600);
+</script>
+</body>
+</html>

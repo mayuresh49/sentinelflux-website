@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human Approvals — SentinelFlux</title>
+    <meta name="description" content="AI suggests, you decide. Locator healing patches, test script changes, and baseline updates all need a human sign-off before they're committed.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #fb923c 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; } [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(194,65,12,0.07) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(234,88,12,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(234,88,12,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        @keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:0.3} }
+        .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+        .approval-card { transition: all 0.4s ease; }
+        .approval-card.approved { border-color: rgba(16,185,129,0.5); background: rgba(16,185,129,0.04); }
+        .approval-card.rejected { border-color: rgba(244,63,94,0.4);  background: rgba(244,63,94,0.04);  opacity:0.6; }
+        .approval-card.entering { opacity:0; transform:translateY(8px); }
+        .approval-card.enter-done { opacity:1; transform:none; transition: opacity 0.4s ease, transform 0.4s ease; }
+        .diff-old { background: rgba(239,68,68,0.12); color:#fca5a5; }
+        .diff-new  { background: rgba(52,211,153,0.12); color:#6ee7b7; }
+        .btn-approve { transition: all 0.2s ease; }
+        .btn-approve:hover { background: rgba(16,185,129,0.2); border-color: rgba(16,185,129,0.5); }
+        .btn-reject  { transition: all 0.2s ease; }
+        .btn-reject:hover  { background: rgba(244,63,94,0.15);  border-color: rgba(244,63,94,0.4); }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex items-center gap-5">
+            <a href="/#platform" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">← Platform</a>
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Request Access</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero-glow hero-grid pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div data-animate="fade-in" class="inline-flex items-center gap-2 bg-orange-50 text-orange-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-orange-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+            Platform Feature — Human Approvals
+        </div>
+        <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
+            AI Suggests.<br><span class="gradient-text">You Decide.</span>
+        </h1>
+        <p data-animate data-delay="2" class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            Locator healing patches, script changes, and baseline updates are never committed automatically. Every AI suggestion lands in your approval queue first.
+        </p>
+    </div>
+</section>
+
+<!-- ANIMATED DEMO -->
+<section class="py-8 px-6 pb-20">
+    <div class="max-w-5xl mx-auto">
+        <div data-animate class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+                <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+                <span class="ml-3 text-slate-400 text-xs mono">app.sentinelflux.in — Approval Queue</span>
+                <div class="ml-auto flex items-center gap-3 text-xs">
+                    <span class="text-slate-500">Pending: <span id="pending-count" class="text-orange-400 font-bold">0</span></span>
+                    <span class="text-slate-500">Approved: <span id="approved-count" class="text-emerald-400 font-bold">0</span></span>
+                    <span class="text-slate-500">Rejected: <span id="rejected-count" class="text-rose-400 font-bold">0</span></span>
+                </div>
+            </div>
+            <div class="flex" style="min-height:420px">
+                <!-- Queue -->
+                <div class="flex-1 p-4 border-r border-slate-800 space-y-3">
+                    <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2">Pending Approvals</div>
+                    <div id="queue-list" class="space-y-3"></div>
+                </div>
+                <!-- Activity -->
+                <div class="w-64 shrink-0 p-4">
+                    <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">Activity</div>
+                    <div id="activity-list" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-slate-50 py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Your test suite, under your control</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">AI does the detection and suggestion. Humans make the call.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div data-animate data-delay="1" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-orange-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Locator Healing Patches</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-3">When LocatorHealer finds a better selector, it shows you the old vs. new locator with a confidence score. You approve and it's committed — or reject and it's discarded.</p>
+                <div class="text-xs text-orange-600 font-medium">Triggered by: FlakyDetector + LocatorHealer</div>
+            </div>
+            <div data-animate data-delay="2" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-orange-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Script Change Reviews</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-3">When ScriptReview or ResultAnalyzer detects a script-level fix, the proposed diff is shown inline. Approve to update the file, reject to keep the current version.</p>
+                <div class="text-xs text-indigo-600 font-medium">Triggered by: ScriptReview + ResultAnalyzer</div>
+            </div>
+            <div data-animate data-delay="3" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-orange-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 11-.75 0z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Visual Baseline Updates</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-3">When a visual diff exceeds threshold and the change is intentional, you approve the new screenshot as the baseline. Rejected diffs block the build.</p>
+                <div class="text-xs text-pink-600 font-medium">Triggered by: Visual Regression module</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 px-6">
+    <div data-animate class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Automation with a human in the loop</h2>
+        <p class="text-slate-500 mb-8">AI does the work. You stay in control of what gets committed to your test suite.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-orange-700 transition-colors">Request Early Access</a>
+            <a href="/#platform" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-colors">← Back to Platform</a>
+        </div>
+    </div>
+</section>
+
+<footer class="border-t border-slate-100 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-semibold text-slate-900">SentinelFlux</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+            <a href="/#modules" class="hover:text-slate-900 transition-colors">Modules</a>
+            <a href="/#platform" class="hover:text-slate-900 transition-colors">Platform</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-slate-900 transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+
+    const approvalItems = [
+        {
+            id: 'AQ-018', type: 'Locator Heal', agent: 'FlakyDetector + LocatorHealer',
+            summary: 'Heal search-input locator on EmployeeListPage',
+            detail: 'The locator [data-testid="search-input"] failed 3/5 recent runs. LocatorHealer discovered a stable alternative.',
+            diff: [
+                { old: '[data-testid="search-input"]', new: '[name="searchInput"]' },
+            ],
+            confidence: '91%', decision: 'approve'
+        },
+        {
+            id: 'AQ-019', type: 'Script Fix', agent: 'ResultAnalyzer',
+            summary: 'Fix wait timeout in test_employee_search_partial',
+            detail: 'Race condition between page navigation and search input rendering. Proposed fix adds explicit wait.',
+            diff: [
+                { old: 'page.click(search_btn)', new: 'page.wait_for_selector(search_input)\npage.click(search_btn)' },
+            ],
+            confidence: '88%', decision: 'approve'
+        },
+        {
+            id: 'AQ-020', type: 'Visual Baseline', agent: 'Visual Regression',
+            summary: 'Update Dashboard baseline — nav button colour changed',
+            detail: 'CTA button colour updated from indigo to brand orange in v2.4.0. Diff: 2.34% (threshold: 1%). Intentional design change.',
+            diff: [{ old: 'Baseline: #4f46e5 (indigo)', new: 'Current: #ea580c (brand orange)' }],
+            confidence: '—', decision: 'reject'
+        },
+    ];
+
+    let pending = 0, approved = 0, rejected = 0;
+
+    function typeBadge(type) {
+        const m = { 'Locator Heal': 'bg-violet-900/60 text-violet-300', 'Script Fix': 'bg-blue-900/60 text-blue-300', 'Visual Baseline': 'bg-pink-900/60 text-pink-300' };
+        return m[type] || 'bg-slate-700 text-slate-300';
+    }
+
+    function buildCard(item) {
+        const card = document.createElement('div');
+        card.id = 'card-' + item.id;
+        card.className = 'approval-card entering bg-slate-800 border border-slate-700 rounded-xl p-4';
+        const diffHtml = item.diff.map(d => `
+            <div class="diff-old rounded px-2 py-1 mono text-xs mb-1">- ${d.old}</div>
+            <div class="diff-new rounded px-2 py-1 mono text-xs">+ ${d.new}</div>
+        `).join('');
+        card.innerHTML = `
+            <div class="flex items-start gap-2 mb-2.5">
+                <span class="mono text-slate-500 text-xs">${item.id}</span>
+                <span class="${typeBadge(item.type)} px-2 py-0.5 rounded text-[10px] font-bold">${item.type}</span>
+                <span class="ml-auto text-xs text-slate-500">by ${item.agent}</span>
+            </div>
+            <div class="text-sm font-semibold text-slate-200 mb-1">${item.summary}</div>
+            <p class="text-xs text-slate-500 leading-relaxed mb-3">${item.detail}</p>
+            <div class="bg-slate-900 rounded-lg p-3 mb-3 space-y-1">${diffHtml}</div>
+            ${item.confidence !== '—' ? `<div class="text-xs text-slate-500 mb-3">AI Confidence: <span class="text-emerald-400 font-semibold">${item.confidence}</span></div>` : ''}
+            <div class="flex gap-2">
+                <button class="btn-approve flex-1 text-xs py-2 px-3 rounded-lg border border-slate-600 text-emerald-400 font-semibold" onclick="decide('${item.id}','approve')">✓ Approve & Commit</button>
+                <button class="btn-reject flex-1 text-xs py-2 px-3 rounded-lg border border-slate-600 text-rose-400 font-semibold" onclick="decide('${item.id}','reject')">✗ Reject</button>
+            </div>
+        `;
+        document.getElementById('queue-list').appendChild(card);
+        requestAnimationFrame(() => { card.classList.remove('entering'); card.classList.add('enter-done'); });
+        pending++;
+        document.getElementById('pending-count').textContent = pending;
+    }
+
+    function decide(id, action) {
+        const card = document.getElementById('card-' + id);
+        if (!card) return;
+        card.classList.add(action === 'approve' ? 'approved' : 'rejected');
+        const btns = card.querySelectorAll('button');
+        btns.forEach(b => b.disabled = true);
+        btns.forEach(b => b.style.opacity = '0.5');
+        pending = Math.max(0, pending - 1);
+        document.getElementById('pending-count').textContent = pending;
+        if (action === 'approve') { approved++; document.getElementById('approved-count').textContent = approved; }
+        else { rejected++; document.getElementById('rejected-count').textContent = rejected; }
+
+        // Add activity
+        const item = approvalItems.find(a => a.id === id);
+        const act = document.createElement('div');
+        act.className = 'text-xs p-2.5 rounded-lg border ' + (action === 'approve' ? 'bg-emerald-950/40 border-emerald-900 text-emerald-300' : 'bg-rose-950/40 border-rose-900 text-rose-300');
+        act.innerHTML = `<div class="font-semibold">${action === 'approve' ? '✓ Approved' : '✗ Rejected'}</div><div class="text-slate-500 mt-0.5">${id} · ${item?.type}</div>`;
+        document.getElementById('activity-list').prepend(act);
+    }
+
+    // Auto-run the animation
+    function runDemo() {
+        // Reset
+        pending = 0; approved = 0; rejected = 0;
+        document.getElementById('pending-count').textContent = '0';
+        document.getElementById('approved-count').textContent = '0';
+        document.getElementById('rejected-count').textContent = '0';
+        document.getElementById('queue-list').innerHTML = '';
+        document.getElementById('activity-list').innerHTML = '';
+
+        approvalItems.forEach((item, i) => {
+            setTimeout(() => buildCard(item), i * 1200);
+        });
+
+        // Auto-decide after cards appear
+        setTimeout(() => decide('AQ-018', 'approve'), 4500);
+        setTimeout(() => decide('AQ-019', 'approve'), 6000);
+        setTimeout(() => decide('AQ-020', 'reject'),  7500);
+        setTimeout(runDemo, 12000);
+    }
+
+    setTimeout(runDemo, 600);
+</script>
+</body>
+</html>
