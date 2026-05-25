@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Runs & Failure Analysis — SentinelFlux</title>
+    <meta name="description" content="Live test execution with AI-powered failure classification — Product Bug, Flaky, Script Issue, or Environment — with full context per failure.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #4338ca 0%, #6366f1 50%, #818cf8 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; } [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(67,56,202,0.08) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        @keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:0.3} }
+        .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+        .run-row { opacity:0; transform:translateX(-5px); transition:opacity 0.2s ease,transform 0.2s ease; }
+        .run-row.show { opacity:1; transform:none; }
+        .analysis-card { opacity:0; transform:translateY(5px); transition:opacity 0.4s ease,transform 0.4s ease; }
+        .analysis-card.show { opacity:1; transform:none; }
+        @keyframes progress-anim { 0%{width:0} 100%{width:var(--p)} }
+        .progress-anim { animation: progress-anim 0.6s ease forwards; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex items-center gap-5">
+            <a href="/#platform" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">← Platform</a>
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Request Access</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero-glow hero-grid pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div data-animate="fade-in" class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-indigo-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>
+            Platform Feature — Test Runs
+        </div>
+        <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
+            Every Failure Classified<br><span class="gradient-text">Before You Even Look</span>
+        </h1>
+        <p data-animate data-delay="2" class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            Failures don't just show up red — they arrive pre-classified as Product Bug, Script Issue, Flaky, or Environment problem, with evidence and a suggested next action.
+        </p>
+    </div>
+</section>
+
+<!-- ANIMATED DEMO -->
+<section class="py-8 px-6 pb-20">
+    <div class="max-w-5xl mx-auto">
+        <div data-animate class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+                <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+                <span class="ml-3 text-slate-400 text-xs mono">sentinelflux run --product orangehrm --domain web</span>
+                <div class="ml-auto flex items-center gap-4 text-xs">
+                    <span class="text-slate-500">Pass: <span id="pass-n" class="text-emerald-400 font-bold">0</span></span>
+                    <span class="text-slate-500">Fail: <span id="fail-n" class="text-rose-400 font-bold">0</span></span>
+                    <div class="flex items-center gap-1.5 text-indigo-400">
+                        <div class="w-1.5 h-1.5 rounded-full bg-indigo-400 pulse-dot"></div>running
+                    </div>
+                </div>
+            </div>
+            <div class="flex" style="min-height:380px">
+                <!-- Test execution list -->
+                <div class="flex-1 border-r border-slate-800 overflow-hidden">
+                    <div class="px-4 pt-3 pb-2">
+                        <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2">Test Execution</div>
+                        <!-- Progress bar -->
+                        <div class="h-1 bg-slate-800 rounded-full overflow-hidden mb-3">
+                            <div id="run-progress" class="h-full bg-indigo-500 rounded-full transition-all duration-500" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div id="run-list" class="px-4 space-y-1 pb-4" style="max-height:330px;overflow-y:auto"></div>
+                </div>
+                <!-- AI Analysis panel -->
+                <div class="w-72 shrink-0 p-4">
+                    <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">AI Failure Analysis</div>
+                    <div id="analysis-list" class="space-y-2.5"></div>
+                    <div id="run-summary" class="hidden mt-4 bg-slate-800 rounded-xl p-3.5 border border-slate-700">
+                        <div class="text-xs text-slate-400 font-semibold mb-2.5">Run Summary</div>
+                        <div class="space-y-1.5 text-xs">
+                            <div class="flex justify-between"><span class="text-slate-500">Total</span><span id="sum-total" class="text-slate-300 font-medium mono"></span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">Pass Rate</span><span id="sum-rate" class="font-bold mono"></span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">Product Bugs</span><span class="text-rose-400 font-medium mono">1</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">Flaky</span><span class="text-amber-400 font-medium mono">1</span></div>
+                            <div class="flex justify-between"><span class="text-slate-500">Duration</span><span class="text-slate-400 mono">1m 42s</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-slate-50 py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Know exactly what broke and why</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">AI analysis runs automatically after every suite — no manual triage required.</p>
+        </div>
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div data-animate data-delay="1" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-rose-200 hover:shadow-md transition-all">
+                <div class="text-xs font-bold text-rose-600 uppercase tracking-widest mb-2">Product Bug</div>
+                <p class="text-sm text-slate-500 leading-relaxed">A real defect in the application — assertion failed on a feature that should work. Routed to the bug tracker automatically.</p>
+            </div>
+            <div data-animate data-delay="2" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-amber-200 hover:shadow-md transition-all">
+                <div class="text-xs font-bold text-amber-600 uppercase tracking-widest mb-2">Flaky — Script</div>
+                <p class="text-sm text-slate-500 leading-relaxed">Timing or locator instability in the test script. FlakyDetector flags it and queues a healing suggestion.</p>
+            </div>
+            <div data-animate data-delay="3" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-blue-200 hover:shadow-md transition-all">
+                <div class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Environment</div>
+                <p class="text-sm text-slate-500 leading-relaxed">Network timeout, service not running, or infra issue. Distinguished from product bugs so devs aren't paged unnecessarily.</p>
+            </div>
+            <div data-animate data-delay="4" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-violet-200 hover:shadow-md transition-all">
+                <div class="text-xs font-bold text-violet-600 uppercase tracking-widest mb-2">Script Issue</div>
+                <p class="text-sm text-slate-500 leading-relaxed">Wrong assertion, missing setup, or stale test data. AI identifies the script fix needed and queues it for review.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 px-6">
+    <div data-animate class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Stop triaging failures manually</h2>
+        <p class="text-slate-500 mb-8">Every run analyzed automatically. You open the dashboard to decisions, not raw failure logs.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-indigo-700 transition-colors">Request Early Access</a>
+            <a href="/#platform" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-colors">← Back to Platform</a>
+        </div>
+    </div>
+</section>
+
+<footer class="border-t border-slate-100 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-semibold text-slate-900">SentinelFlux</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+            <a href="/#modules" class="hover:text-slate-900 transition-colors">Modules</a>
+            <a href="/#platform" class="hover:text-slate-900 transition-colors">Platform</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-slate-900 transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+
+    const tests = [
+        { name:'test_login_valid_credentials',    result:'pass' },
+        { name:'test_login_invalid_password',     result:'fail', label:'Product Bug',    labelClass:'bg-rose-900/70 text-rose-300',   analysis:'Error message element not visible after invalid login. Expected: .error-msg visible. Regression introduced in v2.3.1.', suggestion:'File as BUG-043. Dev fix needed on auth error handler.' },
+        { name:'test_login_empty_fields',         result:'pass' },
+        { name:'test_employee_search_exact',      result:'pass' },
+        { name:'test_employee_search_partial',    result:'fail', label:'Flaky — Script', labelClass:'bg-amber-900/70 text-amber-300',  analysis:'Failed 3/5 recent runs. Search input locator [data-testid="search-input"] intermittently not found. Timing issue.', suggestion:'LocatorHealer queued. Healing patch ready for approval.' },
+        { name:'test_add_employee_valid',         result:'pass' },
+        { name:'test_add_employee_duplicate',     result:'pass' },
+        { name:'test_leave_request_valid',        result:'pass' },
+        { name:'test_leave_request_past_date',    result:'pass' },
+        { name:'test_performance_review_submit',  result:'pass' },
+    ];
+
+    let passCount = 0, failCount = 0, runIdx = 0;
+
+    function addAnalysisCard(t) {
+        const list = document.getElementById('analysis-list');
+        const card = document.createElement('div');
+        card.className = 'analysis-card bg-slate-800 rounded-xl p-3.5 border border-slate-700';
+        card.innerHTML = `
+            <div class="flex items-start gap-2 mb-2">
+                <span class="${t.labelClass} px-2 py-0.5 rounded text-[10px] font-bold shrink-0">${t.label}</span>
+            </div>
+            <div class="text-xs mono text-slate-400 mb-1.5 leading-snug">${t.name}</div>
+            <p class="text-xs text-slate-500 leading-relaxed mb-2">${t.analysis}</p>
+            <div class="text-xs text-indigo-400 font-medium">${t.suggestion}</div>
+        `;
+        list.appendChild(card);
+        requestAnimationFrame(() => card.classList.add('show'));
+    }
+
+    function runNext() {
+        if (runIdx >= tests.length) {
+            const total = tests.length;
+            const rate = Math.round(passCount / total * 100);
+            document.getElementById('run-summary').classList.remove('hidden');
+            document.getElementById('sum-total').textContent = passCount + '/' + total;
+            document.getElementById('sum-rate').textContent = rate + '%';
+            document.getElementById('sum-rate').className = rate >= 80 ? 'text-emerald-400 font-bold mono' : 'text-amber-400 font-bold mono';
+            setTimeout(reset, 5000);
+            return;
+        }
+        const t = tests[runIdx];
+        const list = document.getElementById('run-list');
+
+        // Add running row
+        const row = document.createElement('div');
+        row.className = 'run-row flex items-center gap-2.5 text-xs py-1.5';
+        row.id = 'row-' + runIdx;
+        row.innerHTML = `<div class="w-2 h-2 rounded-full bg-indigo-400 pulse-dot shrink-0"></div><span class="mono text-slate-400 truncate flex-1">${t.name}</span><span class="text-slate-600">running</span>`;
+        list.appendChild(row);
+        requestAnimationFrame(() => row.classList.add('show'));
+
+        setTimeout(() => {
+            const dot = row.querySelector('.rounded-full');
+            const status = row.querySelector('span:last-child');
+            dot.classList.remove('pulse-dot', 'bg-indigo-400');
+            if (t.result === 'pass') {
+                dot.classList.add('bg-emerald-400');
+                status.textContent = '✓ passed';
+                status.className = 'text-emerald-400 font-semibold';
+                passCount++;
+                document.getElementById('pass-n').textContent = passCount;
+            } else {
+                dot.classList.add('bg-rose-400');
+                status.textContent = '✗ failed';
+                status.className = 'text-rose-400 font-semibold';
+                failCount++;
+                document.getElementById('fail-n').textContent = failCount;
+                if (t.analysis) setTimeout(() => addAnalysisCard(t), 400);
+            }
+            document.getElementById('run-progress').style.width = ((runIdx + 1) / tests.length * 100) + '%';
+            runIdx++;
+            setTimeout(runNext, t.result === 'fail' ? 1200 : 500);
+        }, 700);
+    }
+
+    function reset() {
+        passCount = 0; failCount = 0; runIdx = 0;
+        document.getElementById('pass-n').textContent = '0';
+        document.getElementById('fail-n').textContent = '0';
+        document.getElementById('run-progress').style.width = '0%';
+        document.getElementById('run-list').innerHTML = '';
+        document.getElementById('analysis-list').innerHTML = '';
+        document.getElementById('run-summary').classList.add('hidden');
+        setTimeout(runNext, 600);
+    }
+
+    setTimeout(runNext, 600);
+</script>
+</body>
+</html>

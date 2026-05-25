@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Activities — SentinelFlux</title>
+    <meta name="description" content="10 AI agents working autonomously after every test run — classifying failures, detecting flakiness, healing locators, and finding coverage gaps.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #a855f7 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; } [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(91,33,182,0.08) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        @keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:0.3} }
+        .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+        .agent-row { transition: all 0.4s ease; border-left: 3px solid transparent; }
+        .agent-row.running { border-left-color: #8b5cf6; background: rgba(139,92,246,0.06); }
+        .agent-row.done    { border-left-color: #10b981; background: rgba(16,185,129,0.04); }
+        .agent-row.waiting { opacity: 0.45; }
+        .log-line { opacity:0; transform:translateX(-4px); transition:opacity 0.2s ease,transform 0.2s ease; }
+        .log-line.show { opacity:1; transform:none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinning { animation: spin 1s linear infinite; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex items-center gap-5">
+            <a href="/#platform" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">← Platform</a>
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Request Access</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero-glow hero-grid pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div data-animate="fade-in" class="inline-flex items-center gap-2 bg-purple-50 text-purple-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-purple-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+            Platform Feature — Agent Activities
+        </div>
+        <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
+            10 AI Agents Working<br><span class="gradient-text">While You Ship</span>
+        </h1>
+        <p data-animate data-delay="2" class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            After every run, a coordinated pipeline of specialized AI agents analyzes results, heals broken tests, guards against regressions, and surfaces gaps — automatically.
+        </p>
+    </div>
+</section>
+
+<!-- ANIMATED DEMO -->
+<section class="py-8 px-6 pb-20">
+    <div class="max-w-5xl mx-auto">
+        <div data-animate class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+                <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+                <span class="ml-3 text-slate-400 text-xs mono">Post-Run AI Pipeline — RUN-247</span>
+                <div class="ml-auto flex items-center gap-1.5 text-purple-400 text-xs">
+                    <div class="w-1.5 h-1.5 rounded-full bg-purple-400 pulse-dot"></div>agents active
+                </div>
+            </div>
+            <div class="flex" style="min-height:400px">
+                <!-- Agent list -->
+                <div class="w-64 shrink-0 border-r border-slate-800 py-4">
+                    <div class="px-4 text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">Agent Pipeline</div>
+                    <div id="agent-list" class="space-y-0.5 px-3"></div>
+                </div>
+                <!-- Activity log -->
+                <div class="flex-1 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div id="active-agent-label" class="text-xs font-semibold text-slate-400 uppercase tracking-wide"></div>
+                        <div id="active-agent-timer" class="text-xs mono text-slate-600"></div>
+                    </div>
+                    <div id="log-panel" class="bg-slate-800/60 rounded-xl p-4 space-y-1 min-h-[200px] font-mono text-xs mb-4" style="max-height:220px;overflow-y:auto"></div>
+                    <!-- Output card -->
+                    <div id="output-card" class="hidden bg-slate-800 rounded-xl p-4 border border-slate-700">
+                        <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2">Agent Output</div>
+                        <div id="output-content" class="text-xs text-slate-300 leading-relaxed"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-slate-50 py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Every agent has one job it does perfectly</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">Specialized agents, not one big LLM trying to do everything.</p>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+            <div data-animate data-delay="1" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-purple-200 hover:shadow-md transition-all flex gap-4">
+                <div class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5"><div class="w-2 h-2 rounded-full bg-indigo-500"></div></div>
+                <div><h3 class="font-semibold text-slate-900 text-sm mb-1">ResultAnalyzer</h3><p class="text-xs text-slate-500 leading-relaxed">Classifies each failure as Product Bug, Script Issue, Flaky, or Environment. Creates bug tracker entries for Product Bugs automatically.</p></div>
+            </div>
+            <div data-animate data-delay="2" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-purple-200 hover:shadow-md transition-all flex gap-4">
+                <div class="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5"><div class="w-2 h-2 rounded-full bg-violet-500"></div></div>
+                <div><h3 class="font-semibold text-slate-900 text-sm mb-1">FlakyDetector</h3><p class="text-xs text-slate-500 leading-relaxed">Analyses last 5 run histories per test. If a test fails intermittently without code changes, it's flagged as flaky with a stability score.</p></div>
+            </div>
+            <div data-animate data-delay="3" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-purple-200 hover:shadow-md transition-all flex gap-4">
+                <div class="w-8 h-8 bg-rose-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5"><div class="w-2 h-2 rounded-full bg-rose-500"></div></div>
+                <div><h3 class="font-semibold text-slate-900 text-sm mb-1">RegressionGuard</h3><p class="text-xs text-slate-500 leading-relaxed">Compares this run's pass/fail pattern to the previous run. Alerts when tests that previously passed now fail — even subtly.</p></div>
+            </div>
+            <div data-animate data-delay="4" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-purple-200 hover:shadow-md transition-all flex gap-4">
+                <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5"><div class="w-2 h-2 rounded-full bg-amber-500"></div></div>
+                <div><h3 class="font-semibold text-slate-900 text-sm mb-1">CoverageGap</h3><p class="text-xs text-slate-500 leading-relaxed">Cross-references your KB against existing test IDs. Lists KB scenarios with no corresponding test case and offers to generate them.</p></div>
+            </div>
+            <div data-animate data-delay="5" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-purple-200 hover:shadow-md transition-all flex gap-4">
+                <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5"><div class="w-2 h-2 rounded-full bg-emerald-500"></div></div>
+                <div><h3 class="font-semibold text-slate-900 text-sm mb-1">LocatorHealer</h3><p class="text-xs text-slate-500 leading-relaxed">When a locator consistently fails, re-discovers the element from the live DOM and queues a healing patch for human approval.</p></div>
+            </div>
+            <div data-animate data-delay="6" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-purple-200 hover:shadow-md transition-all flex gap-4">
+                <div class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5"><div class="w-2 h-2 rounded-full bg-teal-500"></div></div>
+                <div><h3 class="font-semibold text-slate-900 text-sm mb-1">AppExplorer + DocGen + DocReview + ScriptGen + ScriptReview</h3><p class="text-xs text-slate-500 leading-relaxed">The generation pipeline: crawl live DOM, write test docs, review them, generate scripts, review scripts. Five agents, zero hallucinations.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 px-6">
+    <div data-animate class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Your test suite improves itself after every run</h2>
+        <p class="text-slate-500 mb-8">Agents run post-suite so you wake up to analysis, not raw logs.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-purple-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-purple-700 transition-colors">Request Early Access</a>
+            <a href="/#platform" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-colors">← Back to Platform</a>
+        </div>
+    </div>
+</section>
+
+<footer class="border-t border-slate-100 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-semibold text-slate-900">SentinelFlux</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+            <a href="/#modules" class="hover:text-slate-900 transition-colors">Modules</a>
+            <a href="/#platform" class="hover:text-slate-900 transition-colors">Platform</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-slate-900 transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+
+    const agents = [
+        {
+            name: 'ResultAnalyzer', color: 'bg-indigo-500', dur: '12s',
+            logs: [
+                'Loaded run RUN-247 — 28 test results',
+                'Analyzing 2 failures...',
+                'test_login_invalid_credentials → assertion failure on .error-msg',
+                'Context: element existed in DOM but visibility=hidden',
+                'Classification: PRODUCT BUG (not a locator or env issue)',
+                'test_employee_search_partial → NoSuchElementException on [data-testid="search-input"]',
+                'History: failed 3/5 recent runs, no code changes in last 48h',
+                'Classification: FLAKY — SCRIPT',
+                'Creating BUG-043 for product bug...',
+                'Analysis complete. 1 product bug, 1 flaky test.',
+            ],
+            output: '1 Product Bug → BUG-043 created\n1 Flaky test → FlakyDetector queued\n26 tests passed ✓'
+        },
+        {
+            name: 'FlakyDetector', color: 'bg-violet-500', dur: '8s',
+            logs: [
+                'Received flaky signal for test_employee_search_partial',
+                'Fetching run history (last 5 runs)...',
+                'Run-243: PASS · Run-244: FAIL · Run-245: PASS · Run-246: FAIL · Run-247: FAIL',
+                'Failure pattern: intermittent (60% fail rate)',
+                'Locator analysis: [data-testid="search-input"] inconsistent',
+                'Timing analysis: 3 failures occurred within 200ms of page load',
+                'Stability score: 0.40 (threshold: 0.75)',
+                'Queuing LocatorHealer for search-input element...',
+                'Flaky report saved. Approval queued.',
+            ],
+            output: 'Stability score: 0.40\nLocator healing queued\nApproval item #AQ-018 created'
+        },
+        {
+            name: 'RegressionGuard', color: 'bg-rose-500', dur: '6s',
+            logs: [
+                'Loading RUN-247 vs RUN-246 comparison...',
+                'RUN-246: 26/28 passed · RUN-247: 26/28 passed',
+                'Checking per-test deltas...',
+                'test_login_invalid_credentials: PASS → FAIL ⚠',
+                'test_employee_search_partial: FAIL → FAIL (known flaky)',
+                'Regression detected: test_login_invalid_credentials',
+                'No new regressions introduced in other tests.',
+                'Alert: regression on login flow — likely v2.3.1 impact.',
+            ],
+            output: '1 regression detected\ntest_login_invalid_credentials (v2.3.1 suspect)\nAlert sent to dashboard'
+        },
+        {
+            name: 'CoverageGap', color: 'bg-amber-500', dur: '9s',
+            logs: [
+                'Loading KB: 47 scenarios across 3 YAML files',
+                'Loading test index: 28 test functions in web domain',
+                'Mapping KB → test IDs...',
+                'Mapped: 28/28 existing test functions to KB items',
+                'Checking for unmapped KB scenarios...',
+                'Found 8 KB scenarios with no corresponding test:',
+                '  employee_bulk_import (ui_pages.yaml)',
+                '  leave_balance_report (application.yaml)',
+                '  performance_review_pdf_export (application.yaml)',
+                '  ... +5 more',
+                'Coverage: 83% (39/47 KB scenarios tested)',
+                'Gap report saved. Offering to generate missing TCs.',
+            ],
+            output: '8 uncovered KB scenarios found\nCoverage: 83%\nSuggestion: generate 8 new test cases'
+        },
+        {
+            name: 'LocatorHealer', color: 'bg-emerald-500', dur: '14s',
+            logs: [
+                'Received heal request for [data-testid="search-input"]',
+                'Launching Playwright session on target URL...',
+                'Navigating to /web/index.php/pim/viewEmployeeList',
+                'DOM scan in progress...',
+                'Found 3 candidate elements for "employee search input"',
+                'Candidate 1: [name="searchInput"] — score 0.91',
+                'Candidate 2: input[placeholder="Employee Name"] — score 0.88',
+                'Candidate 3: #pim-search-employee — score 0.72',
+                'Best candidate: [name="searchInput"] (score 0.91)',
+                'Generating patch for locators/web/EmployeeListPage.json...',
+                'Patch ready. Queuing for human approval.',
+            ],
+            output: 'Healing patch: [data-testid="search-input"] → [name="searchInput"]\nApproval item #AQ-019 created\nAwaiting human review'
+        },
+    ];
+
+    let agentIdx = 0;
+
+    // Build agent rows
+    const list = document.getElementById('agent-list');
+    agents.forEach((a, i) => {
+        const row = document.createElement('div');
+        row.id = 'arow-' + i;
+        row.className = 'agent-row waiting rounded-lg px-3 py-2.5 cursor-default';
+        row.innerHTML = `<div class="flex items-center gap-2.5">
+            <div id="adot-${i}" class="w-2 h-2 rounded-full bg-slate-600 shrink-0"></div>
+            <span class="text-xs text-slate-500 font-medium">${a.name}</span>
+            <span id="atimer-${i}" class="text-[10px] mono text-slate-600 ml-auto"></span>
+        </div>`;
+        list.appendChild(row);
+    });
+
+    function runAgent(idx) {
+        if (idx >= agents.length) { setTimeout(resetAll, 3000); return; }
+        const a = agents[idx];
+        const row = document.getElementById('arow-' + idx);
+        row.classList.remove('waiting', 'done'); row.classList.add('running');
+        const dot = document.getElementById('adot-' + idx);
+        dot.className = 'w-2 h-2 rounded-full ' + a.color + ' shrink-0 spinning';
+
+        document.getElementById('active-agent-label').textContent = a.name;
+        document.getElementById('log-panel').innerHTML = '';
+        document.getElementById('output-card').classList.add('hidden');
+
+        let elapsed = 0;
+        const timer = setInterval(() => {
+            elapsed++;
+            document.getElementById('active-agent-timer').textContent = elapsed + 's';
+            document.getElementById('atimer-' + idx).textContent = elapsed + 's';
+        }, 1000);
+
+        a.logs.forEach((line, i) => {
+            setTimeout(() => {
+                const el = document.createElement('div');
+                el.className = 'log-line';
+                const isWarning = line.includes('⚠') || line.includes('Regression') || line.includes('Found');
+                const isSuccess = line.includes('✓') || line.includes('complete') || line.includes('ready') || line.includes('saved');
+                el.style.color = isWarning ? '#fbbf24' : isSuccess ? '#34d399' : '#94a3b8';
+                el.innerHTML = '<span style="color:#475569">$ </span>' + line;
+                document.getElementById('log-panel').appendChild(el);
+                requestAnimationFrame(() => el.classList.add('show'));
+                const p = document.getElementById('log-panel');
+                p.scrollTop = p.scrollHeight;
+            }, i * 260);
+        });
+
+        const totalDelay = a.logs.length * 260 + 400;
+        setTimeout(() => {
+            clearInterval(timer);
+            dot.classList.remove('spinning');
+            dot.classList.add('bg-emerald-400');
+            row.classList.remove('running'); row.classList.add('done');
+            document.getElementById('output-card').classList.remove('hidden');
+            document.getElementById('output-content').innerHTML = a.output.split('\n').map(l => `<div>${l}</div>`).join('');
+            agentIdx++;
+            // Mark next as active
+            if (agentIdx < agents.length) document.getElementById('arow-' + agentIdx).classList.remove('waiting');
+            setTimeout(() => runAgent(agentIdx), 1000);
+        }, totalDelay);
+    }
+
+    function resetAll() {
+        agentIdx = 0;
+        agents.forEach((a, i) => {
+            const row = document.getElementById('arow-' + i);
+            row.classList.remove('running', 'done'); row.classList.add('waiting');
+            const dot = document.getElementById('adot-' + i);
+            dot.className = 'w-2 h-2 rounded-full bg-slate-600 shrink-0';
+            document.getElementById('atimer-' + i).textContent = '';
+        });
+        document.getElementById('log-panel').innerHTML = '';
+        document.getElementById('output-card').classList.add('hidden');
+        document.getElementById('active-agent-label').textContent = '';
+        document.getElementById('active-agent-timer').textContent = '';
+        document.getElementById('arow-0').classList.remove('waiting');
+        setTimeout(() => runAgent(0), 600);
+    }
+
+    document.getElementById('arow-0').classList.remove('waiting');
+    setTimeout(() => runAgent(0), 600);
+</script>
+</body>
+</html>

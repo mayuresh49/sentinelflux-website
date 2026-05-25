@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Plans — SentinelFlux</title>
+    <meta name="description" content="AI generates structured test plans from your knowledge base — organized by feature, with full coverage tracking across all testing domains.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #2dd4bf 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; } [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(13,148,136,0.08) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(20,184,166,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(20,184,166,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        @keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:0.3} }
+        .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+        .tc-row { opacity:0; transform:translateX(-6px); transition:opacity 0.25s ease,transform 0.25s ease; }
+        .tc-row.show { opacity:1; transform:none; }
+        .kb-file { transition:all 0.3s ease; }
+        .kb-file.parsing { border-color:rgba(20,184,166,0.5); background:rgba(20,184,166,0.06); }
+        .kb-file.done    { border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.06); }
+        @keyframes bar-fill { 0%{width:0} 100%{width:var(--w)} }
+        .coverage-bar { animation: bar-fill 0.8s ease forwards; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex items-center gap-5">
+            <a href="/#platform" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">← Platform</a>
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Request Access</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero-glow hero-grid pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div data-animate="fade-in" class="inline-flex items-center gap-2 bg-teal-50 text-teal-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-teal-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/></svg>
+            Platform Feature — Test Plans
+        </div>
+        <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
+            Test Plans Written by<br><span class="gradient-text">AI, Approved by You</span>
+        </h1>
+        <p data-animate data-delay="2" class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            SentinelFlux reads your knowledge base and generates structured test plans — organized by feature, tagged by domain, with coverage tracked against every KB item.
+        </p>
+    </div>
+</section>
+
+<!-- ANIMATED DEMO -->
+<section class="py-8 px-6 pb-20">
+    <div class="max-w-5xl mx-auto">
+        <div data-animate class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+                <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+                <span class="ml-3 text-slate-400 text-xs mono">sentinelflux generate --product myapp --domain web --stage docs</span>
+                <div class="ml-auto flex items-center gap-1.5 text-teal-400 text-xs">
+                    <div class="w-1.5 h-1.5 rounded-full bg-teal-400 pulse-dot"></div>generating
+                </div>
+            </div>
+            <div class="flex" style="min-height:400px">
+                <!-- KB files panel -->
+                <div class="w-52 shrink-0 border-r border-slate-800 p-4">
+                    <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">Knowledge Base</div>
+                    <div class="space-y-2">
+                        <div id="kb-app"  class="kb-file border border-slate-700 rounded-lg p-2.5 text-xs cursor-default">
+                            <div class="flex items-center gap-2 mb-1">
+                                <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                                <span class="text-slate-400 mono">application.yaml</span>
+                            </div>
+                            <div id="kb-app-status" class="text-slate-600 text-[10px] pl-5">waiting</div>
+                        </div>
+                        <div id="kb-pages" class="kb-file border border-slate-700 rounded-lg p-2.5 text-xs cursor-default">
+                            <div class="flex items-center gap-2 mb-1">
+                                <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                                <span class="text-slate-400 mono">ui_pages.yaml</span>
+                            </div>
+                            <div id="kb-pages-status" class="text-slate-600 text-[10px] pl-5">waiting</div>
+                        </div>
+                        <div id="kb-api" class="kb-file border border-slate-700 rounded-lg p-2.5 text-xs cursor-default">
+                            <div class="flex items-center gap-2 mb-1">
+                                <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                                <span class="text-slate-400 mono">api_specs.yaml</span>
+                            </div>
+                            <div id="kb-api-status" class="text-slate-600 text-[10px] pl-5">waiting</div>
+                        </div>
+                        <div id="kb-rules" class="kb-file border border-slate-700 rounded-lg p-2.5 text-xs cursor-default">
+                            <div class="flex items-center gap-2 mb-1">
+                                <svg class="w-3.5 h-3.5 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                                <span class="text-slate-400 mono">business_rules.yaml</span>
+                            </div>
+                            <div id="kb-rules-status" class="text-slate-600 text-[10px] pl-5">waiting</div>
+                        </div>
+                    </div>
+                    <!-- Coverage summary -->
+                    <div id="coverage-panel" class="mt-4 hidden">
+                        <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2">KB Coverage</div>
+                        <div class="space-y-2">
+                            <div>
+                                <div class="flex justify-between text-xs text-slate-400 mb-1"><span>Web</span><span class="text-teal-400">28 TCs</span></div>
+                                <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden"><div class="coverage-bar h-full bg-teal-500 rounded-full" style="--w:90%;width:0"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs text-slate-400 mb-1"><span>API</span><span class="text-indigo-400">13 TCs</span></div>
+                                <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden"><div class="coverage-bar h-full bg-indigo-500 rounded-full" style="--w:72%;width:0"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs text-slate-400 mb-1"><span>Security</span><span class="text-rose-400">5 TCs</span></div>
+                                <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden"><div class="coverage-bar h-full bg-rose-500 rounded-full" style="--w:55%;width:0"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Generated test plan -->
+                <div class="flex-1 p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide">Generated Test Plan</div>
+                        <div class="text-xs mono text-slate-500">TC count: <span id="tc-count" class="text-teal-400 font-bold">0</span></div>
+                    </div>
+                    <!-- Feature groups -->
+                    <div id="plan-panel" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-slate-50 py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Plans that actually reflect your product</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">Not generic templates — test cases derived from your actual business rules and field specifications.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div data-animate data-delay="1" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-teal-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">KB-Derived Test Cases</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Every test case traces to a specific KB item — form field, API endpoint, or business rule. Nothing invented, nothing missed.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Positive + negative scenarios</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Boundary value analysis</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Cross-domain coverage mapping</li>
+                </ul>
+            </div>
+            <div data-animate data-delay="2" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-teal-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">DocGen + DocReview Pipeline</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">DocGenAgent writes the test case docs. DocReviewAgent checks for completeness, missing edge cases, and hallucinated fields before scripts are written.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Two-agent quality gate</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Hallucination prevention</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>TC ID normalizer backstop</li>
+                </ul>
+            </div>
+            <div data-animate data-delay="3" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-teal-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Coverage Tracking</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">CoverageGapAgent compares your KB against existing test cases after every run — surfacing KB items with no test coverage.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Per-KB-item coverage status</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Gap suggestions after each run</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>One-click generate missing TCs</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-20 px-6">
+    <div data-animate class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">From knowledge base to test plan in minutes</h2>
+        <p class="text-slate-500 mb-8">No test design workshops. No spreadsheets. Describe your product, get a test plan.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="mailto:mayuresh49@gmail.com?subject=SentinelFlux Early Access" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-teal-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-teal-700 transition-colors">Request Early Access</a>
+            <a href="/#platform" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-colors">← Back to Platform</a>
+        </div>
+    </div>
+</section>
+
+<footer class="border-t border-slate-100 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-semibold text-slate-900">SentinelFlux</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+            <a href="/#modules" class="hover:text-slate-900 transition-colors">Modules</a>
+            <a href="/#platform" class="hover:text-slate-900 transition-colors">Platform</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-slate-900 transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+
+    const kbFiles = [
+        { id: 'kb-app',   statusId: 'kb-app-status',   delay: 400,  label: '8 scenarios' },
+        { id: 'kb-pages', statusId: 'kb-pages-status', delay: 1200, label: '6 pages, 42 fields' },
+        { id: 'kb-api',   statusId: 'kb-api-status',   delay: 2000, label: '11 endpoints' },
+        { id: 'kb-rules', statusId: 'kb-rules-status', delay: 2800, label: '14 business rules' },
+    ];
+
+    const planGroups = [
+        {
+            domain: 'Web UI', color: 'teal', startDelay: 600,
+            tcs: [
+                'TC-001 · Login with valid credentials',
+                'TC-002 · Login with invalid password',
+                'TC-003 · Login with empty fields',
+                'TC-004 · Employee search — exact match',
+                'TC-005 · Employee search — partial name',
+                'TC-006 · Add employee — mandatory fields',
+                'TC-007 · Add employee — duplicate username',
+            ]
+        },
+        {
+            domain: 'API', color: 'indigo', startDelay: 2200,
+            tcs: [
+                'TC-008 · GET /employees — 200 schema',
+                'TC-009 · POST /employees — valid payload',
+                'TC-010 · POST /employees — missing required',
+                'TC-011 · DELETE /employees/{id} — 204',
+            ]
+        },
+        {
+            domain: 'Security', color: 'rose', startDelay: 3400,
+            tcs: [
+                'TC-012 · SQL injection on search param',
+                'TC-013 · XSS in employee name field',
+            ]
+        }
+    ];
+
+    const domainColors = { teal: 'bg-teal-900/40 border-teal-800 text-teal-300', indigo: 'bg-indigo-900/40 border-indigo-800 text-indigo-300', rose: 'bg-rose-900/40 border-rose-800 text-rose-300' };
+    let tcCount = 0;
+
+    function runAnimation() {
+        kbFiles.forEach(f => {
+            setTimeout(() => {
+                const el = document.getElementById(f.id);
+                el.classList.remove('done'); el.classList.add('parsing');
+                document.getElementById(f.statusId).textContent = 'parsing...';
+                document.getElementById(f.statusId).className = 'text-amber-400 text-[10px] pl-5';
+                setTimeout(() => {
+                    el.classList.remove('parsing'); el.classList.add('done');
+                    document.getElementById(f.statusId).textContent = f.label;
+                    document.getElementById(f.statusId).className = 'text-emerald-400 text-[10px] pl-5';
+                }, 700);
+            }, f.delay);
+        });
+
+        planGroups.forEach(group => {
+            setTimeout(() => {
+                const panel = document.getElementById('plan-panel');
+                const section = document.createElement('div');
+                section.className = 'border border-slate-800 rounded-xl overflow-hidden';
+                section.innerHTML = `<div class="flex items-center gap-2 px-3 py-2 bg-slate-800/80 border-b border-slate-800">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded border ${domainColors[group.color]}">${group.domain}</span>
+                    <span class="text-xs text-slate-500 ml-auto">0 / ${group.tcs.length}</span>
+                </div><div id="group-${group.domain}" class="divide-y divide-slate-800/60"></div>`;
+                panel.appendChild(section);
+
+                group.tcs.forEach((tc, i) => {
+                    setTimeout(() => {
+                        const row = document.createElement('div');
+                        row.className = 'tc-row flex items-center gap-2.5 px-3 py-2 text-xs';
+                        row.innerHTML = `<div class="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0"></div><span class="mono text-slate-300">${tc}</span>`;
+                        document.getElementById('group-' + group.domain).appendChild(row);
+                        requestAnimationFrame(() => row.classList.add('show'));
+                        tcCount++;
+                        document.getElementById('tc-count').textContent = tcCount;
+                        section.querySelector('span.text-xs.text-slate-500').textContent = (i+1) + ' / ' + group.tcs.length;
+                    }, i * 220);
+                });
+            }, group.startDelay);
+        });
+
+        // Show coverage panel
+        setTimeout(() => {
+            document.getElementById('coverage-panel').classList.remove('hidden');
+        }, 4500);
+
+        setTimeout(resetAnimation, 9000);
+    }
+
+    function resetAnimation() {
+        tcCount = 0;
+        document.getElementById('tc-count').textContent = '0';
+        document.getElementById('plan-panel').innerHTML = '';
+        document.getElementById('coverage-panel').classList.add('hidden');
+        kbFiles.forEach(f => {
+            const el = document.getElementById(f.id);
+            el.classList.remove('parsing', 'done');
+            document.getElementById(f.statusId).textContent = 'waiting';
+            document.getElementById(f.statusId).className = 'text-slate-600 text-[10px] pl-5';
+        });
+        setTimeout(runAnimation, 600);
+    }
+
+    setTimeout(runAnimation, 600);
+</script>
+</body>
+</html>
