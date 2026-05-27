@@ -10,6 +10,11 @@
   status: open
   notes: "Needs SentinelFlux platform APIs. Currently demo/simulation only."
 
+- id: pricing-trial-model
+  title: "Replace Starter free tier with 14-day free trial"
+  status: done
+  commit: b40465c
+
 - id: chat-widget-100-topics
   title: "Expand Q&A to 100 topics"
   status: done

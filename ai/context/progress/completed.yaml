@@ -1,6 +1,15 @@
 # Completed work — newest first
 
 - date: 2026-05-27
+  commit: b40465c
+  title: "Replace Starter free tier with 14-day free trial"
+  details:
+    - Removed Starter (self-hosted, forever free) tier — codebase exposure risk
+    - All plans now cloud-hosted; entry point is 14-day free trial (full Pro access, no CC)
+    - Updated pricing card HTML, 9 Q&A responses, and smartHint fallback
+    - Key constraint added: no self-hosting option on any plan
+
+- date: 2026-05-27
   commit: 00107a9
   title: "Expand chat widget Q&A to 100 topics, fix pricing bug, remove CLI refs"
   details:
