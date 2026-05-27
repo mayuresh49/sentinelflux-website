@@ -1,0 +1,52 @@
+# Completed work — newest first
+
+- date: 2026-05-27
+  commit: 00107a9
+  title: "Expand chat widget Q&A to 100 topics, fix pricing bug, remove CLI refs"
+  details:
+    - Added 76 new Q&A topics (product positioning, KB management, generation pipeline,
+      agent config, CI/CD, dashboard, module deep-dives, infra, LLM config,
+      security/privacy, advanced use cases, billing/roadmap)
+    - Fixed pricing keyword bug (bare 'ci' substring matching inside "pricing")
+    - Removed all sentinelflux CLI command references from Q&A
+    - Total Q&A topics now 100
+
+- date: 2026-05-27
+  commit: 2299aa6
+  title: "Fix pricing in chat widget, add export Q&A, smarter fallback"
+  details:
+    - Corrected pricing tiers (Starter=Free, Pro=$49/seat/mo, Enterprise=Custom)
+    - Added export scripts Q&A entry
+    - Added 8 more Q&A topics (browsers, customizing tests, environments, data-driven,
+      reports, Slack notifications, security/VAPT detail)
+    - Replaced generic fallback with topic-cluster smartHint function
+
+- date: 2026-05-27
+  commit: 9ddbcf4
+  title: "Add scripted AI assistant chat widget to index.html"
+  details:
+    - Floating chat button (bottom-right, indigo/purple)
+    - 16 initial Q&A topics
+    - 5 agent simulations with animated log streams
+    - Quick-action chips
+    - No API key or backend required
+
+- date: 2026-05-27
+  commit: 31a0357
+  title: "Full mobile responsiveness pass"
+
+- date: 2026-05-27
+  commit: 84b327f
+  title: "Replace placeholder emails with official sentinelflux.in addresses"
+
+- date: 2026-05-27
+  commit: a69faae
+  title: "Add 10 blog posts + update blog listing page"
+
+- date: 2026-05-27
+  commit: c9856ab
+  title: "Add missing pages: Privacy, Terms, About, Security, Changelog, Blog, Status"
+
+- date: 2026-05-27
+  commit: 0f722dd
+  title: "Fix pricing: update Starter tier with all 8 modules, Ollama or AI service API"

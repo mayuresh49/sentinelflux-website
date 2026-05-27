@@ -1,0 +1,58 @@
+# SentinelFlux Agent Reference — for chat widget simulations and Q&A
+
+post_run_agents:
+  - name: ResultAnalyzer
+    color: "#6366f1"
+    trigger: after every test run
+    purpose: Classifies each failure as Product Bug / Script / Flaky / Environment
+    output: Bug tracker entries for Product Bugs; signals to FlakyDetector for Flaky
+    sim_key: resultanalyzer
+
+  - name: FlakyDetector
+    color: "#8b5cf6"
+    trigger: after ResultAnalyzer flags a Flaky result
+    purpose: Analyses last 5 run histories, computes stability score (threshold 0.75)
+    output: Stability score, locator instability flag, queues LocatorHealer if needed
+    sim_key: flakydetector
+
+  - name: RegressionGuard
+    color: "#ef4444"
+    trigger: after every test run
+    purpose: Compares pass/fail pattern vs previous run, alerts on new regressions
+    output: Regression alert with suspected commit/version
+    sim_key: regressionguard
+
+  - name: CoverageGap
+    color: "#f59e0b"
+    trigger: after every test run
+    purpose: Cross-references KB scenarios against test IDs, finds untested scenarios
+    output: Coverage % per domain, list of uncovered KB scenarios, generation offer
+    sim_key: coveragegap
+
+  - name: LocatorHealer
+    color: "#10b981"
+    trigger: locator failure or FlakyDetector locator signal
+    purpose: Re-discovers broken DOM selectors from live app using headless browser
+    output: Healing patch queued in Approvals with confidence score
+    sim_key: locatorhealer
+
+generation_agents:
+  - name: AppExplorer
+    purpose: Crawls live app DOM, captures real selectors per page listed in KB
+    output: locators/<domain>/*.json
+
+  - name: DocGen
+    purpose: Converts KB scenarios to structured test case markdown documents
+    output: docs/test_cases/<domain>/*.md
+
+  - name: DocReview
+    purpose: QA-reviews generated docs for completeness and quality
+    output: Approved docs forwarded to ScriptGen; rejected docs flagged for KB improvement
+
+  - name: ScriptGen
+    purpose: Converts test case docs to executable pytest scripts using AppExplorer selectors
+    output: tests/<domain>/test_<scenario_id>.py
+
+  - name: ScriptReview
+    purpose: Validates generated scripts (syntax, selector existence, assertion quality)
+    output: Approved scripts saved; rejected scripts re-queued or flagged

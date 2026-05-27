@@ -1,0 +1,36 @@
+# Backlog — status: open | in_progress | done
+
+- id: chat-widget-real-llm
+  title: "Upgrade chat widget to real LLM (Claude API) when backend is available"
+  status: open
+  notes: "Currently scripted/static. Requires backend proxy for API key. Deferred."
+
+- id: chat-widget-agent-invocation
+  title: "Real on-demand agent invocation from chat widget"
+  status: open
+  notes: "Needs SentinelFlux platform APIs. Currently demo/simulation only."
+
+- id: chat-widget-100-topics
+  title: "Expand Q&A to 100 topics"
+  status: done
+  commit: 00107a9
+
+- id: chat-widget-pricing-fix
+  title: "Fix pricing response in chat widget"
+  status: done
+  commit: 2299aa6
+
+- id: chat-widget-no-cli-refs
+  title: "Remove CLI command references from Q&A"
+  status: done
+  commit: 00107a9
+
+- id: chat-widget-initial
+  title: "Add scripted AI assistant chat widget to marketing site"
+  status: done
+  commit: 9ddbcf4
+
+- id: mobile-responsiveness
+  title: "Full mobile responsiveness pass across all pages"
+  status: done
+  commit: 31a0357
