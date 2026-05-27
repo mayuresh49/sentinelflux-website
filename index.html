@@ -119,8 +119,18 @@
                 <a href="/#pricing" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
                     Get started
                 </a>
+                <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors" aria-label="Toggle menu">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
             </div>
         </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-100 px-6 py-3 space-y-1">
+        <a href="/#modules" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Modules</a>
+        <a href="/#platform" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Platform</a>
+        <a href="/#pricing" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Pricing</a>
+        <a href="https://docs.sentinelflux.in" target="_blank" rel="noopener" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Docs</a>
+        <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Sign in</a>
+    </div>
     </nav>
 
     <!-- HERO -->
@@ -130,7 +140,7 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse shrink-0"></span>
                 Now in early access — limited spots available
             </div>
-            <h1 data-animate data-delay="1" class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-6 tracking-tight">
+            <h1 data-animate data-delay="1" class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-6 tracking-tight">
                 Ship Faster With<br>
                 <span class="gradient-text">AI-Powered Testing</span>
             </h1>
@@ -164,7 +174,7 @@
                         <span class="ml-3 text-slate-400 text-xs mono">app.sentinelflux.in — SentinelFlux Dashboard</span>
                     </div>
                     <!-- Stats -->
-                    <div class="p-5 grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                         <div class="bg-slate-800 rounded-xl p-4 border border-slate-700/60">
                             <div class="text-xs text-slate-400 mb-1">Test Runs</div>
                             <div class="text-2xl font-bold text-white mono" data-counter="247">247</div>
@@ -277,7 +287,7 @@
 
     <!-- METRICS -->
     <section class="py-16 px-6 bg-slate-900">
-        <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div class="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
                 <div class="text-3xl font-extrabold text-white mb-1">94.3%</div>
                 <div class="text-sm text-slate-400">Average pass rate</div>
@@ -304,7 +314,7 @@
                 <h2 data-animate class="text-3xl font-bold text-slate-900 mb-4">Everything a QA team needs, in one framework</h2>
                 <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">Eight testing modules, one CLI, one dashboard. No juggling between tools.</p>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <a href="/modules/rest-graphql.html" data-animate data-delay="1" class="module-card bg-white rounded-2xl p-5 border border-slate-200 hover:border-indigo-300 hover:shadow-md group block">
                     <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" /></svg>
@@ -1166,5 +1176,15 @@
         }
     })();
     </script>
+<script>
+(function(){
+    var btn=document.getElementById('mobile-menu-btn');
+    var menu=document.getElementById('mobile-menu');
+    if(btn&&menu){
+        btn.addEventListener('click',function(){ menu.classList.toggle('hidden'); });
+        menu.querySelectorAll('a').forEach(function(a){ a.addEventListener('click',function(){ menu.classList.add('hidden'); }); });
+    }
+})();
+</script>
 </body>
 </html>
