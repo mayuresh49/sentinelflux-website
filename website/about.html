@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About — SentinelFlux</title>
+    <meta name="description" content="SentinelFlux is an AI-powered test automation platform built to eliminate manual test writing for QA teams.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-text {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(79,70,229,0.10) 0%, transparent 65%); }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-10">
+            <a href="/" class="flex items-center gap-2.5 shrink-0">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                    <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                </div>
+                <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+            </a>
+            <div class="hidden md:flex items-center gap-1">
+                <a href="/#modules" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Modules</a>
+                <a href="/#platform" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Platform</a>
+                <a href="/#pricing" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Pricing</a>
+                <a href="https://docs.sentinelflux.in" target="_blank" rel="noopener" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Docs</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="hidden sm:flex text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">Sign in</a>
+            <a href="/#pricing" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">Get started</a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-glow pt-32 pb-20 px-6">
+    <div class="max-w-3xl mx-auto text-center">
+        <div class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-4">About SentinelFlux</div>
+        <h1 class="text-5xl font-extrabold text-slate-900 leading-tight mb-6">
+            Built to end manual<br><span class="gradient-text">test writing forever</span>
+        </h1>
+        <p class="text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto">
+            SentinelFlux started from a simple frustration: QA teams spend more time writing and maintaining test scripts than thinking about quality. We're changing that.
+        </p>
+    </div>
+</section>
+
+<!-- STORY -->
+<section class="py-20 px-6 border-t border-slate-100">
+    <div class="max-w-3xl mx-auto space-y-16">
+
+        <div class="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+                <div class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-3">The Problem</div>
+                <h2 class="text-2xl font-bold text-slate-900 mb-4">Test suites rot faster than code ships</h2>
+                <p class="text-slate-500 leading-relaxed text-sm">Every UI change breaks locators. Every new feature needs new tests. Every release cycle, QA becomes the bottleneck — not because the team is slow, but because the tools haven't kept up.</p>
+                <p class="text-slate-500 leading-relaxed text-sm mt-3">Teams spend 60–80% of QA time writing, fixing, and maintaining test scripts rather than finding real bugs. That's the problem we set out to fix.</p>
+            </div>
+            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"/></svg>
+                    </div>
+                    <div class="text-sm"><span class="font-semibold text-slate-900">Brittle locators</span> — UI changes break dozens of tests overnight</div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div class="text-sm"><span class="font-semibold text-slate-900">Coverage gaps</span> — new features ship before tests catch up</div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div class="text-sm"><span class="font-semibold text-slate-900">Tool sprawl</span> — API, UI, security, performance: 4 tools, 4 pipelines</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-10 items-center">
+            <div class="order-2 md:order-1 bg-slate-900 rounded-2xl p-6 border border-slate-800 space-y-3">
+                <div class="flex items-center gap-3 text-sm">
+                    <div class="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>
+                    <span class="text-slate-300">Tests generated from your knowledge base — not invented</span>
+                </div>
+                <div class="flex items-center gap-3 text-sm">
+                    <div class="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>
+                    <span class="text-slate-300">Broken locators healed automatically with human sign-off</span>
+                </div>
+                <div class="flex items-center gap-3 text-sm">
+                    <div class="w-8 h-8 bg-violet-500/20 rounded-lg flex items-center justify-center shrink-0"><svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg></div>
+                    <span class="text-slate-300">8 modules, 10 AI agents, one dashboard</span>
+                </div>
+            </div>
+            <div class="order-1 md:order-2">
+                <div class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-3">Our Approach</div>
+                <h2 class="text-2xl font-bold text-slate-900 mb-4">AI that understands your product, not just code patterns</h2>
+                <p class="text-slate-500 leading-relaxed text-sm">Instead of recording browser sessions or parsing existing code, SentinelFlux reads your product knowledge base — the same YAML you'd write for onboarding a new engineer. From that, it generates accurate, maintainable test suites that actually match your domain.</p>
+                <p class="text-slate-500 leading-relaxed text-sm mt-3">Human oversight stays in the loop. Every AI suggestion — from locator heals to script patches — goes through an approval queue before it's committed.</p>
+            </div>
+        </div>
+
+        <div class="text-center py-10 border-t border-slate-100">
+            <div class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-3">Where We Are</div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-4">Early access, actively shipping</h2>
+            <p class="text-slate-500 leading-relaxed text-sm max-w-xl mx-auto mb-8">SentinelFlux is in early access. The dashboard is live, the AI pipeline is running real test suites, and we're onboarding teams now. We're building in the open — feedback directly shapes the roadmap.</p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a href="/#pricing" class="flex items-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors text-sm shadow-sm">
+                    Get started free
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                </a>
+                <a href="mailto:mayuresh49@gmail.com" class="flex items-center gap-2 bg-slate-100 text-slate-800 font-semibold px-6 py-3 rounded-xl hover:bg-slate-200 transition-colors text-sm">
+                    Talk to the founder
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-slate-950 text-slate-400 pt-12 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-white text-base tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            <a href="/about.html" class="text-white font-medium">About</a>
+            <a href="/privacy.html" class="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="/terms.html" class="hover:text-white transition-colors">Terms of Service</a>
+            <a href="/security.html" class="hover:text-white transition-colors">Security</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-white transition-colors">Contact</a>
+        </div>
+        <div class="text-sm">&copy; 2026 SentinelFlux, Inc.</div>
+    </div>
+</footer>
+
+</body>
+</html>

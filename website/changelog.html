@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog — SentinelFlux</title>
+    <meta name="description" content="SentinelFlux release history — new features, improvements, and bug fixes.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-10">
+            <a href="/" class="flex items-center gap-2.5 shrink-0">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                    <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                </div>
+                <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+            </a>
+            <div class="hidden md:flex items-center gap-1">
+                <a href="/#modules" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Modules</a>
+                <a href="/#platform" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Platform</a>
+                <a href="/#pricing" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Pricing</a>
+                <a href="https://docs.sentinelflux.in" target="_blank" rel="noopener" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Docs</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="hidden sm:flex text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">Sign in</a>
+            <a href="/#pricing" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">Get started</a>
+        </div>
+    </div>
+</nav>
+
+<!-- CONTENT -->
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-3xl mx-auto">
+        <div class="mb-12">
+            <div class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-3">Releases</div>
+            <h1 class="text-4xl font-extrabold text-slate-900 mb-3">Changelog</h1>
+            <p class="text-slate-500 text-sm">New features, improvements, and fixes — shipped continuously.</p>
+        </div>
+
+        <!-- Timeline -->
+        <div class="relative">
+            <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-200 ml-3"></div>
+
+            <!-- v0.4.0 -->
+            <div class="relative pl-10 pb-14">
+                <div class="absolute left-0 w-7 h-7 bg-indigo-600 rounded-full flex items-center justify-center shadow-sm shadow-indigo-500/30">
+                    <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <span class="text-lg font-bold text-slate-900 mono">v0.4.0</span>
+                    <span class="bg-indigo-100 text-indigo-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">Latest</span>
+                    <span class="text-slate-400 text-sm">May 2026</span>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <div class="text-xs font-bold text-emerald-600 uppercase tracking-wide mb-1.5">New</div>
+                        <ul class="space-y-1.5 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Animated product walkthrough on landing page (4-step KB → Generate → Run → Dashboard)</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Platform feature pages: Test Plans, Test Runs, Quality Dashboard, Agent Activities, Human Approvals</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Integration logos bar on homepage (GitHub Actions, GitLab CI, Jenkins, Jira, Slack, Playwright)</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Pricing page with Starter / Pro / Enterprise tiers</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>FAQ section with accordion UI</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1.5">Improved</div>
+                        <ul class="space-y-1.5 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5 shrink-0">~</span>Navigation rebuilt with full link structure and Sign in / Get started CTAs</li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5 shrink-0">~</span>Footer expanded to multi-column with Product, Resources, Company sections</li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5 shrink-0">~</span>Hero trust bar: "No credit card required · Set up in under 10 minutes · Works with your existing CI/CD"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v0.3.0 -->
+            <div class="relative pl-10 pb-14">
+                <div class="absolute left-0 w-7 h-7 bg-white border-2 border-slate-300 rounded-full flex items-center justify-center">
+                    <div class="w-2 h-2 rounded-full bg-slate-400"></div>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <span class="text-lg font-bold text-slate-900 mono">v0.3.0</span>
+                    <span class="text-slate-400 text-sm">April 2026</span>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <div class="text-xs font-bold text-emerald-600 uppercase tracking-wide mb-1.5">New</div>
+                        <ul class="space-y-1.5 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Module detail pages for all 8 testing modules with animated capability demos</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Scroll-reveal animations and motion workflows across the site</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Live pipeline cycling animation in hero dashboard preview</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Counter animations for dashboard stats (test runs, agents, functions)</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1.5">Improved</div>
+                        <ul class="space-y-1.5 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5 shrink-0">~</span>Hero dashboard preview replaced static mockup with live-animated pipeline widget</li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5 shrink-0">~</span>Module cards now link to dedicated detail pages</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v0.2.0 -->
+            <div class="relative pl-10 pb-14">
+                <div class="absolute left-0 w-7 h-7 bg-white border-2 border-slate-300 rounded-full flex items-center justify-center">
+                    <div class="w-2 h-2 rounded-full bg-slate-400"></div>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <span class="text-lg font-bold text-slate-900 mono">v0.2.0</span>
+                    <span class="text-slate-400 text-sm">March 2026</span>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <div class="text-xs font-bold text-emerald-600 uppercase tracking-wide mb-1.5">New</div>
+                        <ul class="space-y-1.5 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Converted to SaaS landing page with product-first messaging</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Platform section covering 5 dashboard features</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Self-healing locator strategy visualisation (3-tier diagram)</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>AI agent grid listing all 10 post-suite agents</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-amber-600 uppercase tracking-wide mb-1.5">Fixed</div>
+                        <ul class="space-y-1.5 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><span class="text-amber-500 mt-0.5 shrink-0">!</span>Correct agent list — removed duplicate entries, aligned with actual codebase</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v0.1.0 -->
+            <div class="relative pl-10">
+                <div class="absolute left-0 w-7 h-7 bg-white border-2 border-slate-300 rounded-full flex items-center justify-center">
+                    <div class="w-2 h-2 rounded-full bg-slate-400"></div>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <span class="text-lg font-bold text-slate-900 mono">v0.1.0</span>
+                    <span class="bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-0.5 rounded-full">Initial release</span>
+                    <span class="text-slate-400 text-sm">February 2026</span>
+                </div>
+                <div>
+                    <div class="text-xs font-bold text-emerald-600 uppercase tracking-wide mb-1.5">New</div>
+                    <ul class="space-y-1.5 text-sm text-slate-700">
+                        <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Initial public website at sentinelflux.in</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>8 testing module descriptions: REST/GraphQL, Web UI, Security (VAPT), Performance, Accessibility, API Contract, Visual Regression, Bug Tracker</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Early access request flow</li>
+                        <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Live dashboard at app.sentinelflux.in</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="bg-slate-950 text-slate-400 pt-12 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-white text-base tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            <a href="/about.html" class="hover:text-white transition-colors">About</a>
+            <a href="/privacy.html" class="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="/terms.html" class="hover:text-white transition-colors">Terms of Service</a>
+            <a href="/security.html" class="hover:text-white transition-colors">Security</a>
+            <a href="mailto:mayuresh49@gmail.com" class="hover:text-white transition-colors">Contact</a>
+        </div>
+        <div class="text-sm">&copy; 2026 SentinelFlux, Inc.</div>
+    </div>
+</footer>
+
+</body>
+</html>
