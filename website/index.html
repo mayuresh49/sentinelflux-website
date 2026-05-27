@@ -1376,8 +1376,8 @@
       md: '**One CLI command drops into any CI pipeline:**\n\n```bash\nsentinelflux run \\\n  --project myapp \\\n  --domain web \\\n  --env staging\n```\n\nWorks with GitHub Actions, GitLab CI, Jenkins, CircleCI. Results push to the dashboard automatically. Slack and webhook notifications are configurable.'
     },
     {
-      keys: ['pricing','cost','plan','starter','pro','enterprise','how much','tiers'],
-      md: '**Three tiers:**\n\n• **Starter** — All 8 modules, all 10 agents, Ollama or AI API. For small teams.\n• **Pro** — Cloud-hosted agents, priority support, team workspaces, advanced analytics.\n• **Enterprise** — Custom SLA, SSO, on-premises deployment, dedicated support.\n\nCurrently in **early access** — limited spots. Email `engage@sentinelflux.in` to get started.'
+      keys: ['pricing','cost','plan','starter','pro','enterprise','how much','tiers','free','$49'],
+      md: '**Three tiers:**\n\n• **Starter — Free** · Self-hosted, forever free. Up to 3 projects, all 8 modules, AI test generation, Ollama or AI service API, community support.\n\n• **Pro — $49 /seat/month** · Cloud-hosted, billed annually. Unlimited projects, all 10 AI agents, hosted dashboard at app.sentinelflux.in, CI/CD integrations, priority email support.\n\n• **Enterprise — Custom** · Private cloud or on-premise, SSO/SAML, air-gapped LLM support, SLA + dedicated support, custom integrations.\n\nEmail `engage@sentinelflux.in` to get started or start a free Pro trial.'
     },
     {
       keys: ['approvals','human in the loop','approve','approval dashboard','review suggestions'],
@@ -1390,6 +1390,38 @@
     {
       keys: ['get started','getting started','install','setup','quick start','how to start','how do i use'],
       md: '**Quick start:**\n\n1. `pip install sentinelflux`\n2. Write YAML KB files describing your app modules\n3. `sentinelflux explore --url https://your-app.com`\n4. `sentinelflux generate --domain web`\n5. `sentinelflux run --domain web`\n6. Open dashboard to review agent analysis\n\nCurrently in early access. Email `engage@sentinelflux.in` to request access.'
+    },
+    {
+      keys: ['export','download script','export test','take the script','use the script outside','get the scripts','my own runner'],
+      md: 'Yes — **generated test scripts are plain pytest files** stored in your project directory under `tests/<domain>/`.\n\nYou own them completely:\n• Run them directly with `pytest tests/web/` — no SentinelFlux CLI needed\n• Commit them to your own repo\n• Plug them into any test runner or CI pipeline\n• Edit them manually like any Python file\n\nSentinelFlux generates the scripts; after that they\'re just regular `.py` files with no proprietary lock-in.'
+    },
+    {
+      keys: ['browser','chrome','firefox','webkit','playwright','supported browser'],
+      md: '**Supported browsers (Web UI module):**\n\nSentinelFlux uses **Playwright** under the hood, so it supports:\n• Chromium / Chrome\n• Firefox\n• WebKit / Safari\n\nConfigure the target browser in `sentinelflux.config.yaml`. The default is Chromium. AppExplorer also uses a headless browser to crawl your app for DOM selectors before test generation.'
+    },
+    {
+      keys: ['customize','edit generated','modify test','change generated','override','custom test'],
+      md: 'Yes — **you can edit generated test scripts at any time**.\n\nGenerated scripts are plain pytest files. You can:\n• Add custom assertions or steps\n• Parameterize with your own data sets\n• Extend with fixtures or conftest.py logic\n\nIf SentinelFlux re-generates tests for a scenario (e.g. after a KB update), it creates new files rather than overwriting edits. The DocReview and ScriptReview agents also flag low-quality generations before they\'re saved.'
+    },
+    {
+      keys: ['multiple environment','staging','production','env','environment','target env'],
+      md: '**Multiple environments** are supported via the `--env` flag:\n\n```bash\nsentinelflux run --domain web --env staging\nsentinelflux run --domain web --env production\n```\n\nEnvironment-specific base URLs, credentials, and config live in `sentinelflux.config.yaml` under each env key. Results are tracked per-environment in the dashboard.'
+    },
+    {
+      keys: ['data driven','test data','parameterized','multiple data','csv','fixtures','test data set'],
+      md: '**Data-driven tests** are first-class in SentinelFlux.\n\nThe REST/GraphQL API module automatically generates CRUD tests with multiple data sets (valid, boundary, invalid inputs) from your KB field definitions.\n\nFor Web UI tests, ScriptGen can parameterize scenarios using `@pytest.mark.parametrize` when your KB defines multiple example values per field. You can also supply your own fixtures in `conftest.py`.'
+    },
+    {
+      keys: ['report','html report','test report','results report','junit','xml report','output format'],
+      md: '**Test results are available in multiple formats:**\n\n• **Dashboard** — live pass/fail, agent analysis, per-test history\n• **JUnit XML** — auto-generated for CI integrations (`--report junit`)\n• **JSON** — machine-readable output for custom tooling\n• **Slack notification** — configurable webhook with pass/fail summary\n\nThe dashboard is the richest view — it shows failure classifications, agent outputs, coverage trends, and approvals queue all in one place.'
+    },
+    {
+      keys: ['slack','notification','webhook','alert','notify','integration notify'],
+      md: '**Notifications are configurable** in `sentinelflux.config.yaml`:\n\n```yaml\nnotifications:\n  slack:\n    webhook_url: https://hooks.slack.com/...\n    on: [failure, regression, coverage_gap]\n  webhook:\n    url: https://your-server.com/hook\n    on: [all]\n```\n\nYou can trigger notifications on: any failure, regressions only, coverage gap alerts, or all events. The Slack message includes a run summary and a link to the dashboard.'
+    },
+    {
+      keys: ['security test','owasp','vapt','penetration','injection','xss','sql injection','vulnerability'],
+      md: '**Security / VAPT module** covers OWASP Top 10 automatically:\n\n• SQL/NoSQL injection on all form fields\n• XSS reflection and stored XSS probes\n• Auth bypass and privilege escalation tests\n• Insecure direct object reference (IDOR)\n• Sensitive data exposure checks\n• Security headers validation\n\nTests are generated from your KB — SentinelFlux knows your endpoints, fields, and auth flows, so probes are targeted rather than generic. No manual attack script writing needed.'
     }
   ];
 
@@ -1524,7 +1556,7 @@
   var isOpen = false;
 
   // ── Quick chips ──────────────────────────────────────────────────────────────
-  var CHIPS = ['How does it work?', 'Run CoverageGap', 'List all agents', 'What modules?', 'Pricing'];
+  var CHIPS = ['How does it work?', 'Run CoverageGap', 'What modules?', 'Pricing', 'Export scripts?'];
 
   function renderChips() {
     chipsEl.innerHTML = CHIPS.map(function (c) {
@@ -1672,6 +1704,26 @@
     });
   }
 
+  // ── Smart fallback hint ──────────────────────────────────────────────────────
+  function smartHint(text) {
+    var t = text.toLowerCase();
+    // Detect topic clusters and point to nearby Q&A
+    if (/test|script|generat|pytest|file|code/.test(t))
+      return 'That\'s a great question! For anything about generated scripts — exporting, editing, running independently — try asking **"can I export the test scripts?"** or **"can I customize generated tests?"**.\n\nFor the full generation pipeline ask: **"how does the generation pipeline work?"**\n\nStill not finding what you need? Email **engage@sentinelflux.in** and the team will help.';
+    if (/price|cost|free|paid|money|trial|fee/.test(t))
+      return 'For pricing details ask **"what are the pricing tiers?"** — Starter is free (self-hosted), Pro is $49/seat/month, Enterprise is custom.\n\nEmail `engage@sentinelflux.in` to start a free Pro trial.';
+    if (/support|help|contact|email|team|human/.test(t))
+      return 'For questions not covered here, reach the SentinelFlux team directly at **engage@sentinelflux.in**.\n\nDocumentation is at **docs.sentinelflux.in**.';
+    if (/integrat|connect|plugin|jira|linear|github issue|slack/.test(t))
+      return 'SentinelFlux integrates with CI/CD pipelines (GitHub Actions, GitLab, Jenkins) and sends **Slack / webhook notifications** on failures and regressions.\n\nFor bug tracking, the Bug Tracker module auto-creates entries from ResultAnalyzer. Try asking **"how do Slack notifications work?"** or **"how does CI/CD integration work?"**.';
+    if (/selenium|cypress|playwright|puppeteer|compare|vs|alternative/.test(t))
+      return 'SentinelFlux uses **Playwright** for Web UI testing under the hood, so it supports Chromium, Firefox, and WebKit.\n\nThe key difference from Playwright/Cypress/Selenium alone: SentinelFlux **generates** the test scripts from your knowledge base and **self-heals** broken locators automatically — you don\'t write or maintain selectors manually.';
+    if (/language|python|javascript|java|typescript|framework/.test(t))
+      return 'Generated test scripts are **Python / pytest** files. The CLI is also Python (`pip install sentinelflux`).\n\nThe dashboard and agent pipeline run on the backend — the only thing you need locally is Python 3.9+ and optionally Ollama for the local LLM mode.';
+    // Generic fallback
+    return 'I don\'t have specific information on that yet, but here are things I can help with:\n\n• How the **agentic pipeline** works\n• Any of the **10 AI agents** (e.g. CoverageGap, FlakyDetector)\n• All **8 testing modules**\n• **Pricing** tiers\n• **Exporting / customizing** generated test scripts\n• **CI/CD** and **Slack** integrations\n\nOr type **run [agent] on [module]** for a live agent simulation.\n\nFor anything else: **engage@sentinelflux.in**';
+  }
+
   // ── Main input handler ───────────────────────────────────────────────────────
   function handleInput(text) {
     text = (text || '').trim();
@@ -1694,7 +1746,8 @@
       if (entry) {
         addMsg(md(entry.md), 'bot');
       } else {
-        addMsg(md('I can answer questions about SentinelFlux\'s agents, modules, pipeline, and more.\n\nTry asking:\n• "How does the agentic pipeline work?"\n• "What is the CoverageGap agent?"\n• "What modules does SentinelFlux support?"\n\nOr type **run [agent] on [module]** to simulate an agent run — e.g. *"run coveragegap on recruitment"*.'), 'bot');
+        var hint = smartHint(text);
+        addMsg(md(hint), 'bot');
       }
     }, 500 + Math.floor(Math.random() * 400));
   }
