@@ -2,85 +2,84 @@ var NAV = [
   {
     section: 'Getting Started',
     pages: [
-      { title: 'Overview', href: '/getting-started/overview.html' },
-      { title: 'Quick Start', href: '/getting-started/quick-start.html' },
-      { title: 'System Requirements', href: '/getting-started/system-requirements.html' },
-      { title: 'Trial & Onboarding', href: '/getting-started/trial-onboarding.html' }
+      { title: 'Overview', href: '/docs/getting-started/overview.html' },
+      { title: 'Quick Start', href: '/docs/getting-started/quick-start.html' },
+      { title: 'System Requirements', href: '/docs/getting-started/system-requirements.html' },
+      { title: 'Trial & Onboarding', href: '/docs/getting-started/trial-onboarding.html' }
     ]
   },
   {
     section: 'Core Concepts',
     pages: [
-      { title: 'Knowledge Base', href: '/core-concepts/knowledge-base.html' },
-      { title: 'Generation Pipeline', href: '/core-concepts/generation-pipeline.html' },
-      { title: 'Post-Run Agents', href: '/core-concepts/post-run-agents.html' },
-      { title: 'Approvals', href: '/core-concepts/approvals.html' }
+      { title: 'Knowledge Base', href: '/docs/core-concepts/knowledge-base.html' },
+      { title: 'Generation Pipeline', href: '/docs/core-concepts/generation-pipeline.html' },
+      { title: 'Post-Run Agents', href: '/docs/core-concepts/post-run-agents.html' },
+      { title: 'Approvals', href: '/docs/core-concepts/approvals.html' }
     ]
   },
   {
     section: 'Modules',
     pages: [
-      { title: 'Overview', href: '/modules/index.html' },
-      { title: 'REST / GraphQL API', href: '/modules/rest-graphql-api.html' },
-      { title: 'Web UI Testing', href: '/modules/web-ui.html' },
-      { title: 'API Contract', href: '/modules/api-contract.html' },
-      { title: 'Visual Regression', href: '/modules/visual-regression.html' },
-      { title: 'Accessibility', href: '/modules/accessibility.html' },
-      { title: 'Security & VAPT', href: '/modules/security-vapt.html' },
-      { title: 'Performance', href: '/modules/performance.html' },
-      { title: 'Bug Tracker', href: '/modules/bug-tracker.html' }
+      { title: 'Overview', href: '/docs/modules/index.html' },
+      { title: 'REST / GraphQL API', href: '/docs/modules/rest-graphql-api.html' },
+      { title: 'Web UI Testing', href: '/docs/modules/web-ui.html' },
+      { title: 'API Contract', href: '/docs/modules/api-contract.html' },
+      { title: 'Visual Regression', href: '/docs/modules/visual-regression.html' },
+      { title: 'Accessibility', href: '/docs/modules/accessibility.html' },
+      { title: 'Security & VAPT', href: '/docs/modules/security-vapt.html' },
+      { title: 'Performance', href: '/docs/modules/performance.html' },
+      { title: 'Bug Tracker', href: '/docs/modules/bug-tracker.html' }
     ]
   },
   {
     section: 'Agents',
     pages: [
-      { title: 'Overview', href: '/agents/index.html' },
-      { title: 'ResultAnalyzer', href: '/agents/result-analyzer.html' },
-      { title: 'FlakyDetector', href: '/agents/flaky-detector.html' },
-      { title: 'RegressionGuard', href: '/agents/regression-guard.html' },
-      { title: 'CoverageGap', href: '/agents/coverage-gap.html' },
-      { title: 'LocatorHealer', href: '/agents/locator-healer.html' },
-      { title: 'Generation Agents', href: '/agents/generation-agents.html' }
+      { title: 'Overview', href: '/docs/agents/index.html' },
+      { title: 'ResultAnalyzer', href: '/docs/agents/result-analyzer.html' },
+      { title: 'FlakyDetector', href: '/docs/agents/flaky-detector.html' },
+      { title: 'RegressionGuard', href: '/docs/agents/regression-guard.html' },
+      { title: 'CoverageGap', href: '/docs/agents/coverage-gap.html' },
+      { title: 'LocatorHealer', href: '/docs/agents/locator-healer.html' },
+      { title: 'Generation Agents', href: '/docs/agents/generation-agents.html' }
     ]
   },
   {
     section: 'Platform',
     pages: [
-      { title: 'Test Plans', href: '/platform/test-plans.html' },
-      { title: 'Test Runs', href: '/platform/test-runs.html' },
-      { title: 'Agent Activities', href: '/platform/agent-activities.html' },
-      { title: 'Approvals', href: '/platform/approvals.html' },
-      { title: 'Team & Roles', href: '/platform/team-roles.html' },
-      { title: 'Notifications', href: '/platform/notifications.html' }
+      { title: 'Test Plans', href: '/docs/platform/test-plans.html' },
+      { title: 'Test Runs', href: '/docs/platform/test-runs.html' },
+      { title: 'Agent Activities', href: '/docs/platform/agent-activities.html' },
+      { title: 'Approvals', href: '/docs/platform/approvals.html' },
+      { title: 'Team & Roles', href: '/docs/platform/team-roles.html' },
+      { title: 'Notifications', href: '/docs/platform/notifications.html' }
     ]
   },
   {
     section: 'CI/CD Integration',
     pages: [
-      { title: 'GitHub Actions', href: '/ci-cd/github-actions.html' },
-      { title: 'GitLab CI', href: '/ci-cd/gitlab-ci.html' },
-      { title: 'Jenkins & Other', href: '/ci-cd/jenkins.html' }
+      { title: 'GitHub Actions', href: '/docs/ci-cd/github-actions.html' },
+      { title: 'GitLab CI', href: '/docs/ci-cd/gitlab-ci.html' },
+      { title: 'Jenkins & Other', href: '/docs/ci-cd/jenkins.html' }
     ]
   },
   {
     section: 'Configuration',
     pages: [
-      { title: 'Config Reference', href: '/configuration/config-reference.html' },
-      { title: 'Environments', href: '/configuration/environments.html' },
-      { title: 'LLM Configuration', href: '/configuration/llm-configuration.html' }
+      { title: 'Config Reference', href: '/docs/configuration/config-reference.html' },
+      { title: 'Environments', href: '/docs/configuration/environments.html' },
+      { title: 'LLM Configuration', href: '/docs/configuration/llm-configuration.html' }
     ]
   },
   {
     section: 'Troubleshooting',
     pages: [
-      { title: 'Common Issues', href: '/troubleshooting/index.html' }
+      { title: 'Common Issues', href: '/docs/troubleshooting/index.html' }
     ]
   }
 ];
 
 function getCurrentPath() {
   var p = window.location.pathname;
-  // Normalize trailing slash to index.html
   if (p.endsWith('/')) p = p + 'index.html';
   return p;
 }
@@ -88,7 +87,7 @@ function getCurrentPath() {
 function buildSidebar() {
   var current = getCurrentPath();
   var html = '<div class="px-5 py-4 border-b border-slate-200">'
-    + '<a href="/" class="flex items-center gap-2 group">'
+    + '<a href="/docs/" class="flex items-center gap-2 group">'
     + '<div class="w-7 h-7 bg-indigo-600 rounded-md flex items-center justify-center">'
     + '<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
     + '</div>'
@@ -106,9 +105,9 @@ function buildSidebar() {
       var page = group.pages[j];
       var isActive = current === page.href
         || current === page.href.replace('.html', '')
-        || (page.href === '/modules/index.html' && current === '/modules/')
-        || (page.href === '/agents/index.html' && current === '/agents/')
-        || (page.href === '/troubleshooting/index.html' && current === '/troubleshooting/');
+        || (page.href === '/docs/modules/index.html' && current === '/docs/modules/')
+        || (page.href === '/docs/agents/index.html' && current === '/docs/agents/')
+        || (page.href === '/docs/troubleshooting/index.html' && current === '/docs/troubleshooting/');
       html += '<li><a href="' + page.href + '" class="sidebar-link flex items-center px-2 py-1.5 text-sm rounded-md text-slate-600'
         + (isActive ? ' active' : '') + '">' + page.title + '</a></li>';
     }
@@ -132,7 +131,7 @@ function buildBreadcrumb() {
     for (var j = 0; j < group.pages.length; j++) {
       var page = group.pages[j];
       if (current === page.href || current === page.href.replace('.html', '')) {
-        el.innerHTML = '<a href="/" class="hover:text-indigo-600 transition-colors">Docs</a>'
+        el.innerHTML = '<a href="/docs/" class="hover:text-indigo-600 transition-colors">Docs</a>'
           + '<span class="mx-1.5">›</span>'
           + '<span class="hover:text-indigo-600">' + group.section + '</span>'
           + '<span class="mx-1.5">›</span>'

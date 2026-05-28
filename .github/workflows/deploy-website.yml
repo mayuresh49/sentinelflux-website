@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "website/**"
+      - "docs-site/**"
 
 permissions:
   contents: write
@@ -15,9 +16,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Build combined site
+        run: |
+          mkdir -p _build
+          cp -r website/. _build/
+          mkdir -p _build/docs
+          cp -r docs-site/. _build/docs/
+          rm -f _build/docs/CNAME
+
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./website
+          publish_dir: ./_build
           cname: sentinelflux.in
