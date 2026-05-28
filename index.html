@@ -109,7 +109,7 @@
                     <a href="/#modules" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Modules</a>
                     <a href="/#platform" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Platform</a>
                     <a href="/#pricing" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Pricing</a>
-                    <a href="https://docs.sentinelflux.in" target="_blank" rel="noopener" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Docs</a>
+                    <a href="/docs/" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Docs</a>
                 </div>
             </div>
             <div class="flex items-center gap-3">
@@ -128,7 +128,7 @@
         <a href="/#modules" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Modules</a>
         <a href="/#platform" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Platform</a>
         <a href="/#pricing" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Pricing</a>
-        <a href="https://docs.sentinelflux.in" target="_blank" rel="noopener" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Docs</a>
+        <a href="/docs/" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Docs</a>
         <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Sign in</a>
     </div>
     </nav>
@@ -940,7 +940,7 @@
                 <div>
                     <div class="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-4">Resources</div>
                     <ul class="space-y-3 text-sm">
-                        <li><a href="https://docs.sentinelflux.in" target="_blank" rel="noopener" class="hover:text-white transition-colors">Documentation</a></li>
+                        <li><a href="/docs/" class="hover:text-white transition-colors">Documentation</a></li>
                         <li><a href="/blog.html" class="hover:text-white transition-colors">Blog</a></li>
                         <li><a href="/status.html" class="hover:text-white transition-colors">Status</a></li>
                         <li><a href="/changelog.html" class="hover:text-white transition-colors">Releases</a></li>
@@ -1655,11 +1655,11 @@
     // ── CI/CD EXAMPLES ───────────────────────────────────────────────────────
     {
       keys: ['github actions','github action yaml','github workflow example','gh actions'],
-      md: '**GitHub Actions integration** works by adding a SentinelFlux test step to your existing workflow.\n\nThe step:\n• Checks out your repo (including KB and test scripts)\n• Installs SentinelFlux from your private package registry\n• Runs the test suite against the target environment\n• Uploads the JUnit XML report as a workflow artifact for inline PR status\n\nTest results are automatically pushed to the dashboard. The full workflow YAML template is available in the documentation at docs.sentinelflux.in.'
+      md: '**GitHub Actions integration** works by adding a SentinelFlux test step to your existing workflow.\n\nThe step:\n• Checks out your repo (including KB and test scripts)\n• Installs SentinelFlux from your private package registry\n• Runs the test suite against the target environment\n• Uploads the JUnit XML report as a workflow artifact for inline PR status\n\nTest results are automatically pushed to the dashboard. The full workflow YAML template is available in the documentation at sentinelflux.in/docs/.'
     },
     {
       keys: ['gitlab ci','gitlab yaml','gitlab pipeline example','gitlab-ci'],
-      md: '**GitLab CI integration** works by adding a SentinelFlux job to your `.gitlab-ci.yml` pipeline.\n\nThe job:\n• Runs as a dedicated `test` stage after your build\n• Executes the test suite against your staging environment\n• Publishes JUnit XML as a GitLab test report (shows pass/fail inline on MRs)\n• Artifacts expire after 7 days by default\n\nThe full pipeline template is available in the documentation at docs.sentinelflux.in.'
+      md: '**GitLab CI integration** works by adding a SentinelFlux job to your `.gitlab-ci.yml` pipeline.\n\nThe job:\n• Runs as a dedicated `test` stage after your build\n• Executes the test suite against your staging environment\n• Publishes JUnit XML as a GitLab test report (shows pass/fail inline on MRs)\n• Artifacts expire after 7 days by default\n\nThe full pipeline template is available in the documentation at sentinelflux.in/docs/.'
     },
     {
       keys: ['run locally','local run','without ci','run on laptop','run on local machine','not in ci'],
@@ -1745,7 +1745,7 @@
     },
     {
       keys: ['docker','container','docker image','dockerfile','run in docker','containerize'],
-      md: 'SentinelFlux has an **official Docker image** (`sentinelflux/runner`) that bundles Python, Playwright browsers, and all dependencies.\n\nMount your project directory and pass your API key as an environment variable — the container runs the full test suite and outputs results to the mounted volume.\n\nUseful for CI environments where you don\'t want to manage Python/Playwright installs. `docker-compose` examples for local development are available in the docs at docs.sentinelflux.in.'
+      md: 'SentinelFlux has an **official Docker image** (`sentinelflux/runner`) that bundles Python, Playwright browsers, and all dependencies.\n\nMount your project directory and pass your API key as an environment variable — the container runs the full test suite and outputs results to the mounted volume.\n\nUseful for CI environments where you don\'t want to manage Python/Playwright installs. `docker-compose` examples for local development are available in the docs at sentinelflux.in/docs/.'
     },
     {
       keys: ['windows support','mac support','linux support','operating system','windows run','os support'],
@@ -1831,11 +1831,11 @@
     },
     {
       keys: ['community','discord','forum','slack community','support channel','ask questions','contact support'],
-      md: '**SentinelFlux support channels:**\n\n• **Email** — engage@sentinelflux.in (fastest for product questions)\n• **Discord** — community server for Q&A, tips, and sharing KB examples (link in the docs)\n• **GitHub Issues** — bug reports and feature requests at github.com/sentinelflux\n• **Documentation** — docs.sentinelflux.in for guides and API reference\n• **Pro/Enterprise support** — dedicated Slack channel with the engineering team'
+      md: '**SentinelFlux support channels:**\n\n• **Email** — engage@sentinelflux.in (fastest for product questions)\n• **Discord** — community server for Q&A, tips, and sharing KB examples (link in the docs)\n• **GitHub Issues** — bug reports and feature requests at github.com/sentinelflux\n• **Documentation** — sentinelflux.in/docs/ for guides and API reference\n• **Pro/Enterprise support** — dedicated Slack channel with the engineering team'
     },
     {
       keys: ['roadmap','future feature','upcoming','planned feature','what is coming','product roadmap'],
-      md: '**SentinelFlux roadmap highlights (2026):**\n\n• **Native mobile testing** (iOS/Android via Appium integration) — H2 2026\n• **OpenAI/Bedrock LLM support** — Q3 2026\n• **VS Code extension** — inline coverage gap indicators and test generation from the editor\n• **Test impact analysis** — only run tests affected by changed code (git diff aware)\n• **Multi-language scripts** — TypeScript/Jest generation alongside Python/pytest\n\nRegister interest or vote on features at docs.sentinelflux.in/roadmap'
+      md: '**SentinelFlux roadmap highlights (2026):**\n\n• **Native mobile testing** (iOS/Android via Appium integration) — H2 2026\n• **OpenAI/Bedrock LLM support** — Q3 2026\n• **VS Code extension** — inline coverage gap indicators and test generation from the editor\n• **Test impact analysis** — only run tests affected by changed code (git diff aware)\n• **Multi-language scripts** — TypeScript/Jest generation alongside Python/pytest\n\nRegister interest or vote on features at sentinelflux.in/docs/'
     },
     {
       keys: ['free trial','pro trial','try pro','evaluate pro','trial period','trial length'],
@@ -2139,7 +2139,7 @@
     if (/price|cost|free|paid|money|trial|fee/.test(t))
       return 'For pricing details ask **"what are the pricing tiers?"** — 14-day free trial, then Pro at $49/seat/month, Enterprise is custom.\n\nEmail `engage@sentinelflux.in` to start your free trial.';
     if (/support|help|contact|email|team|human/.test(t))
-      return 'For questions not covered here, reach the SentinelFlux team directly at **engage@sentinelflux.in**.\n\nDocumentation is at **docs.sentinelflux.in**.';
+      return 'For questions not covered here, reach the SentinelFlux team directly at **engage@sentinelflux.in**.\n\nDocumentation is at **sentinelflux.in/docs/**.';
     if (/integrat|connect|plugin|jira|linear|github issue|slack/.test(t))
       return 'SentinelFlux integrates with CI/CD pipelines (GitHub Actions, GitLab, Jenkins) and sends **Slack / webhook notifications** on failures and regressions.\n\nFor bug tracking, the Bug Tracker module auto-creates entries from ResultAnalyzer. Try asking **"how do Slack notifications work?"** or **"how does CI/CD integration work?"**.';
     if (/selenium|cypress|playwright|puppeteer|compare|vs|alternative/.test(t))
