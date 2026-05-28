@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM Configuration — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-info{background:#eff6ff;border-left:4px solid #3b82f6}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/index.html" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">LLM Configuration</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SentinelFlux's agents use a large language model for generation and analysis. The default configuration requires no setup. Enterprise plans can connect a local Ollama model for air-gapped environments.</p>
+
+        <h2>Default LLM (no configuration required)</h2>
+        <p>By default, SentinelFlux uses a Mistral-based model hosted on SentinelFlux infrastructure. This model is optimised for code generation and structured reasoning tasks. No API key or LLM configuration is required from you — it is included in all plans.</p>
+
+        <h2>What data is sent to the LLM?</h2>
+        <p>During the generation pipeline, the following data is sent to the LLM:</p>
+        <ul>
+          <li>Your Knowledge Base scenario descriptions (titles, steps, expected outcomes)</li>
+          <li>AppExplorer selector maps (DOM structure, element labels — not user data)</li>
+          <li>Previously generated test case documents (for ScriptGen context)</li>
+        </ul>
+        <p>Test execution results, application user data, and database contents are <strong>not</strong> sent to the LLM. Post-run agent analysis (ResultAnalyzer, FlakyDetector) uses structured rule-based logic supplemented by the LLM only for the failure classification text — not the raw response data.</p>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">All LLM interactions use data scoped to your project's KB and structural metadata. Customer application data (user records, PII, financial data) is never included in LLM calls. See the <a href="https://sentinelflux.in/security" class="underline">Security page</a> for full data handling details.</p>
+        </div>
+
+        <h2>Local LLM via Ollama (Enterprise)</h2>
+        <p>Enterprise plans support routing generation agent calls to a local Ollama instance instead of the SentinelFlux-hosted model. This is designed for organisations in air-gapped or strict data-residency environments where KB content must not leave the organisation's network perimeter.</p>
+        <p>With local LLM configured:</p>
+        <ul>
+          <li>All generation pipeline LLM calls are routed to your Ollama instance</li>
+          <li>KB content and selector maps stay within your network boundary</li>
+          <li>Post-run agent classifications still use SentinelFlux-hosted logic unless the local option is also configured for analysis</li>
+        </ul>
+
+        <h3>Supported local models</h3>
+        <table>
+          <thead><tr><th>Model</th><th>Minimum VRAM</th><th>Generation quality</th></tr></thead>
+          <tbody>
+            <tr><td>Qwen2.5-Coder-32B-Instruct</td><td>24 GB</td><td>Best — recommended for production use</td></tr>
+            <tr><td>Qwen2.5-Coder-7B-Instruct</td><td>8 GB</td><td>Good — suitable for smaller projects</td></tr>
+            <tr><td>Mistral-7B-Instruct</td><td>8 GB</td><td>Acceptable — lower code generation accuracy</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Configuring Ollama</h3>
+        <p>In <strong>Project Settings → LLM Configuration</strong>, select <strong>Local (Ollama)</strong> and provide:</p>
+        <ul>
+          <li><strong>Ollama base URL</strong> — the URL of your Ollama API endpoint (must be accessible from SentinelFlux's execution environment or your private network peering configuration)</li>
+          <li><strong>Model name</strong> — the Ollama model identifier (e.g. <code>qwen2.5-coder:32b</code>)</li>
+        </ul>
+        <p>Contact <a href="mailto:engage@sentinelflux.in">engage@sentinelflux.in</a> to set up network peering for private Ollama access.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs.js"></script>
+</body>
+</html>

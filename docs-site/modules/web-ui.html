@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web UI Testing — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content ol li{list-style-type:decimal}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-info{background:#eff6ff;border-left:4px solid #3b82f6}.callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/index.html" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Web UI Testing</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">End-to-end browser automation using real Playwright tests with selectors captured from your live application.</p>
+
+        <h2>What this module tests</h2>
+        <p>The Web UI module generates Playwright-based end-to-end tests that simulate real user interactions in a Chromium browser. Tests cover:</p>
+        <ul>
+          <li>Page navigation and URL routing</li>
+          <li>Form input, validation, and submission</li>
+          <li>Button clicks, modal interactions, and multi-step flows</li>
+          <li>Dynamic content loaded via JavaScript (SPAs and React/Vue/Angular apps)</li>
+          <li>Redirect and authentication flows</li>
+          <li>Error state handling (404 pages, form validation errors, server errors)</li>
+        </ul>
+
+        <h2>How AppExplorer captures selectors</h2>
+        <p>Before scripts are generated, AppExplorer crawls the live application and builds a selector map for each page. For each interactive element it discovers, it records multiple selector candidates ranked by stability:</p>
+        <ol>
+          <li><code>data-testid</code> attributes (highest stability)</li>
+          <li>ARIA roles and accessible names</li>
+          <li>Element text content</li>
+          <li>CSS class-based selectors (lower stability — subject to style changes)</li>
+          <li>XPath as a fallback</li>
+        </ol>
+        <p>ScriptGen uses the highest-stability selector available for each element. When UI changes cause locator failures, LocatorHealer automatically re-discovers and proposes updated selectors.</p>
+
+        <div class="callout callout-tip not-prose">
+          <p class="text-sm text-green-800"><strong>Best practice:</strong> Add <code>data-testid</code> attributes to your key interactive elements (buttons, form fields, navigation links). These produce the most stable selectors and reduce LocatorHealer activations significantly.</p>
+        </div>
+
+        <h2>KB scenario format for Web UI</h2>
+        <pre># Web UI scenario example
+domain: checkout
+base_urls:
+  - /cart
+  - /checkout
+  - /order-confirmation
+
+scenarios:
+  - id: CHK-001
+    title: "User completes checkout with valid payment"
+    module: web_ui
+    tags: [smoke, regression]
+    priority: high
+    steps:
+      - Navigate to /cart with at least one item in cart
+      - Click the "Proceed to Checkout" button
+      - Fill in shipping address form fields
+      - Click "Continue to Payment"
+      - Enter valid test card details in the payment form
+      - Click "Place Order"
+    expected: >
+      Redirected to /order-confirmation page.
+      Order confirmation number is displayed.
+      "Thank you for your order" heading is visible.
+
+  - id: CHK-002
+    title: "Empty cart shows message and disabled checkout button"
+    steps:
+      - Navigate to /cart with an empty cart
+    expected: >
+      "Your cart is empty" message is visible.
+      "Proceed to Checkout" button is either absent or disabled.</pre>
+
+        <h2>Browser and viewport configuration</h2>
+        <p>By default, Web UI tests run in Chromium at a desktop viewport (1280×800). You can configure additional viewports per test plan to run mobile and tablet tests:</p>
+        <ul>
+          <li>Desktop: 1280×800 (default)</li>
+          <li>Tablet: 768×1024</li>
+          <li>Mobile: 375×812</li>
+        </ul>
+        <p>Configure viewports in <strong>Project Settings → Test Execution → Viewport Profiles</strong>.</p>
+
+        <h2>Handling authentication in UI tests</h2>
+        <p>Most UI flows require a logged-in user. Configure test credentials in <strong>Project Settings → Environments → Credentials</strong>. Web UI tests use a shared authenticated session established at the start of the test suite — login is performed once and the session is reused across tests in the same run.</p>
+
+        <h2>Generated script structure</h2>
+        <p>Generated Web UI scripts use <strong>Playwright</strong> with pytest-playwright. Each test function uses a <code>page</code> fixture that provides an authenticated Chromium browser context.</p>
+
+        <pre># Example generated test structure (illustrative)
+def test_chk_001_complete_checkout(page, base_url, test_credentials):
+    page.goto(f"{base_url}/cart")
+    page.get_by_role("button", name="Proceed to Checkout").click()
+    page.get_by_label("First name").fill(test_credentials["first_name"])
+    page.get_by_label("Last name").fill(test_credentials["last_name"])
+    # ... shipping fields ...
+    page.get_by_role("button", name="Continue to Payment").click()
+    page.get_by_label("Card number").fill("4111111111111111")
+    page.get_by_role("button", name="Place Order").click()
+    page.wait_for_url("**/order-confirmation**")
+    assert page.get_by_role("heading", name="Thank you for your order").is_visible()</pre>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">Web UI tests run in a headless Chromium browser on SentinelFlux's cloud infrastructure. No local browser setup is required. Screenshots of failures are automatically captured and attached to the run results.</p>
+        </div>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs.js"></script>
+</body>
+</html>

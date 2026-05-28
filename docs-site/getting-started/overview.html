@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overview — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.9rem}
+    .doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8125rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}
+    .doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}
+    .doc-content a{color:#4f46e5;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/index.html" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500">
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Overview</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SentinelFlux is a cloud-hosted AI platform that generates, maintains, and runs automated tests for your applications — continuously, without manual scripting.</p>
+
+        <h2>What is SentinelFlux?</h2>
+        <p>SentinelFlux replaces the traditional test-writing workflow. Instead of hand-coding test scripts, you describe your application's expected behaviour in a structured <strong>Knowledge Base</strong>, and SentinelFlux's AI pipeline generates executable pytest test suites from those descriptions — complete with real DOM selectors, API assertions, and edge-case coverage.</p>
+        <p>When tests run, a set of post-run AI agents automatically classify failures, detect flaky tests, catch regressions, and heal broken locators. The result is a self-maintaining test suite that improves with every run.</p>
+
+        <h2>How the platform works</h2>
+        <p>SentinelFlux operates in four continuous phases:</p>
+
+        <div class="not-prose my-6 space-y-3">
+          <div class="flex gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50">
+            <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
+            <div>
+              <div class="font-semibold text-slate-800 text-sm">Define — Build the Knowledge Base</div>
+              <div class="text-slate-500 text-sm mt-0.5">Describe your application's domains, user flows, and expected behaviours in the KB editor. Each scenario maps to test IDs that the generation pipeline uses as input.</div>
+            </div>
+          </div>
+          <div class="flex gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50">
+            <div class="w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
+            <div>
+              <div class="font-semibold text-slate-800 text-sm">Generate — Run the Generation Pipeline</div>
+              <div class="text-slate-500 text-sm mt-0.5">Five generation agents (AppExplorer → DocGen → DocReview → ScriptGen → ScriptReview) convert KB entries into reviewed, executable test scripts. Each stage has an optional approval gate.</div>
+            </div>
+          </div>
+          <div class="flex gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50">
+            <div class="w-8 h-8 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">3</div>
+            <div>
+              <div class="font-semibold text-slate-800 text-sm">Run — Execute via dashboard or CI/CD</div>
+              <div class="text-slate-500 text-sm mt-0.5">Trigger test runs from the dashboard or automatically on every commit via your CI/CD pipeline. SentinelFlux handles infrastructure, browser execution, and result collection.</div>
+            </div>
+          </div>
+          <div class="flex gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50">
+            <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">4</div>
+            <div>
+              <div class="font-semibold text-slate-800 text-sm">Analyse — Post-run agents act automatically</div>
+              <div class="text-slate-500 text-sm mt-0.5">After each run, five analysis agents classify failures, detect regressions, measure coverage gaps, compute flakiness scores, and queue locator healing patches for review.</div>
+            </div>
+          </div>
+        </div>
+
+        <h2>Key capabilities</h2>
+        <h3>8 test modules</h3>
+        <p>SentinelFlux covers the full testing surface of modern applications. You can enable any combination of modules per project:</p>
+        <ul>
+          <li><strong>REST / GraphQL API</strong> — functional API tests with schema and contract validation</li>
+          <li><strong>Web UI Testing</strong> — end-to-end browser tests using real DOM selectors</li>
+          <li><strong>API Contract</strong> — consumer-driven contract tests via Pact-compatible format</li>
+          <li><strong>Visual Regression</strong> — pixel-level screenshot comparisons across builds</li>
+          <li><strong>Accessibility</strong> — WCAG 2.1 AA/AAA automated audit per page</li>
+          <li><strong>Security & VAPT</strong> — OWASP Top 10 and surface-level vulnerability scanning</li>
+          <li><strong>Performance</strong> — response time, throughput, and Lighthouse-based metrics</li>
+          <li><strong>Bug Tracker</strong> — automatically creates and links bug entries from test failures</li>
+        </ul>
+
+        <h3>10 AI agents</h3>
+        <p>SentinelFlux includes two categories of agents:</p>
+        <ul>
+          <li><strong>5 generation agents</strong> — AppExplorer, DocGen, DocReview, ScriptGen, ScriptReview — run once to produce test scripts from the KB</li>
+          <li><strong>5 post-run agents</strong> — ResultAnalyzer, FlakyDetector, RegressionGuard, CoverageGap, LocatorHealer — run after every test execution automatically</li>
+        </ul>
+
+        <h3>Approvals workflow</h3>
+        <p>Every AI-generated artifact — test case documents, scripts, locator healing patches — passes through a human review step before being committed. Approvals can be mandatory, auto-approved, or team-gated depending on your settings.</p>
+
+        <h2>Platform model</h2>
+        <p>SentinelFlux is a fully cloud-hosted platform. There is no agent to install on your infrastructure. The dashboard, test execution environment, result storage, and AI agents all run on SentinelFlux-managed cloud infrastructure. Your application under test is accessed over the network by the platform's agents.</p>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800"><strong>No self-hosting.</strong> SentinelFlux does not offer a self-hosted or on-premise deployment. All plans run on dedicated SentinelFlux cloud infrastructure. For air-gapped environments, Enterprise plans support local LLM configuration via Ollama.</p>
+        </div>
+
+        <h2>Where to go next</h2>
+        <ul>
+          <li><a href="/getting-started/quick-start.html">Quick Start</a> — set up your first project in under 20 minutes</li>
+          <li><a href="/getting-started/system-requirements.html">System Requirements</a> — supported CI/CD, browsers, and network requirements</li>
+          <li><a href="/core-concepts/knowledge-base.html">Knowledge Base</a> — the foundation of everything SentinelFlux generates</li>
+          <li><a href="/agents/index.html">Agents Overview</a> — all 10 AI agents and what they do</li>
+        </ul>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs.js"></script>
+</body>
+</html>

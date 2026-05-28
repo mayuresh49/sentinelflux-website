@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Environments — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/index.html" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Environments</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Define named environments (staging, production, preview) with distinct base URLs, credentials, and configuration. Run the same test plan against multiple environments.</p>
+
+        <h2>What is an environment?</h2>
+        <p>An environment is a named configuration profile that specifies:</p>
+        <ul>
+          <li>The <strong>base URL</strong> to run tests against</li>
+          <li><strong>Credentials</strong> (test user accounts, API keys, bearer tokens)</li>
+          <li>Any <strong>environment-specific variables</strong> (feature flags, custom headers)</li>
+        </ul>
+        <p>Test plans reference an environment by name. The same plan can be run against <code>staging</code> for pre-deploy checks and against <code>production</code> for post-deploy smoke tests.</p>
+
+        <h2>Creating an environment</h2>
+        <p>Navigate to <strong>Project Settings → Environments → Add Environment</strong>:</p>
+        <table>
+          <thead><tr><th>Field</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>Name</td><td>Short identifier: <code>staging</code>, <code>production</code>, <code>preview</code></td></tr>
+            <tr><td>Base URL</td><td>Full URL including protocol: <code>https://staging.myapp.com</code></td></tr>
+            <tr><td>Default environment</td><td>If checked, this environment is used when no environment is specified in a run trigger</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Credentials</h2>
+        <p>Add credentials per environment under <strong>Environments → [name] → Credentials</strong>:</p>
+        <ul>
+          <li><strong>Test user account</strong> — email/password for logging in via Web UI tests</li>
+          <li><strong>API bearer token</strong> — pre-issued token for API tests (or a login endpoint + credentials to obtain one at test setup)</li>
+          <li><strong>API key</strong> — header name and key value</li>
+          <li><strong>Admin account</strong> — separate credentials for scenarios that require elevated privileges</li>
+        </ul>
+        <p>All credentials are encrypted at rest and are only decrypted in the test execution environment. They are never exposed in logs or UI.</p>
+
+        <div class="callout callout-warning not-prose">
+          <p class="text-sm text-amber-800"><strong>Use dedicated test accounts.</strong> Never use a real user's production credentials. Create dedicated test accounts in each environment with known, stable passwords that won't expire.</p>
+        </div>
+
+        <h2>Environment variables</h2>
+        <p>Add arbitrary key-value pairs per environment that are injected into the test execution context. Useful for:</p>
+        <ul>
+          <li>Feature flag values that differ between environments</li>
+          <li>Custom request headers (e.g. bypassing rate limits in staging)</li>
+          <li>Test data identifiers (e.g. a known product ID that exists in staging)</li>
+        </ul>
+
+        <h2>Specifying environment in a run trigger</h2>
+        <pre>POST https://api.sentinelflux.in/v1/runs
+{
+  "project": "myapp",
+  "plan": "smoke",
+  "environment": "staging"
+}</pre>
+
+        <p>If <code>environment</code> is omitted, the default environment for the project is used.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs.js"></script>
+</body>
+</html>

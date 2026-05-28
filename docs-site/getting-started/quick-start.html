@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Start — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content a{color:#4f46e5;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .step-num{display:inline-flex;align-items:center;justify-content:center;width:1.75rem;height:1.75rem;background:#4f46e5;color:#fff;border-radius:9999px;font-size:.8rem;font-weight:700;flex-shrink:0;margin-top:.125rem}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/index.html" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Quick Start</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Set up your first SentinelFlux project and run AI-generated tests in under 20 minutes.</p>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800"><strong>Prerequisites:</strong> A running web application or API that is network-accessible from the internet (or reachable via your CI/CD environment). Your SentinelFlux trial account credentials.</p>
+        </div>
+
+        <h2>Step 1 — Activate your trial</h2>
+        <p>Go to <a href="https://sentinelflux.in">sentinelflux.in</a> and click <strong>Start free trial</strong>. You'll get 14 days of full Pro access with no credit card required. After email verification, you'll land on the dashboard's onboarding wizard.</p>
+
+        <h2>Step 2 — Create a project</h2>
+        <p>From the dashboard, click <strong>New Project</strong> and provide:</p>
+        <ul>
+          <li><strong>Project name</strong> — any identifier (e.g. <code>my-app-staging</code>)</li>
+          <li><strong>Application URL</strong> — the base URL of your application (e.g. <code>https://staging.myapp.com</code>)</li>
+          <li><strong>Application type</strong> — Web UI, REST API, GraphQL API, or mixed</li>
+          <li><strong>Modules to enable</strong> — select the test types you want (you can change this later)</li>
+        </ul>
+        <p>SentinelFlux will verify it can reach the application URL before saving the project.</p>
+
+        <h2>Step 3 — Build the Knowledge Base</h2>
+        <p>The Knowledge Base (KB) is where you describe your application's expected behaviour. Navigate to <strong>Project → Knowledge Base → Add Domain</strong>.</p>
+        <p>Each domain maps to a functional area of your application (e.g. <em>Authentication</em>, <em>Checkout</em>, <em>API / Products</em>). Within each domain, add scenarios — plain-language descriptions of what should work:</p>
+
+        <pre># Example KB entry (YAML format shown for reference)
+domain: authentication
+scenarios:
+  - id: AUTH-001
+    title: "User can log in with valid credentials"
+    steps:
+      - Navigate to /login
+      - Enter registered email and password
+      - Click Sign In
+    expected: Redirect to /dashboard with user session active
+
+  - id: AUTH-002
+    title: "Invalid password shows error message"
+    steps:
+      - Navigate to /login
+      - Enter registered email with wrong password
+      - Click Sign In
+    expected: Error message "Invalid credentials" displayed; no redirect</pre>
+
+        <div class="callout callout-tip not-prose">
+          <p class="text-sm text-green-800"><strong>Tip:</strong> Start with 5–10 scenarios per domain covering your most important user flows. You can add more scenarios incrementally; the generation pipeline can be re-run at any time.</p>
+        </div>
+
+        <h2>Step 4 — Run the Generation Pipeline</h2>
+        <p>Once you have at least one domain with scenarios, click <strong>Generate Tests</strong>. The five generation agents run in sequence:</p>
+        <ol>
+          <li><strong>AppExplorer</strong> crawls your app and captures live DOM selectors for each page referenced in the KB</li>
+          <li><strong>DocGen</strong> converts KB scenarios into structured test case documents</li>
+          <li><strong>DocReview</strong> validates the documents for completeness and consistency</li>
+          <li><strong>ScriptGen</strong> produces executable pytest scripts using the captured selectors</li>
+          <li><strong>ScriptReview</strong> validates syntax, selector existence, and assertion quality</li>
+        </ol>
+        <p>The full pipeline for 10–20 scenarios typically completes in 3–7 minutes. You can monitor progress in real time under <strong>Agent Activities</strong>.</p>
+
+        <h2>Step 5 — Review and approve</h2>
+        <p>Generated scripts land in <strong>Approvals</strong> before being committed to your test suite. Review the generated code, optionally edit it, then click <strong>Approve</strong>. Rejected items return to the queue with your comments so the agent can regenerate.</p>
+
+        <h2>Step 6 — Run your first test suite</h2>
+        <p>Navigate to <strong>Test Plans</strong>, select or create a plan, and click <strong>Run Now</strong>. The results appear in real time in <strong>Test Runs</strong>. After the run completes, post-run agents automatically analyse the results.</p>
+
+        <h2>Step 7 — Connect CI/CD</h2>
+        <p>To trigger runs automatically on every deployment, connect your CI/CD pipeline. Navigate to <strong>Settings → CI/CD Integration</strong> to get your project's API token and webhook URL.</p>
+        <p>See the integration guides for your platform:</p>
+        <ul>
+          <li><a href="/ci-cd/github-actions.html">GitHub Actions</a></li>
+          <li><a href="/ci-cd/gitlab-ci.html">GitLab CI</a></li>
+          <li><a href="/ci-cd/jenkins.html">Jenkins & Other</a></li>
+        </ul>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs.js"></script>
+</body>
+</html>
