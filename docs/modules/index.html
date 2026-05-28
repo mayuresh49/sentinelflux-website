@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modules Overview — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Modules</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SentinelFlux's eight test modules cover the full testing surface of modern web and API applications. Enable any combination per project.</p>
+
+        <h2>Module reference</h2>
+        <table>
+          <thead><tr><th>Module</th><th>App type</th><th>What it tests</th></tr></thead>
+          <tbody>
+            <tr><td><a href="/modules/rest-graphql-api.html">REST / GraphQL API</a></td><td>API</td><td>Functional API requests, response validation, status codes, payloads</td></tr>
+            <tr><td><a href="/modules/web-ui.html">Web UI Testing</a></td><td>Web</td><td>End-to-end browser automation, user flows, form interactions</td></tr>
+            <tr><td><a href="/modules/api-contract.html">API Contract</a></td><td>API</td><td>Consumer-driven contract tests, schema stability, breaking change detection</td></tr>
+            <tr><td><a href="/modules/visual-regression.html">Visual Regression</a></td><td>Web</td><td>Pixel-level screenshot comparisons between builds</td></tr>
+            <tr><td><a href="/modules/accessibility.html">Accessibility</a></td><td>Web</td><td>WCAG 2.1 AA/AAA automated audit per page and component</td></tr>
+            <tr><td><a href="/modules/security-vapt.html">Security & VAPT</a></td><td>API / Web</td><td>OWASP Top 10, SQL injection, XSS, authentication vulnerabilities</td></tr>
+            <tr><td><a href="/modules/performance.html">Performance</a></td><td>API / Web</td><td>Response times, throughput, Lighthouse metrics, load thresholds</td></tr>
+            <tr><td><a href="/modules/bug-tracker.html">Bug Tracker</a></td><td>All</td><td>Automatic bug entry creation from test failures with full context</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Enabling modules</h2>
+        <p>Modules are configured per project. Navigate to <strong>Project Settings → Modules</strong> to enable or disable modules. You can change module settings at any time; the change takes effect on the next test run.</p>
+        <p>When you enable a new module after the initial generation run, you'll need to re-run the generation pipeline for domains where you want the new module to produce tests. Existing scripts for other modules are not affected.</p>
+
+        <h2>Module-specific KB fields</h2>
+        <p>Most KB scenarios work across all enabled modules. Some modules support additional scenario fields to improve generation quality:</p>
+        <ul>
+          <li><strong>REST / GraphQL API</strong> — <code>endpoint</code>, <code>method</code>, <code>request_body</code>, <code>expected_status</code></li>
+          <li><strong>Performance</strong> — <code>max_response_ms</code>, <code>min_throughput_rps</code></li>
+          <li><strong>Security</strong> — <code>auth_required</code>, <code>sensitive_data_fields</code></li>
+          <li><strong>Visual Regression</strong> — <code>viewport</code>, <code>screenshot_regions</code></li>
+        </ul>
+        <p>These fields are optional. The generation agents use them as hints when present.</p>
+
+        <h2>Running a subset of modules</h2>
+        <p>Test plans can be scoped to specific modules. For example, you can define a plan that runs only Web UI and Accessibility tests on every PR, while the full suite (including Security and Performance) runs nightly. See <a href="/platform/test-plans.html">Test Plans</a>.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>

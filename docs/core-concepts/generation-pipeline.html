@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generation Pipeline — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content ol li{list-style-type:decimal}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-info{background:#eff6ff;border-left:4px solid #3b82f6}.callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Generation Pipeline</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">How SentinelFlux converts Knowledge Base entries into reviewed, executable test scripts using five sequential AI agents.</p>
+
+        <h2>Pipeline overview</h2>
+        <p>The generation pipeline transforms your Knowledge Base into test scripts in five stages. Each stage is handled by a dedicated AI agent. Stages run sequentially; if any stage produces output that fails the review criteria, it is either automatically retried or queued for human review before the next stage begins.</p>
+
+        <div class="not-prose my-6 space-y-2">
+          <div class="flex items-center gap-3">
+            <div class="flex-shrink-0 w-28 text-right text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">AppExplorer</div>
+            <div class="flex-1 h-px bg-slate-200 relative"><div class="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 border-r-2 border-t-2 border-slate-300 rotate-45"></div></div>
+            <div class="flex-shrink-0 w-28 text-right text-xs font-semibold text-violet-600 bg-violet-50 px-2 py-1 rounded">DocGen</div>
+            <div class="flex-1 h-px bg-slate-200 relative"><div class="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 border-r-2 border-t-2 border-slate-300 rotate-45"></div></div>
+            <div class="flex-shrink-0 w-28 text-right text-xs font-semibold text-sky-600 bg-sky-50 px-2 py-1 rounded">DocReview</div>
+          </div>
+          <div class="ml-32 text-center text-xs text-slate-400">↓</div>
+          <div class="flex items-center gap-3 justify-end">
+            <div class="flex-shrink-0 w-28 text-right text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">ScriptReview</div>
+            <div class="flex-1 h-px bg-slate-200 relative"><div class="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 border-l-2 border-t-2 border-slate-300 -rotate-45"></div></div>
+            <div class="flex-shrink-0 w-28 text-right text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-1 rounded">ScriptGen</div>
+          </div>
+        </div>
+
+        <h2>Stage 1 — AppExplorer</h2>
+        <p>AppExplorer crawls your live application using a headless Chromium browser. For each page or API endpoint referenced in the KB, it:</p>
+        <ul>
+          <li>Discovers and captures stable DOM selectors for all interactive elements</li>
+          <li>Records page structure and element hierarchy</li>
+          <li>Captures API endpoint signatures and response shapes (for API modules)</li>
+          <li>Stores selector data as structured JSON indexed by domain and page</li>
+        </ul>
+        <p>AppExplorer output is used by ScriptGen to generate tests with real, working selectors rather than placeholder values.</p>
+        <p><strong>Inputs:</strong> Project URL, KB domain base URLs, authenticated session credentials (if configured)<br>
+        <strong>Output:</strong> <code>locators/&lt;domain&gt;/*.json</code> — selector maps per page</p>
+
+        <h2>Stage 2 — DocGen</h2>
+        <p>DocGen takes each KB scenario and generates a structured test case document in Markdown format. These documents are the intermediate specification that ScriptGen uses to write code. Each document includes:</p>
+        <ul>
+          <li>Scenario ID, title, and priority</li>
+          <li>Preconditions derived from the KB steps</li>
+          <li>Step-by-step test actions with inferred interaction types</li>
+          <li>Expected assertions derived from the <code>expected</code> field</li>
+          <li>Data requirements (test credentials, input values)</li>
+        </ul>
+        <p><strong>Inputs:</strong> KB scenarios, AppExplorer selector maps<br>
+        <strong>Output:</strong> <code>docs/test_cases/&lt;domain&gt;/*.md</code> — one file per scenario</p>
+
+        <h2>Stage 3 — DocReview</h2>
+        <p>DocReview acts as a QA gate on the generated documents before code is written. It checks each document for:</p>
+        <ul>
+          <li>Completeness — all required fields present and non-empty</li>
+          <li>Consistency — steps and expected outcomes are internally coherent</li>
+          <li>Actionability — steps are concrete enough for ScriptGen to produce valid code</li>
+          <li>Selector availability — referenced elements exist in the AppExplorer output</li>
+        </ul>
+        <p>Documents that pass DocReview proceed to ScriptGen. Documents that fail are either automatically corrected with a retry or forwarded to the <strong>Approvals</strong> queue with a failure reason for human review.</p>
+        <p><strong>Inputs:</strong> DocGen output documents<br>
+        <strong>Output:</strong> Approved documents → ScriptGen; rejected documents → Approvals queue</p>
+
+        <h2>Stage 4 — ScriptGen</h2>
+        <p>ScriptGen converts approved test case documents into executable pytest test scripts. Generated scripts use:</p>
+        <ul>
+          <li>Playwright (for Web UI modules) — real browser automation using selectors from AppExplorer</li>
+          <li>HTTPX (for API modules) — HTTP client with schema-aware assertions</li>
+          <li>pytest fixtures for session setup, environment-specific configuration, and credential injection</li>
+        </ul>
+        <p>Scripts follow a consistent structure: one test function per scenario ID, with setup, execution, and assertion phases clearly separated.</p>
+        <p><strong>Inputs:</strong> Approved test case documents, locator maps<br>
+        <strong>Output:</strong> <code>tests/&lt;domain&gt;/test_&lt;scenario_id&gt;.py</code> — one file per scenario</p>
+
+        <h2>Stage 5 — ScriptReview</h2>
+        <p>ScriptReview performs static validation of generated scripts before they are committed to the test suite:</p>
+        <ul>
+          <li>Syntax validation — parses the script and reports syntax errors</li>
+          <li>Selector validation — verifies referenced selectors exist in the AppExplorer locator maps</li>
+          <li>Assertion quality — checks that each test has at least one meaningful assertion</li>
+          <li>Import checks — verifies all referenced fixtures and utilities are available</li>
+        </ul>
+        <p>Scripts that pass proceed to the <strong>Approvals</strong> queue for final human sign-off. Failed scripts are automatically retried with ScriptGen once; if they fail again, they enter the Approvals queue as rejected items with detailed failure reasons.</p>
+        <p><strong>Inputs:</strong> ScriptGen output scripts, locator maps<br>
+        <strong>Output:</strong> Approved scripts → Approvals queue; failed scripts → retry or Approvals queue (rejected)</p>
+
+        <h2>Re-running the pipeline</h2>
+        <p>The generation pipeline can be re-run at any time. You can choose to regenerate:</p>
+        <ul>
+          <li><strong>Entire project</strong> — re-runs all stages for all domains</li>
+          <li><strong>Specific domains</strong> — re-runs all stages for selected domains only</li>
+          <li><strong>Specific scenarios</strong> — re-runs ScriptGen and ScriptReview for selected scenario IDs</li>
+          <li><strong>AppExplorer only</strong> — refreshes selector maps without regenerating scripts (useful after UI changes)</li>
+        </ul>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">Re-running the pipeline for a domain with approved scripts will create new pending approvals. Existing approved scripts are not overwritten until the new version is approved.</p>
+        </div>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>

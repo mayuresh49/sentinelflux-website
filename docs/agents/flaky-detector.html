@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlakyDetector — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-info{background:#eff6ff;border-left:4px solid #3b82f6}.callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#8b5cf6">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <div><div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Post-run Agent</div></div>
+        </div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">FlakyDetector</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Analyses run history to compute per-test stability scores and identify whether flakiness is caused by locator instability — triggering LocatorHealer when it is.</p>
+
+        <h2>Trigger</h2>
+        <p>FlakyDetector is triggered when ResultAnalyzer classifies one or more tests in a run as <strong>Flaky</strong>. It runs on each flagged test independently.</p>
+
+        <h2>Stability score</h2>
+        <p>For each flagged test, FlakyDetector fetches the test's run history (last 5 runs by default) and computes a <strong>stability score</strong> between 0 and 1:</p>
+        <ul>
+          <li><strong>1.0</strong> — test has passed in every one of the last 5 runs (not flaky)</li>
+          <li><strong>0.6–0.99</strong> — test has occasional failures with no pattern (mildly flaky)</li>
+          <li><strong>0.0–0.59</strong> — test fails frequently or in a recognisable pattern (significantly flaky)</li>
+        </ul>
+        <p>Tests scoring below the configured threshold (default: <strong>0.75</strong>) are marked as <em>unstable</em> and appear in the Flaky Tests report on the dashboard.</p>
+
+        <h2>Locator instability detection</h2>
+        <p>For each unstable test, FlakyDetector checks whether the failure pattern correlates with locator errors (element not found, selector timeout). It compares the AppExplorer selector snapshots from the current run against the snapshot at the time the test was last stable.</p>
+        <p>If selector changes are detected that align with the flakiness pattern, FlakyDetector raises a <strong>locator instability flag</strong> and queues LocatorHealer to re-discover the affected selectors.</p>
+
+        <h2>Outputs</h2>
+        <table>
+          <thead><tr><th>Output</th><th>Where to find it</th></tr></thead>
+          <tbody>
+            <tr><td>Stability score per test</td><td>Run results → Agent Activity → FlakyDetector output; also shown on the test's history page</td></tr>
+            <tr><td>Unstable test list</td><td>Dashboard → Flaky Tests report</td></tr>
+            <tr><td>Locator instability flag</td><td>Shown on the specific test in Flaky Tests report; triggers LocatorHealer automatically</td></tr>
+            <tr><td>Pattern summary</td><td>FlakyDetector agent output includes a text summary of the instability pattern observed</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Configuration</h2>
+        <p>Navigate to <strong>Project Settings → Agents → FlakyDetector</strong>:</p>
+        <ul>
+          <li><strong>History window</strong> — number of past runs to analyse (default: 5, max: 20)</li>
+          <li><strong>Stability threshold</strong> — score below which a test is marked unstable (default: 0.75)</li>
+          <li><strong>Auto-queue LocatorHealer</strong> — whether to automatically trigger LocatorHealer when locator instability is detected (default: enabled)</li>
+        </ul>
+
+        <div class="callout callout-tip not-prose">
+          <p class="text-sm text-green-800">Tests with a stability score below 0.5 are automatically quarantined — excluded from blocking the CI/CD run — until resolved. This prevents a persistently flaky test from blocking deployments while it's being investigated.</p>
+        </div>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>

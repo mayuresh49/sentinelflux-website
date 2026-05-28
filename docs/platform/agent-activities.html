@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Activities — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Agent Activities</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">A unified log of all agent activity across both generation pipeline runs and post-run analysis — with real-time status and detailed output per activity.</p>
+
+        <h2>Accessing Agent Activities</h2>
+        <p>Navigate to <strong>Agent Activities</strong> from the left sidebar. The view shows a chronological list of all agent activities across your project, most recent first. Filter by agent type, status, or date range.</p>
+
+        <h2>Activity record</h2>
+        <p>Each activity record shows:</p>
+        <ul>
+          <li><strong>Agent name</strong> — which agent ran</li>
+          <li><strong>Trigger</strong> — what triggered it (run ID, generation request, FlakyDetector signal)</li>
+          <li><strong>Status</strong> — Running, Completed, Failed, Partial</li>
+          <li><strong>Duration</strong> — how long the agent took</li>
+          <li><strong>Timestamp</strong> — when it started and completed</li>
+          <li><strong>Output summary</strong> — e.g. "4 tests classified: 2 Product Bug, 1 Flaky, 1 Script Error"</li>
+          <li><strong>Actions</strong> — links to resulting approvals, reports, or alerts</li>
+        </ul>
+
+        <h2>Activity status values</h2>
+        <table>
+          <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td>Running</td><td>Agent is currently active. Real-time log stream available.</td></tr>
+            <tr><td>Completed</td><td>Agent finished successfully and produced output.</td></tr>
+            <tr><td>Partial</td><td>Agent completed some work but encountered errors for a subset of inputs. Output available for successful portions.</td></tr>
+            <tr><td>Failed</td><td>Agent could not complete. Check the detail log for the error. May be retriable.</td></tr>
+            <tr><td>Skipped</td><td>Agent did not run because its trigger conditions were not met (e.g. no Flaky tests for FlakyDetector).</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Real-time streaming</h2>
+        <p>For in-progress activities, click into the record to see a live log stream. Generation pipeline activities show which stage each domain or scenario is currently in. Post-run agent activities show per-test classification progress.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>

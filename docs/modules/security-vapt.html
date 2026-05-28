@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security & VAPT — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Security & VAPT</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Automated OWASP Top 10 and vulnerability scanning integrated into your continuous testing pipeline.</p>
+
+        <h2>What this module tests</h2>
+        <p>The Security & VAPT module generates and runs automated security test cases targeting common vulnerability classes. Tests are scoped to the endpoints and pages in your Knowledge Base, ensuring security coverage is aligned with your actual application surface.</p>
+        <p>Vulnerability classes tested:</p>
+        <ul>
+          <li><strong>Injection</strong> — SQL injection, NoSQL injection, command injection probe payloads</li>
+          <li><strong>Broken Authentication</strong> — missing rate limits, weak token entropy, session fixation</li>
+          <li><strong>Cross-Site Scripting (XSS)</strong> — reflected and stored XSS probe payloads in form inputs and URL parameters</li>
+          <li><strong>Broken Access Control</strong> — IDOR probes (accessing another user's resources), privilege escalation paths</li>
+          <li><strong>Security Misconfiguration</strong> — missing security headers, verbose error messages exposing stack traces, open CORS</li>
+          <li><strong>Sensitive Data Exposure</strong> — plaintext sensitive fields in responses, missing HTTPS enforcement</li>
+          <li><strong>CSRF</strong> — missing CSRF tokens on state-changing endpoints</li>
+        </ul>
+
+        <div class="callout callout-warning not-prose">
+          <p class="text-sm text-amber-800"><strong>Run on staging only.</strong> Security tests send probe payloads that may create junk data. Configure the Security module to run against your staging environment, not production. Set this in <strong>Project Settings → Environments → Security Scan Target</strong>.</p>
+        </div>
+
+        <h2>Test scope</h2>
+        <p>Security tests are scoped to the endpoints and pages defined in your KB domains. Only URLs and API endpoints you've described in the KB are tested — SentinelFlux does not crawl or discover additional attack surface beyond what is in scope.</p>
+        <p>For API endpoints, additional scope can be added by uploading an OpenAPI spec in <strong>Project Settings → API Spec</strong>.</p>
+
+        <h2>KB scenario format for security tests</h2>
+        <pre># Security scenario example
+domain: auth-api
+scenarios:
+  - id: SEC-AUTH-001
+    title: "Login endpoint rejects SQL injection in email field"
+    module: security
+    auth_required: false
+    steps:
+      - Send POST to /api/auth/login with email containing SQL injection payload
+    expected: >
+      HTTP 400 or 422 response.
+      No database error messages exposed in response body.
+      Application does not return HTTP 200 or 500 for injection payloads.
+
+  - id: SEC-AUTH-002
+    title: "Protected endpoints return 401 without auth token"
+    module: security
+    steps:
+      - Send GET to /api/v1/users/me without any Authorization header
+    expected: >
+      HTTP 401 response.
+      Response does not include any user data.
+      WWW-Authenticate header is present.</pre>
+
+        <h2>Severity classification</h2>
+        <table>
+          <thead><tr><th>Severity</th><th>Definition</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td>Critical</td><td>Exploitable with immediate impact on data or system integrity</td><td>SQL injection returning database rows</td></tr>
+            <tr><td>High</td><td>Significant vulnerability requiring prompt remediation</td><td>Missing authentication on admin endpoints</td></tr>
+            <tr><td>Medium</td><td>Vulnerability with limited exploitability or impact</td><td>Missing CSRF protection on low-risk forms</td></tr>
+            <tr><td>Low</td><td>Best-practice issue with minimal direct risk</td><td>Verbose error messages</td></tr>
+            <tr><td>Informational</td><td>Configuration observation, no direct risk</td><td>Missing optional security header</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Reporting and integration</h2>
+        <p>Security findings are available in the <strong>Security</strong> tab of the run results view. Findings marked as Critical or High automatically create Bug Tracker entries (if the Bug Tracker module is enabled). Reports can be exported as PDF or JSON for compliance and audit purposes.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>
