@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
         code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
 
         /* Animated gradient text */
@@ -460,13 +460,13 @@
                     </li>
                     <li class="flex items-start gap-3 text-slate-700">
                         <svg class="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                        Works with Mistral (cloud) or Ollama/Qwen (local, air-gapped)
+                        Works with Anthropic Claude or Mistral (cloud) or Ollama/Qwen (local, air-gapped)
                     </li>
                 </ul>
             </div>
-            <div data-animate="slide-right" class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl">
+            <div data-animate="slide-right" class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl overflow-hidden">
                 <div class="text-xs text-slate-500 mb-4 mono font-medium">knowledge_base / myapp / application.yaml</div>
-                <pre class="text-sm leading-relaxed overflow-x-auto"><code><span class="text-slate-500"># Step 1 — define your Knowledge Base</span>
+                <pre class="text-sm leading-relaxed overflow-x-auto max-w-full"><code><span class="text-slate-500"># Step 1 — define your Knowledge Base</span>
 <span class="text-indigo-400">app</span><span class="text-slate-300">:</span>
   <span class="text-amber-300">name</span><span class="text-slate-300">:</span> <span class="text-emerald-400">myapp</span>
   <span class="text-amber-300">base_url</span><span class="text-slate-300">:</span> <span class="text-emerald-400">https://staging.myapp.com</span>
@@ -494,29 +494,29 @@
             <div data-animate="slide-left" class="order-2 md:order-1 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
                 <div class="text-xs text-slate-500 mb-5 font-semibold uppercase tracking-wide">Locator Healing Strategy</div>
                 <div class="space-y-3">
-                    <div class="flex items-center gap-3.5 p-3.5 bg-emerald-50 rounded-xl border border-emerald-200">
+                    <div class="flex items-center gap-3 p-3.5 bg-emerald-50 rounded-xl border border-emerald-200">
                         <div class="w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">1</div>
-                        <div class="flex-1">
+                        <div class="flex-1 min-w-0">
                             <div class="text-sm font-semibold text-slate-900">Primary Locator</div>
                             <div class="text-xs text-slate-500 mt-0.5">data-testid, aria-label — most stable selectors</div>
                         </div>
-                        <div class="text-xs font-semibold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-lg shrink-0">Active</div>
+                        <div class="text-xs font-semibold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-lg shrink-0">Active</div>
                     </div>
-                    <div class="flex items-center gap-3.5 p-3.5 bg-amber-50 rounded-xl border border-amber-200">
+                    <div class="flex items-center gap-3 p-3.5 bg-amber-50 rounded-xl border border-amber-200">
                         <div class="w-7 h-7 bg-amber-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">2</div>
-                        <div class="flex-1">
+                        <div class="flex-1 min-w-0">
                             <div class="text-sm font-semibold text-slate-900">Alternative Locators</div>
                             <div class="text-xs text-slate-500 mt-0.5">id, name, placeholder, CSS path</div>
                         </div>
-                        <div class="text-xs font-semibold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-lg shrink-0">Fallback</div>
+                        <div class="text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-1 rounded-lg shrink-0">Fallback</div>
                     </div>
-                    <div class="flex items-center gap-3.5 p-3.5 bg-indigo-50 rounded-xl border border-indigo-200">
+                    <div class="flex items-center gap-3 p-3.5 bg-indigo-50 rounded-xl border border-indigo-200">
                         <div class="w-7 h-7 bg-indigo-500 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">3</div>
-                        <div class="flex-1">
+                        <div class="flex-1 min-w-0">
                             <div class="text-sm font-semibold text-slate-900">AI Healer</div>
                             <div class="text-xs text-slate-500 mt-0.5">LocatorHealerAgent re-discovers from live DOM</div>
                         </div>
-                        <div class="text-xs font-semibold text-indigo-700 bg-indigo-100 px-2.5 py-1 rounded-lg shrink-0">Auto-heal</div>
+                        <div class="text-xs font-semibold text-indigo-700 bg-indigo-100 px-2 py-1 rounded-lg shrink-0">Auto-heal</div>
                     </div>
                     <div class="flex items-center gap-3 mt-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
                         <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -571,14 +571,14 @@
                 <div class="space-y-3">
                     <div class="bg-white rounded-xl p-4 border border-slate-200">
                         <div class="flex items-start justify-between gap-2 mb-2">
-                            <span class="text-xs font-semibold text-slate-700 mono leading-snug">test_login_invalid_credentials</span>
+                            <span class="text-xs font-semibold text-slate-700 mono leading-snug min-w-0 overflow-hidden" style="word-break:break-all">test_login_invalid_credentials</span>
                             <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded font-semibold shrink-0 whitespace-nowrap">Product Bug</span>
                         </div>
                         <p class="text-xs text-slate-500 leading-relaxed">Error message not shown after invalid login — assertion failure on element visibility. Likely introduced in v2.3.1.</p>
                     </div>
                     <div class="bg-white rounded-xl p-4 border border-slate-200">
                         <div class="flex items-start justify-between gap-2 mb-2">
-                            <span class="text-xs font-semibold text-slate-700 mono leading-snug">test_employee_search</span>
+                            <span class="text-xs font-semibold text-slate-700 mono leading-snug min-w-0 overflow-hidden" style="word-break:break-all">test_employee_search</span>
                             <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-semibold shrink-0 whitespace-nowrap">Flaky — Script</span>
                         </div>
                         <p class="text-xs text-slate-500 leading-relaxed">Failed 3 of 5 recent runs. Search input locator may need updating. Healing suggestion queued for approval.</p>
@@ -864,7 +864,7 @@
                         Which LLMs does SentinelFlux support?
                         <svg class="w-4 h-4 text-slate-400 transition-transform group-open:rotate-180 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                     </summary>
-                    <div class="px-6 pb-5 text-sm text-slate-500 leading-relaxed">SentinelFlux works with Mistral (cloud) out of the box. For air-gapped or local LLM configurations, it supports Ollama with Qwen and other local models. Enterprise plans include custom LLM integrations and a dedicated cloud instance.</div>
+                    <div class="px-6 pb-5 text-sm text-slate-500 leading-relaxed">SentinelFlux supports Anthropic Claude and Mistral as cloud LLM providers. For air-gapped or local configurations it supports Ollama with Qwen and other local models. Enterprise plans include custom LLM integrations and a dedicated cloud instance.</div>
                 </details>
                 <details class="group border border-slate-200 rounded-xl overflow-hidden">
                     <summary class="flex items-center justify-between px-6 py-4 cursor-pointer font-semibold text-slate-900 text-sm select-none hover:bg-slate-50 transition-colors">
@@ -1469,8 +1469,8 @@
       md: 'The **Knowledge Base (KB)** is YAML files describing your app:\n\n```yaml\nmodule: employee_management\nscenarios:\n  - id: emp_create\n    description: Create new employee record\n    fields: [name, email, department]\n    validations: [required, email format]\n```\n\nKB scenario IDs drive test generation, coverage gap analysis, and failure classification. SentinelFlux never generates tests for fields not in your KB — no hallucinations.'
     },
     {
-      keys: ['ollama','local llm','air-gapped','airgapped','mistral','qwen','which llm','llm support'],
-      md: '**Two LLM configurations:**\n\n• **Cloud:** Mistral via API — fastest, no GPU needed\n• **Local / Air-gapped:** Ollama + Qwen — zero data leaves your environment\n\nSwitch via `sentinelflux.config.yaml`. The local option is popular for teams with strict data residency requirements or no internet access.'
+      keys: ['ollama','local llm','air-gapped','airgapped','mistral','qwen','which llm','llm support','anthropic','claude llm'],
+      md: '**Three LLM configurations:**\n\n• **Anthropic Claude** (cloud) — default; claude-sonnet via API, prompt-cached for speed\n• **Mistral** (cloud) — alternative cloud option, fast and cost-effective\n• **Local / Air-gapped:** Ollama + Qwen — zero data leaves your environment\n\nSwitch in the dashboard Settings → LLM Configuration. The local option is popular for teams with strict data residency requirements.'
     },
     {
       keys: ['cicd','ci/cd','github actions','gitlab ci','jenkins','continuous integration','pipeline integration','integrate with ci'],
@@ -1517,8 +1517,8 @@
       md: '**Test results are available in multiple formats:**\n\n• **Dashboard** — live pass/fail, agent analysis, per-test history\n• **JUnit XML** — auto-generated for CI integrations (`--report junit`)\n• **JSON** — machine-readable output for custom tooling\n• **Slack notification** — configurable webhook with pass/fail summary\n\nThe dashboard is the richest view — it shows failure classifications, agent outputs, coverage trends, and approvals queue all in one place.'
     },
     {
-      keys: ['slack','notification','webhook','alert','notify','integration notify'],
-      md: '**Notifications are configurable** in `sentinelflux.config.yaml`:\n\n```yaml\nnotifications:\n  slack:\n    webhook_url: https://hooks.slack.com/...\n    on: [failure, regression, coverage_gap]\n  webhook:\n    url: https://your-server.com/hook\n    on: [all]\n```\n\nYou can trigger notifications on: any failure, regressions only, coverage gap alerts, or all events. The Slack message includes a run summary and a link to the dashboard.'
+      keys: ['slack','notification','webhook','alert','notify','integration notify','email notification','smtp'],
+      md: '**Notifications are configurable** from Dashboard → Settings:\n\n• **Slack** — webhook URL, triggers on failure / regression / coverage gap\n• **Webhook** — any HTTP endpoint, with full run JSON payload\n• **Email (SMTP)** — configure outbound SMTP (Zoho defaults included) with per-product override; alert emails for failures and regressions\n\nThe in-app **notification bell** (top-right of the dashboard) shows unread alerts with type icons and polls every 60 seconds — no page refresh needed.'
     },
     {
       keys: ['security test','owasp','vapt','penetration','injection','xss','sql injection','vulnerability'],
@@ -1559,6 +1559,10 @@
     {
       keys: ['update kb','change kb','kb update','new scenario','add scenario','kb change'],
       md: 'After updating your KB:\n\n1. Trigger **test generation** for the updated domain — SentinelFlux generates docs and scripts only for new/changed scenarios\n2. Existing tests for unchanged scenarios are **not overwritten**\n3. CoverageGap will automatically pick up the new KB scenarios on the next run and report them as gaps if no tests exist yet\n\nKB updates are incremental — you don\'t need to regenerate the entire suite when you add a scenario.'
+    },
+    {
+      keys: ['extract from document','upload word','upload pdf','extract kb','docx to kb','pdf to kb','import kb','kb from document'],
+      md: '**Extract from Document** converts a Word (.docx), PDF, or Markdown file into multiple validated KB YAML files in one step.\n\nHow it works:\n1. Upload your document from Dashboard → Knowledge Base → Extract from Document\n2. The AI splits the content into separate files (application.yaml, ui_pages.yaml, api_specs.yaml, product_knowledge.yaml)\n3. Each file shows a per-file preview with error/warning badges and an editable YAML textarea\n4. Check the files you want to save, uncheck any with errors, and click Save\n5. Nothing is written until you confirm — so you can review and correct before committing\n\nUseful for teams with existing test documentation in Word or Confluence exports who want to bootstrap their KB quickly.'
     },
     {
       keys: ['validate kb','kb error','kb lint','kb format','kb schema','kb invalid'],
@@ -1656,6 +1660,10 @@
     },
 
     // ── CI/CD EXAMPLES ───────────────────────────────────────────────────────
+    {
+      keys: ['reportportal','report portal','rp integration','test results reporting','rp launch'],
+      md: '**ReportPortal integration** pushes test results directly to your ReportPortal instance after each run.\n\nConfigure from Dashboard → Settings → ReportPortal:\n• Enter your RP URL and API token\n• Enable or disable per product with a toggle\n• Each run creates a launch named after the product\n\nReportPortal gives you a centralised test analytics view across multiple projects and runs — useful for teams that already use RP as their reporting hub alongside the SentinelFlux dashboard.'
+    },
     {
       keys: ['github actions','github action yaml','github workflow example','gh actions'],
       md: '**GitHub Actions integration** works by adding a SentinelFlux test step to your existing workflow.\n\nThe step:\n• Checks out your repo (including KB and test scripts)\n• Installs SentinelFlux from your private package registry\n• Runs the test suite against the target environment\n• Uploads the JUnit XML report as a workflow artifact for inline PR status\n\nTest results are automatically pushed to the dashboard. The full workflow YAML template is available in the documentation at sentinelflux.in/docs/.'
@@ -1766,7 +1774,7 @@
     // ── LLM / AI CONFIGURATION ───────────────────────────────────────────────
     {
       keys: ['switch llm','change model','configure llm','ollama setup how','how to use ollama'],
-      md: 'Switch between cloud and local LLM in `sentinelflux.config.yaml`:\n\n```yaml\n# Local / air-gapped:\nllm:\n  provider: ollama\n  model: qwen2.5:7b\n  base_url: http://localhost:11434\n\n# Mistral cloud:\nllm:\n  provider: mistral\n  api_key: ${MISTRAL_API_KEY}\n  model: mistral-large-latest\n```\n\nFor local mode, install Ollama separately (ollama.ai) and pull your preferred model before running SentinelFlux. The `base_url` should point to your Ollama instance.'
+      md: 'Switch LLM provider in Dashboard → Settings → LLM Configuration or in `sentinelflux.config.yaml`:\n\n```yaml\n# Anthropic Claude (default):\nllm:\n  provider: anthropic\n  api_key: ${ANTHROPIC_API_KEY}\n  model: claude-sonnet-4-6\n\n# Mistral cloud:\nllm:\n  provider: mistral\n  api_key: ${MISTRAL_API_KEY}\n  model: mistral-large-latest\n\n# Local / air-gapped:\nllm:\n  provider: ollama\n  model: qwen2.5:7b\n  base_url: http://localhost:11434\n```\n\nFor local mode, install Ollama separately (ollama.ai) and pull your preferred model before running SentinelFlux.'
     },
     {
       keys: ['which ollama model','ollama model list','qwen version','recommended ollama','best local model'],
@@ -1782,7 +1790,7 @@
     },
     {
       keys: ['openai','gpt','chatgpt','use openai','azure openai','gpt-4','other llm provider'],
-      md: 'Currently SentinelFlux supports **Mistral** (cloud) and **Ollama** (local) as LLM providers.\n\nOpenAI / Azure OpenAI support is planned — email `engage@sentinelflux.in` to register interest or inquire about Enterprise custom integrations.\n\nIf you\'re on Enterprise, custom LLM integrations (including OpenAI, Bedrock, Vertex AI) are available as part of the plan.'
+      md: 'SentinelFlux currently supports **Anthropic Claude**, **Mistral** (cloud) and **Ollama** (local) as LLM providers.\n\nOpenAI / Azure OpenAI support is planned — email `engage@sentinelflux.in` to register interest or inquire about Enterprise custom integrations.\n\nIf you\'re on Enterprise, custom LLM integrations (including OpenAI, Bedrock, Vertex AI) are available as part of the plan.'
     },
     {
       keys: ['generation quality','ai accuracy','hallucination','how good','quality of tests','accurate generation'],
