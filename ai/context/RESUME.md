@@ -13,7 +13,17 @@ Static marketing website for SentinelFlux (sentinelflux.in) — an AI-powered te
 
 ---
 
-## What Was Just Done (2026-06-02) — b6cfc79
+## What Was Just Done (2026-06-02) — ab4a756
+
+### Portfolio certifications upgraded with verified PDF data
+- Replaced flat tag-style certs with card grid (issuer + date + cert number)
+- ISTQB CTFL: #ITB-CTFL-0092941, Sep 2018, Indian Testing Board
+- Lean Six Sigma Black Belt: #C-2024-57597, Apr 2024, IMC / CPD UK / CSSC USA
+- ISO 9001:2015 Lead Auditor: #C-2026-XXXXX, May 2026, IMC / CPD UK (A038236)
+
+---
+
+## Previous Work (2026-06-02) — b6cfc79
 
 ### Portfolio page — website/portfolio.html
 - New standalone portfolio page at sentinelflux.in/portfolio for job applications
