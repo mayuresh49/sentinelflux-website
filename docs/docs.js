@@ -51,7 +51,8 @@ var NAV = [
       { title: 'Agent Activities', href: '/docs/platform/agent-activities.html' },
       { title: 'Approvals', href: '/docs/platform/approvals.html' },
       { title: 'Team & Roles', href: '/docs/platform/team-roles.html' },
-      { title: 'Notifications', href: '/docs/platform/notifications.html' }
+      { title: 'Notifications', href: '/docs/platform/notifications.html' },
+      { title: 'Integrations', href: '/docs/platform/integrations.html' }
     ]
   },
   {
@@ -67,7 +68,8 @@ var NAV = [
     pages: [
       { title: 'Config Reference', href: '/docs/configuration/config-reference.html' },
       { title: 'Environments', href: '/docs/configuration/environments.html' },
-      { title: 'LLM Configuration', href: '/docs/configuration/llm-configuration.html' }
+      { title: 'LLM Configuration', href: '/docs/configuration/llm-configuration.html' },
+      { title: 'Service Registry', href: '/docs/configuration/service-registry.html' }
     ]
   },
   {

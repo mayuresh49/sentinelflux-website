@@ -19,11 +19,28 @@
       <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
         <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
         <h1 class="text-3xl font-bold text-slate-900 mb-3">Notifications</h1>
-        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Configure email, Slack, and webhook notifications for run results, regressions, approval queue updates, and agent alerts.</p>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SentinelFlux delivers alerts through four channels: an in-app notification bell, email (SMTP), Slack webhooks, and generic HTTP webhooks. Each channel is independently configurable.</p>
+
+        <h2>In-app notification bell</h2>
+        <p>The notification bell in the top-right corner of the dashboard surfaces real-time alerts without requiring a page reload. It polls every 60 seconds and shows:</p>
+        <ul>
+          <li>An unread count badge that clears once you open the panel</li>
+          <li>Type icons to distinguish run failures, regression alerts, approval requests, and pipeline completions</li>
+          <li>Relative timestamps (e.g. "2 minutes ago") that update on each poll</li>
+        </ul>
+        <p>Notifications are tracked per user — marking them as read on one browser session does not affect other team members' unread counts.</p>
 
         <h2>Notification channels</h2>
-        <h3>Email</h3>
-        <p>Enabled by default for all team members. Configure which events trigger email in <strong>Settings → Notifications → Email</strong>. Each team member can manage their own email preferences from their profile.</p>
+        <h3>Email (SMTP)</h3>
+        <p>Configure outbound email in <strong>Settings → Notifications → Email</strong>. SentinelFlux ships with Zoho SMTP defaults so you only need to supply credentials; swap in any SMTP provider by overriding the host, port, and TLS settings.</p>
+        <p>Required fields:</p>
+        <ul>
+          <li><strong>SMTP host</strong> — e.g. <code>smtp.zoho.com</code></li>
+          <li><strong>Port</strong> — <code>465</code> (SSL) or <code>587</code> (STARTTLS)</li>
+          <li><strong>Username</strong> and <strong>Password</strong> (or app-specific password)</li>
+          <li><strong>From address</strong> — the sender address recipients will see</li>
+        </ul>
+        <p>Email settings can be overridden per product from <strong>Product Settings → Notifications</strong>, useful when different products have separate QA email aliases.</p>
 
         <h3>Slack</h3>
         <p>Connect a Slack workspace in <strong>Settings → Integrations → Slack</strong>. Configure per-channel routing:</p>

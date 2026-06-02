@@ -19,10 +19,32 @@
       <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
         <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
         <h1 class="text-3xl font-bold text-slate-900 mb-3">LLM Configuration</h1>
-        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SentinelFlux's agents use a large language model for generation and analysis. The default configuration requires no setup. Enterprise plans can connect a local Ollama model for air-gapped environments.</p>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SentinelFlux's agents use a large language model for generation and analysis. Three provider options are available: Anthropic Claude (default cloud), Mistral (alternative cloud), and Ollama (local / air-gapped).</p>
 
-        <h2>Default LLM (no configuration required)</h2>
-        <p>By default, SentinelFlux uses a Mistral-based model hosted on SentinelFlux infrastructure. This model is optimised for code generation and structured reasoning tasks. No API key or LLM configuration is required from you — it is included in all plans.</p>
+        <h2>Provider overview</h2>
+        <table>
+          <thead><tr><th>Provider</th><th>Mode</th><th>Setup required</th><th>Best for</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Anthropic Claude</strong></td><td>Cloud (default)</td><td>API key in Settings</td><td>Best generation quality; prompt-cached for speed</td></tr>
+            <tr><td><strong>Mistral</strong></td><td>Cloud</td><td>API key in Settings</td><td>Cost-effective alternative for high-volume generation</td></tr>
+            <tr><td><strong>Ollama</strong></td><td>Local / air-gapped</td><td>Self-hosted Ollama instance</td><td>Strict data-residency; no data leaves your network</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Anthropic Claude (default)</h2>
+        <p>The default provider is <strong>Anthropic Claude</strong> (<code>claude-sonnet-4-6</code>). It is optimised for code generation and structured reasoning and uses prompt caching so repeated KB context is served from cache rather than re-tokenised on every pipeline call — reducing both latency and API cost.</p>
+        <p>To configure: go to <strong>Settings → LLM Configuration</strong>, select <strong>Anthropic</strong>, and paste your Anthropic API key. The model field defaults to <code>claude-sonnet-4-6</code>; you can override it with any Anthropic model ID.</p>
+        <pre>llm:
+  provider: anthropic
+  api_key: ${ANTHROPIC_API_KEY}
+  model: claude-sonnet-4-6</pre>
+
+        <h2>Mistral (alternative cloud)</h2>
+        <p>Mistral is available as a cloud alternative. It produces comparable generation quality at lower per-token cost, which makes it a good choice for teams running large KB regeneration jobs frequently.</p>
+        <pre>llm:
+  provider: mistral
+  api_key: ${MISTRAL_API_KEY}
+  model: mistral-large-latest</pre>
 
         <h2>What data is sent to the LLM?</h2>
         <p>During the generation pipeline, the following data is sent to the LLM:</p>

@@ -45,6 +45,25 @@
           <li><strong>Screenshots</strong> — failure screenshots for Web UI tests</li>
         </ul>
 
+        <h2>Per-test detail panel</h2>
+        <p>Click the <strong>Tests (N)</strong> expander on any run card to open the per-test detail panel without leaving the runs list. Each test row shows:</p>
+        <ul>
+          <li>Outcome dot (green = pass, red = fail, amber = flaky, grey = skipped)</li>
+          <li>Artifact badges indicating which artifacts are available: screenshot, browser console log, API request/response log, Playwright trace</li>
+        </ul>
+        <p>Clicking a test row expands the full detail view, which loads on demand:</p>
+        <ul>
+          <li><strong>Traceback</strong> — full Python exception and assertion error text</li>
+          <li><strong>Stdout</strong> — captured print statements and test step logs</li>
+          <li><strong>Screenshot thumbnail</strong> — inline failure screenshot for Web UI tests; click to open full size</li>
+          <li><strong>Browser console log</strong> — JavaScript console output captured during the test session</li>
+          <li><strong>API request/response log</strong> — full curl-equivalent request plus response body for API tests; includes headers, payload, status code, and elapsed milliseconds</li>
+          <li><strong>Playwright trace download</strong> — download the <code>.zip</code> trace file for replay in the Playwright Trace Viewer</li>
+        </ul>
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">The API log captures all HTTP calls made during the test, including auth requests, so you can reproduce failures with a single curl command without re-running the suite.</p>
+        </div>
+
         <h2>Retrying failed tests</h2>
         <p>From the Tests tab, select one or more failed tests and click <strong>Re-run Selected</strong> to create a new run containing only those tests. This is useful for verifying a fix without running the full suite.</p>
 
