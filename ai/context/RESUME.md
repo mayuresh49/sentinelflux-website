@@ -13,7 +13,14 @@ Static marketing website for SentinelFlux (sentinelflux.in) — an AI-powered te
 
 ---
 
-## What Was Just Done (2026-06-02) — ef5c75d + cert fixes
+## What Was Just Done (2026-06-02) — 2d9716e
+
+### Minor portfolio copy fix
+- Texnovate Solutions: condensed 2 bullets into 1, removed low-signal details (bell notifications, paginated data tables)
+
+---
+
+## Previous Work (2026-06-02) — ef5c75d + cert fixes
 
 ### Portfolio major update from resume PDF + cert number fix
 - Hero: stronger executive tagline (14+ yrs), resume PDF download button added
