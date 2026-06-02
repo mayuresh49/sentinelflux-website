@@ -65,14 +65,58 @@
         <div class="relative">
             <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-200 ml-3"></div>
 
-            <!-- v0.4.0 -->
+            <!-- v0.5.0 -->
             <div class="relative pl-10 pb-14">
                 <div class="absolute left-0 w-7 h-7 bg-indigo-600 rounded-full flex items-center justify-center shadow-sm shadow-indigo-500/30">
                     <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
                 </div>
                 <div class="flex flex-wrap items-center gap-3 mb-4">
-                    <span class="text-lg font-bold text-slate-900 mono">v0.4.0</span>
+                    <span class="text-lg font-bold text-slate-900 mono">v0.5.0</span>
                     <span class="bg-indigo-100 text-indigo-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">Latest</span>
+                    <span class="text-slate-400 text-sm">June 2026</span>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <div class="text-xs font-bold text-emerald-600 uppercase tracking-wide mb-1.5">New</div>
+                        <ul class="space-y-1.5 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Extract from Document — upload Word, PDF, or Markdown and AI splits it into validated KB YAML files with a per-file preview before saving</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>ReportPortal integration — push test results to ReportPortal per product from the dashboard config</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>SMTP email notifications — configurable outbound email (Zoho defaults) with per-product override</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Notification bell — per-user unread badge with type icons and 60 s live poll in the dashboard header</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>App Explorer dedicated output tab — crawl results separated from the KB Files tab for clarity</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Per-test detail panel in Test Runs — expandable traceback, screenshot thumbnail, browser console log, API log, and Playwright trace download per test</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>System Logs page — rotating log viewer for master admins</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Service Registry webhook and manifest source modes — CI/CD can POST change reports; monitor works air-gapped with no git credentials</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1.5">Improved</div>
+                        <ul class="space-y-1.5 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5 shrink-0">~</span>Billing page accessible to all product admins — cancel and reactivate subscription flow added</li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5 shrink-0">~</span>Visual Regression — View button for individual baseline screenshots in Baselines tab</li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5 shrink-0">~</span>Product delete — four independent scope checkboxes (runs, KB, docs, scripts) for selective cleanup</li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5 shrink-0">~</span>Pipeline Retry button for failed jobs with same product/domain/feature/increment settings</li>
+                            <li class="flex items-start gap-2"><span class="text-blue-500 mt-0.5 shrink-0">~</span>Doc generation history — generation provenance (added/removed TC counts, timestamp, increment file) per test case doc</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-amber-600 uppercase tracking-wide mb-1.5">Fixed</div>
+                        <ul class="space-y-1.5 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><span class="text-amber-500 mt-0.5 shrink-0">!</span>SPA routes no longer misclassified as API endpoints in DocReview and ScriptReview</li>
+                            <li class="flex items-start gap-2"><span class="text-amber-500 mt-0.5 shrink-0">!</span>Orphaned pending activity log entries now resolved on pipeline job failure or timeout</li>
+                            <li class="flex items-start gap-2"><span class="text-amber-500 mt-0.5 shrink-0">!</span>Coverage webhook queue no longer clobbered on double-push (per-SHA queue files)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- v0.4.0 -->
+            <div class="relative pl-10 pb-14">
+                <div class="absolute left-0 w-7 h-7 bg-white border-2 border-slate-300 rounded-full flex items-center justify-center">
+                    <div class="w-2 h-2 rounded-full bg-slate-400"></div>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <span class="text-lg font-bold text-slate-900 mono">v0.4.0</span>
                     <span class="text-slate-400 text-sm">May 2026</span>
                 </div>
                 <div class="space-y-3">
