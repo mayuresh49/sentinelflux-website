@@ -115,6 +115,26 @@ scenarios:
           <p class="text-sm text-green-800"><strong>Coverage tip:</strong> Include at least one <em>happy path</em> and one <em>error/edge case</em> scenario per user flow. The CoverageGap agent will flag domains where only happy paths exist.</p>
         </div>
 
+        <h2>Extract from Document</h2>
+        <p>If your team already has test plans or feature specifications written in Word, PDF, or Markdown, the <strong>Extract from Document</strong> feature can bootstrap your KB in minutes instead of hours.</p>
+        <p>Navigate to <strong>Knowledge Base → Extract from Document</strong> and upload your file (.docx, .pdf, or .md). The AI reads the document and splits it into the standard KB file set:</p>
+        <ul>
+          <li><code>application.yaml</code> — business rules, validations, domain logic</li>
+          <li><code>ui_pages.yaml</code> — web UI pages, fields, and user flows</li>
+          <li><code>api_specs.yaml</code> — API endpoints and expected responses</li>
+          <li><code>product_knowledge.yaml</code> — product context and non-functional requirements</li>
+        </ul>
+        <p>After extraction, each file appears as a preview card with:</p>
+        <ul>
+          <li>An editable YAML textarea so you can correct the output before saving</li>
+          <li>Error badges for missing required fields (file will not be auto-checked for save)</li>
+          <li>Warning badges for missing recommended fields (file is auto-checked; save is allowed)</li>
+        </ul>
+        <div class="callout callout-tip not-prose">
+          <p class="text-sm text-green-800"><strong>Tip:</strong> Review each file before saving. The AI extracts intent faithfully but may miss implicit rules or project-specific conventions. Think of it as a first draft — edit it the same way you would a generated test script.</p>
+        </div>
+        <p>Only files you explicitly check are written to disk. Nothing is saved until you click <strong>Save Selected</strong>. You can re-run extraction with the same document as many times as needed.</p>
+
         <h2>Updating the KB</h2>
         <p>The KB can be updated at any time through the dashboard's KB editor. After updating scenarios, you can re-run the generation pipeline for affected domains only — you don't need to regenerate the entire project.</p>
         <p>Deleted scenarios are flagged in the next generation run and the corresponding scripts are archived (not deleted) pending your review.</p>
