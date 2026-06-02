@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mayuresh Kulkarni — Founder & Software Engineer</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="mask-icon" href="/favicon.svg" color="#4f46e5">
+    <meta name="description" content="Mayuresh Kulkarni — Founder & Software Engineer. 13+ years in engineering leadership, quality automation, and AI. Founder of SentinelFlux.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .gradient-text {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #db2777 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(79,70,229,0.10) 0%, transparent 65%); }
+        .timeline-wrap { position: relative; }
+        .timeline-wrap::before {
+            content: ''; position: absolute; left: 19px; top: 28px; bottom: 28px;
+            width: 2px; background: linear-gradient(to bottom, #c7d2fe, #e2e8f0, transparent);
+        }
+        .skill-tag { transition: all 0.15s ease; }
+        .skill-tag:hover { transform: translateY(-1px); }
+        .card-hover { transition: transform 0.18s ease, box-shadow 0.18s ease; }
+        .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 40px -8px rgba(79,70,229,0.14); }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+        .fade-up { animation: fadeUp 0.5s ease both; }
+        .delay-1 { animation-delay: 0.08s; }
+        .delay-2 { animation-delay: 0.16s; }
+        .promo-dot { width:8px; height:8px; border-radius:50%; background:#e0e7ff; border:2px solid #a5b4fc; flex-shrink:0; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-10">
+            <a href="/" class="flex items-center gap-2.5 shrink-0">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                    <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                </div>
+                <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+            </a>
+            <div class="hidden md:flex items-center gap-1">
+                <a href="#experience" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Experience</a>
+                <a href="#projects" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Projects</a>
+                <a href="#skills" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Skills</a>
+                <a href="#education" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Education</a>
+                <a href="#contact" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Contact</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="mailto:mayuresh49@gmail.com" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+                Hire me
+            </a>
+            <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">SentinelFlux</a>
+            <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors" aria-label="Toggle menu">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-100 px-6 py-3 space-y-1">
+        <a href="#experience" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Experience</a>
+        <a href="#projects" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Projects</a>
+        <a href="#skills" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Skills</a>
+        <a href="#education" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Education</a>
+        <a href="#contact" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Contact</a>
+        <a href="mailto:mayuresh49@gmail.com" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Hire me</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-glow pt-28 pb-20 px-6">
+    <div class="max-w-5xl mx-auto">
+        <div class="flex flex-col md:flex-row items-center md:items-start gap-10">
+
+            <!-- Photo -->
+            <div class="shrink-0 fade-up">
+                <div class="relative">
+                    <img src="/mayuresh-photo.png" alt="Mayuresh Kulkarni"
+                         class="w-36 h-36 md:w-44 md:h-44 rounded-2xl object-cover object-top shadow-xl border-4 border-white ring-1 ring-slate-200">
+                    <span class="absolute -bottom-2 -right-2 bg-emerald-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm whitespace-nowrap">Open to work</span>
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="text-center md:text-left fade-up delay-1">
+                <div class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-2">Portfolio</div>
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-tight mb-2">Mayuresh Kulkarni</h1>
+                <p class="text-xl font-semibold text-slate-500 mb-4">Founder &amp; Software Engineer</p>
+                <p class="text-slate-500 leading-relaxed max-w-xl mb-3">
+                    AI/ML enthusiast with 13+ years bridging quality engineering, engineering leadership, and product development. From writing automation frameworks at IBM to leading cross-functional teams as VP Engineering — and now engineering product ideas to production with <span class="text-indigo-600 font-semibold">SentinelFlux</span>.
+                </p>
+                <p class="text-sm text-slate-400 mb-6">Bengaluru, Karnataka, India</p>
+
+                <!-- Contact links -->
+                <div class="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                    <a href="mailto:mayuresh49@gmail.com"
+                       class="flex items-center gap-2 bg-indigo-600 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-indigo-700 transition-colors text-sm shadow-sm">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+                        mayuresh49@gmail.com
+                    </a>
+                    <a href="https://www.linkedin.com/in/mayuresh49/" target="_blank" rel="noopener"
+                       class="flex items-center gap-2 bg-white text-slate-700 font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 border border-slate-200 transition-colors text-sm shadow-sm">
+                        <svg class="w-4 h-4 text-[#0A66C2]" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        LinkedIn
+                    </a>
+                    <a href="https://github.com/mayuresh49" target="_blank" rel="noopener"
+                       class="flex items-center gap-2 bg-white text-slate-700 font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 border border-slate-200 transition-colors text-sm shadow-sm">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                        GitHub
+                    </a>
+                    <a href="https://sentinelflux.in" target="_blank" rel="noopener"
+                       class="flex items-center gap-2 bg-white text-slate-700 font-semibold px-4 py-2.5 rounded-xl hover:bg-slate-50 border border-slate-200 transition-colors text-sm shadow-sm">
+                        <svg class="w-4 h-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                        SentinelFlux
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience" class="py-20 px-6 border-t border-slate-100">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-2">Career</div>
+        <h2 class="text-3xl font-bold text-slate-900 mb-12">Work Experience</h2>
+
+        <div class="timeline-wrap space-y-8">
+
+            <!-- SentinelFlux -->
+            <div class="flex gap-6 relative">
+                <div class="shrink-0 w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center mt-0.5 shadow-sm z-10">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                </div>
+                <div class="flex-1 bg-indigo-50 rounded-2xl border border-indigo-100 p-6 card-hover">
+                    <div class="flex flex-wrap items-start justify-between gap-2 mb-1">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">Founder &amp; Software Engineer</h3>
+                            <a href="https://sentinelflux.in" target="_blank" rel="noopener" class="text-indigo-600 font-semibold text-sm hover:underline">SentinelFlux</a>
+                        </div>
+                        <span class="text-xs font-medium text-indigo-600 bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded-full shrink-0">Apr 2026 — Present</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-3">Bootstrapped · Remote</p>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                        <li class="flex gap-2"><span class="text-indigo-400 mt-0.5 shrink-0">▸</span>Built an AI-powered test automation SaaS from 0→1, covering 8 testing modules (REST/GraphQL, Web UI, Security, Performance, Accessibility, Visual Regression, and more) with a 10-agent AI pipeline.</li>
+                        <li class="flex gap-2"><span class="text-indigo-400 mt-0.5 shrink-0">▸</span>Designed the full product architecture: knowledge-base-driven test generation, self-healing locator engine, post-suite AI analysis, and human-in-the-loop approval workflows.</li>
+                        <li class="flex gap-2"><span class="text-indigo-400 mt-0.5 shrink-0">▸</span>Shipped integrations with GitHub Actions, GitLab CI, Jenkins, Jira, and Slack; launched to early-access customers at sentinelflux.in.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- peopleHum -->
+            <div class="flex gap-6 relative">
+                <div class="shrink-0 w-10 h-10 bg-violet-600 rounded-xl flex items-center justify-center mt-0.5 shadow-sm z-10">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/></svg>
+                </div>
+                <div class="flex-1 bg-slate-50 rounded-2xl border border-slate-200 p-6 card-hover">
+                    <div class="flex flex-wrap items-start justify-between gap-2 mb-1">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">Lead SDET → VP Engineering</h3>
+                            <span class="text-violet-600 font-semibold text-sm">peopleHum</span>
+                            <span class="text-slate-400 text-xs ml-2">SaaS HR-tech platform</span>
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-full shrink-0">Mar 2020 — Apr 2026 · 6 yrs</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">Bengaluru, India</p>
+
+                    <!-- Promotion ladder -->
+                    <div class="flex flex-wrap gap-2 mb-5">
+                        <div class="flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg px-2.5 py-1">
+                            <span class="w-1.5 h-1.5 bg-violet-400 rounded-full"></span>Lead SDET <span class="text-slate-400">2020</span>
+                        </div>
+                        <svg class="w-3 h-3 text-slate-300 self-center" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                        <div class="flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg px-2.5 py-1">
+                            <span class="w-1.5 h-1.5 bg-violet-500 rounded-full"></span>Eng Manager <span class="text-slate-400">2021</span>
+                        </div>
+                        <svg class="w-3 h-3 text-slate-300 self-center" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                        <div class="flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg px-2.5 py-1">
+                            <span class="w-1.5 h-1.5 bg-violet-600 rounded-full"></span>QA Director <span class="text-slate-400">2024</span>
+                        </div>
+                        <svg class="w-3 h-3 text-slate-300 self-center" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                        <div class="flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg px-2.5 py-1">
+                            <span class="w-1.5 h-1.5 bg-violet-700 rounded-full"></span>Eng Director <span class="text-slate-400">2024</span>
+                        </div>
+                        <svg class="w-3 h-3 text-slate-300 self-center" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                        <div class="flex items-center gap-1.5 text-xs font-medium text-violet-700 bg-violet-50 border border-violet-200 rounded-lg px-2.5 py-1 font-semibold">
+                            <span class="w-1.5 h-1.5 bg-violet-600 rounded-full"></span>VP Engineering <span class="text-violet-400">2026</span>
+                        </div>
+                    </div>
+
+                    <!-- Award + Speaker -->
+                    <div class="flex flex-wrap gap-3 mb-5">
+                        <a href="https://quanticconnect.in/editors-picks/from-bugs-to-ai-inside-bengalurus-first-digital-qa-software-testing-show-2026/" target="_blank" rel="noopener" class="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-amber-100 transition-colors">
+                            <svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0"/></svg>
+                            Excellence in QE Transformation (HRTech) — Digital QA Show 2026
+                            <svg class="w-3 h-3 opacity-50 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                        </a>
+                        <a href="https://www.linkedin.com/posts/qa-qualityassurance-softwaretesting-share-7419665324473511937-471H/" target="_blank" rel="noopener" class="flex items-center gap-2 bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-indigo-100 transition-colors">
+                            <svg class="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"/></svg>
+                            Speaker — "Quality at Scale" · Bengaluru, Mar 2026
+                            <svg class="w-3 h-3 opacity-50 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+                        </a>
+                    </div>
+
+                    <ul class="space-y-2 text-sm text-slate-600">
+                        <li class="flex gap-2"><span class="text-violet-400 mt-0.5 shrink-0">▸</span>Led cross-functional teams across Backend, Frontend, Mobile, Platform, and Quality Engineering for a SaaS HR-tech product used by global enterprises.</li>
+                        <li class="flex gap-2"><span class="text-violet-400 mt-0.5 shrink-0">▸</span>Delivered complex product modules including an Applicant Tracking System (Hire), Performance Management System (Nurture), and L&amp;D platform (Grow).</li>
+                        <li class="flex gap-2"><span class="text-violet-400 mt-0.5 shrink-0">▸</span>Scaled and mentored a QA team of 15+ SDETs; applied lean methodologies to cut test cycle times and eliminate inefficiencies across functional, non-functional, and VAPT testing.</li>
+                        <li class="flex gap-2"><span class="text-violet-400 mt-0.5 shrink-0">▸</span>Built automation strategies for web, API, and mobile platforms; integrated ReportPortal for real-time interactive test reporting.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- IBM -->
+            <div class="flex gap-6 relative">
+                <div class="shrink-0 w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center mt-0.5 shadow-sm z-10">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3"/></svg>
+                </div>
+                <div class="flex-1 bg-slate-50 rounded-2xl border border-slate-200 p-6 card-hover">
+                    <div class="flex flex-wrap items-start justify-between gap-2 mb-1">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">QA Engineer → Principal QA Engineer</h3>
+                            <span class="text-blue-600 font-semibold text-sm">IBM</span>
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-full shrink-0">Sep 2015 — Mar 2020 · 4.5 yrs</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">Bengaluru, India</p>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                        <li class="flex gap-2"><span class="text-blue-400 mt-0.5 shrink-0">▸</span>Led QA for IBM's transition from monolithic to microservices architecture; built a comprehensive API automation framework using Rest Assured, standardized across the organization for APIs, databases, and async messaging.</li>
+                        <li class="flex gap-2"><span class="text-blue-400 mt-0.5 shrink-0">▸</span>Received a special company award for the framework development that underpinned the microservices migration; earned multiple monetary awards for leading high-impact projects.</li>
+                        <li class="flex gap-2"><span class="text-blue-400 mt-0.5 shrink-0">▸</span>Progressed from QA Engineer → Sr. QA Engineer → Principal QA Engineer; built test reporting utilities, led framework migrations (Sikuli → Winium), and developed a Hackathon award-winning App Signing Utility for Windows UWP apps.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- AFour Technologies -->
+            <div class="flex gap-6 relative">
+                <div class="shrink-0 w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center mt-0.5 shadow-sm z-10">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+                </div>
+                <div class="flex-1 bg-slate-50 rounded-2xl border border-slate-200 p-6 card-hover">
+                    <div class="flex flex-wrap items-start justify-between gap-2 mb-1">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">Software Engineer → Sr. SDET</h3>
+                            <span class="text-emerald-600 font-semibold text-sm">AFour Technologies</span>
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-full shrink-0">Jun 2012 — Aug 2015 · 3 yrs</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">Pune, India</p>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                        <li class="flex gap-2"><span class="text-emerald-400 mt-0.5 shrink-0">▸</span>Developed test automation frameworks for web (Selenium, .NET/SpecFlow, BDD), mobile (Appium, Java), and SOAP API testing; built Python scripts for VM backup automation.</li>
+                        <li class="flex gap-2"><span class="text-emerald-400 mt-0.5 shrink-0">▸</span>Conducted performance benchmarking with JMeter and Windows Performance profiling tools for web and desktop applications.</li>
+                        <li class="flex gap-2"><span class="text-emerald-400 mt-0.5 shrink-0">▸</span>Won a Hackathon award for developing an ID certificate delivery troubleshooting utility for Windows, Android, and iOS devices managed by MaaS360.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Texnovate Solutions -->
+            <div class="flex gap-6 relative">
+                <div class="shrink-0 w-10 h-10 bg-slate-500 rounded-xl flex items-center justify-center mt-0.5 shadow-sm z-10">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+                </div>
+                <div class="flex-1 bg-slate-50 rounded-2xl border border-slate-200 p-6 card-hover">
+                    <div class="flex flex-wrap items-start justify-between gap-2 mb-1">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900">Software Engineer Trainee</h3>
+                            <span class="text-slate-600 font-semibold text-sm">Texnovate Solutions</span>
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-full shrink-0">Oct 2011 — May 2012 · 8 mos</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">Pune, India · .NET Full Stack</p>
+                    <ul class="space-y-2 text-sm text-slate-600">
+                        <li class="flex gap-2"><span class="text-slate-400 mt-0.5 shrink-0">▸</span>Developed full-stack web applications using .NET technologies integrated with jQuery, delivering end-to-end modules including bell notifications and data tables with pagination and filtering.</li>
+                        <li class="flex gap-2"><span class="text-slate-400 mt-0.5 shrink-0">▸</span>Authored multiple MS SQL stored procedures for an advertising product and managed deployments to web servers via FileZilla.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects" class="py-20 px-6 bg-slate-50 border-t border-slate-100">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-2">Work</div>
+        <h2 class="text-3xl font-bold text-slate-900 mb-10">Featured Projects</h2>
+
+        <div class="grid md:grid-cols-2 gap-6">
+
+            <!-- SentinelFlux — featured -->
+            <div class="md:col-span-2 bg-white rounded-2xl border border-slate-200 p-7 card-hover shadow-sm">
+                <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 bg-indigo-600 rounded-xl flex items-center justify-center shrink-0">
+                            <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900">SentinelFlux</h3>
+                            <p class="text-xs text-slate-500">AI-Powered Test Automation Platform · Founder</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-semibold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full border border-indigo-100">Live — Early Access</span>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                    Full-stack SaaS that eliminates manual test writing. Reads a product knowledge base, generates and executes test suites across 8 modules via 10 AI agents, heals broken locators automatically, and delivers post-run analysis — all in one dashboard with CI/CD integrations.
+                </p>
+                <div class="flex flex-wrap gap-2 mb-5">
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">Python</span>
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">TypeScript</span>
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">Playwright</span>
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">LLMs / AI Agents</span>
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">React</span>
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">GitHub Actions · GitLab CI · Jenkins</span>
+                </div>
+                <div class="flex gap-3">
+                    <a href="https://sentinelflux.in" target="_blank" rel="noopener"
+                       class="flex items-center gap-1.5 bg-indigo-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+                        Visit site
+                    </a>
+                    <a href="https://app.sentinelflux.in" target="_blank" rel="noopener"
+                       class="flex items-center gap-1.5 bg-slate-100 text-slate-700 text-xs font-semibold px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors">
+                        Live demo
+                    </a>
+                </div>
+            </div>
+
+            <!-- peopleHum HR Platform -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 card-hover shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">peopleHum HR Platform</h3>
+                        <p class="text-xs text-slate-500">Engineering Director · 2020–2026</p>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed mb-3">Led engineering for an enterprise SaaS HR suite — ATS (Hire), Performance Management (Nurture), and L&amp;D (Grow) — from mid-scale to global enterprise customers.</p>
+                <div class="flex flex-wrap gap-1.5">
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Python</span>
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">React</span>
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Mobile</span>
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Playwright</span>
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">VAPT</span>
+                </div>
+            </div>
+
+            <!-- IBM API Automation Framework -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 card-hover shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 9.75L16.5 12l-2.25 2.25m-4.5 0L7.5 12l2.25-2.25M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">IBM API Automation Framework</h3>
+                        <p class="text-xs text-slate-500">Principal QA Engineer · IBM · Award-winning</p>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed mb-3">Built the REST API automation framework that underpinned IBM's monolith → microservices migration. Standardized across the org for APIs, databases, and async messaging. Received a special company award.</p>
+                <div class="flex flex-wrap gap-1.5">
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Java</span>
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Rest Assured</span>
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Microservices</span>
+                    <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">ExtentReports</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills" class="py-20 px-6 border-t border-slate-100">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-2">Expertise</div>
+        <h2 class="text-3xl font-bold text-slate-900 mb-10">Skills &amp; Technologies</h2>
+
+        <div class="grid md:grid-cols-2 gap-x-12 gap-y-8">
+
+            <div>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Languages</h3>
+                <div class="flex flex-wrap gap-2">
+                    <span class="skill-tag text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1.5 rounded-lg">Python</span>
+                    <span class="skill-tag text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1.5 rounded-lg">Java</span>
+                    <span class="skill-tag text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1.5 rounded-lg">JavaScript</span>
+                    <span class="skill-tag text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1.5 rounded-lg">TypeScript</span>
+                    <span class="skill-tag text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1.5 rounded-lg">.NET / C#</span>
+                    <span class="skill-tag text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1.5 rounded-lg">SQL</span>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">AI &amp; ML</h3>
+                <div class="flex flex-wrap gap-2">
+                    <span class="skill-tag text-sm font-medium bg-pink-50 text-pink-700 border border-pink-100 px-3 py-1.5 rounded-lg">AI Agents</span>
+                    <span class="skill-tag text-sm font-medium bg-pink-50 text-pink-700 border border-pink-100 px-3 py-1.5 rounded-lg">LLMs &amp; Prompt Engineering</span>
+                    <span class="skill-tag text-sm font-medium bg-pink-50 text-pink-700 border border-pink-100 px-3 py-1.5 rounded-lg">PyTorch</span>
+                    <span class="skill-tag text-sm font-medium bg-pink-50 text-pink-700 border border-pink-100 px-3 py-1.5 rounded-lg">MLOps</span>
+                    <span class="skill-tag text-sm font-medium bg-pink-50 text-pink-700 border border-pink-100 px-3 py-1.5 rounded-lg">RAG</span>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Testing &amp; QA</h3>
+                <div class="flex flex-wrap gap-2">
+                    <span class="skill-tag text-sm font-medium bg-violet-50 text-violet-700 border border-violet-100 px-3 py-1.5 rounded-lg">Playwright</span>
+                    <span class="skill-tag text-sm font-medium bg-violet-50 text-violet-700 border border-violet-100 px-3 py-1.5 rounded-lg">Selenium</span>
+                    <span class="skill-tag text-sm font-medium bg-violet-50 text-violet-700 border border-violet-100 px-3 py-1.5 rounded-lg">Appium</span>
+                    <span class="skill-tag text-sm font-medium bg-violet-50 text-violet-700 border border-violet-100 px-3 py-1.5 rounded-lg">Rest Assured</span>
+                    <span class="skill-tag text-sm font-medium bg-violet-50 text-violet-700 border border-violet-100 px-3 py-1.5 rounded-lg">JMeter</span>
+                    <span class="skill-tag text-sm font-medium bg-violet-50 text-violet-700 border border-violet-100 px-3 py-1.5 rounded-lg">pytest</span>
+                    <span class="skill-tag text-sm font-medium bg-violet-50 text-violet-700 border border-violet-100 px-3 py-1.5 rounded-lg">VAPT</span>
+                    <span class="skill-tag text-sm font-medium bg-violet-50 text-violet-700 border border-violet-100 px-3 py-1.5 rounded-lg">BDD / SpecFlow</span>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Tools &amp; DevOps</h3>
+                <div class="flex flex-wrap gap-2">
+                    <span class="skill-tag text-sm font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">GitHub Actions</span>
+                    <span class="skill-tag text-sm font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">GitLab CI</span>
+                    <span class="skill-tag text-sm font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">Jenkins</span>
+                    <span class="skill-tag text-sm font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">Docker</span>
+                    <span class="skill-tag text-sm font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">React</span>
+                    <span class="skill-tag text-sm font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">Node.js</span>
+                    <span class="skill-tag text-sm font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">Jira</span>
+                    <span class="skill-tag text-sm font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">ReportPortal</span>
+                    <span class="skill-tag text-sm font-medium bg-slate-100 text-slate-700 px-3 py-1.5 rounded-lg">Salesforce</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education" class="py-20 px-6 bg-slate-50 border-t border-slate-100">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-xs font-semibold text-indigo-600 uppercase tracking-widest mb-2">Background</div>
+        <h2 class="text-3xl font-bold text-slate-900 mb-10">Education &amp; Certifications</h2>
+
+        <div class="grid md:grid-cols-2 gap-6 mb-10">
+
+            <!-- IIIT Bangalore -->
+            <div class="bg-white rounded-2xl border border-indigo-100 p-6 card-hover shadow-sm">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">International Institute of Information Technology Bangalore</h3>
+                        <p class="text-sm text-indigo-600 font-medium mt-0.5">Executive PG Programme in Applied AI &amp; Agentic AI</p>
+                        <p class="text-xs text-slate-400 mt-1">Graduating Dec 2026</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Solapur University -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 card-hover shadow-sm">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">Solapur University</h3>
+                        <p class="text-sm text-slate-600 font-medium mt-0.5">Bachelor of Engineering — Computer Science</p>
+                        <p class="text-xs text-slate-400 mt-1">2007 – 2011</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Certifications -->
+        <h3 class="text-sm font-semibold text-slate-700 mb-4">Certifications</h3>
+        <div class="flex flex-wrap gap-3">
+            <div class="flex items-center gap-2 bg-white border border-amber-200 text-amber-800 text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm">
+                <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0"/></svg>
+                Lean Six Sigma Black Belt (ICBB)
+            </div>
+            <div class="flex items-center gap-2 bg-white border border-slate-200 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm">
+                <svg class="w-4 h-4 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+                Machine Learning Foundations: Calculus
+            </div>
+            <div class="flex items-center gap-2 bg-white border border-slate-200 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm">
+                <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+                Advanced Playwright Techniques
+            </div>
+            <div class="flex items-center gap-2 bg-white border border-slate-200 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm">
+                <svg class="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+                Playwright: Design Patterns
+            </div>
+            <div class="flex items-center gap-2 bg-white border border-emerald-200 text-emerald-800 text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm">
+                <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                ISTQB Certified Tester Foundation Level (CTFL)
+            </div>
+            <div class="flex items-center gap-2 bg-white border border-emerald-200 text-emerald-800 text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm">
+                <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Trained ISO 9001:2015 Lead Auditor
+            </div>
+            <div class="flex items-center gap-2 bg-white border border-slate-200 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm">
+                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"/></svg>
+                Git Essential Training
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT CTA -->
+<section id="contact" class="py-20 px-6 border-t border-slate-100">
+    <div class="max-w-3xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-100 mb-6">
+            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+            Open to new opportunities
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight mb-4">
+            Let's build something <span class="gradient-text">great together</span>
+        </h2>
+        <p class="text-slate-500 leading-relaxed mb-8 max-w-xl mx-auto">
+            Open to senior/staff engineering, engineering leadership, and AI/ML-focused roles. Happy to consult on quality engineering strategy and AI product development.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="mailto:mayuresh49@gmail.com"
+               class="flex items-center gap-2 bg-indigo-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors text-sm shadow-sm">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+                Send me an email
+            </a>
+            <a href="https://www.linkedin.com/in/mayuresh49/" target="_blank" rel="noopener"
+               class="flex items-center gap-2 bg-white text-slate-700 font-semibold px-6 py-3 rounded-xl hover:bg-slate-50 border border-slate-200 transition-colors text-sm shadow-sm">
+                <svg class="w-4 h-4 text-[#0A66C2]" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                Connect on LinkedIn
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-slate-950 text-slate-400 pt-12 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-white text-base tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            <a href="/portfolio.html" class="text-white font-medium">Portfolio</a>
+            <a href="/about.html" class="hover:text-white transition-colors">About</a>
+            <a href="/privacy.html" class="hover:text-white transition-colors">Privacy Policy</a>
+            <a href="/terms.html" class="hover:text-white transition-colors">Terms of Service</a>
+            <a href="mailto:engage@sentinelflux.in" class="hover:text-white transition-colors">Contact</a>
+        </div>
+        <div class="text-sm">&copy; 2026 Mayuresh Kulkarni</div>
+    </div>
+</footer>
+
+<script>
+(function(){
+    var btn = document.getElementById('mobile-menu-btn');
+    var menu = document.getElementById('mobile-menu');
+    if (btn && menu) {
+        btn.addEventListener('click', function(){ menu.classList.toggle('hidden'); });
+        menu.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', function(){ menu.classList.add('hidden'); }); });
+    }
+})();
+</script>
+</body>
+</html>
