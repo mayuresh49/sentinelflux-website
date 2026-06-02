@@ -1,6 +1,18 @@
 # Completed work — newest first
 
 - date: 2026-06-02
+  commit: ef5c75d
+  title: "Major portfolio update from resume PDF + cert number fix"
+  details:
+    - Resume PDF download button in hero
+    - peopleHum: AWS→Hetzner, 35% regression reduction, Quantic Panelist, Kafka/Redis/ES, mobile stack
+    - Awards & Recognition dedicated section (3 linked cards)
+    - Skills expanded: Spring Boot, Kotlin, Swift, Kafka, Redis, Elasticsearch, Ionic, OWASP ZAP, SOC2, Serenity BDD, IaC
+    - Certs added: PMP Training, Agentic AI Workflows, OWASP ZAP, Serenity BDD
+    - University full name corrected
+    - ISO 9001:2015 cert number: C-2026-58593 (was XXXXX)
+
+- date: 2026-06-02
   commit: ab4a756
   title: "Upgrade portfolio certifications with verified details from PDFs"
   details:

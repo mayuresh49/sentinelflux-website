@@ -13,7 +13,21 @@ Static marketing website for SentinelFlux (sentinelflux.in) — an AI-powered te
 
 ---
 
-## What Was Just Done (2026-06-02) — ab4a756
+## What Was Just Done (2026-06-02) — ef5c75d + cert fixes
+
+### Portfolio major update from resume PDF + cert number fix
+- Hero: stronger executive tagline (14+ yrs), resume PDF download button added
+- peopleHum: AWS→Hetzner migration, 35% regression reduction, Quantic Panelist, Kafka/Redis/ES, iOS/Kotlin/Ionic
+- IBM: richer role-split bullets (Principal QA vs Sr QA MaaS360)
+- Skills: Spring Boot, Kotlin, Swift, Kafka, Redis, Elasticsearch, Ionic, OWASP ZAP, SOC2, Serenity BDD, IaC
+- Awards section: new dedicated section with 3 linked cards
+- Certifications: added PMP Training, Agentic AI Workflows, OWASP ZAP, Serenity BDD
+- University: full name Punyashlok Ahilyadevi Holkar Solapur University
+- ISO 9001:2015 cert number updated: C-2026-XXXXX → C-2026-58593
+
+---
+
+## Previous Work (2026-06-02) — ab4a756
 
 ### Portfolio certifications upgraded with verified PDF data
 - Replaced flat tag-style certs with card grid (issuer + date + cert number)
