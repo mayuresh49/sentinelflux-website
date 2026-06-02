@@ -13,10 +13,10 @@ Static marketing website for SentinelFlux (sentinelflux.in) — an AI-powered te
 
 ---
 
-## What Was Just Done (2026-06-02) — 2d9716e
+## What Was Just Done (2026-06-02) — 90140d3
 
 ### Minor portfolio copy fix
-- Texnovate Solutions: condensed 2 bullets into 1, removed low-signal details (bell notifications, paginated data tables)
+- Texnovate Solutions: final bullet wording — "Built web applications in .NET and jQuery; authored complex MS SQL stored procedures for an advertising product; managed deployments."
 
 ---
 
