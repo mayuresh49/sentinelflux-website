@@ -1,5 +1,20 @@
 # Backlog — status: open | in_progress | done
 
+- id: docs-site
+  title: "Build complete docs site for docs.sentinelflux.in"
+  status: done
+  commit: f7847d1
+
+- id: marketing-cli-refs-removal
+  title: "Remove all CLI references from marketing site"
+  status: done
+  commit: f7847d1
+
+- id: marketing-impact-section
+  title: "Add cost/impact section to marketing site"
+  status: done
+  commit: f7847d1
+
 - id: chat-widget-real-llm
   title: "Upgrade chat widget to real LLM (Claude API) when backend is available"
   status: open
@@ -34,6 +49,11 @@
   title: "Add scripted AI assistant chat widget to marketing site"
   status: done
   commit: 9ddbcf4
+
+- id: portfolio-page
+  title: "Personal portfolio page at /portfolio for job applications"
+  status: done
+  commit: b6cfc79
 
 - id: mobile-responsiveness
   title: "Full mobile responsiveness pass across all pages"

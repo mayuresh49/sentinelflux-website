@@ -1,5 +1,42 @@
 # Completed work — newest first
 
+- date: 2026-06-02
+  commit: b6cfc79
+  title: "Add Mayuresh Kulkarni portfolio page at /portfolio"
+  details:
+    - New website/portfolio.html with photo, full 13-year career timeline, projects, skills, education, certifications
+    - Photo (mayuresh-photo.png) added to website root
+    - Linked award + speaker badges in peopleHum card
+    - All certifications added: ISTQB CTFL, Lean Six Sigma ICBB, ISO 9001:2015 Lead Auditor, Playwright certs, ML Foundations, Git
+
+- date: 2026-05-28
+  commit: 420f58f
+  title: "Update all docs links in marketing site from subdomain to /docs/ path"
+  details:
+    - Nav, mobile nav, footer, and all chat widget Q&A text updated
+    - No more references to docs.sentinelflux.in anywhere in website/
+
+- date: 2026-05-28
+  commit: 2606adc
+  title: "Serve docs at sentinelflux.in/docs/ via combined deploy workflow"
+  details:
+    - GitHub Pages single-domain constraint — subdomain requires separate repo
+    - Deploy workflow now merges website/ (root) + docs-site/ (_build/docs/) before publishing
+    - All docs paths updated to /docs/ prefix (NAV hrefs, script src, mobile header, landing page)
+    - Workflow triggers on website/** or docs-site/** changes
+
+- date: 2026-05-28
+  commit: f7847d1
+  title: "Add complete docs site + remove CLI refs + add Impact section to marketing site"
+  details:
+    - Built 38-page docs site under docs-site/ for docs.sentinelflux.in (CNAME set)
+    - Sections: Getting Started, Core Concepts, Modules (9), Agents (7), Platform (6),
+      CI/CD Integration (3), Configuration (3), Troubleshooting
+    - Shared docs.js: sidebar nav, breadcrumbs, prev/next — no HTML duplication across pages
+    - Removed all sentinelflux CLI references from website (static code block, 2 walkthrough
+      slides, FAQ answer, JS TITLES array)
+    - Added Impact section: 4 stat cards (80%/3×/<1 day/$0) + before/after comparison
+
 - date: 2026-05-27
   commit: b40465c
   title: "Replace Starter free tier with 14-day free trial"

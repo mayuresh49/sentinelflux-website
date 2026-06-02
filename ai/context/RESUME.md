@@ -1,28 +1,73 @@
 # SentinelFlux Website — AI Context Resume
 
-**Last updated:** 2026-05-27
+**Last updated:** 2026-06-02
 
 ## Project Overview
 
-Static marketing website for SentinelFlux (sentinelflux.in) — an AI-powered test automation platform. Pure HTML/Tailwind CSS, no build step, hosted via GitHub Pages.
+Static marketing website for SentinelFlux (sentinelflux.in) — an AI-powered test automation platform. Pure HTML/Tailwind CSS, no build step, hosted via GitHub Pages. `docs-site/` is deployed to `sentinelflux.in/docs/` via the combined deploy workflow.
 
 **Repo:** github.com/mayuresh49/sentinelflux  
 **Stack:** HTML5, Tailwind CSS (CDN), vanilla JS  
-**Pages:** index, about, blog, changelog, status, privacy, terms, security + feature/module/blog subpages
+**Pages:** index, about, blog, changelog, status, privacy, terms, security + feature/module/blog subpages  
+**Docs site:** docs-site/ — 38 pages served at sentinelflux.in/docs/, shared docs.js for sidebar/nav
 
 ---
 
-## What Was Just Done (2026-05-27) — b40465c
+## What Was Just Done (2026-06-02) — b6cfc79
 
-### Pricing: Starter free tier → 14-day free trial
-- Removed "Starter — Free — Self-hosted — forever free" tier entirely
-- **Reason:** self-hosting would expose codebase; all plans are now cloud-hosted
-- Replaced with **Free Trial card**: 14 days, full Pro access, no credit card required
-- Updated 10 spots: pricing card HTML, Q&A pricing/open-source/run-locally/multiple-users/run-history/data-storage/GDPR/downgrade responses, and smart hint fallback
+### Portfolio page — website/portfolio.html
+- New standalone portfolio page at sentinelflux.in/portfolio for job applications
+- Profile photo (mayuresh-photo.png) added to website root
+- Sections: Hero (photo, name, tagline, contact links), Experience timeline, Featured Projects, Skills grid, Education & Certifications, Contact CTA
+- Experience covers full 13+ year career: SentinelFlux (Apr 2026–Present), peopleHum (2020–2026, 5-step promotion ladder), IBM (2015–2020), AFour Technologies (2012–2015), Texnovate Solutions (2011–2012)
+- peopleHum card includes linked award badge (Excellence in QE Transformation HRTech, Digital QA Show 2026) and linked speaker badge ("Quality at Scale", Mar 2026)
+- Certifications: ISTQB CTFL, Lean Six Sigma Black Belt (ICBB), ISO 9001:2015 Lead Auditor, ML Foundations, Playwright certs, Git
+- Education: IIIT Bangalore PG Applied AI & Agentic AI (Dec 2026), Solapur University BE CS (2007–2011)
+- All role title arrows consistently junior → senior
 
 ---
 
 ## Previous Work
+
+### Docs served at sentinelflux.in/docs/ (420f58f + 2606adc, 2026-05-28)
+- GitHub Pages can only serve one domain per repo — subdomain would require a separate repo
+- Deploy workflow now merges `website/` (root) + `docs-site/` (`_build/docs/`) before publishing to gh-pages
+- All docs paths updated: NAV hrefs, script src, mobile header links, docs landing page card links
+- All marketing site links updated from `https://docs.sentinelflux.in` to `/docs/` (nav, mobile nav, footer, chat widget Q&A)
+- Workflow triggers on changes to `website/**` OR `docs-site/**`
+- No GoDaddy DNS change needed — docs live at `sentinelflux.in/docs/`
+
+---
+
+## Older Previous Work
+
+### Complete docs site + CLI ref removal + Impact section (f7847d1)
+- 38 static HTML pages under `docs-site/` covering Getting Started, Core Concepts, Modules, Agents, Platform, CI/CD Integration, Configuration, Troubleshooting
+- Removed all CLI references from marketing site (code block, walkthrough slides, FAQ, JS TITLES)
+- Added Impact section: 4 stat cards + before/after comparison
+
+### Pricing: Starter free tier → 14-day free trial (b40465c)
+- Removed Starter (self-hosted, forever free) tier — codebase exposure risk
+- Replaced with Free Trial card: 14 days, full Pro access, no CC required
+
+### Chat Widget — 100 Q&A topics (00107a9)
+- Pure frontend JS AI assistant, zero backend/API dependency
+- 100 Q&A topics covering all product areas
+- 5 on-demand agent simulations (CoverageGap, FlakyDetector, RegressionGuard, ResultAnalyzer, LocatorHealer)
+- Fixes: CI keyword bug, pricing accuracy, CLI refs removed, smart fallback
+
+### Mobile responsiveness pass (31a0357)
+Full mobile responsiveness across all pages.
+
+### Email addresses (84b327f)
+Replaced placeholder emails with official `sentinelflux.in` addresses.
+
+### Blog posts + missing pages (a69faae, c9856ab)
+10 blog posts + Privacy, Terms, About, Security, Changelog, Blog, Status pages.
+
+### Pricing: Starter free tier → 14-day free trial (b40465c)
+- Removed Starter (self-hosted, forever free) tier — codebase exposure risk
+- Replaced with Free Trial card: 14 days, full Pro access, no CC required
 
 ### Chat Widget — 100 Q&A topics (00107a9)
 - Pure frontend JS AI assistant, zero backend/API dependency
