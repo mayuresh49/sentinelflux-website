@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrapping Your Knowledge Base from Existing Documentation — SentinelFlux Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="mask-icon" href="/favicon.svg" color="#4f46e5">
+    <meta name="description" content="How to use SentinelFlux's Extract from Document feature to turn Word specs, PDFs, and Markdown into a ready-to-use Knowledge Base in minutes.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose h3 { font-size: 1.1rem; font-weight: 600; color: #0f172a; margin: 1.5rem 0 0.5rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ol li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #4f46e5; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5 shrink-0"><div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0"><svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div><span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span></a>
+        <div class="flex items-center gap-3"><a href="/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a><a href="/#pricing" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">Get started</a></div>
+    </div>
+</nav>
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4"><span class="bg-violet-100 text-violet-700 text-xs font-semibold px-2.5 py-1 rounded-full">Tutorial</span><span class="text-slate-400 text-sm">June 5, 2026 · 7 min read</span></div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Bootstrapping Your Knowledge Base from Existing Documentation</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">Most teams already have test plans, feature specs, or API docs sitting in Word or Confluence. Here's how to turn them into a SentinelFlux Knowledge Base in under an hour — and what to review before you trust the output.</p>
+        </div>
+        <div class="prose">
+            <p>The most common reason teams delay adopting SentinelFlux isn't the pipeline or the agents — it's the blank-page problem. Writing a knowledge base from scratch feels like a significant upfront investment, especially for products that already have working documentation.</p>
+
+            <p>The <strong>Extract from Document</strong> feature removes that barrier. Upload a Word document, a PDF spec, or a Markdown file, and SentinelFlux splits it into the four standard KB YAML files — with a per-file preview so you can review and correct before anything is saved.</p>
+
+            <h2>What it extracts and where it puts it</h2>
+            <p>The AI reads your document and maps content to the four KB file types:</p>
+            <ul>
+                <li><strong><code>application.yaml</code></strong> — product overview, modules, testing domains, and high-level business rules extracted from introductory sections and scope statements</li>
+                <li><strong><code>ui_pages.yaml</code></strong> — page-by-page descriptions including field names, validation rules, and expected behaviours pulled from UI spec sections and mockup annotations</li>
+                <li><strong><code>api_specs.yaml</code></strong> — endpoint definitions, request/response shapes, and status codes from API documentation sections</li>
+                <li><strong><code>product_knowledge.yaml</code></strong> — non-functional requirements, compliance notes, and domain glossary terms from non-UI sections</li>
+            </ul>
+            <p>Files the AI can't find content for simply appear empty with a note — you're not required to save every file.</p>
+
+            <h2>The review step matters</h2>
+            <p>Each extracted file appears as a card with an editable YAML textarea and badges indicating issues:</p>
+            <ul>
+                <li><strong>Error badges</strong> — required fields are missing (the file's save checkbox is automatically unchecked; you need to fix the errors before saving)</li>
+                <li><strong>Warning badges</strong> — recommended fields are absent but the file is valid and can be saved as-is</li>
+            </ul>
+            <p>Don't skip the review. The AI extracts faithfully from what's written, but documentation often has implicit knowledge that never made it into the spec — the login flow that assumes session state, the validation rule that "everyone knows" but nobody wrote down. Read each file the same way you'd review a generated test script: trust but verify.</p>
+
+            <h2>What it handles well and what it doesn't</h2>
+            <p>Documents with clear structure — numbered sections, explicit field lists, table-based API specs — produce the cleanest output. The extraction quality roughly matches the document quality. Some patterns to watch for:</p>
+
+            <p><strong>It handles well:</strong></p>
+            <ul>
+                <li>Feature specs written as acceptance criteria ("the system shall…")</li>
+                <li>API documentation with method, path, and response codes per endpoint</li>
+                <li>Test plans with step-by-step scenarios and expected results</li>
+                <li>Confluence exports (Word format) with heading hierarchy preserved</li>
+            </ul>
+
+            <p><strong>It won't extract reliably:</strong></p>
+            <ul>
+                <li>Information embedded in screenshots or diagrams (text only)</li>
+                <li>Implicit business rules mentioned only in meeting notes or comments</li>
+                <li>Selector-level UI details (don't put these in the KB anyway — AppExplorer finds them)</li>
+                <li>Version history sections or document metadata</li>
+            </ul>
+
+            <h2>A practical workflow</h2>
+            <p>Here's how to go from existing documentation to a first test run efficiently:</p>
+            <ol>
+                <li><strong>Upload your most comprehensive spec</strong> — the one that a new team member would read to understand the product. Usually a functional spec, test plan, or user guide.</li>
+                <li><strong>Review <code>application.yaml</code> first</strong> — get the modules and domains right before looking at the other files. The generation pipeline uses this as its index.</li>
+                <li><strong>Skim <code>ui_pages.yaml</code> for field completeness</strong> — error states and validation rules are the most commonly missing pieces. Add them inline in the textarea before saving.</li>
+                <li><strong>Save the files you're confident in; skip the rest</strong> — you can re-run extraction or add files manually later. Don't save a file full of errors just because it was extracted.</li>
+                <li><strong>Run a small generation job immediately</strong> — pick one domain and trigger the pipeline. The generated test docs are the fastest feedback on whether your KB is specific enough.</li>
+            </ol>
+
+            <h2>Using it for incremental updates</h2>
+            <p>Extraction isn't just for initial setup. When your team writes a new feature spec, run it through extraction to get an increment YAML for the KB. Review the diff, drop it in the Increments tab, and trigger the pipeline for the affected domain. The whole cycle from spec to new test cases can happen in a single afternoon.</p>
+
+            <p>The KB you build this way won't be perfect on day one — no KB is. But it will be dramatically better than starting from a blank file, and it will improve iteratively as the generated tests reveal what the AI did and didn't understand about your application.</p>
+        </div>
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>All posts</a>
+            <a href="/#pricing" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1.5">Try SentinelFlux free<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></a>
+        </div>
+    </div>
+</main>
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6"><div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm"><a href="/" class="flex items-center gap-2 font-bold text-white"><div class="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center"><svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>SentinelFlux</a><div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/blog.html" class="hover:text-white transition-colors">Blog</a></div><div>&copy; 2026 SentinelFlux, Inc.</div></div></footer>
+</body>
+</html>
