@@ -1,6 +1,6 @@
 # SentinelFlux Website — AI Context Resume
 
-**Last updated:** 2026-06-02
+**Last updated:** 2026-06-03
 
 ## Project Overview
 
@@ -13,7 +13,19 @@ Static marketing website for SentinelFlux (sentinelflux.in) — an AI-powered te
 
 ---
 
-## What Was Just Done (2026-06-02) — b73d29c
+## What Was Just Done (2026-06-03) — c82b8bc
+
+### Add Compliance Reports as module #9
+- Module card grid: added 9th card (teal/shield icon, "Pro" badge) for Compliance Reports
+- Metrics bar: 8 → 9 testing modules counter
+- Modules subtitle: "Eight" → "Nine testing modules"
+- Pricing: Trial ("All 9"), Pro ("Compliance Reports — SOC 2, ISO 27001, GDPR, 3/month"), Enterprise ("Unlimited + branded PDF")
+- Chatbot: updated module count + added entry #9 to the modules list response
+- OG meta description: 8 → 9 modules
+
+---
+
+## Previous Work (2026-06-02) — b73d29c
 
 ### Minor portfolio copy + hook fix
 - Contact CTA: removed "senior/staff" — profile is VP/Director level

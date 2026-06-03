@@ -1,5 +1,16 @@
 # Completed work — newest first
 
+- date: 2026-06-03
+  commit: c82b8bc
+  title: "Add Compliance Reports as module #9 to marketing website"
+  details:
+    - Module card #9 added (teal, shield icon, Pro badge) — SOC 2 / ISO 27001 / GDPR
+    - Metrics bar: 8 → 9 testing modules
+    - Modules subtitle: Eight → Nine
+    - Pricing: Trial all-9, Pro 3/month, Enterprise unlimited + branded PDF
+    - Chatbot: module count + list entry updated to 9
+    - OG meta description updated
+
 - date: 2026-06-02
   commit: ef5c75d
   title: "Major portfolio update from resume PDF + cert number fix"

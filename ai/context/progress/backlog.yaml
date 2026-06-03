@@ -55,6 +55,11 @@
   status: done
   commit: b6cfc79
 
+- id: compliance-module-website
+  title: "Add Compliance Reports module #9 to marketing website"
+  status: done
+  commit: c82b8bc
+
 - id: mobile-responsiveness
   title: "Full mobile responsiveness pass across all pages"
   status: done
