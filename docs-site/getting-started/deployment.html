@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deployment — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}
+    .doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}
+    .doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}
+    .doc-content a{color:#4f46e5;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .scenario-card{border:1px solid #e2e8f0;border-radius:.75rem;padding:1.5rem;margin-bottom:1.5rem}
+    .scenario-label{display:inline-block;font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:.25rem .75rem;border-radius:9999px;margin-bottom:1rem}
+    .label-a{background:#ede9fe;color:#5b21b6}
+    .label-b{background:#fce7f3;color:#9d174d}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Deployment</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">How SentinelFlux is deployed depends on where your application under test is hosted. This page covers both scenarios — they can coexist for different projects.</p>
+
+        <h2>How it works</h2>
+        <p>The SentinelFlux dashboard is hosted centrally at <code>api.sentinelflux.in</code>. It manages everything: knowledge base, test docs, run scheduling, run history, analysis, and user management. Tests are never executed on the dashboard server.</p>
+        <p>Test execution is handled by a <strong>runner daemon</strong> — a lightweight process (<code>sentinelflux runner</code>) that polls the dashboard for queued runs, executes pytest locally against your application, and streams results back in real time. The runner must be on a machine that can reach your application under test.</p>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800"><strong>Who installs what:</strong> The dashboard is already running — you do not install or manage it. The only question is where the runner lives, which depends on whether your application is publicly reachable.</p>
+        </div>
+
+        <h2>Choose your scenario</h2>
+
+        <div class="scenario-card not-prose">
+          <span class="scenario-label label-a">Scenario A</span>
+          <h3 class="text-base font-semibold text-slate-900 mb-1">Application is publicly accessible</h3>
+          <p class="text-sm text-slate-600 mb-0">Your staging or production URL is reachable from the internet (e.g. <code class="text-xs">https://staging.acme.com</code>). The SentinelFlux team operates a central runner that can reach it. You log into the dashboard, configure your project, and trigger runs — no infrastructure to set up on your side.</p>
+        </div>
+
+        <div class="scenario-card not-prose">
+          <span class="scenario-label label-b">Scenario B</span>
+          <h3 class="text-base font-semibold text-slate-900 mb-1">Application is behind a firewall or internal network</h3>
+          <p class="text-sm text-slate-600 mb-0">Your application is only reachable inside your corporate network (e.g. <code class="text-xs">http://internal.acme.com</code>). You install a runner inside your network. The runner polls the dashboard, runs tests locally against your internal URL, and posts results back. The dashboard itself never needs to reach your application.</p>
+        </div>
+
+        <h2>Scenario A — Public application</h2>
+        <p>Nothing to install. The SentinelFlux runner on our infrastructure handles test execution.</p>
+
+        <table>
+          <thead><tr><th>Task</th><th>Responsibility</th></tr></thead>
+          <tbody>
+            <tr><td>Dashboard</td><td>SentinelFlux (already hosted at api.sentinelflux.in)</td></tr>
+            <tr><td>Runner</td><td>SentinelFlux (central runner, reaches public URLs)</td></tr>
+            <tr><td>Test code</td><td>SentinelFlux team authors and deploys</td></tr>
+            <tr><td>Triggering runs, viewing results</td><td>You — via the dashboard in your browser</td></tr>
+            <tr><td>Installing software</td><td>Nothing required on your machines</td></tr>
+          </tbody>
+        </table>
+
+        <p>To get started: log in, add your project, build the knowledge base, and trigger your first run. See the <a href="/docs/getting-started/quick-start.html">Quick Start</a> guide.</p>
+
+        <h2>Scenario B — Internal application</h2>
+        <p>You install one runner process inside your network. It connects outbound to the dashboard — no inbound ports, no firewall rule changes needed.</p>
+
+        <table>
+          <thead><tr><th>Task</th><th>Responsibility</th></tr></thead>
+          <tbody>
+            <tr><td>Dashboard</td><td>SentinelFlux (already hosted at api.sentinelflux.in)</td></tr>
+            <tr><td>Runner</td><td>You — installed on a machine inside your network</td></tr>
+            <tr><td>Test code</td><td>SentinelFlux team — delivered as a versioned archive</td></tr>
+            <tr><td>Runner token</td><td>Generated in dashboard, shared with you by your SentinelFlux contact</td></tr>
+            <tr><td>Triggering runs, viewing results</td><td>You — via the dashboard in your browser</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Prerequisites (runner machine)</h3>
+        <ul>
+          <li>A machine inside your network that can reach your application under test</li>
+          <li>Outbound HTTPS access to <code>api.sentinelflux.in</code> (port 443)</li>
+          <li>Python 3.10 or later — <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a></li>
+          <li>pip (bundled with Python — verify with <code>pip --version</code>)</li>
+          <li>For web UI tests: Playwright with Chromium (see install steps below)</li>
+          <li>For mobile tests: Appium server running locally or accessible on your network</li>
+        </ul>
+
+        <h3>Step 1 — Install the runner</h3>
+        <p>Your SentinelFlux contact will provide a wheel file (<code>.whl</code>). Install it with pip — this automatically pulls all required open-source dependencies from PyPI:</p>
+        <pre>pip install sentinelflux-&lt;version&gt;-py3-none-any.whl</pre>
+
+        <p>If your project includes web UI tests, install Playwright and the Chromium browser:</p>
+        <pre>pip install playwright
+playwright install chromium</pre>
+
+        <div class="callout callout-tip not-prose">
+          <p class="text-sm text-green-800"><strong>Tip:</strong> Run these commands inside a Python virtual environment to keep the runner isolated from other Python packages on the machine.</p>
+        </div>
+
+        <h3>Step 2 — Extract the test suite</h3>
+        <p>Your SentinelFlux contact will also provide a test suite archive for your project. Extract it to a working directory:</p>
+        <pre>tar -xzf sentinelflux-tests-&lt;project&gt;-&lt;version&gt;.tar.gz -C /opt/sf-runner</pre>
+
+        <p>The extracted layout will look like:</p>
+        <pre>/opt/sf-runner/
+  products/
+    &lt;your-project&gt;/
+      tests/
+        web/
+        api/
+      pages/
+      locators/
+      config/
+        env_qa.yaml     ← edit this before starting</pre>
+
+        <h3>Step 3 — Configure your application URL</h3>
+        <p>Edit <code>config/env_qa.yaml</code> inside the extracted directory. Set the base URL and any credentials needed to reach your internal application:</p>
+        <pre>web:
+  base_url: "http://internal.acme.com"
+api:
+  rest_base_url: "http://internal-api.acme.com"
+credentials:
+  username: "test-user@acme.com"
+  password: "your-test-password"</pre>
+
+        <div class="callout callout-warning not-prose">
+          <p class="text-sm text-amber-800"><strong>Important:</strong> Use a dedicated test account, not a personal or admin account. The runner will log in and perform actions against your application during test execution.</p>
+        </div>
+
+        <h3>Step 4 — Generate a runner token</h3>
+        <p>In the dashboard, go to <strong>Settings → Runners → Create Token</strong>. Give the token a name (e.g. <em>acme-internal-runner</em>) and scope it to your project. Copy the token — it is shown only once.</p>
+
+        <h3>Step 5 — Start the runner</h3>
+        <p>Use the setup wizard to configure the runner as a background service:</p>
+        <pre>sentinelflux runner-init</pre>
+
+        <p>The wizard prompts for your API URL, token, and working directory, then writes a <code>runner.env</code> configuration file and registers a system service (systemd on Linux, launchd on macOS) so the runner starts automatically on boot.</p>
+
+        <p>Alternatively, start the runner manually for testing:</p>
+        <pre>cd /opt/sf-runner
+sentinelflux runner \
+  --api-url https://api.sentinelflux.in \
+  --token sfr_&lt;your_token&gt; \
+  --work-dir /opt/sf-runner</pre>
+
+        <p>Once running, the daemon polls the dashboard every 30 seconds. When a run is triggered from the dashboard, the runner claims it, executes pytest against your internal application, streams live progress, and posts the full report when done. Everything is visible in the dashboard — no VPN or direct access to the runner machine is needed to view results.</p>
+
+        <h3>Verifying the connection</h3>
+        <p>After the runner starts, go to <strong>Settings → Runners</strong> in the dashboard. Your runner should appear with a green <em>Online</em> status and a recent <em>Last seen</em> timestamp. If it shows offline, check that the machine has outbound HTTPS access to <code>api.sentinelflux.in</code> and that the token is correct.</p>
+
+        <h2>Both scenarios together</h2>
+        <p>Scenario A and Scenario B can run simultaneously. If you have multiple projects — some with public URLs and some internal — each project is configured with its own preferred runner in the dashboard (<strong>Settings → Run Config → Runner</strong>). The dashboard routes each queued run to the correct runner automatically. Runner tokens are scoped to specific projects, so runners only ever claim runs they are authorised for.</p>
+
+        <h2>Upgrading the runner</h2>
+        <p>When a new version is available, your SentinelFlux contact will provide an updated wheel and test suite archive. To upgrade:</p>
+        <pre># Stop the runner service first, then:
+pip install sentinelflux-&lt;new-version&gt;-py3-none-any.whl --force-reinstall
+tar -xzf sentinelflux-tests-&lt;project&gt;-&lt;new-version&gt;.tar.gz -C /opt/sf-runner
+# Restart the runner service</pre>
+        <p>Your configuration in <code>env_qa.yaml</code> and <code>runner.env</code> is preserved across upgrades.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>
