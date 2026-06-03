@@ -1,6 +1,14 @@
 # Completed work — newest first
 
 - date: 2026-06-03
+  commit: 8127f4b
+  title: "Add compliance-reports.html module doc page"
+  details:
+    - New website/modules/compliance-reports.html (teal, animated demo)
+    - Demo animates: config panel → metrics → PDF sections → control coverage → ready state
+    - Homepage card wired with href link
+
+- date: 2026-06-03
   commit: c82b8bc
   title: "Add Compliance Reports as module #9 to marketing website"
   details:

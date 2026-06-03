@@ -13,7 +13,17 @@ Static marketing website for SentinelFlux (sentinelflux.in) — an AI-powered te
 
 ---
 
-## What Was Just Done (2026-06-03) — c82b8bc
+## What Was Just Done (2026-06-03) — 8127f4b
+
+### Add compliance-reports.html module doc page
+- New `website/modules/compliance-reports.html` — teal colour scheme, animated demo
+- Demo: framework config panel, run aggregation metrics, section-by-section PDF build animation, SOC 2 control coverage table, "ready" state with download button
+- Homepage module card `<div>` → `<a>` with correct href wired
+- Follows exact structure/pattern of bug-tracker.html
+
+---
+
+## Previous Work (2026-06-03) — c82b8bc
 
 ### Add Compliance Reports as module #9
 - Module card grid: added 9th card (teal/shield icon, "Pro" badge) for Compliance Reports

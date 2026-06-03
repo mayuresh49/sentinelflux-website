@@ -55,6 +55,11 @@
   status: done
   commit: b6cfc79
 
+- id: compliance-module-doc-page
+  title: "Add compliance-reports.html module doc page"
+  status: done
+  commit: 8127f4b
+
 - id: compliance-module-website
   title: "Add Compliance Reports module #9 to marketing website"
   status: done
