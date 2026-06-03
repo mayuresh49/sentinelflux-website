@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Reports — SentinelFlux</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="mask-icon" href="/favicon.svg" color="#4f46e5">
+    <meta name="description" content="Turn your test runs into audit-ready evidence reports for SOC 2, ISO 27001, and GDPR. One click from test data to signed PDF.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #5eead4 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate="slide-left"]  { transform: translateX(-30px); }
+        [data-animate="slide-right"] { transform: translateX(30px); }
+        [data-animate="fade-in"]     { transform: none; }
+        [data-animate].visible       { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; } [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(13,148,136,0.08) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(20,184,166,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(20,184,166,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
+        @keyframes bar-grow { from { width: 0%; } to { width: var(--w); } }
+        .bar-anim { animation: bar-grow 0.8s ease-out forwards; }
+        .section-row { opacity:0; transform:translateX(-8px); transition: opacity 0.35s ease, transform 0.35s ease; }
+        .section-row.show { opacity:1; transform:none; }
+        .ctrl-row { opacity:0; transform:translateX(8px); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .ctrl-row.show { opacity:1; transform:none; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5">
+            <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+        </a>
+        <div class="flex items-center gap-5">
+            <a href="/#modules" class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">← All Modules</a>
+            <a href="mailto:engage@sentinelflux.in?subject=SentinelFlux Early Access" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">Request Access</a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-glow hero-grid pt-32 pb-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div data-animate="fade-in" class="inline-flex items-center gap-2 bg-teal-50 text-teal-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-teal-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Testing Module — Compliance Reports &nbsp;·&nbsp; <span class="bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded text-xs font-bold">Pro</span>
+        </div>
+        <h1 data-animate data-delay="1" class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] mb-5 tracking-tight">
+            Test Runs as<br><span class="gradient-text">Audit Evidence</span>
+        </h1>
+        <p data-animate data-delay="2" class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            Your auditor needs proof of testing. SentinelFlux turns every test run into a structured, signed PDF report — mapped to SOC 2, ISO 27001, or GDPR controls. No new process. No spreadsheets.
+        </p>
+    </div>
+</section>
+
+<!-- ANIMATED DEMO -->
+<section class="py-8 px-6 pb-20">
+    <div class="max-w-5xl mx-auto">
+        <div data-animate class="bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700">
+                <div class="w-3 h-3 rounded-full bg-rose-500 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-amber-400 opacity-80"></div>
+                <div class="w-3 h-3 rounded-full bg-emerald-500 opacity-80"></div>
+                <span class="ml-3 text-slate-400 text-xs mono">SentinelFlux — Compliance Reports — SOC 2 Evidence</span>
+                <div class="ml-auto flex items-center gap-1.5 text-teal-400 text-xs">
+                    <div class="w-1.5 h-1.5 rounded-full bg-teal-400 pulse-dot"></div>generating
+                </div>
+            </div>
+            <div class="p-5">
+                <div class="grid md:grid-cols-2 gap-5">
+
+                    <!-- Left: config + metrics -->
+                    <div class="space-y-4">
+                        <!-- Report config card -->
+                        <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                            <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">Report Configuration</div>
+                            <div class="space-y-2.5">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-400">Framework</span>
+                                    <span id="fw-badge" class="font-semibold text-teal-300 mono">SOC 2 Type II</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-400">Evidence Period</span>
+                                    <span class="text-slate-300 mono">2026-05-01 → 2026-05-31</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-400">Product</span>
+                                    <span class="text-slate-300">orangehrm</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-400">Runs Found</span>
+                                    <span id="runs-found" class="font-semibold text-emerald-300">—</span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-slate-400">Sign-off</span>
+                                    <span class="text-slate-300">Sarah Chen · Head of Eng</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Metrics -->
+                        <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                            <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-3">Aggregated Evidence</div>
+                            <div class="space-y-2.5">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="text-slate-400">Overall Pass Rate</span>
+                                        <span id="pass-rate" class="font-semibold text-emerald-300">—</span>
+                                    </div>
+                                    <div class="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                                        <div id="pass-bar" class="h-full bg-emerald-500 rounded-full" style="width:0%; transition: width 1s ease"></div>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2 pt-1">
+                                    <div class="text-center">
+                                        <div id="m-runs" class="text-sm font-bold text-white">—</div>
+                                        <div class="text-xs text-slate-500 mt-0.5">Runs</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div id="m-tests" class="text-sm font-bold text-white">—</div>
+                                        <div class="text-xs text-slate-500 mt-0.5">Tests</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div id="m-domains" class="text-sm font-bold text-white">—</div>
+                                        <div class="text-xs text-slate-500 mt-0.5">Domains</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: PDF sections building out -->
+                    <div>
+                        <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2.5">Report Sections</div>
+                        <div id="sections-list" class="space-y-1.5"></div>
+
+                        <div id="controls-area" class="mt-4 space-y-1.5">
+                            <div class="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-2">Control Coverage</div>
+                        </div>
+
+                        <div id="ready-block" class="hidden mt-4 bg-teal-900/30 border border-teal-700/50 rounded-xl p-3 text-center">
+                            <div class="text-teal-300 font-semibold text-sm mb-1">Report Ready</div>
+                            <div class="text-xs text-teal-400/80 mono">compliance_soc2_orangehrm_2026-05.pdf</div>
+                            <div class="mt-2 inline-flex items-center gap-1.5 bg-teal-700/50 text-teal-200 text-xs px-3 py-1.5 rounded-lg font-medium">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                Download PDF
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="bg-slate-50 py-20 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Everything your auditor needs, already in your test data</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-xl mx-auto">No separate compliance tooling. SentinelFlux maps what you already run to the controls that matter.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+
+            <div data-animate data-delay="1" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-teal-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Framework-Mapped Controls</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">Test runs are automatically mapped to the relevant controls — SOC 2 CC6/CC7/CC8, ISO 27001 A.14.2/A.12.6, or GDPR Art.25/Art.32. Every control shows run count, pass rate, and coverage status.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>SOC 2 Type II</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>ISO 27001:2022</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>GDPR Readiness</li>
+                </ul>
+            </div>
+
+            <div data-animate data-delay="2" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-teal-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Complete Audit PDF</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">The generated PDF contains everything an auditor expects: executive summary, control coverage table, timestamped run evidence log, human approval records, AI agent activity, and a signed declaration.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Timestamped run evidence log</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Human approval records</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Sign-off declaration block</li>
+                </ul>
+            </div>
+
+            <div data-animate data-delay="3" class="bg-white rounded-2xl p-6 border border-slate-200 hover:border-teal-200 hover:shadow-md transition-all">
+                <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Zero Extra Process</h3>
+                <p class="text-sm text-slate-500 leading-relaxed mb-4">No new workflow. Run your tests as usual — SentinelFlux collects the evidence automatically. When audit time comes, select a date range, pick a framework, and download the PDF. Done in under a minute.</p>
+                <ul class="space-y-1.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>No manual evidence collection</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Report history stored and re-downloadable</li>
+                    <li class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Under a minute, start to PDF</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- WHAT'S IN THE REPORT -->
+<section class="py-20 px-6">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">What's inside the PDF</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-lg mx-auto">Every section is structured to satisfy an auditor's evidence request — not just pretty charts.</p>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+            <div data-animate data-delay="1" class="flex items-start gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                <div class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                    <span class="text-xs font-bold text-teal-700">1</span>
+                </div>
+                <div>
+                    <div class="font-semibold text-slate-800 text-sm mb-1">Cover + Executive Summary</div>
+                    <div class="text-xs text-slate-500 leading-relaxed">Product, framework, evidence period, total runs, pass rate, domains covered, sign-off status at a glance.</div>
+                </div>
+            </div>
+            <div data-animate data-delay="2" class="flex items-start gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                <div class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                    <span class="text-xs font-bold text-teal-700">2</span>
+                </div>
+                <div>
+                    <div class="font-semibold text-slate-800 text-sm mb-1">Framework Control Coverage</div>
+                    <div class="text-xs text-slate-500 leading-relaxed">Each control mapped to test domains, with run count, total tests, and pass rate. Green = covered, amber = no data.</div>
+                </div>
+            </div>
+            <div data-animate data-delay="3" class="flex items-start gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                <div class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                    <span class="text-xs font-bold text-teal-700">3</span>
+                </div>
+                <div>
+                    <div class="font-semibold text-slate-800 text-sm mb-1">Test Coverage by Domain</div>
+                    <div class="text-xs text-slate-500 leading-relaxed">Per-domain table: runs, total tests, pass/fail counts, pass rate, total duration — broken out by API, Web, Security, Performance, Accessibility.</div>
+                </div>
+            </div>
+            <div data-animate data-delay="1" class="flex items-start gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                <div class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                    <span class="text-xs font-bold text-teal-700">4</span>
+                </div>
+                <div>
+                    <div class="font-semibold text-slate-800 text-sm mb-1">Test Run Evidence Log</div>
+                    <div class="text-xs text-slate-500 leading-relaxed">Every test run in the period: run ID, domain, module, trigger type (manual/schedule), status, pass rate, UTC timestamp.</div>
+                </div>
+            </div>
+            <div data-animate data-delay="2" class="flex items-start gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                <div class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                    <span class="text-xs font-bold text-teal-700">5</span>
+                </div>
+                <div>
+                    <div class="font-semibold text-slate-800 text-sm mb-1">Human Approval Records</div>
+                    <div class="text-xs text-slate-500 leading-relaxed">All human-in-the-loop decisions (approvals/rejections) made during the period — type, title, decision, resolver, and timestamp.</div>
+                </div>
+            </div>
+            <div data-animate data-delay="3" class="flex items-start gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                <div class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                    <span class="text-xs font-bold text-teal-700">6</span>
+                </div>
+                <div>
+                    <div class="font-semibold text-slate-800 text-sm mb-1">Sign-off Declaration</div>
+                    <div class="text-xs text-slate-500 leading-relaxed">Named declaration block with role, date, and signature field — ready to print and countersign for your auditor package.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 px-6">
+    <div data-animate class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Stop assembling audit evidence by hand</h2>
+        <p class="text-slate-500 mb-8">If you're already running tests with SentinelFlux, you're already collecting the evidence. Compliance Reports just packages it.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="mailto:engage@sentinelflux.in?subject=SentinelFlux Compliance Reports" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-teal-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-teal-700 transition-colors">Request Early Access</a>
+            <a href="/#modules" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-6 py-3.5 rounded-xl hover:bg-slate-200 transition-colors">← View All Modules</a>
+        </div>
+    </div>
+</section>
+
+<footer class="border-t border-slate-100 py-10 px-6">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-2.5">
+            <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+            </div>
+            <span class="font-semibold text-slate-900">SentinelFlux</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+            <a href="/#modules" class="hover:text-slate-900 transition-colors">All Modules</a>
+            <a href="https://app.sentinelflux.in" target="_blank" rel="noopener" class="hover:text-slate-900 transition-colors">Dashboard</a>
+            <a href="mailto:engage@sentinelflux.in" class="hover:text-slate-900 transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-400">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+
+    const reportSections = [
+        { label: 'Cover Page', icon: '📄', color: 'text-slate-300' },
+        { label: 'Executive Summary', icon: '📊', color: 'text-teal-300' },
+        { label: 'Framework Control Coverage', icon: '🛡', color: 'text-teal-300' },
+        { label: 'Test Coverage by Domain', icon: '🔬', color: 'text-indigo-300' },
+        { label: 'Test Run Evidence Log', icon: '📋', color: 'text-slate-300' },
+        { label: 'Human Approval Records', icon: '✅', color: 'text-emerald-300' },
+        { label: 'AI Agent Activity', icon: '🤖', color: 'text-violet-300' },
+        { label: 'Sign-off Declaration', icon: '✍️', color: 'text-amber-300' },
+    ];
+
+    const controls = [
+        { id: 'CC6', name: 'Logical Access Controls', rate: '98%', color: 'text-emerald-400' },
+        { id: 'CC7', name: 'System Operations',       rate: '94%', color: 'text-emerald-400' },
+        { id: 'CC8', name: 'Change Management',        rate: '91%', color: 'text-teal-400' },
+        { id: 'CC9', name: 'Risk Mitigation',          rate: '87%', color: 'text-amber-400' },
+    ];
+
+    let started = false;
+
+    function startAnimation() {
+        if (started) return;
+        started = true;
+
+        // Populate runs found + metrics with stagger
+        setTimeout(() => { document.getElementById('runs-found').textContent = '23 runs'; }, 500);
+        setTimeout(() => {
+            document.getElementById('pass-rate').textContent = '94.2%';
+            document.getElementById('pass-bar').style.width = '94.2%';
+            document.getElementById('m-runs').textContent = '23';
+            document.getElementById('m-tests').textContent = '1,847';
+            document.getElementById('m-domains').textContent = '5';
+        }, 900);
+
+        // Build report sections one by one
+        const list = document.getElementById('sections-list');
+        reportSections.forEach((s, i) => {
+            setTimeout(() => {
+                const row = document.createElement('div');
+                row.className = 'section-row flex items-center gap-2 text-xs bg-slate-800 rounded-lg px-3 py-2 border border-slate-700';
+                row.innerHTML = `
+                    <svg class="w-3.5 h-3.5 text-teal-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                    <span class="${s.color}">${s.label}</span>
+                `;
+                list.appendChild(row);
+                requestAnimationFrame(() => row.classList.add('show'));
+            }, 1200 + i * 350);
+        });
+
+        // Build control rows
+        const ctrlArea = document.getElementById('controls-area');
+        controls.forEach((c, i) => {
+            setTimeout(() => {
+                const row = document.createElement('div');
+                row.className = 'ctrl-row flex items-center justify-between text-xs bg-slate-800 rounded-lg px-3 py-1.5 border border-slate-700';
+                row.innerHTML = `
+                    <span class="font-semibold text-slate-400 mono">${c.id}</span>
+                    <span class="text-slate-400 flex-1 mx-2 truncate">${c.name}</span>
+                    <span class="font-bold ${c.color}">${c.rate}</span>
+                `;
+                ctrlArea.appendChild(row);
+                requestAnimationFrame(() => row.classList.add('show'));
+            }, 1200 + reportSections.length * 350 + i * 280);
+        });
+
+        // Show ready block
+        const readyDelay = 1200 + (reportSections.length * 350) + (controls.length * 280) + 400;
+        setTimeout(() => {
+            document.getElementById('ready-block').classList.remove('hidden');
+            document.querySelector('.pulse-dot').parentElement.innerHTML = `
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></div>
+                <span class="text-emerald-400">ready</span>
+            `;
+        }, readyDelay);
+    }
+
+    // Trigger when demo scrolls into view
+    const demoEl = document.querySelector('.bg-slate-900');
+    const demoObs = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) { startAnimation(); demoObs.disconnect(); }
+    }, { threshold: 0.3 });
+    if (demoEl) demoObs.observe(demoEl);
+</script>
+</body>
+</html>
