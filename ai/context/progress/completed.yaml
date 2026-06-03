@@ -1,6 +1,13 @@
 # Completed work — newest first
 
 - date: 2026-06-03
+  commit: 55e4de0
+  title: "Add SpecVault ecosystem section to marketing site"
+  details:
+    - New section above footer: SentinelFlux + SpecVault side-by-side cards
+    - SpecVault card links to GitHub repo
+
+- date: 2026-06-03
   commit: 8127f4b
   title: "Add compliance-reports.html module doc page"
   details:

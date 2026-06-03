@@ -13,7 +13,17 @@ Static marketing website for SentinelFlux (sentinelflux.in) — an AI-powered te
 
 ---
 
-## What Was Just Done (2026-06-03) — 8127f4b
+## What Was Just Done (2026-06-03) — 55e4de0
+
+### Add SpecVault ecosystem section
+- New "The SentinelFlux Ecosystem" section above the footer
+- Two cards side-by-side: SentinelFlux (current, indigo) + SpecVault (companion, violet)
+- SpecVault card links to github.com/mayuresh49/sentinelflux-specvault
+- Establishes cross-product narrative on the marketing site
+
+---
+
+## Previous Work (2026-06-03) — 8127f4b
 
 ### Add compliance-reports.html module doc page
 - New `website/modules/compliance-reports.html` — teal colour scheme, animated demo
