@@ -5,7 +5,8 @@ var NAV = [
       { title: 'Overview', href: '/docs/getting-started/overview.html' },
       { title: 'Quick Start', href: '/docs/getting-started/quick-start.html' },
       { title: 'System Requirements', href: '/docs/getting-started/system-requirements.html' },
-      { title: 'Trial & Onboarding', href: '/docs/getting-started/trial-onboarding.html' }
+      { title: 'Trial & Onboarding', href: '/docs/getting-started/trial-onboarding.html' },
+      { title: 'Deployment', href: '/docs/getting-started/deployment.html' }
     ]
   },
   {
