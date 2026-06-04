@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpecVault — API Contract Registry</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="Publish OpenAPI specs, version them, and automatically detect breaking changes. SpecVault is the API contract registry built for teams that ship fast.">
+    <meta property="og:title" content="SpecVault — API Contract Registry">
+    <meta property="og:description" content="Publish OpenAPI specs, version them, auto-detect breaking changes. Part of the SentinelFlux ecosystem.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; }
+        .gradient-text {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 40%, #4f46e5 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-glow { background: radial-gradient(ellipse at 50% -10%, rgba(124,58,237,0.1) 0%, transparent 65%); }
+        .hero-grid {
+            background-image: linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        [data-animate] { opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease; }
+        [data-animate].visible { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.08s; }
+        [data-delay="2"] { transition-delay: 0.16s; }
+        [data-delay="3"] { transition-delay: 0.24s; }
+        .card { transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
+        .card:hover { transform: translateY(-3px); }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80">
+    <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-6">
+            <a href="/specvault/" class="flex items-center gap-2.5">
+                <div class="w-7 h-7 bg-violet-600 rounded-lg flex items-center justify-center shrink-0">
+                    <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/>
+                    </svg>
+                </div>
+                <span class="font-bold text-slate-900 text-base tracking-tight">SpecVault</span>
+            </a>
+            <span class="hidden sm:block text-slate-200">|</span>
+            <a href="/" class="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-700 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                By SentinelFlux
+            </a>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="https://github.com/mayuresh49/sentinelflux-specvault" target="_blank" rel="noopener"
+               class="hidden sm:flex items-center gap-1.5 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors">
+                GitHub
+            </a>
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener"
+               class="bg-violet-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors shadow-sm">
+                Open App
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-glow hero-grid pt-32 pb-20 px-6">
+    <div class="max-w-3xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 bg-violet-50 text-violet-700 text-xs font-semibold px-3.5 py-1.5 rounded-full mb-6 border border-violet-100">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+            API Contract Registry
+        </div>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.08] mb-5 tracking-tight">
+            Stop finding out about<br><span class="gradient-text">breaking changes in prod</span>
+        </h1>
+        <p class="text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed mb-8">
+            Publish your OpenAPI specs, version them, and get automatically notified when a new release breaks something consumers depend on — before it hits production.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener"
+               class="w-full sm:w-auto flex items-center justify-center gap-2 bg-violet-600 text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-violet-700 transition-colors text-base shadow-lg shadow-violet-500/20">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+            <a href="https://github.com/mayuresh49/sentinelflux-specvault" target="_blank" rel="noopener"
+               class="w-full sm:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-semibold px-7 py-3.5 rounded-xl hover:bg-slate-200 transition-colors text-base">
+                View on GitHub
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="py-20 px-6 bg-slate-50">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Works in three steps</h2>
+            <p data-animate data-delay="1" class="text-slate-500 max-w-lg mx-auto">No new tooling to learn. If you have an OpenAPI spec, you're already set up.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div data-animate data-delay="1" class="card bg-white rounded-2xl p-6 border border-slate-200 hover:border-violet-300 hover:shadow-md">
+                <div class="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center mb-4">
+                    <span class="text-sm font-bold text-violet-700">1</span>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Register your API</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Add a service — name it after your API, add the team owner and base URL. One time setup.</p>
+            </div>
+            <div data-animate data-delay="2" class="card bg-white rounded-2xl p-6 border border-slate-200 hover:border-violet-300 hover:shadow-md">
+                <div class="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center mb-4">
+                    <span class="text-sm font-bold text-violet-700">2</span>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Publish spec versions</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Paste your spec URL or upload a JSON/YAML file. Each publish auto-diffs against the previous version.</p>
+            </div>
+            <div data-animate data-delay="3" class="card bg-white rounded-2xl p-6 border border-slate-200 hover:border-violet-300 hover:shadow-md">
+                <div class="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center mb-4">
+                    <span class="text-sm font-bold text-violet-700">3</span>
+                </div>
+                <h3 class="font-semibold text-slate-900 mb-2">Subscribers get alerted</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Consumer teams subscribe and receive email alerts the moment a breaking change is detected — before they're broken.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="py-20 px-6">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 data-animate class="text-3xl font-bold text-slate-900 mb-3">Everything a platform team needs</h2>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div data-animate data-delay="1" class="card bg-slate-50 rounded-2xl p-5 border border-slate-100 hover:border-violet-200 hover:bg-white hover:shadow-sm">
+                <div class="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center mb-3">
+                    <svg class="w-4.5 h-4.5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 text-sm mb-1.5">Version History</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Every spec version stored with endpoint count, publish date, and author. Diff any two versions on demand.</p>
+            </div>
+            <div data-animate data-delay="2" class="card bg-slate-50 rounded-2xl p-5 border border-slate-100 hover:border-violet-200 hover:bg-white hover:shadow-sm">
+                <div class="w-9 h-9 bg-red-100 rounded-xl flex items-center justify-center mb-3">
+                    <svg class="w-4.5 h-4.5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 text-sm mb-1.5">Breaking Change Detection</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Automatically flags removed endpoints, deleted required params, new required fields, and removed response fields.</p>
+            </div>
+            <div data-animate data-delay="3" class="card bg-slate-50 rounded-2xl p-5 border border-slate-100 hover:border-violet-200 hover:bg-white hover:shadow-sm">
+                <div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center mb-3">
+                    <svg class="w-4.5 h-4.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 text-sm mb-1.5">Email Alerts</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Consumer teams subscribe per service. Breaking-change alerts land in their inbox before the next deploy ships.</p>
+            </div>
+            <div data-animate data-delay="1" class="card bg-slate-50 rounded-2xl p-5 border border-slate-100 hover:border-violet-200 hover:bg-white hover:shadow-sm">
+                <div class="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center mb-3">
+                    <svg class="w-4.5 h-4.5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 text-sm mb-1.5">CI/CD Integration</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Publish specs via API token from your pipeline. SentinelFlux auto-pushes specs after every successful contract test run.</p>
+            </div>
+            <div data-animate data-delay="2" class="card bg-slate-50 rounded-2xl p-5 border border-slate-100 hover:border-violet-200 hover:bg-white hover:shadow-sm">
+                <div class="w-9 h-9 bg-indigo-100 rounded-xl flex items-center justify-center mb-3">
+                    <svg class="w-4.5 h-4.5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 text-sm mb-1.5">API Tokens</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Generate machine tokens for headless publishing from CI. Tokens are bcrypt-hashed; plain value shown once.</p>
+            </div>
+            <div data-animate data-delay="3" class="card bg-slate-50 rounded-2xl p-5 border border-slate-100 hover:border-violet-200 hover:bg-white hover:shadow-sm">
+                <div class="w-9 h-9 bg-slate-200 rounded-xl flex items-center justify-center mb-3">
+                    <svg class="w-4.5 h-4.5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                </div>
+                <h3 class="font-semibold text-slate-900 text-sm mb-1.5">Open Source</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">MIT licensed. Self-host on your own GCP / AWS instance in under 10 minutes with the included deploy script.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STACK / TECH -->
+<section class="py-16 px-6 bg-slate-50">
+    <div class="max-w-4xl mx-auto text-center">
+        <h2 data-animate class="text-2xl font-bold text-slate-900 mb-3">Built on a lean, proven stack</h2>
+        <p data-animate data-delay="1" class="text-slate-500 mb-8 max-w-lg mx-auto">No heavy framework. Pure Python — same stack as SentinelFlux — so it deploys anywhere Python runs.</p>
+        <div class="flex flex-wrap justify-center gap-3">
+            <span class="text-sm font-medium bg-white text-slate-600 px-4 py-2 rounded-full border border-slate-200">Python 3.12</span>
+            <span class="text-sm font-medium bg-white text-slate-600 px-4 py-2 rounded-full border border-slate-200">FastAPI</span>
+            <span class="text-sm font-medium bg-white text-slate-600 px-4 py-2 rounded-full border border-slate-200">SQLite + WAL</span>
+            <span class="text-sm font-medium bg-white text-slate-600 px-4 py-2 rounded-full border border-slate-200">Jinja2 + Alpine.js</span>
+            <span class="text-sm font-medium bg-white text-slate-600 px-4 py-2 rounded-full border border-slate-200">Tailwind CSS</span>
+            <span class="text-sm font-medium bg-white text-slate-600 px-4 py-2 rounded-full border border-slate-200">Caddy (TLS)</span>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 px-6 bg-slate-900">
+    <div class="max-w-2xl mx-auto text-center">
+        <h2 class="text-3xl font-extrabold text-white mb-4">Start tracking your API contracts</h2>
+        <p class="text-slate-400 mb-8">Free and open source. Self-host in minutes or use the hosted instance.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener"
+               class="w-full sm:w-auto flex items-center justify-center gap-2 bg-violet-500 text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-violet-400 transition-colors text-base shadow-lg shadow-violet-900/30">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+            <a href="https://github.com/mayuresh49/sentinelflux-specvault" target="_blank" rel="noopener"
+               class="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/10 text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-white/15 transition-colors text-base border border-white/20">
+                GitHub — MIT
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-slate-950 text-slate-400 py-10 px-6">
+    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-violet-600 rounded-md flex items-center justify-center">
+                    <svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+                </div>
+                <span class="font-semibold text-white text-sm">SpecVault</span>
+            </div>
+            <span class="text-slate-600">·</span>
+            <a href="/" class="text-sm hover:text-white transition-colors">By SentinelFlux</a>
+        </div>
+        <div class="flex items-center gap-6 text-sm">
+            <a href="https://github.com/mayuresh49/sentinelflux-specvault" target="_blank" rel="noopener" class="hover:text-white transition-colors">GitHub</a>
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener" class="hover:text-white transition-colors">App</a>
+            <a href="mailto:engage@sentinelflux.in" class="hover:text-white transition-colors">Contact</a>
+        </div>
+        <div class="text-sm text-slate-600">&copy; 2026 SentinelFlux</div>
+    </div>
+</footer>
+
+<script>
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('[data-animate]').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
