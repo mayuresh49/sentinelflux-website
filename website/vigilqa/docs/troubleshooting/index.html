@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Troubleshooting — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content ol li{list-style-type:decimal}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}.callout-info{background:#eff6ff;border-left:4px solid #3b82f6}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/vigilqa/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Common Issues</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Solutions for the most frequently encountered issues. If your issue isn't listed here, contact <a href="mailto:engage@sentinelflux.in">engage@sentinelflux.in</a>.</p>
+
+        <h2>Generation pipeline issues</h2>
+
+        <h3>AppExplorer fails to access the application</h3>
+        <p><strong>Symptom:</strong> AppExplorer status shows "Connection refused" or "Timeout" in Agent Activities.</p>
+        <p><strong>Causes and fixes:</strong></p>
+        <ol>
+          <li>The application URL is not publicly accessible. Verify the URL is reachable from an external network.</li>
+          <li>Your firewall or WAF is blocking SentinelFlux's IP ranges. Whitelist the IP ranges from <strong>Settings → Network → IP Allowlist</strong>.</li>
+          <li>The URL requires HTTPS but your staging certificate is self-signed. Use a valid certificate or contact support to configure certificate bypass for staging.</li>
+        </ol>
+
+        <h3>DocReview rejects all generated documents</h3>
+        <p><strong>Symptom:</strong> All scenarios fail DocReview and enter the Approvals queue as rejected.</p>
+        <p><strong>Causes and fixes:</strong></p>
+        <ol>
+          <li>KB scenario <code>steps</code> are too vague. Add specific element names, page paths, and observable actions. See <a href="/vigilqa/docs/core-concepts/knowledge-base.html">Knowledge Base best practices</a>.</li>
+          <li>KB scenario <code>expected</code> fields don't specify observable outcomes. Replace "login works" with "redirected to /dashboard with user name visible".</li>
+          <li>AppExplorer didn't run before DocGen. Check that AppExplorer completed successfully for the affected domain.</li>
+        </ol>
+
+        <h3>ScriptReview fails with "selector not found"</h3>
+        <p><strong>Symptom:</strong> Scripts fail ScriptReview with errors like "selector 'button.checkout-btn' not found in locator map".</p>
+        <p><strong>Causes and fixes:</strong></p>
+        <ol>
+          <li>AppExplorer's selector map is stale (the UI changed since the last crawl). Re-run AppExplorer from <strong>Generation → AppExplorer → Re-run</strong>.</li>
+          <li>The scenario references a page that AppExplorer didn't crawl. Check that the page path is listed in the domain's <code>base_urls</code> in the KB.</li>
+        </ol>
+
+        <h2>Test run issues</h2>
+
+        <h3>All Web UI tests fail with "Page not found"</h3>
+        <p><strong>Symptom:</strong> Every Web UI test fails immediately with a 404 or login redirect.</p>
+        <p><strong>Causes and fixes:</strong></p>
+        <ol>
+          <li>The environment's base URL is incorrect or the application is down. Verify the URL in <strong>Project Settings → Environments</strong>.</li>
+          <li>Test credentials are invalid or the test user account has been deleted. Update credentials in <strong>Environments → [name] → Credentials</strong>.</li>
+          <li>The application requires a VPN or IP allowlist that the test runner can't reach. Check network access requirements.</li>
+        </ol>
+
+        <h3>Run stuck in "Running" status</h3>
+        <p><strong>Symptom:</strong> A run has been in "Running" state for longer than the configured timeout.</p>
+        <p><strong>Causes and fixes:</strong></p>
+        <ol>
+          <li>The application is very slow to respond, causing individual tests to time out. Check application performance.</li>
+          <li>A specific test is hanging on a modal or JavaScript interaction. Check the live log stream in Agent Activities for the current test being executed.</li>
+          <li>Contact support if the run doesn't complete after 2× the configured timeout — it may need to be manually terminated.</li>
+        </ol>
+
+        <h2>CI/CD integration issues</h2>
+
+        <h3>API call returns 401 Unauthorized</h3>
+        <p>Verify the API token is correct and has not expired. Generate a new token from <strong>Settings → API Tokens</strong>. Ensure the token is being passed in the <code>Authorization: Bearer {token}</code> header — not as a query parameter.</p>
+
+        <h3>Run trigger returns 404</h3>
+        <p>Check that the <code>project</code> and <code>plan</code> values in the request body exactly match the slugs shown in the dashboard. Project and plan names are case-sensitive.</p>
+
+        <h2>Getting support</h2>
+        <p>For issues not covered here:</p>
+        <ul>
+          <li><strong>Email:</strong> <a href="mailto:engage@sentinelflux.in">engage@sentinelflux.in</a> — include your project name, the run ID (if applicable), and a description of the issue</li>
+          <li><strong>Trial accounts:</strong> Priority email support with same-day response during business hours</li>
+          <li><strong>Enterprise accounts:</strong> Dedicated Slack channel and SLA-backed response times</li>
+        </ul>
+
+        <div class="callout callout-tip not-prose">
+          <p class="text-sm text-green-800">When contacting support, include the <strong>Agent Activity ID</strong> or <strong>Run ID</strong> from the dashboard — this allows the support team to immediately access logs without needing additional information from you.</p>
+        </div>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>

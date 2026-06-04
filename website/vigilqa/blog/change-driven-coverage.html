@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change-Driven Coverage: Testing What Actually Changed — VigilQA Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="mask-icon" href="/favicon.svg" color="#4f46e5">
+    <meta name="description" content="How the VigilQA Service Registry connects backend code changes to test coverage gaps — and why that changes the way you think about QA in fast-moving codebases.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose h3 { font-size: 1.1rem; font-weight: 600; color: #0f172a; margin: 1.5rem 0 0.5rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ol li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #4f46e5; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/vigilqa/" class="flex items-center gap-2.5 shrink-0"><div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0"><svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div><span class="font-bold text-slate-900 text-lg tracking-tight">VigilQA</span></a>
+        <div class="flex items-center gap-3"><a href="/vigilqa/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a><a href="/vigilqa/#pricing" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">Get started</a></div>
+    </div>
+</nav>
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4"><span class="bg-orange-100 text-orange-700 text-xs font-semibold px-2.5 py-1 rounded-full">Deep Dive</span><span class="text-slate-400 text-sm">May 25, 2026 · 6 min read</span></div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Change-Driven Coverage: Testing What Actually Changed</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">Coverage gaps are everywhere. The question isn't which ones exist — it's which ones matter right now. Here's how connecting VigilQA to your code repositories changes the answer.</p>
+        </div>
+        <div class="prose">
+            <p>Every non-trivial product has more untested KB scenarios than a QA team can address in a sprint. CoverageGap analysis is useful, but a list of 80 uncovered scenarios with no ordering is hard to act on. Where do you start?</p>
+
+            <p>The answer changes when you know which backend services changed since the last test run. A coverage gap in a module that hasn't been touched in six months is low risk. The same gap in a service where three functions were modified yesterday is urgent. The <strong>Service Registry</strong> makes that distinction automatic.</p>
+
+            <h2>How it works</h2>
+            <p>The Service Registry is a YAML file in your KB that maps backend service repositories to the test domains that depend on them. When VigilQA detects changes in a registered service, it passes the change context — changed files, changed functions, and a diff summary — into the CoverageGap agent's analysis.</p>
+            <p>The agent then weights its gap output: scenarios that map to changed services are surfaced first, tagged with the affected service name and a <code>repo_change</code> source field. You still see all gaps, but the ones that matter most are at the top.</p>
+            <p>Approved gap suggestions are automatically written as KB increment YAML files, which appear in the Increments tab ready to trigger a generation pipeline run. The path from "code changed" to "new tests generated" becomes a linear flow rather than a manual triage exercise.</p>
+
+            <h2>Three ways to connect a service</h2>
+            <p>Different infrastructure setups need different integration approaches. The registry supports three source modes:</p>
+
+            <p><strong>Git polling (<code>source_mode: git</code>)</strong> — VigilQA diffs the service's repository against the last known commit SHA at a configurable interval. Works when VigilQA can reach the git remote directly. Supports PAT and SSH authentication, with credentials read from environment variables at runtime rather than stored in config.</p>
+
+            <p><strong>CI webhook (<code>source_mode: webhook</code>)</strong> — your CI/CD pipeline POSTs a change report to VigilQA's coverage ingest endpoint after each push. This is the right choice when VigilQA is on a private network, when git credentials are restricted, or when you want real-time change detection rather than polling. A single curl call in your GitHub Actions or GitLab CI workflow is all it takes.</p>
+
+            <p><strong>Manifest drop (<code>source_mode: manifest</code>)</strong> — CI writes a YAML or JSON file at a configured path; VigilQA reads and deduplicates on commit SHA. The most useful mode for fully air-gapped environments where there's no HTTP connectivity between your CI system and VigilQA at all.</p>
+
+            <h2>Symbol-level precision</h2>
+            <p>The simplest change report just lists changed filenames. That's enough for CoverageGap to work — it can map files to KB domains and identify relevant scenarios. But if your CI tooling can extract changed function and class names from the diff, include them in the webhook payload or manifest. The CoverageGap analysis becomes significantly more precise: it reasons about which specific functions changed and which test scenarios exercise those functions, rather than which files changed and which domain they belong to.</p>
+            <p>For Python and JavaScript codebases, most CI tools can produce this from <code>git diff --unified=3</code> output. A few lines of grep or an AST diff library is usually enough.</p>
+
+            <h2>What this changes in practice</h2>
+            <p>Teams that adopt change-driven coverage reporting typically describe the same shift: they stop running full coverage audits and start running targeted gap analysis after each significant backend change instead. Instead of "we have 80 uncovered scenarios", the conversation becomes "the auth service changed today, and these three scenarios that test token refresh now need scripts".</p>
+            <p>That specificity makes coverage improvement tractable in a way that a global gap count never does. You're not trying to close 80 gaps before the next release — you're trying to close three gaps before the auth service change ships to production. That's a scoping decision your team can actually make.</p>
+
+            <h2>Getting started</h2>
+            <p>The simplest starting point is to register one service in git polling mode with no authentication (public repo or already-cloned local path), set <code>check_interval_hours: 0</code> so polling is manual-only, and click <strong>Check Now</strong> once from the dashboard to verify the connection. That gives you a single working change detection loop you can extend incrementally.</p>
+            <p>Once you've seen how change context affects the CoverageGap output for one service, adding the rest of your registry is straightforward. The webhook mode adds one step to your CI pipeline config. The manifest mode adds one file write. Neither requires changes to VigilQA itself.</p>
+        </div>
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/vigilqa/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>All posts</a>
+            <a href="/vigilqa/#pricing" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1.5">Try VigilQA free<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></a>
+        </div>
+    </div>
+</main>
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6"><div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm"><a href="/vigilqa/" class="flex items-center gap-2 font-bold text-white"><div class="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center"><svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>VigilQA</a><div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/vigilqa/blog.html" class="hover:text-white transition-colors">Blog</a></div><div>&copy; 2026 SentinelFlux, Inc.</div></div></footer>
+</body>
+</html>

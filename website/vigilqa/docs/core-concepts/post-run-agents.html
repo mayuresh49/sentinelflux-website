@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post-Run Agents — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content ol li{list-style-type:decimal}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-info{background:#eff6ff;border-left:4px solid #3b82f6}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/vigilqa/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Post-Run Agents</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Five AI agents that run automatically after every test execution to classify failures, detect regressions, and keep your test suite healthy.</p>
+
+        <h2>Overview</h2>
+        <p>Post-run agents are triggered automatically when a test run completes. They operate in parallel on the run results and produce actionable outputs — bug tracker entries, alerts, coverage reports, and healing patches — within minutes of run completion. You don't need to trigger them manually.</p>
+
+        <table>
+          <thead><tr><th>Agent</th><th>Trigger</th><th>Primary output</th></tr></thead>
+          <tbody>
+            <tr><td><a href="/vigilqa/docs/agents/result-analyzer.html">ResultAnalyzer</a></td><td>After every run</td><td>Failure classification (Bug / Script / Flaky / Environment)</td></tr>
+            <tr><td><a href="/vigilqa/docs/agents/regression-guard.html">RegressionGuard</a></td><td>After every run</td><td>Regression alert with suspect commit/version</td></tr>
+            <tr><td><a href="/vigilqa/docs/agents/coverage-gap.html">CoverageGap</a></td><td>After every run</td><td>Coverage % per domain, list of untested scenarios</td></tr>
+            <tr><td><a href="/vigilqa/docs/agents/flaky-detector.html">FlakyDetector</a></td><td>When ResultAnalyzer flags Flaky</td><td>Stability score, locator instability flag</td></tr>
+            <tr><td><a href="/vigilqa/docs/agents/locator-healer.html">LocatorHealer</a></td><td>On locator failure or FlakyDetector signal</td><td>Healing patch queued in Approvals</td></tr>
+          </tbody>
+        </table>
+
+        <h2>ResultAnalyzer</h2>
+        <p>ResultAnalyzer processes every failed test in the run and classifies the failure into one of four categories:</p>
+        <ul>
+          <li><strong>Product Bug</strong> — the application behaviour does not match the expected outcome. A bug tracker entry is created automatically.</li>
+          <li><strong>Script Error</strong> — the test script has an issue (e.g. stale selector, wrong assertion). The script is flagged for regeneration.</li>
+          <li><strong>Flaky</strong> — the test passed in a previous run but failed now with no clear application change. Forwarded to FlakyDetector.</li>
+          <li><strong>Environment Issue</strong> — the failure is attributed to infrastructure (timeout, missing dependency). Flagged with environment context.</li>
+        </ul>
+        <p>For Product Bug classifications, ResultAnalyzer creates a structured bug entry in the Bug Tracker module (if enabled) with the failed test ID, steps, assertion failure, and screenshot.</p>
+
+        <h2>RegressionGuard</h2>
+        <p>RegressionGuard compares the pass/fail pattern of the current run against the immediately preceding run. It raises a regression alert when:</p>
+        <ul>
+          <li>A test that passed in the previous run fails in the current run</li>
+          <li>A new test scenario fails on its first run (no baseline established)</li>
+          <li>Multiple tests in the same domain fail together, suggesting a domain-level change</li>
+        </ul>
+        <p>Regression alerts include the suspected commit or deployment version (derived from the CI/CD context passed at run trigger time), the affected test IDs, and a diff of the pass/fail count.</p>
+
+        <h2>CoverageGap</h2>
+        <p>CoverageGap cross-references all KB scenarios against the test IDs present in the active test suite. After each run it reports:</p>
+        <ul>
+          <li>Coverage percentage per domain (scenarios with tests ÷ total scenarios)</li>
+          <li>List of KB scenario IDs that have no corresponding test script</li>
+          <li>Suggestion to trigger the generation pipeline for uncovered scenarios</li>
+        </ul>
+        <p>CoverageGap outputs are visible in the <strong>Coverage</strong> tab of the run results view and in the dashboard's coverage summary widget.</p>
+
+        <h2>FlakyDetector</h2>
+        <p>FlakyDetector is triggered when ResultAnalyzer flags one or more tests as Flaky. It analyses the last 5 run histories for each flagged test and computes a <strong>stability score</strong> between 0 and 1. Tests scoring below the threshold (default 0.75) are marked as unstable.</p>
+        <p>If the instability pattern correlates with DOM selector changes (detected by comparing AppExplorer snapshots), FlakyDetector raises a <strong>locator instability flag</strong> and queues LocatorHealer automatically.</p>
+
+        <h2>LocatorHealer</h2>
+        <p>LocatorHealer is triggered when a test fails with a locator-related error or when FlakyDetector raises a locator instability flag. It:</p>
+        <ol>
+          <li>Launches a headless Chromium session and navigates to the affected page</li>
+          <li>Attempts to re-discover the target element using alternative selector strategies (role, text, data-testid, CSS, XPath)</li>
+          <li>Scores candidate selectors by stability and uniqueness</li>
+          <li>Generates a healing patch — a script update replacing the broken selector with the best candidate</li>
+          <li>Queues the patch in <strong>Approvals</strong> with the confidence score and selector comparison</li>
+        </ol>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">LocatorHealer patches require human approval before being applied to the test suite. This ensures a QA engineer reviews the proposed selector change before it is committed.</p>
+        </div>
+
+        <h2>Viewing agent outputs</h2>
+        <p>All post-run agent outputs are accessible from the run results view under the <strong>Agent Activity</strong> tab. You can see which agents ran, their status, the time taken, and drill into each agent's detailed output. Pending approvals generated by agents appear in <strong>Approvals → From Agents</strong>.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>

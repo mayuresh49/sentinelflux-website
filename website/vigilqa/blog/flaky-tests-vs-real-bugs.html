@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flaky Tests vs Real Bugs: How AI Tells the Difference — VigilQA Blog</title>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="mask-icon" href="/favicon.svg" color="#4f46e5">
+<meta name="description" content="How VigilQA's FlakyDetector agent distinguishes intermittent test infrastructure issues from genuine product bugs.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>body{font-family:'Inter',sans-serif}.prose p{margin-bottom:1.25rem;color:#475569;line-height:1.8}.prose h2{font-size:1.375rem;font-weight:700;color:#0f172a;margin:2rem 0 .75rem}.prose ul{list-style:disc;padding-left:1.5rem;margin-bottom:1.25rem;color:#475569}.prose li{margin-bottom:.4rem;line-height:1.7}.prose code{font-family:'JetBrains Mono',monospace;background:#f1f5f9;padding:.1em .4em;border-radius:4px;font-size:.875em;color:#4f46e5}</style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5"><div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center"><svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div><span class="font-bold text-lg tracking-tight">VigilQA</span></a>
+        <div class="flex items-center gap-3"><a href="/vigilqa/blog.html" class="text-slate-600 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50">← Blog</a><a href="/vigilqa/#pricing" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700">Get started</a></div>
+    </div>
+</nav>
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4"><span class="bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">Concepts</span><span class="text-slate-400 text-sm">April 28, 2026 · 5 min read</span></div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Flaky Tests vs Real Bugs: How AI Tells the Difference</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">A test that fails 3 out of 5 runs might be a flaky test, a broken locator, a timing issue — or a real, intermittent product bug. Here's how VigilQA's FlakyDetector agent categorises each one.</p>
+        </div>
+        <div class="prose">
+            <p>Flaky tests are the silent killers of QA confidence. When a test fails intermittently, the natural first response is "it's probably flaky" — and the test gets muted, skipped, or ignored. Sometimes that's right. Sometimes a real product bug is being written off as infrastructure noise.</p>
+
+            <h2>The four failure categories</h2>
+            <p>VigilQA's <code>ResultAnalyzerAgent</code> classifies every test failure into one of four categories after each run:</p>
+            <ul>
+                <li><strong>Product Bug</strong> — the application behaved incorrectly. Consistent failure, traceable to a specific assertion, matches known functionality.</li>
+                <li><strong>Flaky — Script</strong> — the test script has a timing, selector, or sequencing issue. Fails intermittently, often recovers on retry.</li>
+                <li><strong>Flaky — Infrastructure</strong> — the environment is unreliable. Network timeouts, slow CI runners, external service unavailability.</li>
+                <li><strong>Broken Locator</strong> — the selector no longer resolves. Consistent failure, no assertion reached, element not found.</li>
+            </ul>
+
+            <h2>How the FlakyDetector agent works</h2>
+            <p>The <code>FlakyDetector</code> runs after the result classification pass and looks specifically at tests that have appeared in multiple recent runs. Its analysis is based on three signals:</p>
+            <ul>
+                <li><strong>Failure pattern</strong> — does this test fail consistently (product bug) or intermittently (flaky)?</li>
+                <li><strong>Failure message similarity</strong> — are the error messages across failures identical (deterministic) or varied (non-deterministic)?</li>
+                <li><strong>Failure timing</strong> — do failures correlate with specific conditions (CI load, time of day, run order)?</li>
+            </ul>
+            <p>A test that fails with the same <code>AssertionError</code> on every run is classified differently from one that fails with a <code>TimeoutError</code> on 2 of 7 runs.</p>
+
+            <h2>Why the distinction matters</h2>
+            <p>Misclassifying a real product bug as flaky means it ships. Misclassifying a flaky script as a product bug means an engineer wastes time investigating something that isn't broken. Both have real costs.</p>
+            <p>The FlakyDetector output gives you a prioritised list: fix these locators, investigate these product bugs, ignore these infrastructure blips until they reach a threshold. That's a genuinely useful signal — not just a raw list of failing tests.</p>
+
+            <h2>The escalation threshold</h2>
+            <p>VigilQA lets you configure a flakiness threshold — if a test fails more than N% of runs over a rolling window, it gets promoted from "Flaky — Script" to a full bug card in the Bug Tracker module, with the run history and error log attached. That prevents genuine intermittent bugs from staying invisible in the "probably flaky" pile indefinitely.</p>
+        </div>
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/vigilqa/blog.html" class="text-sm text-slate-500 hover:text-slate-900 flex items-center gap-2"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>All posts</a>
+            <a href="/vigilqa/#pricing" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5">Try VigilQA free<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></a>
+        </div>
+    </div>
+</main>
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6"><div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm"><a href="/vigilqa/" class="flex items-center gap-2 font-bold text-white"><div class="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center"><svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>VigilQA</a><div class="flex gap-6"><a href="/privacy.html" class="hover:text-white">Privacy</a><a href="/terms.html" class="hover:text-white">Terms</a><a href="/vigilqa/blog.html" class="hover:text-white">Blog</a></div><div>&copy; 2026 SentinelFlux, Inc.</div></div></footer>
+</body></html>

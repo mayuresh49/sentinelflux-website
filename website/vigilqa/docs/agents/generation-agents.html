@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generation Agents — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-info{background:#eff6ff;border-left:4px solid #3b82f6}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/vigilqa/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Generation Agents</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">The five agents that form the test generation pipeline — from crawling your live app to producing reviewed, ready-to-run pytest scripts.</p>
+        <p>For a detailed description of how these agents interact as a pipeline, see <a href="/vigilqa/docs/core-concepts/generation-pipeline.html">Generation Pipeline</a>. This page documents each agent's individual behaviour and configuration.</p>
+
+        <h2>AppExplorer</h2>
+        <p><strong>Purpose:</strong> Crawls the live application and captures selector and structure data for every page or endpoint referenced in the Knowledge Base.</p>
+        <p><strong>What it does:</strong></p>
+        <ul>
+          <li>Launches a headless Chromium browser and navigates to each page listed in KB domain base URLs</li>
+          <li>Discovers interactive elements (inputs, buttons, links, forms, selects)</li>
+          <li>Records multiple selector strategies per element (data-testid, ARIA role, text, CSS, XPath)</li>
+          <li>For API modules: probes API endpoints and records response shapes</li>
+          <li>Stores output as structured JSON selector maps per domain</li>
+        </ul>
+        <p><strong>Re-run AppExplorer only:</strong> Navigate to <strong>Project → Generation → AppExplorer → Re-run</strong> after UI changes to refresh selector maps without regenerating scripts.</p>
+
+        <h2>DocGen</h2>
+        <p><strong>Purpose:</strong> Converts KB scenarios into structured test case documents that serve as the specification for ScriptGen.</p>
+        <p><strong>What it does:</strong></p>
+        <ul>
+          <li>Reads each KB scenario (steps, expected outcomes, priority, tags)</li>
+          <li>Combines with AppExplorer selector data to infer element interactions</li>
+          <li>Generates a Markdown test case document with explicit test setup, actions, and assertions</li>
+          <li>Assigns unique test case IDs following the configured numbering convention</li>
+        </ul>
+
+        <h2>DocReview</h2>
+        <p><strong>Purpose:</strong> Quality-gates DocGen output before code is written, catching gaps and ambiguities early.</p>
+        <p><strong>Checks performed:</strong></p>
+        <ul>
+          <li>All required document fields are present and non-empty</li>
+          <li>Steps and expected outcomes are internally consistent</li>
+          <li>Referenced DOM selectors exist in AppExplorer output</li>
+          <li>Assertions are specific enough for ScriptGen to produce meaningful code</li>
+        </ul>
+        <p>Passing documents are forwarded to ScriptGen. Failing documents are retried once automatically; persistent failures enter the Approvals queue as rejected items with the specific failure reason.</p>
+
+        <h2>ScriptGen</h2>
+        <p><strong>Purpose:</strong> Converts approved test case documents into executable pytest test scripts.</p>
+        <p><strong>What it produces:</strong></p>
+        <ul>
+          <li>Python pytest files using Playwright (Web UI) or HTTPX (API) as the testing library</li>
+          <li>One test function per scenario ID</li>
+          <li>Fixtures for authentication, environment configuration, and base URL injection</li>
+          <li>Assertions derived from the expected outcomes in the test case document</li>
+        </ul>
+
+        <h2>ScriptReview</h2>
+        <p><strong>Purpose:</strong> Validates generated scripts before they reach the Approvals queue.</p>
+        <p><strong>Checks performed:</strong></p>
+        <ul>
+          <li>Python syntax validity — scripts are parsed and any syntax errors are reported</li>
+          <li>Selector existence — verifies referenced locators exist in current AppExplorer maps</li>
+          <li>Assertion presence — each test function must contain at least one assertion</li>
+          <li>Import validity — checks that all used fixtures and imports are resolvable</li>
+        </ul>
+        <p>Passing scripts are sent to the Approvals queue. Failing scripts trigger one automatic ScriptGen retry; persistent failures go to Approvals as rejected items.</p>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">All five generation agents are visible in <strong>Agent Activities</strong> during a generation run. You can monitor progress in real time and see which stage each domain or scenario is currently in.</p>
+        </div>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>
