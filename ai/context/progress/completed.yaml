@@ -1,5 +1,13 @@
 # Completed work — newest first
 
+- date: 2026-06-04
+  commit: c0e3977
+  title: "SpecVault product landing page + portfolio update"
+  details:
+    - website/specvault/index.html — full product landing page
+    - portfolio.html — SpecVault card added, SentinelFlux corrected (9 modules, right stack)
+    - index.html ecosystem card links to /specvault/
+
 - date: 2026-06-03
   commit: 55e4de0
   title: "Add SpecVault ecosystem section to marketing site"

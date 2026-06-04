@@ -13,7 +13,16 @@ Static marketing website for SentinelFlux (sentinelflux.in) — an AI-powered te
 
 ---
 
-## What Was Just Done (2026-06-03) — 55e4de0
+## What Was Just Done (2026-06-04) — c0e3977
+
+### SpecVault product landing page + portfolio update
+- `website/specvault/index.html` — standalone product landing page: hero, 3-step how-it-works, 6-card feature grid (version history, breaking change detection, email alerts, CI/CD integration, API tokens, open source), stack section, CTA, footer; links to `specvault.sentinelflux.in` and GitHub
+- `portfolio.html` — SentinelFlux + SpecVault now side-by-side featured cards (not col-span-2 SentinelFlux alone); SentinelFlux description: 9 modules, correct stack tags (FastAPI/Alpine.js/HTMX, not React/TypeScript); hero bio updated to mention both products; SpecVault card links to product page + live app + GitHub
+- `index.html` — ecosystem section SpecVault card "Learn more →" now links to `/specvault/`; GitHub link kept separately
+
+---
+
+## Previous Work (2026-06-04) — 55e4de0
 
 ### Add SpecVault ecosystem section
 - New "The SentinelFlux Ecosystem" section above the footer

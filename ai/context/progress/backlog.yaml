@@ -55,6 +55,11 @@
   status: done
   commit: b6cfc79
 
+- id: specvault-landing-page
+  title: "SpecVault product landing page at /specvault/"
+  status: done
+  commit: c0e3977
+
 - id: compliance-module-doc-page
   title: "Add compliance-reports.html module doc page"
   status: done
