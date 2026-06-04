@@ -1,6 +1,14 @@
 # Completed work — newest first
 
 - date: 2026-06-04
+  commit: 01d18e2
+  title: "Remove all SpecVault GitHub links — repo made private"
+  details:
+    - specvault/index.html: GitHub → contact/request-access mailto; Open Source → Self-Hostable
+    - portfolio.html: GitHub button removed; MIT tag → Self-hostable
+    - index.html: ecosystem GitHub link removed
+
+- date: 2026-06-04
   commit: c0e3977
   title: "SpecVault product landing page + portfolio update"
   details:

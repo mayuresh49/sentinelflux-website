@@ -13,7 +13,16 @@ Static marketing website for SentinelFlux (sentinelflux.in) — an AI-powered te
 
 ---
 
-## What Was Just Done (2026-06-04) — c0e3977
+## What Was Just Done (2026-06-04) — 01d18e2
+
+### Remove all SpecVault GitHub links — repo made private
+- `specvault/index.html`: nav GitHub → Contact mailto; hero "View on GitHub" → "Request Access" mailto; CTA "GitHub — MIT" → "Request Access"; footer GitHub → Contact; "Open Source" feature card → "Self-Hostable"; MIT stack tag → "Self-hostable"
+- `portfolio.html`: removed GitHub button from SpecVault card; "MIT Open Source" tag → "Self-hostable"
+- `index.html`: ecosystem section GitHub link removed, just "Learn more →" remains
+
+---
+
+## Previous Work (2026-06-04) — c0e3977
 
 ### SpecVault product landing page + portfolio update
 - `website/specvault/index.html` — standalone product landing page: hero, 3-step how-it-works, 6-card feature grid (version history, breaking change detection, email alerts, CI/CD integration, API tokens, open source), stack section, CTA, footer; links to `specvault.sentinelflux.in` and GitHub
