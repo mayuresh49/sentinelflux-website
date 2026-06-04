@@ -25,13 +25,13 @@
         <ul>
           <li>A VigilQA project with at least one approved test plan</li>
           <li>A VigilQA API token (generate from <strong>Settings → API Tokens → New Token</strong>)</li>
-          <li>The API token stored as a GitHub secret: <code>SENTINELFLUX_API_TOKEN</code></li>
+          <li>The API token stored as a GitHub secret: <code>VIGILQA_API_TOKEN</code></li>
         </ul>
 
         <h2>Basic integration</h2>
         <p>Add a step to your workflow that triggers a VigilQA run and waits for results:</p>
 
-        <pre># .github/workflows/sentinelflux.yml
+        <pre># .github/workflows/vigilqa.yml
 name: VigilQA Tests
 
 on:
@@ -40,7 +40,7 @@ on:
   pull_request:
 
 jobs:
-  sentinelflux:
+  vigilqa:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger VigilQA run
@@ -48,7 +48,7 @@ jobs:
         run: |
           RUN_ID=$(curl -s -X POST \
             "https://api.sentinelflux.in/v1/runs" \
-            -H "Authorization: Bearer ${{ secrets.SENTINELFLUX_API_TOKEN }}" \
+            -H "Authorization: Bearer ${{ secrets.VIGILQA_API_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{
               "project": "myapp",
@@ -66,7 +66,7 @@ jobs:
           while true; do
             STATUS=$(curl -s \
               "https://api.sentinelflux.in/v1/runs/${{ steps.sf_run.outputs.run_id }}" \
-              -H "Authorization: Bearer ${{ secrets.SENTINELFLUX_API_TOKEN }}" \
+              -H "Authorization: Bearer ${{ secrets.VIGILQA_API_TOKEN }}" \
               | jq -r '.status')
             if [[ "$STATUS" == "passed" ]]; then exit 0; fi
             if [[ "$STATUS" == "failed" ]]; then exit 1; fi
@@ -81,7 +81,7 @@ jobs:
         run: |
           RESULT=$(curl -s \
             "https://api.sentinelflux.in/v1/runs/${{ steps.sf_run.outputs.run_id }}" \
-            -H "Authorization: Bearer ${{ secrets.SENTINELFLUX_API_TOKEN }}")
+            -H "Authorization: Bearer ${{ secrets.VIGILQA_API_TOKEN }}")
           RG_STATUS=$(echo $RESULT | jq -r '.regression_guard_status')
           if [[ "$RG_STATUS" == "regressions_detected" ]]; then
             echo "New regressions detected — failing workflow"
@@ -117,6 +117,6 @@ jobs:
       </div>
     </main>
   </div>
-  <script src="/docs/docs.js"></script>
+  <script src="/vigilqa/docs/docs.js"></script>
 </body>
 </html>

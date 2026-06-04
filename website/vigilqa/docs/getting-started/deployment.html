@@ -48,10 +48,10 @@
         <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
 
         <h1 class="text-3xl font-bold text-slate-900 mb-3">Deployment</h1>
-        <p class="text-lg text-slate-500 mb-10 leading-relaxed">How VigilQA VigilQA is deployed depends on where your application under test is hosted. This page covers both scenarios — they can coexist for different projects.</p>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">How VigilQA is deployed depends on where your application under test is hosted. This page covers both scenarios — they can coexist for different projects.</p>
 
         <h2>How it works</h2>
-        <p>The VigilQA VigilQA dashboard is hosted centrally at <code>api.sentinelflux.in</code>. It manages everything: knowledge base, test docs, run scheduling, run history, analysis, and user management. Tests are never executed on the dashboard server.</p>
+        <p>The VigilQA dashboard is hosted centrally at <code>api.sentinelflux.in</code>. It manages everything: knowledge base, test docs, run scheduling, run history, analysis, and user management. Tests are never executed on the dashboard server.</p>
         <p>Test execution is handled by a <strong>runner daemon</strong> — a lightweight process (<code>vigilqa runner</code>) that polls the dashboard for queued runs, executes pytest locally against your application, and streams results back in real time. The runner must be on a machine that can reach your application under test.</p>
 
         <div class="callout callout-info not-prose">
@@ -78,8 +78,8 @@
         <table>
           <thead><tr><th>Task</th><th>Responsibility</th></tr></thead>
           <tbody>
-            <tr><td>Dashboard</td><td>VigilQA VigilQA (already hosted at api.sentinelflux.in)</td></tr>
-            <tr><td>Runner</td><td>VigilQA VigilQA (central runner, reaches public URLs)</td></tr>
+            <tr><td>Dashboard</td><td>VigilQA (already hosted at api.sentinelflux.in)</td></tr>
+            <tr><td>Runner</td><td>VigilQA (central runner, reaches public URLs)</td></tr>
             <tr><td>Test code</td><td>VigilQA team authors and deploys</td></tr>
             <tr><td>Triggering runs, viewing results</td><td>You — via the dashboard in your browser</td></tr>
             <tr><td>Installing software</td><td>Nothing required on your machines</td></tr>
@@ -94,7 +94,7 @@
         <table>
           <thead><tr><th>Task</th><th>Responsibility</th></tr></thead>
           <tbody>
-            <tr><td>Dashboard</td><td>VigilQA VigilQA (already hosted at api.sentinelflux.in)</td></tr>
+            <tr><td>Dashboard</td><td>VigilQA (already hosted at api.sentinelflux.in)</td></tr>
             <tr><td>Runner</td><td>You — installed on a machine inside your network</td></tr>
             <tr><td>Test code</td><td>VigilQA team — delivered as a versioned archive</td></tr>
             <tr><td>Runner token</td><td>Generated in dashboard, shared with you by your VigilQA contact</td></tr>
@@ -126,7 +126,7 @@ playwright install chromium</pre>
 
         <h3>Step 2 — Extract the test suite</h3>
         <p>Your VigilQA contact will also provide a test suite archive for your project. Extract it to a working directory:</p>
-        <pre>tar -xzf sentinelflux-tests-&lt;project&gt;-&lt;version&gt;.tar.gz -C /opt/sf-runner</pre>
+        <pre>tar -xzf vigilqa-tests-&lt;project&gt;-&lt;version&gt;.tar.gz -C /opt/sf-runner</pre>
 
         <p>The extracted layout will look like:</p>
         <pre>/opt/sf-runner/
@@ -182,7 +182,7 @@ vigilqa runner \
         <p>When a new version is available, your VigilQA contact will provide an updated wheel and test suite archive. To upgrade:</p>
         <pre># Stop the runner service first, then:
 pip install vigilqa-&lt;new-version&gt;-py3-none-any.whl --force-reinstall
-tar -xzf sentinelflux-tests-&lt;project&gt;-&lt;new-version&gt;.tar.gz -C /opt/sf-runner
+tar -xzf vigilqa-tests-&lt;project&gt;-&lt;new-version&gt;.tar.gz -C /opt/sf-runner
 # Restart the runner service</pre>
         <p>Your configuration in <code>env_qa.yaml</code> and <code>runner.env</code> is preserved across upgrades.</p>
 
@@ -190,6 +190,6 @@ tar -xzf sentinelflux-tests-&lt;project&gt;-&lt;new-version&gt;.tar.gz -C /opt/s
       </div>
     </main>
   </div>
-  <script src="/docs/docs.js"></script>
+  <script src="/vigilqa/docs/docs.js"></script>
 </body>
 </html>

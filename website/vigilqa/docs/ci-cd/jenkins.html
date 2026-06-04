@@ -25,7 +25,7 @@
         <pre>pipeline {
   agent any
   environment {
-    SF_TOKEN = credentials('sentinelflux-api-token')
+    SF_TOKEN = credentials('vigilqa-api-token')
   }
   stages {
     stage('VigilQA Tests') {
@@ -73,7 +73,7 @@ set -e
 
 # Trigger run
 RUN_ID=$(curl -s -X POST "https://api.sentinelflux.in/v1/runs" \
-  -H "Authorization: Bearer ${SENTINELFLUX_API_TOKEN}" \
+  -H "Authorization: Bearer ${VIGILQA_API_TOKEN}" \
   -H "Content-Type: application/json" \
   -d "{\"project\":\"${SF_PROJECT}\",\"plan\":\"${SF_PLAN}\"}" \
   | jq -r '.run_id')
@@ -83,7 +83,7 @@ echo "Triggered run: $RUN_ID"
 # Poll until complete (max 30 minutes)
 for i in $(seq 1 120); do
   STATUS=$(curl -s "https://api.sentinelflux.in/v1/runs/$RUN_ID" \
-    -H "Authorization: Bearer ${SENTINELFLUX_API_TOKEN}" \
+    -H "Authorization: Bearer ${VIGILQA_API_TOKEN}" \
     | jq -r '.status')
   echo "Status: $STATUS"
   case $STATUS in
@@ -98,7 +98,7 @@ exit 1</pre>
 
         <h2>Environment variables reference</h2>
         <ul>
-          <li><code>SENTINELFLUX_API_TOKEN</code> — API token from <strong>Settings → API Tokens</strong></li>
+          <li><code>VIGILQA_API_TOKEN</code> — API token from <strong>Settings → API Tokens</strong></li>
           <li><code>SF_PROJECT</code> — your project slug (shown in the dashboard URL)</li>
           <li><code>SF_PLAN</code> — the plan name to run (e.g. <code>smoke</code>, <code>regression</code>)</li>
         </ul>
@@ -107,6 +107,6 @@ exit 1</pre>
       </div>
     </main>
   </div>
-  <script src="/docs/docs.js"></script>
+  <script src="/vigilqa/docs/docs.js"></script>
 </body>
 </html>
