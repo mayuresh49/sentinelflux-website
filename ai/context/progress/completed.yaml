@@ -1,5 +1,23 @@
 # Completed work — newest first
 
+- date: 2026-06-05
+  commit: 48b3e9d
+  title: "Move blog and docs under /vigilqa/, add company-level stubs"
+  details:
+    - vigilqa/blog/ + vigilqa/blog.html — VigilQA blog (branding updated, SentinelFlux→VigilQA in posts)
+    - vigilqa/docs/ — docs moved from docs-site/; internal links updated to /vigilqa/docs/ prefix
+    - /blog.html — company stub linking to product blogs
+    - All site pages updated: blog → /vigilqa/blog, docs → /vigilqa/docs/
+
+- date: 2026-06-05
+  commit: 350b459
+  title: "Restructure sentinelflux.in as company homepage with per-product pages"
+  details:
+    - index.html → new SentinelFlux company homepage (hero, product cards, mission)
+    - vigilqa/index.html → VigilQA product page (moved from root); By SentinelFlux breadcrumb added
+    - specvault/ unchanged (already had the right pattern)
+    - All 35+ supporting pages: /#modules → /vigilqa/#modules etc.
+
 - date: 2026-06-04
   commit: 01d18e2
   title: "Remove all SpecVault GitHub links — repo made private"

@@ -1,19 +1,37 @@
 # SentinelFlux Website — AI Context Resume
 
-**Last updated:** 2026-06-03
+**Last updated:** 2026-06-05
 
 ## Project Overview
 
-Static marketing website for SentinelFlux (sentinelflux.in) — an AI-powered test automation platform. Pure HTML/Tailwind CSS, no build step, hosted via GitHub Pages. `docs-site/` is deployed to `sentinelflux.in/docs/` via the combined deploy workflow.
+sentinelflux.in is now a **company homepage** for SentinelFlux, with products on their own pages. Pure HTML/Tailwind CSS, no build step, hosted via GitHub Pages.
 
-**Repo:** github.com/mayuresh49/sentinelflux  
+**Repo:** github.com/mayuresh49/sentinelflux-website  
 **Stack:** HTML5, Tailwind CSS (CDN), vanilla JS  
-**Pages:** index, about, blog, changelog, status, privacy, terms, security + feature/module/blog subpages  
-**Docs site:** docs-site/ — 38 pages served at sentinelflux.in/docs/, shared docs.js for sidebar/nav
+**Structure:**
+- `/` — SentinelFlux company homepage (hero, product cards, mission)
+- `/vigilqa/` — VigilQA product landing page (with "By SentinelFlux" breadcrumb)
+- `/vigilqa/blog.html` + `/vigilqa/blog/` — VigilQA blog (14 posts, VigilQA branding)
+- `/vigilqa/docs/` — VigilQA docs (moved from docs-site/, 41 pages)
+- `/specvault/` — SpecVault product landing page
+- `/blog.html` — company-level blog stub (links to product blogs)
+- Supporting pages: about, changelog, status, privacy, terms, security, features/, modules/
 
 ---
 
-## What Was Just Done (2026-06-04) — 01d18e2
+## What Was Just Done (2026-06-05) — 48b3e9d + 350b459
+
+### Restructure as company site with per-product pages
+- `website/index.html` → new SentinelFlux company homepage (hero, product cards for VigilQA + SpecVault, mission section, CTA)
+- `website/vigilqa/index.html` → VigilQA product page (moved from root); nav updated: logo → /vigilqa/, "By SentinelFlux" breadcrumb → /
+- `website/vigilqa/blog.html` + `blog/` → VigilQA blog index + 14 posts; branding updated SentinelFlux → VigilQA throughout; company-name exceptions preserved
+- `website/vigilqa/docs/` → docs moved from docs-site/; all internal links updated to /vigilqa/docs/ prefix; stale CNAME removed
+- `website/blog.html` → company-level stub linking to product blogs
+- All 35+ supporting pages updated: `/#modules` → `/vigilqa/#modules`, blog → `/vigilqa/blog`, docs → `/vigilqa/docs/`
+
+---
+
+## Previous Work (2026-06-04) — 01d18e2
 
 ### Remove all SpecVault GitHub links — repo made private
 - `specvault/index.html`: nav GitHub → Contact mailto; hero "View on GitHub" → "Request Access" mailto; CTA "GitHub — MIT" → "Request Access"; footer GitHub → Contact; "Open Source" feature card → "Self-Hostable"; MIT stack tag → "Self-hostable"
