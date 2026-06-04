@@ -37,7 +37,7 @@
 </head>
 <body class="bg-white text-slate-900">
   <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
-    <a href="/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <a href="/docs/" class="font-bold text-indigo-600">SentinelFlux VigilQA <span class="text-slate-400 font-normal text-sm">Docs</span></a>
     <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
   </div>
   <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
@@ -48,10 +48,10 @@
         <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
 
         <h1 class="text-3xl font-bold text-slate-900 mb-3">Deployment</h1>
-        <p class="text-lg text-slate-500 mb-10 leading-relaxed">How SentinelFlux is deployed depends on where your application under test is hosted. This page covers both scenarios — they can coexist for different projects.</p>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">How SentinelFlux VigilQA is deployed depends on where your application under test is hosted. This page covers both scenarios — they can coexist for different projects.</p>
 
         <h2>How it works</h2>
-        <p>The SentinelFlux dashboard is hosted centrally at <code>api.sentinelflux.in</code>. It manages everything: knowledge base, test docs, run scheduling, run history, analysis, and user management. Tests are never executed on the dashboard server.</p>
+        <p>The SentinelFlux VigilQA dashboard is hosted centrally at <code>api.sentinelflux.in</code>. It manages everything: knowledge base, test docs, run scheduling, run history, analysis, and user management. Tests are never executed on the dashboard server.</p>
         <p>Test execution is handled by a <strong>runner daemon</strong> — a lightweight process (<code>vigilqa runner</code>) that polls the dashboard for queued runs, executes pytest locally against your application, and streams results back in real time. The runner must be on a machine that can reach your application under test.</p>
 
         <div class="callout callout-info not-prose">
@@ -78,8 +78,8 @@
         <table>
           <thead><tr><th>Task</th><th>Responsibility</th></tr></thead>
           <tbody>
-            <tr><td>Dashboard</td><td>SentinelFlux (already hosted at api.sentinelflux.in)</td></tr>
-            <tr><td>Runner</td><td>SentinelFlux (central runner, reaches public URLs)</td></tr>
+            <tr><td>Dashboard</td><td>SentinelFlux VigilQA (already hosted at api.sentinelflux.in)</td></tr>
+            <tr><td>Runner</td><td>SentinelFlux VigilQA (central runner, reaches public URLs)</td></tr>
             <tr><td>Test code</td><td>SentinelFlux team authors and deploys</td></tr>
             <tr><td>Triggering runs, viewing results</td><td>You — via the dashboard in your browser</td></tr>
             <tr><td>Installing software</td><td>Nothing required on your machines</td></tr>
@@ -94,7 +94,7 @@
         <table>
           <thead><tr><th>Task</th><th>Responsibility</th></tr></thead>
           <tbody>
-            <tr><td>Dashboard</td><td>SentinelFlux (already hosted at api.sentinelflux.in)</td></tr>
+            <tr><td>Dashboard</td><td>SentinelFlux VigilQA (already hosted at api.sentinelflux.in)</td></tr>
             <tr><td>Runner</td><td>You — installed on a machine inside your network</td></tr>
             <tr><td>Test code</td><td>SentinelFlux team — delivered as a versioned archive</td></tr>
             <tr><td>Runner token</td><td>Generated in dashboard, shared with you by your SentinelFlux contact</td></tr>
