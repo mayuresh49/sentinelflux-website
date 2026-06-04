@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>System Requirements — SentinelFlux Docs</title>
+  <title>System Requirements — VigilQA Docs</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -47,15 +47,15 @@
         <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
 
         <h1 class="text-3xl font-bold text-slate-900 mb-3">System Requirements</h1>
-        <p class="text-lg text-slate-500 mb-10 leading-relaxed">What your application and CI/CD environment need to work with SentinelFlux VigilQA.</p>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">What your application and CI/CD environment need to work with VigilQA VigilQA.</p>
 
         <h2>Application requirements</h2>
-        <p>SentinelFlux VigilQA tests your application externally — it doesn't require any SDK or agent installed in your codebase. Your application needs to meet the following:</p>
+        <p>VigilQA VigilQA tests your application externally — it doesn't require any SDK or agent installed in your codebase. Your application needs to meet the following:</p>
 
         <table>
           <thead><tr><th>Requirement</th><th>Details</th></tr></thead>
           <tbody>
-            <tr><td>Network reachability</td><td>Application URL must be accessible from SentinelFlux VigilQA cloud infrastructure. Staging and preview environments on public URLs are ideal. VPN or private network apps require Enterprise plan with network peering.</td></tr>
+            <tr><td>Network reachability</td><td>Application URL must be accessible from VigilQA VigilQA cloud infrastructure. Staging and preview environments on public URLs are ideal. VPN or private network apps require Enterprise plan with network peering.</td></tr>
             <tr><td>Stable base URL</td><td>A consistent HTTPS base URL per environment (production, staging, etc.).</td></tr>
             <tr><td>Web UI apps</td><td>Must render in a standards-compliant browser (Chromium-based). JavaScript-rendered SPAs are supported.</td></tr>
             <tr><td>API apps</td><td>REST or GraphQL endpoints returning JSON. OpenAPI/Swagger spec improves generation quality but is not required.</td></tr>
@@ -78,7 +78,7 @@
         </table>
 
         <h2>CI/CD platforms</h2>
-        <p>SentinelFlux VigilQA integrates with any CI/CD platform that can make outbound HTTPS calls. Native integration guides are provided for:</p>
+        <p>VigilQA VigilQA integrates with any CI/CD platform that can make outbound HTTPS calls. Native integration guides are provided for:</p>
 
         <table>
           <thead><tr><th>Platform</th><th>Integration type</th><th>Status</th></tr></thead>
@@ -93,7 +93,7 @@
         </table>
 
         <h2>Dashboard browser requirements</h2>
-        <p>The SentinelFlux VigilQA web dashboard is tested against:</p>
+        <p>The VigilQA VigilQA web dashboard is tested against:</p>
         <ul>
           <li>Chrome / Chromium 110+</li>
           <li>Firefox 115+</li>
@@ -107,21 +107,21 @@
         <h3>Outbound from your CI/CD</h3>
         <p>Your CI/CD runner needs outbound HTTPS (port 443) access to:</p>
         <ul>
-          <li><code>api.sentinelflux.in</code> — trigger runs and fetch results via the SentinelFlux VigilQA API</li>
+          <li><code>api.sentinelflux.in</code> — trigger runs and fetch results via the VigilQA VigilQA API</li>
         </ul>
 
-        <h3>Inbound to SentinelFlux VigilQA from your app</h3>
-        <p>No inbound connections required. SentinelFlux VigilQA's agents initiate all connections outbound to your application URL.</p>
+        <h3>Inbound to VigilQA VigilQA from your app</h3>
+        <p>No inbound connections required. VigilQA VigilQA's agents initiate all connections outbound to your application URL.</p>
 
-        <h3>SentinelFlux VigilQA to your application</h3>
-        <p>SentinelFlux VigilQA agents make HTTPS requests to your application from a fixed set of IP ranges. You can whitelist these in your firewall/WAF rules. The current IP allowlist is available in <strong>Settings → Network → IP Allowlist</strong> in the dashboard.</p>
+        <h3>VigilQA VigilQA to your application</h3>
+        <p>VigilQA VigilQA agents make HTTPS requests to your application from a fixed set of IP ranges. You can whitelist these in your firewall/WAF rules. The current IP allowlist is available in <strong>Settings → Network → IP Allowlist</strong> in the dashboard.</p>
 
         <div class="callout callout-warning not-prose">
-          <p class="text-sm text-amber-800"><strong>Private or VPN-gated applications:</strong> If your staging environment is behind a VPN or firewall, you'll need to either whitelist SentinelFlux VigilQA IPs or use the Enterprise plan's network peering feature. Contact <a href="mailto:engage@sentinelflux.in" class="underline">engage@sentinelflux.in</a> for assistance.</p>
+          <p class="text-sm text-amber-800"><strong>Private or VPN-gated applications:</strong> If your staging environment is behind a VPN or firewall, you'll need to either whitelist VigilQA VigilQA IPs or use the Enterprise plan's network peering feature. Contact <a href="mailto:engage@sentinelflux.in" class="underline">engage@sentinelflux.in</a> for assistance.</p>
         </div>
 
         <h2>LLM provider requirements</h2>
-        <p>SentinelFlux VigilQA's AI agents use a large language model for generation. By default, this is a Mistral-based model hosted on SentinelFlux VigilQA infrastructure. No configuration is required.</p>
+        <p>VigilQA VigilQA's AI agents use a large language model for generation. By default, this is a Mistral-based model hosted on VigilQA VigilQA infrastructure. No configuration is required.</p>
         <p>Enterprise plans support connecting a local Ollama model for air-gapped environments. See <a href="/vigilqa/docs/configuration/llm-configuration.html">LLM Configuration</a> for details.</p>
 
         <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>

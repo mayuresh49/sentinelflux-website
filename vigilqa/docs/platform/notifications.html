@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Notifications — SentinelFlux Docs</title>
+  <title>Notifications — VigilQA Docs</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}</style>
 </head>
 <body class="bg-white text-slate-900">
   <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
-    <a href="/vigilqa/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <a href="/vigilqa/docs/" class="font-bold text-indigo-600">VigilQA <span class="text-slate-400 font-normal text-sm">Docs</span></a>
     <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
   </div>
   <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
@@ -19,7 +19,7 @@
       <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
         <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
         <h1 class="text-3xl font-bold text-slate-900 mb-3">Notifications</h1>
-        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SentinelFlux delivers alerts through four channels: an in-app notification bell, email (SMTP), Slack webhooks, and generic HTTP webhooks. Each channel is independently configurable.</p>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">VigilQA delivers alerts through four channels: an in-app notification bell, email (SMTP), Slack webhooks, and generic HTTP webhooks. Each channel is independently configurable.</p>
 
         <h2>In-app notification bell</h2>
         <p>The notification bell in the top-right corner of the dashboard surfaces real-time alerts without requiring a page reload. It polls every 60 seconds and shows:</p>
@@ -32,7 +32,7 @@
 
         <h2>Notification channels</h2>
         <h3>Email (SMTP)</h3>
-        <p>Configure outbound email in <strong>Settings → Notifications → Email</strong>. SentinelFlux ships with Zoho SMTP defaults so you only need to supply credentials; swap in any SMTP provider by overriding the host, port, and TLS settings.</p>
+        <p>Configure outbound email in <strong>Settings → Notifications → Email</strong>. VigilQA ships with Zoho SMTP defaults so you only need to supply credentials; swap in any SMTP provider by overriding the host, port, and TLS settings.</p>
         <p>Required fields:</p>
         <ul>
           <li><strong>SMTP host</strong> — e.g. <code>smtp.zoho.com</code></li>
@@ -51,7 +51,7 @@
         </ul>
 
         <h3>Webhooks</h3>
-        <p>Register a webhook URL in <strong>Settings → Integrations → Webhooks</strong>. SentinelFlux will POST a JSON payload to your URL for configured events. Useful for custom integrations (PagerDuty, custom dashboards, ChatOps bots).</p>
+        <p>Register a webhook URL in <strong>Settings → Integrations → Webhooks</strong>. VigilQA will POST a JSON payload to your URL for configured events. Useful for custom integrations (PagerDuty, custom dashboards, ChatOps bots).</p>
 
         <h2>Configurable notification events</h2>
         <ul>
