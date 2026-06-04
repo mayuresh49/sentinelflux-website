@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Regression Testing: Catching UI Bugs Before Users Do — VigilQA Blog</title>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="mask-icon" href="/favicon.svg" color="#4f46e5">
+<meta name="description" content="How pixel-diff screenshot testing works, when it's worth doing, and how to avoid the false positive trap.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>body{font-family:'Inter',sans-serif}.prose p{margin-bottom:1.25rem;color:#475569;line-height:1.8}.prose h2{font-size:1.375rem;font-weight:700;color:#0f172a;margin:2rem 0 .75rem}.prose ul{list-style:disc;padding-left:1.5rem;margin-bottom:1.25rem;color:#475569}.prose li{margin-bottom:.4rem;line-height:1.7}.prose code{font-family:'JetBrains Mono',monospace;background:#f1f5f9;padding:.1em .4em;border-radius:4px;font-size:.875em;color:#4f46e5}</style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5"><div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center"><svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div><span class="font-bold text-lg tracking-tight">VigilQA</span></a>
+        <div class="flex items-center gap-3"><a href="/vigilqa/blog.html" class="text-slate-600 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50">← Blog</a><a href="/vigilqa/#pricing" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700">Get started</a></div>
+    </div>
+</nav>
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4"><span class="bg-pink-100 text-pink-700 text-xs font-semibold px-2.5 py-1 rounded-full">Concepts</span><span class="text-slate-400 text-sm">March 8, 2026 · 5 min read</span></div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Visual Regression Testing: Catching UI Bugs Before Users Do</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">Pixel-diff screenshot testing catches the UI bugs that functional tests are blind to — broken layouts, overlapping elements, invisible text. Here's how to use it without drowning in false positives.</p>
+        </div>
+        <div class="prose">
+            <p>Functional tests verify behaviour: click this button, check this text appears. What they don't verify is whether the page looks right. A button can be fully functional but overlapped by a tooltip. Text can render with the correct content but be invisible due to a colour regression. A modal can open correctly but push the layout out of alignment.</p>
+            <p>Visual regression testing catches these by comparing screenshots against a known-good baseline.</p>
+
+            <h2>How pixel-diff testing works</h2>
+            <p>The process has three steps:</p>
+            <ul>
+                <li><strong>Establish a baseline</strong> — take screenshots of each page/component when the UI looks correct. These become the reference images.</li>
+                <li><strong>Run comparisons</strong> — on each subsequent test run, take new screenshots and diff them against the baseline pixel-by-pixel.</li>
+                <li><strong>Flag differences</strong> — any diff above the configured threshold (e.g., 0.5% of pixels changed) is flagged as a potential visual regression.</li>
+            </ul>
+            <p>VigilQA stores baselines in your repo's test artifacts, diffs on every run, and presents any flagged differences in the dashboard with a side-by-side comparison and the diff overlay highlighted.</p>
+
+            <h2>The false positive problem</h2>
+            <p>The biggest challenge with visual regression testing is noise. Dynamic content (timestamps, user names, ads, animations) changes between runs and generates constant false positives. Without managing this, the tests become impossible to maintain.</p>
+            <p>Mitigation strategies:</p>
+            <ul>
+                <li><strong>Mask dynamic regions</strong> — tell VigilQA to ignore specific areas of the screenshot (date fields, avatars, live data widgets) during comparison</li>
+                <li><strong>Set appropriate thresholds</strong> — a 0.01% threshold catches tiny regressions but generates noise; 0.5–1% filters rendering artefacts while still catching real layout breaks</li>
+                <li><strong>Use component-level screenshots</strong> where possible rather than full-page — smaller scope means fewer dynamic elements</li>
+            </ul>
+
+            <h2>When baselines need updating</h2>
+            <p>When you intentionally change the UI, the baseline becomes outdated and every run will flag a diff — not a bug, just an outdated reference. This is handled through the Approvals queue: the comparison shows the old baseline, the new screenshot, and the diff. Approve it to update the baseline; reject it to investigate whether the change was intentional.</p>
+            <p>The approval workflow means baseline updates are always deliberate and logged, rather than silently overwritten.</p>
+        </div>
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/vigilqa/blog.html" class="text-sm text-slate-500 hover:text-slate-900 flex items-center gap-2"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>All posts</a>
+            <a href="/vigilqa/#pricing" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5">Try VigilQA free<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></a>
+        </div>
+    </div>
+</main>
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6"><div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm"><a href="/vigilqa/" class="flex items-center gap-2 font-bold text-white"><div class="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center"><svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>VigilQA</a><div class="flex gap-6"><a href="/privacy.html" class="hover:text-white">Privacy</a><a href="/terms.html" class="hover:text-white">Terms</a><a href="/vigilqa/blog.html" class="hover:text-white">Blog</a></div><div>&copy; 2026 SentinelFlux, Inc.</div></div></footer>
+</body></html>

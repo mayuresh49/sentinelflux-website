@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OWASP Top 10 in 31 Checks: Inside the VAPT Module — VigilQA Blog</title>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="mask-icon" href="/favicon.svg" color="#4f46e5">
+<meta name="description" content="What VigilQA's security testing module actually checks — all 31 OWASP-mapped tests, what they catch, and what they don't.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>body{font-family:'Inter',sans-serif}.prose p{margin-bottom:1.25rem;color:#475569;line-height:1.8}.prose h2{font-size:1.375rem;font-weight:700;color:#0f172a;margin:2rem 0 .75rem}.prose ul{list-style:disc;padding-left:1.5rem;margin-bottom:1.25rem;color:#475569}.prose li{margin-bottom:.4rem;line-height:1.7}.prose code{font-family:'JetBrains Mono',monospace;background:#f1f5f9;padding:.1em .4em;border-radius:4px;font-size:.875em;color:#4f46e5}</style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5"><div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center"><svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div><span class="font-bold text-lg tracking-tight">VigilQA</span></a>
+        <div class="flex items-center gap-3"><a href="/vigilqa/blog.html" class="text-slate-600 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50">← Blog</a><a href="/vigilqa/#pricing" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700">Get started</a></div>
+    </div>
+</nav>
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4"><span class="bg-rose-100 text-rose-700 text-xs font-semibold px-2.5 py-1 rounded-full">Security</span><span class="text-slate-400 text-sm">April 20, 2026 · 6 min read</span></div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">OWASP Top 10 in 31 Checks: Inside the VAPT Module</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">What VigilQA's security module actually tests, how it generates a compliance certificate, and where it fits alongside a manual pentest.</p>
+        </div>
+        <div class="prose">
+            <p>Most teams run security testing once a year — a manual pentest before a compliance audit or a major release. The problem is that security issues are introduced continuously as code ships. VigilQA's VAPT module brings automated security checks into the same CI pipeline as your functional tests, so regressions get caught before they reach production.</p>
+
+            <h2>What the 31 checks cover</h2>
+            <p>The checks map directly to OWASP Top 10 (2021) categories A01–A10:</p>
+            <ul>
+                <li><strong>A01 Broken Access Control</strong> — tests for IDOR, missing auth on protected routes, privilege escalation via parameter tampering</li>
+                <li><strong>A02 Cryptographic Failures</strong> — checks for sensitive data in URLs, insecure cookies, weak TLS configurations</li>
+                <li><strong>A03 Injection</strong> — SQL, NoSQL, command injection via form inputs and API parameters</li>
+                <li><strong>A04 Insecure Design</strong> — missing rate limits, insecure direct references, predictable resource IDs</li>
+                <li><strong>A05 Security Misconfiguration</strong> — exposed debug endpoints, default credentials, verbose error messages, CORS misconfigurations</li>
+                <li><strong>A06 Vulnerable Components</strong> — checks response headers for known framework/version disclosures</li>
+                <li><strong>A07 Auth Failures</strong> — brute force protections, session fixation, insecure password reset flows</li>
+                <li><strong>A08 Software Integrity</strong> — checks for missing integrity checks on external resources</li>
+                <li><strong>A09 Logging Failures</strong> — verifies that failed auth attempts are logged without leaking credentials</li>
+                <li><strong>A10 SSRF</strong> — server-side request forgery via URL inputs and redirect parameters</li>
+            </ul>
+
+            <h2>What comes out</h2>
+            <p>After a VAPT run, the dashboard shows each finding with a severity (Critical/High/Medium/Low/Info), the exact request and response that triggered it, a remediation recommendation, and the OWASP reference. For clean runs, a compliance certificate PDF is generated — useful for internal audits, compliance reviews, or sharing with enterprise procurement teams.</p>
+
+            <h2>What it doesn't replace</h2>
+            <p>Automated VAPT is not a substitute for a full manual pentest. It covers the known, systematic checks well — the same checks a human pentester runs first before diving deeper. What it can't do is find logic-level business vulnerabilities that require contextual understanding, novel attack chains, or social engineering vectors. Think of VigilQA's VAPT as the baseline that should be green before a manual pentest starts, not instead of one.</p>
+
+            <h2>Running it in CI without blocking deploys</h2>
+            <p>Security findings shouldn't always block a deploy. Use <code>--vapt-threshold critical</code> to only fail the build on critical findings, while surfacing lower-severity issues for review in the dashboard. This keeps shipping velocity high while ensuring the worst vulnerabilities are blocked automatically.</p>
+        </div>
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/vigilqa/blog.html" class="text-sm text-slate-500 hover:text-slate-900 flex items-center gap-2"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>All posts</a>
+            <a href="/vigilqa/#pricing" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5">Try VigilQA free<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></a>
+        </div>
+    </div>
+</main>
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6"><div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm"><a href="/vigilqa/" class="flex items-center gap-2 font-bold text-white"><div class="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center"><svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>VigilQA</a><div class="flex gap-6"><a href="/privacy.html" class="hover:text-white">Privacy</a><a href="/terms.html" class="hover:text-white">Terms</a><a href="/vigilqa/blog.html" class="hover:text-white">Blog</a></div><div>&copy; 2026 SentinelFlux, Inc.</div></div></footer>
+</body></html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LocatorHealer — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content ol li{list-style-type:decimal}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-info{background:#eff6ff;border-left:4px solid #3b82f6}.callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/vigilqa/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#10b981">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+          </div>
+          <div><div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Post-run Agent</div></div>
+        </div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">LocatorHealer</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Automatically re-discovers broken DOM selectors using a headless browser and proposes healing patches — eliminating the manual selector-hunting that kills test suite health.</p>
+
+        <h2>Trigger</h2>
+        <p>LocatorHealer is triggered in two cases:</p>
+        <ul>
+          <li>A test fails with a locator-related error (element not found, selector timeout, no such element)</li>
+          <li>FlakyDetector raises a locator instability flag on an unstable test</li>
+        </ul>
+
+        <h2>How healing works</h2>
+        <ol>
+          <li><strong>Navigate</strong> — LocatorHealer launches a headless Chromium session and navigates to the page where the locator failed, using the authenticated session from the test's fixture</li>
+          <li><strong>Discover candidates</strong> — it searches for the target element using multiple selector strategies in priority order: <code>data-testid</code>, ARIA role + name, text content, CSS class, and XPath</li>
+          <li><strong>Score candidates</strong> — each candidate selector is scored on uniqueness (does it match exactly one element?), stability (is it likely to survive UI changes?), and semantic correctness (does it refer to the right element type?)</li>
+          <li><strong>Generate patch</strong> — the highest-scoring selector replacement is compiled into a script diff (healing patch)</li>
+          <li><strong>Queue for approval</strong> — the patch is placed in the Approvals queue with the confidence score, the old selector, the proposed new selector, and a visual screenshot of the matched element</li>
+        </ol>
+
+        <h2>Healing patch review</h2>
+        <p>In the Approvals queue, each LocatorHealer patch shows:</p>
+        <ul>
+          <li>The affected test script (scenario ID)</li>
+          <li>The broken selector (old)</li>
+          <li>The proposed replacement selector (new)</li>
+          <li>Confidence score (0–1) and explanation</li>
+          <li>A screenshot annotating the matched element on the live page</li>
+          <li>Alternative candidate selectors if you prefer a different option</li>
+        </ul>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">LocatorHealer patches always require manual approval — they are never applied automatically. This ensures a QA engineer reviews the proposed selector change before it is committed to the test suite.</p>
+        </div>
+
+        <h2>Confidence score thresholds</h2>
+        <table>
+          <thead><tr><th>Confidence range</th><th>Interpretation</th><th>Recommendation</th></tr></thead>
+          <tbody>
+            <tr><td>0.90 – 1.0</td><td>High confidence — unambiguous element match with stable selector</td><td>Safe to approve directly</td></tr>
+            <tr><td>0.70 – 0.89</td><td>Good confidence — clear match, slightly less stable selector</td><td>Review quickly and approve</td></tr>
+            <tr><td>0.50 – 0.69</td><td>Moderate confidence — multiple candidates, best one selected</td><td>Review carefully; consider adding <code>data-testid</code></td></tr>
+            <tr><td>&lt; 0.50</td><td>Low confidence — element may have changed significantly</td><td>Inspect the screenshot; may require manual fix</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-warning not-prose">
+          <p class="text-sm text-amber-800"><strong>Best practice:</strong> When LocatorHealer proposes a CSS-class-based selector as its best option (low stability), take the opportunity to add a <code>data-testid</code> attribute to the element in your codebase. This permanently improves selector stability and reduces future healing activations.</p>
+        </div>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>

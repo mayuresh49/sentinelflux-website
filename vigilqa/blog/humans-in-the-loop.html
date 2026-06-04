@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why We Kept Humans in the Loop — VigilQA Blog</title>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="mask-icon" href="/favicon.svg" color="#4f46e5">
+<meta name="description" content="The design philosophy behind VigilQA's approval queue — why fully autonomous AI testing is a trap, and what human oversight actually costs.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>body{font-family:'Inter',sans-serif}.prose p{margin-bottom:1.25rem;color:#475569;line-height:1.8}.prose h2{font-size:1.375rem;font-weight:700;color:#0f172a;margin:2rem 0 .75rem}.prose ul{list-style:disc;padding-left:1.5rem;margin-bottom:1.25rem;color:#475569}.prose li{margin-bottom:.4rem;line-height:1.7}.prose code{font-family:'JetBrains Mono',monospace;background:#f1f5f9;padding:.1em .4em;border-radius:4px;font-size:.875em;color:#4f46e5}</style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2.5"><div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center"><svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div><span class="font-bold text-lg tracking-tight">VigilQA</span></a>
+        <div class="flex items-center gap-3"><a href="/vigilqa/blog.html" class="text-slate-600 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50">← Blog</a><a href="/vigilqa/#pricing" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700">Get started</a></div>
+    </div>
+</nav>
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4"><span class="bg-purple-100 text-purple-700 text-xs font-semibold px-2.5 py-1 rounded-full">Philosophy</span><span class="text-slate-400 text-sm">April 12, 2026 · 5 min read</span></div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Why We Kept Humans in the Loop</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">Fully autonomous AI testing sounds appealing. Here's why we deliberately chose not to build it — and why that makes VigilQA more trustworthy, not less.</p>
+        </div>
+        <div class="prose">
+            <p>When we were designing VigilQA's approval queue, the most common pushback from early users was: "Why can't it just commit the fix automatically?" It's a fair question. If the AI identifies a broken locator and proposes a correct replacement, what's the value of asking a human to click approve?</p>
+            <p>The answer is: the AI doesn't always propose the correct replacement.</p>
+
+            <h2>The confidence problem</h2>
+            <p>Language models are confident even when they're wrong. An AI that identifies "the submit button on the login form" will propose a locator — but on a page with two submit buttons, it might pick the wrong one. Without human review, that bad locator gets committed, the test passes, and you've silently started testing the wrong element.</p>
+            <p>Worse: because the test is now "passing", it stops generating signal. You've traded a visible failure (broken locator) for an invisible one (test that passes while testing nothing useful). That's a worse outcome than leaving the test broken.</p>
+
+            <h2>What human review actually costs</h2>
+            <p>The common objection is that approval queues create friction. In practice, reviewing a locator heal takes about 10 seconds: you see the old selector, the new proposed selector, a screenshot of the element, and the page context. You click Approve or Reject. That's the entire review.</p>
+            <p>Compare that to the alternative: a fully autonomous system that occasionally silently breaks your test suite in ways that take hours to diagnose.</p>
+
+            <h2>The three categories of approval items</h2>
+            <p>The Approvals queue in VigilQA covers three types of AI suggestions:</p>
+            <ul>
+                <li><strong>Locator heals</strong> — new selectors proposed by the LocatorHealerAgent after all stored locators failed</li>
+                <li><strong>Script fixes</strong> — test script patches proposed after the ScriptReview agent identifies issues in generated code</li>
+                <li><strong>Baseline updates</strong> — visual regression baseline image replacements when a legitimate UI change is flagged as a diff</li>
+            </ul>
+            <p>All three have the same property: they're cases where the AI is making a judgment call that could be wrong in ways that aren't immediately visible. Human review is the backstop.</p>
+
+            <h2>The autonomy slider</h2>
+            <p>We're exploring an optional high-confidence auto-approve mode for teams that want it — where approvals with confidence scores above a threshold are committed without review. But it will always be opt-in, always logged, and always easily reversible. The default will remain human-in-the-loop.</p>
+            <p>Trustworthy AI tooling isn't about removing humans. It's about putting humans in the right places — the decisions that require judgment — and automating everything else.</p>
+        </div>
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/vigilqa/blog.html" class="text-sm text-slate-500 hover:text-slate-900 flex items-center gap-2"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>All posts</a>
+            <a href="/vigilqa/#pricing" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5">Try VigilQA free<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></a>
+        </div>
+    </div>
+</main>
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6"><div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm"><a href="/vigilqa/" class="flex items-center gap-2 font-bold text-white"><div class="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center"><svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>VigilQA</a><div class="flex gap-6"><a href="/privacy.html" class="hover:text-white">Privacy</a><a href="/terms.html" class="hover:text-white">Terms</a><a href="/vigilqa/blog.html" class="hover:text-white">Blog</a></div><div>&copy; 2026 SentinelFlux, Inc.</div></div></footer>
+</body></html>

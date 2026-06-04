@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Runs — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/vigilqa/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Test Runs</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Each execution of a test plan creates a test run. Runs record individual test results, agent outputs, screenshots, and logs.</p>
+
+        <h2>Run lifecycle</h2>
+        <table>
+          <thead><tr><th>Status</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>Queued</td><td>Run accepted and waiting for execution infrastructure</td></tr>
+            <tr><td>Running</td><td>Tests are actively executing; results stream in real time</td></tr>
+            <tr><td>Analysing</td><td>Tests complete; post-run agents are processing results</td></tr>
+            <tr><td>Passed</td><td>All tests passed; no regressions detected</td></tr>
+            <tr><td>Failed</td><td>One or more tests failed; see results for details</td></tr>
+            <tr><td>Error</td><td>Infrastructure error prevented the run from completing; all results may not be available</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Viewing run results</h2>
+        <p>Navigate to <strong>Test Runs → [run name]</strong>. The results view has tabs:</p>
+        <ul>
+          <li><strong>Summary</strong> — pass count, fail count, duration, environment, triggered by</li>
+          <li><strong>Tests</strong> — per-test results with status, duration, assertion details</li>
+          <li><strong>Agent Activity</strong> — outputs from all post-run agents (ResultAnalyzer, RegressionGuard, etc.)</li>
+          <li><strong>Coverage</strong> — CoverageGap report for this run</li>
+          <li><strong>Logs</strong> — raw test execution logs per test</li>
+          <li><strong>Screenshots</strong> — failure screenshots for Web UI tests</li>
+        </ul>
+
+        <h2>Per-test detail panel</h2>
+        <p>Click the <strong>Tests (N)</strong> expander on any run card to open the per-test detail panel without leaving the runs list. Each test row shows:</p>
+        <ul>
+          <li>Outcome dot (green = pass, red = fail, amber = flaky, grey = skipped)</li>
+          <li>Artifact badges indicating which artifacts are available: screenshot, browser console log, API request/response log, Playwright trace</li>
+        </ul>
+        <p>Clicking a test row expands the full detail view, which loads on demand:</p>
+        <ul>
+          <li><strong>Traceback</strong> — full Python exception and assertion error text</li>
+          <li><strong>Stdout</strong> — captured print statements and test step logs</li>
+          <li><strong>Screenshot thumbnail</strong> — inline failure screenshot for Web UI tests; click to open full size</li>
+          <li><strong>Browser console log</strong> — JavaScript console output captured during the test session</li>
+          <li><strong>API request/response log</strong> — full curl-equivalent request plus response body for API tests; includes headers, payload, status code, and elapsed milliseconds</li>
+          <li><strong>Playwright trace download</strong> — download the <code>.zip</code> trace file for replay in the Playwright Trace Viewer</li>
+        </ul>
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">The API log captures all HTTP calls made during the test, including auth requests, so you can reproduce failures with a single curl command without re-running the suite.</p>
+        </div>
+
+        <h2>Retrying failed tests</h2>
+        <p>From the Tests tab, select one or more failed tests and click <strong>Re-run Selected</strong> to create a new run containing only those tests. This is useful for verifying a fix without running the full suite.</p>
+
+        <h2>Run retention</h2>
+        <p>Run results are retained for:</p>
+        <ul>
+          <li><strong>Pro plan</strong> — 90 days</li>
+          <li><strong>Enterprise plan</strong> — configurable, up to unlimited</li>
+        </ul>
+        <p>After the retention period, detailed logs and screenshots are deleted. Summary-level data (pass/fail counts, run metadata) is retained indefinitely for trend reporting.</p>
+
+        <h2>Run API</h2>
+        <p>Check run status programmatically to integrate with CI/CD gates:</p>
+        <pre>GET https://api.sentinelflux.in/v1/runs/{run_id}
+Authorization: Bearer {API_TOKEN}
+
+# Response
+{
+  "run_id": "run_abc123",
+  "status": "failed",
+  "passed": 34,
+  "failed": 2,
+  "regression_guard_status": "regressions_detected",
+  "duration_seconds": 187,
+  "completed_at": "2025-11-15T14:23:01Z"
+}</pre>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>

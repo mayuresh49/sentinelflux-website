@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Integrations — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content ol li{list-style-type:decimal}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-info{background:#eff6ff;border-left:4px solid #3b82f6}.callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/vigilqa/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Integrations</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SentinelFlux can push test results to external reporting and issue-tracking platforms. Integrations are configured per product so different teams can route results to different destinations.</p>
+
+        <h2>ReportPortal</h2>
+        <p>ReportPortal is a test analytics platform that aggregates results across multiple projects and runs. The SentinelFlux integration pushes each run as a ReportPortal <em>launch</em> after execution completes.</p>
+
+        <h3>Setup</h3>
+        <ol>
+          <li>In ReportPortal, generate an API token from <strong>User Profile → API Keys</strong>.</li>
+          <li>Note your ReportPortal instance URL (e.g. <code>https://reportportal.mycompany.com</code>) and the target project name.</li>
+          <li>In the SentinelFlux dashboard, go to <strong>Settings → Integrations → ReportPortal</strong>.</li>
+          <li>Enter the <strong>URL</strong>, <strong>API token</strong>, and <strong>project name</strong>. Click <strong>Save and Test</strong> to verify the connection.</li>
+        </ol>
+
+        <h3>Per-product toggle</h3>
+        <p>Once the global ReportPortal connection is saved, each product can independently enable or disable the push via <strong>Product Settings → Integrations → ReportPortal</strong>. This lets you push results for production-critical products while keeping experimental products out of your reporting dashboard.</p>
+
+        <h3>What gets pushed</h3>
+        <p>For each completed run, SentinelFlux creates a launch in ReportPortal with:</p>
+        <ul>
+          <li>Launch name set to the product display name</li>
+          <li>Per-test items with pass/fail/skipped status and failure messages</li>
+          <li>Test attributes: domain (web, api, security…), run ID, environment</li>
+          <li>Failure logs attached as log entries so you can read tracebacks directly in ReportPortal</li>
+        </ul>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">ReportPortal launch attributes map SentinelFlux domains to RP test suites. If your ReportPortal project uses custom attributes for filtering, add them to the <strong>Custom Attributes</strong> field in the integration settings.</p>
+        </div>
+
+        <h3>Troubleshooting</h3>
+        <ul>
+          <li><strong>Connection test fails</strong> — check that the SentinelFlux server can reach your ReportPortal host on port 443. If ReportPortal is on a private network, ensure network peering or VPN connectivity.</li>
+          <li><strong>401 Unauthorized</strong> — the API token may have expired; regenerate it in ReportPortal and update the integration settings.</li>
+          <li><strong>Launch not appearing</strong> — verify the project name matches exactly (case-sensitive) and that the API token has write access to that project.</li>
+        </ul>
+
+        <h2>Bug trackers</h2>
+        <p>The Bug Tracker module auto-creates entries when ResultAnalyzer classifies a failure as a <em>Product Bug</em>. See the <a href="/vigilqa/docs/modules/bug-tracker.html">Bug Tracker module</a> documentation for Jira, Linear, and GitHub Issues setup.</p>
+
+        <h2>CI/CD integrations</h2>
+        <p>For triggering runs from GitHub Actions, GitLab CI, and Jenkins, see the <a href="/vigilqa/docs/ci-cd/github-actions.html">CI/CD Integration</a> section.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>

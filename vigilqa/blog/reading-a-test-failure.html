@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reading a Test Failure: Five Artifacts That Accelerate Debugging — VigilQA Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="mask-icon" href="/favicon.svg" color="#4f46e5">
+    <meta name="description" content="VigilQA captures five artifacts per failing test. Here's how to use each one to reproduce and fix bugs faster.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose h3 { font-size: 1.1rem; font-weight: 600; color: #0f172a; margin: 1.5rem 0 0.5rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ol li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #4f46e5; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/vigilqa/" class="flex items-center gap-2.5 shrink-0"><div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0"><svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div><span class="font-bold text-slate-900 text-lg tracking-tight">VigilQA</span></a>
+        <div class="flex items-center gap-3"><a href="/vigilqa/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a><a href="/vigilqa/#pricing" class="bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">Get started</a></div>
+    </div>
+</nav>
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4"><span class="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full">How-to</span><span class="text-slate-400 text-sm">May 30, 2026 · 5 min read</span></div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Reading a Test Failure: Five Artifacts That Accelerate Debugging</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">A raw assertion error tells you what failed. The five artifacts VigilQA captures per test tell you why — and give you everything you need to reproduce the failure without re-running the suite.</p>
+        </div>
+        <div class="prose">
+            <p>The classic debugging loop for a CI test failure looks like this: notice the failure, re-run the suite locally, try to reproduce it, add some prints, run again. Depending on the test, that loop can eat an hour before you've even looked at the actual bug.</p>
+
+            <p>VigilQA captures five artifacts during each test run and makes them available per test in the run results — no re-run needed. Here's what each one tells you and how to use it.</p>
+
+            <h2>1. Traceback</h2>
+            <p>The full Python exception and assertion error text, exactly as pytest captured it. This is the starting point for every failure analysis.</p>
+            <p>What to look for: assertion errors tell you what the test expected vs what it got. Exception tracebacks tell you where execution stopped. If the traceback points into a framework file rather than your test code, the failure is likely an infrastructure issue (timeout, connection refused, environment problem) rather than a product bug — which is useful context before you start debugging the app.</p>
+
+            <h2>2. Screenshot (Web UI tests)</h2>
+            <p>A screenshot taken at the exact moment of failure, displayed inline as a thumbnail. Click to see it full size.</p>
+            <p>Screenshots answer the question that tracebacks can't: <em>what did the page actually look like?</em> An assertion failure on an error message element might be because the message wasn't shown — or because it was shown but in the wrong place, or because the page never finished loading. The screenshot disambiguates all three in one glance.</p>
+            <p>A common pattern: the traceback says <code>AssertionError: expected element to be visible</code>. The screenshot shows a loading spinner still spinning. That's an environment issue (slow staging server), not a product bug — and without the screenshot you'd spend time hunting for a non-existent code defect.</p>
+
+            <h2>3. Browser console log</h2>
+            <p>JavaScript console output captured during the test session — errors, warnings, and any application-level logging your frontend emits.</p>
+            <p>This is the most underused artifact. Frontend applications increasingly log meaningful state changes to the console: authentication events, API response summaries, feature flag states. When a web UI test fails, a JavaScript error in the console is often the root cause even when the Python traceback points somewhere else.</p>
+            <p>It's also useful for flaky tests: if a test passes 4 out of 5 runs, comparing the console logs across runs often reveals a race condition — a resource load that sometimes completes in time and sometimes doesn't.</p>
+
+            <h2>4. API request/response log</h2>
+            <p>Every HTTP call made during the test, captured as a curl-equivalent command with full headers, request body, response status, response body, and elapsed milliseconds.</p>
+            <p>This is the artifact that most often resolves ambiguity about whether a failure is a frontend issue or a backend issue. If the UI shows the wrong data, the API log tells you whether the API returned the wrong data (backend bug) or the API returned correct data that the frontend rendered incorrectly (frontend bug). That distinction saves significant time routing the bug to the right team.</p>
+            <p>The curl format is also directly reproducible: copy the command, paste it in your terminal, and you have an isolated reproduction of the API call — no test framework, no auth setup, just the request.</p>
+
+            <h2>5. Playwright trace (Web UI tests)</h2>
+            <p>A downloadable <code>.zip</code> trace file for replay in the <a href="https://playwright.dev/docs/trace-viewer" target="_blank" rel="noopener">Playwright Trace Viewer</a>. The trace records every browser action, network request, DOM snapshot, and console event in sequence.</p>
+            <p>The trace is most useful when the other four artifacts don't fully explain the failure. It lets you step through the test action by action, see the DOM state at each point, and identify exactly which step produced the unexpected result. Think of it as a video recording of the test with full network and DOM inspection capability.</p>
+            <p>Download the trace from the test detail panel, open the Playwright Trace Viewer in your browser, and load the file. No installation required beyond a Chromium-based browser.</p>
+
+            <h2>A triage approach</h2>
+            <p>Not every failure needs all five artifacts. A quick triage order that works for most failures:</p>
+            <ol>
+                <li>Read the <strong>traceback</strong> — is this an assertion failure or an exception? Does it point to test code or framework code?</li>
+                <li>If it's a Web UI test, look at the <strong>screenshot</strong> — does the page match what the test expected to see?</li>
+                <li>Check the <strong>API log</strong> — did the backend return what the frontend expected?</li>
+                <li>If the failure is intermittent, compare <strong>console logs</strong> across passing and failing runs for JS errors or timing signals.</li>
+                <li>If you still can't explain the failure, download the <strong>Playwright trace</strong> for full step-by-step replay.</li>
+            </ol>
+            <p>In practice, most failures are resolved at step 1 or 2. The later artifacts are there for the harder cases — and having them available without re-running the suite is the difference between a 10-minute bug investigation and an hour-long one.</p>
+        </div>
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/vigilqa/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>All posts</a>
+            <a href="/vigilqa/#pricing" class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1.5">Try VigilQA free<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg></a>
+        </div>
+    </div>
+</main>
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6"><div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm"><a href="/vigilqa/" class="flex items-center gap-2 font-bold text-white"><div class="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center"><svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>VigilQA</a><div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/vigilqa/blog.html" class="hover:text-white transition-colors">Blog</a></div><div>&copy; 2026 SentinelFlux, Inc.</div></div></footer>
+</body>
+</html>
