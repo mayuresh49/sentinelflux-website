@@ -1,6 +1,15 @@
 # Completed work — newest first
 
 - date: 2026-06-05
+  commit: 961afd6
+  title: "Complete SentinelFlux → VigilQA rename across docs and blog"
+  details:
+    - docs.js sidebar/back link/breadcrumb fixed
+    - All 41 docs pages titles + body text updated
+    - docs/index.html meta, back link, content fixed
+    - why-we-built blog post CTA + footer logo fixed
+
+- date: 2026-06-05
   commit: 48b3e9d
   title: "Move blog and docs under /vigilqa/, add company-level stubs"
   details:

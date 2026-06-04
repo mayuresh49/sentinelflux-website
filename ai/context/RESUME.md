@@ -19,7 +19,17 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 
 ---
 
-## What Was Just Done (2026-06-05) — 48b3e9d + 350b459
+## What Was Just Done (2026-06-05) — 961afd6
+
+### Complete SentinelFlux → VigilQA rename across docs and blog
+- `docs.js`: sidebar logo "SentinelFlux" → "VigilQA", back link → /vigilqa/, breadcrumb href fixed
+- All 41 docs pages: titles "SentinelFlux Docs" → "VigilQA Docs", body product references, nav
+- `docs/index.html`: meta description, back link → /vigilqa/, content text
+- `vigilqa/blog/why-we-built-sentinelflux.html`: product body refs, CTA "Try VigilQA free", footer logo
+
+---
+
+## Previous Work (2026-06-05) — 48b3e9d + 350b459
 
 ### Restructure as company site with per-product pages
 - `website/index.html` → new SentinelFlux company homepage (hero, product cards for VigilQA + SpecVault, mission section, CTA)
