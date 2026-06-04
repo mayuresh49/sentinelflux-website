@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deployment — SentinelFlux Docs</title>
+  <title>Deployment — VigilQA Docs</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -48,10 +48,10 @@
         <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
 
         <h1 class="text-3xl font-bold text-slate-900 mb-3">Deployment</h1>
-        <p class="text-lg text-slate-500 mb-10 leading-relaxed">How SentinelFlux VigilQA is deployed depends on where your application under test is hosted. This page covers both scenarios — they can coexist for different projects.</p>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">How VigilQA VigilQA is deployed depends on where your application under test is hosted. This page covers both scenarios — they can coexist for different projects.</p>
 
         <h2>How it works</h2>
-        <p>The SentinelFlux VigilQA dashboard is hosted centrally at <code>api.sentinelflux.in</code>. It manages everything: knowledge base, test docs, run scheduling, run history, analysis, and user management. Tests are never executed on the dashboard server.</p>
+        <p>The VigilQA VigilQA dashboard is hosted centrally at <code>api.sentinelflux.in</code>. It manages everything: knowledge base, test docs, run scheduling, run history, analysis, and user management. Tests are never executed on the dashboard server.</p>
         <p>Test execution is handled by a <strong>runner daemon</strong> — a lightweight process (<code>vigilqa runner</code>) that polls the dashboard for queued runs, executes pytest locally against your application, and streams results back in real time. The runner must be on a machine that can reach your application under test.</p>
 
         <div class="callout callout-info not-prose">
@@ -63,7 +63,7 @@
         <div class="scenario-card not-prose">
           <span class="scenario-label label-a">Scenario A</span>
           <h3 class="text-base font-semibold text-slate-900 mb-1">Application is publicly accessible</h3>
-          <p class="text-sm text-slate-600 mb-0">Your staging or production URL is reachable from the internet (e.g. <code class="text-xs">https://staging.acme.com</code>). The SentinelFlux team operates a central runner that can reach it. You log into the dashboard, configure your project, and trigger runs — no infrastructure to set up on your side.</p>
+          <p class="text-sm text-slate-600 mb-0">Your staging or production URL is reachable from the internet (e.g. <code class="text-xs">https://staging.acme.com</code>). The VigilQA team operates a central runner that can reach it. You log into the dashboard, configure your project, and trigger runs — no infrastructure to set up on your side.</p>
         </div>
 
         <div class="scenario-card not-prose">
@@ -78,9 +78,9 @@
         <table>
           <thead><tr><th>Task</th><th>Responsibility</th></tr></thead>
           <tbody>
-            <tr><td>Dashboard</td><td>SentinelFlux VigilQA (already hosted at api.sentinelflux.in)</td></tr>
-            <tr><td>Runner</td><td>SentinelFlux VigilQA (central runner, reaches public URLs)</td></tr>
-            <tr><td>Test code</td><td>SentinelFlux team authors and deploys</td></tr>
+            <tr><td>Dashboard</td><td>VigilQA VigilQA (already hosted at api.sentinelflux.in)</td></tr>
+            <tr><td>Runner</td><td>VigilQA VigilQA (central runner, reaches public URLs)</td></tr>
+            <tr><td>Test code</td><td>VigilQA team authors and deploys</td></tr>
             <tr><td>Triggering runs, viewing results</td><td>You — via the dashboard in your browser</td></tr>
             <tr><td>Installing software</td><td>Nothing required on your machines</td></tr>
           </tbody>
@@ -94,10 +94,10 @@
         <table>
           <thead><tr><th>Task</th><th>Responsibility</th></tr></thead>
           <tbody>
-            <tr><td>Dashboard</td><td>SentinelFlux VigilQA (already hosted at api.sentinelflux.in)</td></tr>
+            <tr><td>Dashboard</td><td>VigilQA VigilQA (already hosted at api.sentinelflux.in)</td></tr>
             <tr><td>Runner</td><td>You — installed on a machine inside your network</td></tr>
-            <tr><td>Test code</td><td>SentinelFlux team — delivered as a versioned archive</td></tr>
-            <tr><td>Runner token</td><td>Generated in dashboard, shared with you by your SentinelFlux contact</td></tr>
+            <tr><td>Test code</td><td>VigilQA team — delivered as a versioned archive</td></tr>
+            <tr><td>Runner token</td><td>Generated in dashboard, shared with you by your VigilQA contact</td></tr>
             <tr><td>Triggering runs, viewing results</td><td>You — via the dashboard in your browser</td></tr>
           </tbody>
         </table>
@@ -113,7 +113,7 @@
         </ul>
 
         <h3>Step 1 — Install the runner</h3>
-        <p>Your SentinelFlux contact will provide a wheel file (<code>.whl</code>). Install it with pip — this automatically pulls all required open-source dependencies from PyPI:</p>
+        <p>Your VigilQA contact will provide a wheel file (<code>.whl</code>). Install it with pip — this automatically pulls all required open-source dependencies from PyPI:</p>
         <pre>pip install vigilqa-&lt;version&gt;-py3-none-any.whl</pre>
 
         <p>If your project includes web UI tests, install Playwright and the Chromium browser:</p>
@@ -125,7 +125,7 @@ playwright install chromium</pre>
         </div>
 
         <h3>Step 2 — Extract the test suite</h3>
-        <p>Your SentinelFlux contact will also provide a test suite archive for your project. Extract it to a working directory:</p>
+        <p>Your VigilQA contact will also provide a test suite archive for your project. Extract it to a working directory:</p>
         <pre>tar -xzf sentinelflux-tests-&lt;project&gt;-&lt;version&gt;.tar.gz -C /opt/sf-runner</pre>
 
         <p>The extracted layout will look like:</p>
@@ -179,7 +179,7 @@ vigilqa runner \
         <p>Scenario A and Scenario B can run simultaneously. If you have multiple projects — some with public URLs and some internal — each project is configured with its own preferred runner in the dashboard (<strong>Settings → Run Config → Runner</strong>). The dashboard routes each queued run to the correct runner automatically. Runner tokens are scoped to specific projects, so runners only ever claim runs they are authorised for.</p>
 
         <h2>Upgrading the runner</h2>
-        <p>When a new version is available, your SentinelFlux contact will provide an updated wheel and test suite archive. To upgrade:</p>
+        <p>When a new version is available, your VigilQA contact will provide an updated wheel and test suite archive. To upgrade:</p>
         <pre># Stop the runner service first, then:
 pip install vigilqa-&lt;new-version&gt;-py3-none-any.whl --force-reinstall
 tar -xzf sentinelflux-tests-&lt;project&gt;-&lt;new-version&gt;.tar.gz -C /opt/sf-runner
