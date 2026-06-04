@@ -46,14 +46,14 @@
         <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
 
         <h1 class="text-3xl font-bold text-slate-900 mb-3">Overview</h1>
-        <p class="text-lg text-slate-500 mb-10 leading-relaxed">VigilQA VigilQA is a cloud-hosted AI platform that generates, maintains, and runs automated tests for your applications — continuously, without manual scripting.</p>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">VigilQA is a cloud-hosted AI platform that generates, maintains, and runs automated tests for your applications — continuously, without manual scripting.</p>
 
-        <h2>What is VigilQA VigilQA?</h2>
-        <p>VigilQA VigilQA replaces the traditional test-writing workflow. Instead of hand-coding test scripts, you describe your application's expected behaviour in a structured <strong>Knowledge Base</strong>, and VigilQA VigilQA's AI pipeline generates executable pytest test suites from those descriptions — complete with real DOM selectors, API assertions, and edge-case coverage.</p>
+        <h2>What is VigilQA?</h2>
+        <p>VigilQA replaces the traditional test-writing workflow. Instead of hand-coding test scripts, you describe your application's expected behaviour in a structured <strong>Knowledge Base</strong>, and VigilQA's AI pipeline generates executable pytest test suites from those descriptions — complete with real DOM selectors, API assertions, and edge-case coverage.</p>
         <p>When tests run, a set of post-run AI agents automatically classify failures, detect flaky tests, catch regressions, and heal broken locators. The result is a self-maintaining test suite that improves with every run.</p>
 
         <h2>How the platform works</h2>
-        <p>VigilQA VigilQA operates in four continuous phases:</p>
+        <p>VigilQA operates in four continuous phases:</p>
 
         <div class="not-prose my-6 space-y-3">
           <div class="flex gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50">
@@ -74,7 +74,7 @@
             <div class="w-8 h-8 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">3</div>
             <div>
               <div class="font-semibold text-slate-800 text-sm">Run — Execute via dashboard or CI/CD</div>
-              <div class="text-slate-500 text-sm mt-0.5">Trigger test runs from the dashboard or automatically on every commit via your CI/CD pipeline. VigilQA VigilQA handles infrastructure, browser execution, and result collection.</div>
+              <div class="text-slate-500 text-sm mt-0.5">Trigger test runs from the dashboard or automatically on every commit via your CI/CD pipeline. VigilQA handles infrastructure, browser execution, and result collection.</div>
             </div>
           </div>
           <div class="flex gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50">
@@ -88,7 +88,7 @@
 
         <h2>Key capabilities</h2>
         <h3>8 test modules</h3>
-        <p>VigilQA VigilQA covers the full testing surface of modern applications. You can enable any combination of modules per project:</p>
+        <p>VigilQA covers the full testing surface of modern applications. You can enable any combination of modules per project:</p>
         <ul>
           <li><strong>REST / GraphQL API</strong> — functional API tests with schema and contract validation</li>
           <li><strong>Web UI Testing</strong> — end-to-end browser tests using real DOM selectors</li>
@@ -101,7 +101,7 @@
         </ul>
 
         <h3>10 AI agents</h3>
-        <p>VigilQA VigilQA includes two categories of agents:</p>
+        <p>VigilQA includes two categories of agents:</p>
         <ul>
           <li><strong>5 generation agents</strong> — AppExplorer, DocGen, DocReview, ScriptGen, ScriptReview — run once to produce test scripts from the KB</li>
           <li><strong>5 post-run agents</strong> — ResultAnalyzer, FlakyDetector, RegressionGuard, CoverageGap, LocatorHealer — run after every test execution automatically</li>
@@ -111,17 +111,17 @@
         <p>Every AI-generated artifact — test case documents, scripts, locator healing patches — passes through a human review step before being committed. Approvals can be mandatory, auto-approved, or team-gated depending on your settings.</p>
 
         <h2>Platform model</h2>
-        <p>VigilQA VigilQA is a fully cloud-hosted platform. There is no agent to install on your infrastructure. The dashboard, test execution environment, result storage, and AI agents all run on VigilQA VigilQA-managed cloud infrastructure. Your application under test is accessed over the network by the platform's agents.</p>
+        <p>VigilQA is a fully cloud-hosted platform. There is no agent to install on your infrastructure. The dashboard, test execution environment, result storage, and AI agents all run on VigilQA-managed cloud infrastructure. Your application under test is accessed over the network by the platform's agents.</p>
 
         <div class="callout callout-info not-prose">
-          <p class="text-sm text-blue-800"><strong>No self-hosting.</strong> VigilQA VigilQA does not offer a self-hosted or on-premise deployment. All plans run on dedicated VigilQA VigilQA cloud infrastructure. For air-gapped environments, Enterprise plans support local LLM configuration via Ollama.</p>
+          <p class="text-sm text-blue-800"><strong>No self-hosting.</strong> VigilQA does not offer a self-hosted or on-premise deployment. All plans run on dedicated VigilQA cloud infrastructure. For air-gapped environments, Enterprise plans support local LLM configuration via Ollama.</p>
         </div>
 
         <h2>Where to go next</h2>
         <ul>
           <li><a href="/vigilqa/docs/getting-started/quick-start.html">Quick Start</a> — set up your first project in under 20 minutes</li>
           <li><a href="/vigilqa/docs/getting-started/system-requirements.html">System Requirements</a> — supported CI/CD, browsers, and network requirements</li>
-          <li><a href="/vigilqa/docs/core-concepts/knowledge-base.html">Knowledge Base</a> — the foundation of everything VigilQA VigilQA generates</li>
+          <li><a href="/vigilqa/docs/core-concepts/knowledge-base.html">Knowledge Base</a> — the foundation of everything VigilQA generates</li>
           <li><a href="/vigilqa/docs/agents/index.html">Agents Overview</a> — all 10 AI agents and what they do</li>
         </ul>
 
@@ -129,6 +129,6 @@
       </div>
     </main>
   </div>
-  <script src="/docs/docs.js"></script>
+  <script src="/vigilqa/docs/docs.js"></script>
 </body>
 </html>
