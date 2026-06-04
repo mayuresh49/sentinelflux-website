@@ -52,7 +52,7 @@
 
         <h2>How it works</h2>
         <p>The SentinelFlux dashboard is hosted centrally at <code>api.sentinelflux.in</code>. It manages everything: knowledge base, test docs, run scheduling, run history, analysis, and user management. Tests are never executed on the dashboard server.</p>
-        <p>Test execution is handled by a <strong>runner daemon</strong> — a lightweight process (<code>sentinelflux runner</code>) that polls the dashboard for queued runs, executes pytest locally against your application, and streams results back in real time. The runner must be on a machine that can reach your application under test.</p>
+        <p>Test execution is handled by a <strong>runner daemon</strong> — a lightweight process (<code>vigilqa runner</code>) that polls the dashboard for queued runs, executes pytest locally against your application, and streams results back in real time. The runner must be on a machine that can reach your application under test.</p>
 
         <div class="callout callout-info not-prose">
           <p class="text-sm text-blue-800"><strong>Who installs what:</strong> The dashboard is already running — you do not install or manage it. The only question is where the runner lives, which depends on whether your application is publicly reachable.</p>
@@ -73,7 +73,7 @@
         </div>
 
         <h2>Scenario A — Public application</h2>
-        <p>Nothing to install. The SentinelFlux runner on our infrastructure handles test execution.</p>
+        <p>Nothing to install. The VigilQA central runner on our infrastructure handles test execution.</p>
 
         <table>
           <thead><tr><th>Task</th><th>Responsibility</th></tr></thead>
@@ -114,7 +114,7 @@
 
         <h3>Step 1 — Install the runner</h3>
         <p>Your SentinelFlux contact will provide a wheel file (<code>.whl</code>). Install it with pip — this automatically pulls all required open-source dependencies from PyPI:</p>
-        <pre>pip install sentinelflux-&lt;version&gt;-py3-none-any.whl</pre>
+        <pre>pip install vigilqa-&lt;version&gt;-py3-none-any.whl</pre>
 
         <p>If your project includes web UI tests, install Playwright and the Chromium browser:</p>
         <pre>pip install playwright
@@ -159,13 +159,13 @@ credentials:
 
         <h3>Step 5 — Start the runner</h3>
         <p>Use the setup wizard to configure the runner as a background service:</p>
-        <pre>sentinelflux runner-init</pre>
+        <pre>vigilqa runner-init</pre>
 
         <p>The wizard prompts for your API URL, token, and working directory, then writes a <code>runner.env</code> configuration file and registers a system service (systemd on Linux, launchd on macOS) so the runner starts automatically on boot.</p>
 
         <p>Alternatively, start the runner manually for testing:</p>
         <pre>cd /opt/sf-runner
-sentinelflux runner \
+vigilqa runner \
   --api-url https://api.sentinelflux.in \
   --token sfr_&lt;your_token&gt; \
   --work-dir /opt/sf-runner</pre>
@@ -181,7 +181,7 @@ sentinelflux runner \
         <h2>Upgrading the runner</h2>
         <p>When a new version is available, your SentinelFlux contact will provide an updated wheel and test suite archive. To upgrade:</p>
         <pre># Stop the runner service first, then:
-pip install sentinelflux-&lt;new-version&gt;-py3-none-any.whl --force-reinstall
+pip install vigilqa-&lt;new-version&gt;-py3-none-any.whl --force-reinstall
 tar -xzf sentinelflux-tests-&lt;project&gt;-&lt;new-version&gt;.tar.gz -C /opt/sf-runner
 # Restart the runner service</pre>
         <p>Your configuration in <code>env_qa.yaml</code> and <code>runner.env</code> is preserved across upgrades.</p>
