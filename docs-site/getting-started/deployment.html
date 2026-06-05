@@ -51,7 +51,7 @@
         <p class="text-lg text-slate-500 mb-10 leading-relaxed">How SentinelFlux VigilQA is deployed depends on where your application under test is hosted. This page covers both scenarios — they can coexist for different projects.</p>
 
         <h2>How it works</h2>
-        <p>The SentinelFlux VigilQA dashboard is hosted centrally at <code>api.sentinelflux.in</code>. It manages everything: knowledge base, test docs, run scheduling, run history, analysis, and user management. Tests are never executed on the dashboard server.</p>
+        <p>The SentinelFlux VigilQA dashboard is hosted centrally at <code>vigilqa.sentinelflux.in</code>. It manages everything: knowledge base, test docs, run scheduling, run history, analysis, and user management. Tests are never executed on the dashboard server.</p>
         <p>Test execution is handled by a <strong>runner daemon</strong> — a lightweight process (<code>vigilqa runner</code>) that polls the dashboard for queued runs, executes pytest locally against your application, and streams results back in real time. The runner must be on a machine that can reach your application under test.</p>
 
         <div class="callout callout-info not-prose">
@@ -78,7 +78,7 @@
         <table>
           <thead><tr><th>Task</th><th>Responsibility</th></tr></thead>
           <tbody>
-            <tr><td>Dashboard</td><td>SentinelFlux VigilQA (already hosted at api.sentinelflux.in)</td></tr>
+            <tr><td>Dashboard</td><td>SentinelFlux VigilQA (already hosted at vigilqa.sentinelflux.in)</td></tr>
             <tr><td>Runner</td><td>SentinelFlux VigilQA (central runner, reaches public URLs)</td></tr>
             <tr><td>Test code</td><td>SentinelFlux team authors and deploys</td></tr>
             <tr><td>Triggering runs, viewing results</td><td>You — via the dashboard in your browser</td></tr>
@@ -94,7 +94,7 @@
         <table>
           <thead><tr><th>Task</th><th>Responsibility</th></tr></thead>
           <tbody>
-            <tr><td>Dashboard</td><td>SentinelFlux VigilQA (already hosted at api.sentinelflux.in)</td></tr>
+            <tr><td>Dashboard</td><td>SentinelFlux VigilQA (already hosted at vigilqa.sentinelflux.in)</td></tr>
             <tr><td>Runner</td><td>You — installed on a machine inside your network</td></tr>
             <tr><td>Test code</td><td>SentinelFlux team — delivered as a versioned archive</td></tr>
             <tr><td>Runner token</td><td>Generated in dashboard, shared with you by your SentinelFlux contact</td></tr>
@@ -105,7 +105,7 @@
         <h3>Prerequisites (runner machine)</h3>
         <ul>
           <li>A machine inside your network that can reach your application under test</li>
-          <li>Outbound HTTPS access to <code>api.sentinelflux.in</code> (port 443)</li>
+          <li>Outbound HTTPS access to <code>vigilqa.sentinelflux.in</code> (port 443)</li>
           <li>Python 3.10 or later — <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a></li>
           <li>pip (bundled with Python — verify with <code>pip --version</code>)</li>
           <li>For web UI tests: Playwright with Chromium (see install steps below)</li>
@@ -166,14 +166,14 @@ credentials:
         <p>Alternatively, start the runner manually for testing:</p>
         <pre>cd /opt/sf-runner
 vigilqa runner \
-  --api-url https://api.sentinelflux.in \
+  --api-url https://vigilqa.sentinelflux.in \
   --token sfr_&lt;your_token&gt; \
   --work-dir /opt/sf-runner</pre>
 
         <p>Once running, the daemon polls the dashboard every 30 seconds. When a run is triggered from the dashboard, the runner claims it, executes pytest against your internal application, streams live progress, and posts the full report when done. Everything is visible in the dashboard — no VPN or direct access to the runner machine is needed to view results.</p>
 
         <h3>Verifying the connection</h3>
-        <p>After the runner starts, go to <strong>Settings → Runners</strong> in the dashboard. Your runner should appear with a green <em>Online</em> status and a recent <em>Last seen</em> timestamp. If it shows offline, check that the machine has outbound HTTPS access to <code>api.sentinelflux.in</code> and that the token is correct.</p>
+        <p>After the runner starts, go to <strong>Settings → Runners</strong> in the dashboard. Your runner should appear with a green <em>Online</em> status and a recent <em>Last seen</em> timestamp. If it shows offline, check that the machine has outbound HTTPS access to <code>vigilqa.sentinelflux.in</code> and that the token is correct.</p>
 
         <h2>Both scenarios together</h2>
         <p>Scenario A and Scenario B can run simultaneously. If you have multiple projects — some with public URLs and some internal — each project is configured with its own preferred runner in the dashboard (<strong>Settings → Run Config → Runner</strong>). The dashboard routes each queued run to the correct runner automatically. Runner tokens are scoped to specific projects, so runners only ever claim runs they are authorised for.</p>
@@ -185,6 +185,35 @@ pip install vigilqa-&lt;new-version&gt;-py3-none-any.whl --force-reinstall
 tar -xzf sentinelflux-tests-&lt;project&gt;-&lt;new-version&gt;.tar.gz -C /opt/sf-runner
 # Restart the runner service</pre>
         <p>Your configuration in <code>env_qa.yaml</code> and <code>runner.env</code> is preserved across upgrades.</p>
+
+        <h2>Self-hosting the dashboard (GCP / any server)</h2>
+        <p>If your organisation requires a fully self-hosted deployment, the repo includes a one-command bootstrap for Ubuntu/Debian servers.</p>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li>Ubuntu 22.04/24.04 or Debian 12/13 server (GCP, Hetzner, etc.)</li>
+          <li>Ports 80 and 443 open inbound (GCP: VPC Network → Firewall rule)</li>
+          <li>DNS A record pointing your domain to the server IP</li>
+        </ul>
+
+        <h3>First-time setup</h3>
+        <p>SSH into the server and run:</p>
+        <pre>git clone https://github.com/mayuresh49/sentinelflux-vigilqa.git ~/vigilqa
+cd ~/vigilqa
+sudo make bootstrap   # installs Python, Caddy, venv, systemd service
+make setup-env        # generates session secret → edit .env to add MISTRAL_API_KEY
+make admin            # create first admin user (interactive prompt)
+make start            # start dashboard + Caddy + health check</pre>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800"><strong>GCP note:</strong> Ensure TCP 80 and 443 are allowed in your VPC firewall rules (separate from the OS firewall). Caddy provisions the TLS certificate automatically once port 80 is reachable.</p>
+        </div>
+
+        <h3>Ongoing deploys</h3>
+        <p>After SSH keys are configured on your local machine:</p>
+        <pre>make deploy    # git pull + pip install + restart
+make status    # service status + health check
+make logs      # tail live logs</pre>
 
         <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
       </div>
