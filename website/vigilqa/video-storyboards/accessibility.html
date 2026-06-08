@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessibility — VigilQA Video Storyboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body{font-family:'Inter',sans-serif}
+        .scene{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #e2e8f0;border-radius:0.75rem;overflow:hidden;margin-bottom:1.25rem}
+        .scene-screen{background:#f8fafc;padding:1.25rem;border-right:1px solid #e2e8f0}
+        .scene-vo{background:#fff;padding:1.25rem}
+        .scene-header{grid-column:1/-1;background:#4f46e5;color:white;padding:0.625rem 1.25rem;display:flex;justify-content:space-between;align-items:center}
+        @media print{.scene{page-break-inside:avoid}}
+    </style>
+</head>
+<body class="bg-white text-slate-900">
+<div class="max-w-5xl mx-auto px-6 py-10">
+
+    <div class="flex items-start justify-between mb-8">
+        <div>
+            <a href="index.html" class="text-xs text-indigo-600 hover:underline mb-2 block">← All storyboards</a>
+            <h1 class="text-2xl font-extrabold text-slate-900">Accessibility Testing</h1>
+            <p class="text-slate-500 mt-1">WCAG 2.1 AA/AAA automated audits built into every CI run</p>
+        </div>
+        <div class="text-right text-sm text-slate-400">
+            <div class="font-semibold text-slate-700">~4:00</div>
+            <div>estimated duration</div>
+            <div class="mt-1">Target: frontend engineers, product owners, compliance teams</div>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 1 — Hook</span><span class="text-indigo-200 text-xs">0:00 – 0:20</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Stat: <em>"1 in 6 people worldwide has a disability. Most accessibility violations are introduced in code, not fixed until a complaint arrives."</em></p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Accessibility compliance — WCAG 2.1 AA — isn't just a legal requirement in many markets, it's a quality signal. And most teams only audit accessibility manually, infrequently, or after a complaint. VigilQA makes accessibility auditing automatic — it runs on every commit, across every page."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 2 — What it audits</span><span class="text-indigo-200 text-xs">0:20 – 0:55</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Categorised list: Perceivable (image alt text, colour contrast, captions) · Operable (keyboard nav, focus indicators, skip links) · Understandable (form labels, error messages) · Robust (ARIA roles, HTML validity)</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"VigilQA's accessibility module covers the four WCAG pillars: Perceivable — colour contrast, image alt text, media captions. Operable — keyboard navigation, focus management, interactive element sizing. Understandable — form labels, error message clarity. Robust — ARIA roles, landmark structure, HTML validity. Each page gets a detailed violation list with severity and remediation guidance."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 3 — KB config and run</span><span class="text-indigo-200 text-xs">0:55 – 1:35</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">KB scenario: <code>module: accessibility</code>, WCAG level (AA), pages list. Trigger a run. Show progress as each page is audited.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Configuration is minimal — specify the WCAG compliance level you're targeting (AA or AAA) and the pages to audit. VigilQA navigates to each page in a real Chromium browser, runs the axe-core accessibility engine plus its own checks, and collects every violation. Authenticated pages work too — VigilQA logs in using your test credentials before auditing."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 4 — Results view</span><span class="text-indigo-200 text-xs">1:35 – 2:25</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Accessibility results page. Show: overall score per page, violation count by severity (critical, serious, moderate, minor). Click a critical violation — shows: affected element (highlighted in screenshot), violation description, WCAG criterion reference, and suggested fix.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"The results view shows every violation grouped by severity. Critical violations are things that block users with disabilities completely — missing form labels, images without alt text, buttons with no accessible name. Each violation links to the affected element in a screenshot, shows the WCAG criterion it violates, and suggests a specific code fix. No manual interpretation required."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 5 — Compliance report</span><span class="text-indigo-200 text-xs">2:25 – 3:05</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Click "Export PDF" — show the generated compliance report: summary header, pass/fail by WCAG criterion, violation table, per-page breakdown. Format looks like a formal audit document.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Every accessibility run produces a downloadable compliance report — formatted for stakeholders, legal teams, or procurement requirements. It shows which WCAG criteria pass and fail, lists every violation with its severity, and provides a per-page summary. Run it before a product launch, a tender submission, or an annual review."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 6 — CTA</span><span class="text-indigo-200 text-xs">3:05 – 3:40</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Feature list: WCAG 2.1 AA/AAA ✓ · Real browser audits ✓ · Screenshot evidence ✓ · Compliance PDF ✓ · Runs on every commit ✓. URL: vigilqa.sentinelflux.in</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Accessibility compliance on autopilot — WCAG 2.1 AA audits on every commit, real browser evidence, compliance-ready PDF reports. Stop catching accessibility violations from user complaints. Start catching them at code review time. Try VigilQA at vigilqa.sentinelflux.in."</p>
+        </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-slate-200 flex justify-between text-sm text-slate-400">
+        <a href="visual-regression.html" class="hover:text-indigo-600">← Visual Regression</a>
+        <a href="security-vapt.html" class="hover:text-indigo-600">Next: Security & VAPT →</a>
+    </div>
+</div>
+</body>
+</html>
