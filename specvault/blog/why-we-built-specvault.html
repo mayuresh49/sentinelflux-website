@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why We Built SpecVault — SpecVault Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="The story behind SpecVault — from API breaking changes discovered in prod to a purpose-built contract registry for teams that ship fast.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose h3 { font-size: 1.1rem; font-weight: 600; color: #0f172a; margin: 1.5rem 0 0.5rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #7c3aed; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/specvault/" class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SpecVault</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/specvault/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a>
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener" class="bg-violet-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-violet-100 text-violet-700 text-xs font-semibold px-2.5 py-1 rounded-full">Company</span>
+                <span class="text-slate-400 text-sm">May 28, 2026 · 5 min read</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Why We Built SpecVault</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">The story behind SpecVault — from API breaking changes discovered in production to a purpose-built contract registry for teams that move fast.</p>
+        </div>
+
+        <div class="prose">
+            <p>It was a Tuesday deployment. The payments team had shipped a new version of their API — a clean refactor, they said, no functional changes. By Wednesday morning, three consumer teams had opened incidents. A required field had been renamed. An endpoint path had moved. The old spec was still in a Confluence page from eight months ago.</p>
+
+            <p>Nobody had updated it. Nobody had told the consumers. And nobody had a reliable way to compare the old shape against the new one. The whole incident took two days to fully resolve, and the root cause was a gap that every team with more than one service eventually hits: there was no single source of truth for what the API contract actually was at any given point in time.</p>
+
+            <h2>The Slack-as-registry problem</h2>
+            <p>We've seen this pattern at companies of all sizes. The "official" place to learn about an API is a Slack message from six months ago, a Confluence page that was accurate when it was written, or a README that someone remembers updating once. The OpenAPI spec — if there is one — lives in the repo and gets generated from code, but nobody's watching it for changes. Nobody's comparing v41 against v42 and asking: did any of these changes break someone?</p>
+
+            <p>Producer teams ship. Consumer teams adapt. When the adaptation fails, it's usually because the producer didn't know they broke anything, and the consumer didn't know to check.</p>
+
+            <h2>Why existing solutions didn't fit</h2>
+            <p>There are tools in this space. Stoplight, Swagger Hub, API Gateways with schema validation — but they're either too heavyweight for a small engineering team, require infrastructure buy-in to set up, or solve a slightly different problem (publishing API docs versus tracking contract changes between versions).</p>
+
+            <p>Consumer-driven contract testing tools like Pact are excellent but require producers and consumers to adopt the same toolchain and workflow simultaneously. Getting three teams to coordinate a Pact rollout is a project in itself. Meanwhile, the next breaking change ships.</p>
+
+            <p>We wanted something that took ten minutes to set up, required no changes to the producer's codebase or the consumer's toolchain, and gave both sides confidence that if a breaking change had happened, someone would be told.</p>
+
+            <h2>The insight: version-aware diffing plus subscriptions</h2>
+            <p>The core idea is simple: store every version of an API's OpenAPI spec, diff each new version against its predecessor using rules that match what consumers actually care about, and email the right people when something breaks.</p>
+
+            <p>Producers publish specs via a single curl command or a CI step. They don't need to annotate changes or write consumer tests. Consumers subscribe once per service. They don't need to modify their code or run new tooling. When a breaking change lands — a removed endpoint, a renamed required field, a new required parameter — the affected subscribers get an email before the change goes live in their environment.</p>
+
+            <h2>What SpecVault is, and what it isn't</h2>
+            <p>SpecVault is not a full consumer-driven contract testing platform. It doesn't run assertions against running services. It doesn't generate test stubs. It's a registry and a diff engine, and that's intentional. The goal is to make the cost of "API contract visibility" low enough that every team actually has it, rather than high enough that only the teams with dedicated platform engineers bother.</p>
+
+            <p>It's open source and self-hostable. Your specs stay on your infrastructure. The whole stack runs on a $6/month VM. If you have an OpenAPI spec and an SMTP server, you're set up in under ten minutes.</p>
+
+            <p>We built SpecVault because we kept hitting this problem and the existing tools required too much commitment for too little return. If you've ever found out about a breaking API change from a production incident rather than a colleague, this is for you.</p>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/specvault/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                All posts
+            </a>
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener" class="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors flex items-center gap-1.5">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/specvault/" class="flex items-center gap-2 font-bold text-white">
+            <div class="w-6 h-6 bg-violet-600 rounded-md flex items-center justify-center"><svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg></div>
+            SpecVault
+        </a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/specvault/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/specvault/docs/" class="hover:text-white transition-colors">Docs</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+</body>
+</html>

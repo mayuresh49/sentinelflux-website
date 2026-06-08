@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Self-Hosting SpecVault on GCP in 10 Minutes — SpecVault Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="Step-by-step guide to spinning up SpecVault on a GCP VM with Docker and Caddy for TLS.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose h3 { font-size: 1.1rem; font-weight: 600; color: #0f172a; margin: 1.5rem 0 0.5rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #7c3aed; }
+        pre { background: #0f172a; color: #e2e8f0; border-radius: 0.5rem; padding: 1.25rem; overflow-x: auto; line-height: 1.7; font-size: 0.85rem; margin-bottom: 1.25rem; font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/specvault/" class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SpecVault</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/specvault/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a>
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener" class="bg-violet-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full">How-to</span>
+                <span class="text-slate-400 text-sm">May 18, 2026 · 4 min read</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Self-Hosting SpecVault on GCP in 10 Minutes</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">A step-by-step guide to spinning up SpecVault on a GCP VM with Docker and Caddy for TLS — your specs stay on your infrastructure, and the whole stack runs on about $6/month.</p>
+        </div>
+
+        <div class="prose">
+            <p>SpecVault is designed to self-host. The entire stack is a single Python process, a SQLite database, and a JSON audit log — no Postgres, no Redis, no separate worker processes. A $6/month e2-micro on GCP is more than enough for most teams.</p>
+
+            <h2>Step 1 — Create a VM</h2>
+            <p>In the GCP console or via gcloud, create an e2-micro instance (or equivalent on AWS/Hetzner/DigitalOcean):</p>
+            <pre>gcloud compute instances create specvault \
+  --machine-type=e2-micro \
+  --image-family=debian-12 \
+  --image-project=debian-cloud \
+  --zone=us-central1-a \
+  --tags=http-server,https-server</pre>
+
+            <p>Open ports 80 and 443 in your firewall rules so Caddy can handle TLS certificate provisioning.</p>
+
+            <h2>Step 2 — Install Docker and clone the repo</h2>
+            <pre>sudo apt update && sudo apt install -y docker.io git
+sudo systemctl enable docker && sudo systemctl start docker
+
+git clone https://github.com/sentinelflux/specvault.git /opt/specvault
+cd /opt/specvault</pre>
+
+            <h2>Step 3 — Configure environment variables</h2>
+            <pre>cp .env.example data/.env</pre>
+
+            <p>Edit <code>data/.env</code> with your settings:</p>
+            <pre>SECRET_KEY=generate-a-long-random-string-here
+ADMIN_EMAIL=you@yourcompany.com
+ADMIN_PASSWORD=choose-a-strong-password
+
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_USER=apikey
+SMTP_PASSWORD=your-sendgrid-api-key
+SMTP_FROM=specvault@yourcompany.com
+SMTP_TLS=true</pre>
+
+            <p>For <code>SECRET_KEY</code>, generate one with: <code>python3 -c "import secrets; print(secrets.token_hex(32))"</code></p>
+
+            <h2>Step 4 — Build and start the container</h2>
+            <pre>docker build -t specvault .
+docker run -d \
+  --name specvault \
+  --restart unless-stopped \
+  -p 8000:8000 \
+  -v /opt/specvault/data:/app/data \
+  --env-file /opt/specvault/data/.env \
+  specvault</pre>
+
+            <p>SpecVault is now running on port 8000. The <code>-v</code> flag mounts the data directory so your SQLite database and audit log survive container restarts and updates.</p>
+
+            <h2>Step 5 — Add Caddy for TLS</h2>
+            <p>Point your domain's A record at the VM's IP, then install and configure Caddy:</p>
+            <pre>sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update && sudo apt install caddy</pre>
+
+            <p>Create <code>/etc/caddy/Caddyfile</code>:</p>
+            <pre>specvault.yourcompany.com {
+    reverse_proxy localhost:8000
+}</pre>
+
+            <pre>sudo systemctl reload caddy</pre>
+
+            <p>Caddy automatically provisions a Let's Encrypt certificate. Your instance is now live at <code>https://specvault.yourcompany.com</code>.</p>
+
+            <h2>Step 6 — Log in and register your first service</h2>
+            <p>Open the dashboard, log in with the <code>ADMIN_EMAIL</code> and <code>ADMIN_PASSWORD</code> you set, and follow the <a href="/specvault/docs/getting-started/quick-start.html">Quick Start</a> guide to add your first API.</p>
+
+            <h2>Backups</h2>
+            <p>SpecVault's entire persistent state lives in two files:</p>
+            <ul>
+                <li><code>data/specvault.db</code> — SQLite database (all services, specs, subscriptions, tokens)</li>
+                <li><code>data/audit_log.json</code> — append-only audit log</li>
+            </ul>
+
+            <p>Back these up with a simple cron job:</p>
+            <pre>0 3 * * * cp /opt/specvault/data/specvault.db /opt/specvault/data/backups/specvault-$(date +\%Y\%m\%d).db</pre>
+
+            <p>Or use <code>gsutil cp</code> to ship daily backups to a GCS bucket.</p>
+
+            <h2>Updates</h2>
+            <pre>cd /opt/specvault
+git pull
+docker build -t specvault .
+docker stop specvault && docker rm specvault
+# re-run the docker run command from Step 4</pre>
+
+            <p>The data directory is mounted outside the container, so updates never touch your database or audit log.</p>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/specvault/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                All posts
+            </a>
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener" class="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors flex items-center gap-1.5">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/specvault/" class="flex items-center gap-2 font-bold text-white"><div class="w-6 h-6 bg-violet-600 rounded-md flex items-center justify-center"><svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg></div>SpecVault</a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/specvault/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/specvault/docs/" class="hover:text-white transition-colors">Docs</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+</body>
+</html>

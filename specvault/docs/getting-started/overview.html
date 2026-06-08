@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overview — SpecVault Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ede9fe;color:#7c3aed;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content a{color:#7c3aed;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/specvault/docs/" class="font-bold text-violet-600">SpecVault <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500">
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Overview</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SpecVault is a self-hosted API contract registry that versions your OpenAPI specs and automatically notifies consumer teams when a new release breaks something they depend on.</p>
+
+        <h2>What is SpecVault?</h2>
+        <p>SpecVault solves a specific problem: producer teams publish API changes that break consumers, and nobody finds out until something fails in production. The traditional fix — "communicate changes over Slack" — doesn't scale when you have multiple services, multiple consuming teams, and weekly releases.</p>
+        <p>SpecVault gives every API a version history backed by its OpenAPI spec. When you publish a new spec version, SpecVault automatically diffs it against the previous one, identifies breaking changes, and emails every subscribed consumer team with a detailed report — before the release ships.</p>
+
+        <h2>How it works</h2>
+        <p>SpecVault operates in three steps:</p>
+
+        <div class="not-prose my-6 space-y-3">
+          <div class="flex gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50">
+            <div class="w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
+            <div>
+              <div class="font-semibold text-slate-800 text-sm">Register — Create a service</div>
+              <div class="text-slate-500 text-sm mt-0.5">Add your API as a service in SpecVault. Give it a name, team owner, and base URL. One-time setup per API.</div>
+            </div>
+          </div>
+          <div class="flex gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50">
+            <div class="w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
+            <div>
+              <div class="font-semibold text-slate-800 text-sm">Publish — Upload or fetch a spec</div>
+              <div class="text-slate-500 text-sm mt-0.5">Paste a URL to your spec or upload a YAML/JSON file. SpecVault stores the spec, counts endpoints, and automatically diffs against the previous version.</div>
+            </div>
+          </div>
+          <div class="flex gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50">
+            <div class="w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">3</div>
+            <div>
+              <div class="font-semibold text-slate-800 text-sm">Get alerted — Subscribers receive email notifications</div>
+              <div class="text-slate-500 text-sm mt-0.5">Consumer teams subscribe to services they depend on. When a publish detects breaking changes, every subscriber receives an email listing each breaking change with endpoint details.</div>
+            </div>
+          </div>
+        </div>
+
+        <h2>Key capabilities</h2>
+
+        <h3>Version history</h3>
+        <p>Every spec version is stored with its full content, endpoint count, publish date, and the user or API token that published it. You can view the diff between any two versions directly in the dashboard.</p>
+
+        <h3>Breaking change detection</h3>
+        <p>SpecVault's diff engine compares consecutive spec versions and flags changes that would break existing consumers:</p>
+        <ul>
+          <li>Removed endpoints (path + method combinations that no longer exist)</li>
+          <li>Removed required request parameters</li>
+          <li>New required request parameters added without a default</li>
+          <li>Removed response fields</li>
+          <li>Type changes on existing fields</li>
+        </ul>
+        <p>Additive changes — new optional parameters, new endpoints, new optional response fields — are not flagged, because they don't break existing consumers.</p>
+
+        <h3>Email alerts</h3>
+        <p>Subscriber alerts are sent immediately on spec publish when breaking changes are detected. Each alert includes the service name, version number, and a detailed list of breaking changes with HTTP method, path, and change description.</p>
+
+        <h3>API tokens</h3>
+        <p>Generate machine-readable tokens for publishing specs from CI/CD pipelines. Tokens are bcrypt-hashed at storage; the plain value is shown only once on creation. Any pipeline with a valid token can publish a spec via a simple POST request.</p>
+
+        <h3>Audit log</h3>
+        <p>Every significant action — spec publish, service create/update, token create/revoke, login — is recorded in the audit log with timestamp and actor. The log is viewable in the dashboard and exportable as JSON.</p>
+
+        <h3>Self-hostable</h3>
+        <p>SpecVault is designed to be deployed on your own infrastructure. Your specs never leave your servers. The default deployment is a single Python process with a SQLite database — simple to run, simple to back up.</p>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800"><strong>Self-hosted only.</strong> SpecVault does not offer a shared SaaS plan. Every instance runs on infrastructure you control. The hosted demo at <a href="https://specvault.sentinelflux.in" class="underline">specvault.sentinelflux.in</a> is a reference deployment you can use to evaluate the product.</p>
+        </div>
+
+        <h2>Where to go next</h2>
+        <ul>
+          <li><a href="/specvault/docs/getting-started/quick-start.html">Quick Start</a> — create a service, publish a spec, and set up a subscriber in under 10 minutes</li>
+          <li><a href="/specvault/docs/getting-started/deployment.html">Deployment</a> — deploy SpecVault on GCP, AWS, or any Linux server</li>
+          <li><a href="/specvault/docs/core-concepts/breaking-changes.html">Breaking Changes</a> — exactly what SpecVault flags and why</li>
+          <li><a href="/specvault/docs/ci-cd/github-actions.html">GitHub Actions</a> — automate spec publishing from your pipeline</li>
+        </ul>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/specvault/docs/docs.js"></script>
+</body>
+</html>

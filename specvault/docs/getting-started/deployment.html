@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deployment — SpecVault Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ede9fe;color:#7c3aed;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.9rem}
+    .doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8125rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}
+    .doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}
+    .doc-content a{color:#7c3aed;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/specvault/docs/" class="font-bold text-violet-600">SpecVault <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Deployment</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Deploy SpecVault on your own infrastructure using Docker or a direct Python setup. Supports any Linux server, GCP, or AWS.</p>
+
+        <h2>Docker deployment (recommended)</h2>
+        <p>The fastest path to a running instance. Clone the repo, configure your <code>.env</code>, and start:</p>
+
+        <pre>git clone git@github.com:your-org/specvault.git
+cd specvault
+cp .env.example .env
+# Edit .env with your values (see Environment Variables below)
+docker compose up -d</pre>
+
+        <p>The app starts on port 8000 by default. Put Caddy or Nginx in front for TLS.</p>
+
+        <h2>Caddy for TLS</h2>
+        <p>Caddy is the recommended reverse proxy because it handles certificate renewal automatically via Let's Encrypt:</p>
+
+        <pre># Caddyfile
+specvault.example.com {
+    reverse_proxy localhost:8000
+}</pre>
+
+        <pre>caddy start --config /etc/caddy/Caddyfile</pre>
+
+        <p>Point your domain's A record at the server IP, and Caddy will obtain and renew the TLS certificate automatically.</p>
+
+        <h2>GCP deployment</h2>
+        <ol>
+          <li>Create a GCP Compute Engine VM (e2-micro or larger). Choose Ubuntu 22.04.</li>
+          <li>SSH into the VM and install Docker: <code>curl -fsSL https://get.docker.com | sh</code></li>
+          <li>Clone the SpecVault repo and configure <code>.env</code></li>
+          <li>Start with <code>docker compose up -d</code></li>
+          <li>Install Caddy and configure a Caddyfile pointing at port 8000</li>
+          <li>Open ports 80 and 443 in the VM's firewall rules</li>
+        </ol>
+
+        <h2>AWS deployment</h2>
+        <p>The process is identical on an EC2 instance. Use a t3.micro or larger. Open ports 80 and 443 in the security group. Use an Elastic IP for a stable address to point your DNS at.</p>
+
+        <h2>Data volume</h2>
+        <p>SpecVault stores all data in a single SQLite file at <code>data/specvault.db</code>. In Docker Compose, this directory is mounted as a volume:</p>
+
+        <pre># docker-compose.yml (relevant section)
+volumes:
+  - ./data:/app/data</pre>
+
+        <p>Back up the <code>data/</code> directory to keep your spec history. A daily cron job copying <code>specvault.db</code> to object storage is sufficient for most deployments.</p>
+
+        <h2>Environment variables</h2>
+
+        <table>
+          <thead>
+            <tr><th>Variable</th><th>Required</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>SECRET_KEY</code></td><td>Yes</td><td>Random string used for session signing. Generate with <code>openssl rand -hex 32</code>.</td></tr>
+            <tr><td><code>ADMIN_EMAIL</code></td><td>Yes</td><td>Email address for the default admin account.</td></tr>
+            <tr><td><code>ADMIN_PASSWORD</code></td><td>Yes</td><td>Password for the default admin account. Change after first login.</td></tr>
+            <tr><td><code>SMTP_HOST</code></td><td>Yes</td><td>SMTP server hostname for sending alert emails.</td></tr>
+            <tr><td><code>SMTP_PORT</code></td><td>Yes</td><td>SMTP port (typically 587 for STARTTLS, 465 for SSL).</td></tr>
+            <tr><td><code>SMTP_USER</code></td><td>Yes</td><td>SMTP authentication username.</td></tr>
+            <tr><td><code>SMTP_PASSWORD</code></td><td>Yes</td><td>SMTP authentication password.</td></tr>
+            <tr><td><code>SMTP_FROM</code></td><td>Yes</td><td>From address for outgoing alert emails (e.g. <code>specvault@example.com</code>).</td></tr>
+            <tr><td><code>DATABASE_PATH</code></td><td>No</td><td>Path to the SQLite database file. Defaults to <code>data/specvault.db</code>.</td></tr>
+            <tr><td><code>BASE_URL</code></td><td>No</td><td>Public URL of the SpecVault instance. Used in email alert links.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-warning not-prose">
+          <p class="text-sm text-amber-800"><strong>Security note:</strong> Never commit your <code>.env</code> file to version control. Add it to <code>.gitignore</code>. Use a secrets manager (GCP Secret Manager, AWS Secrets Manager) for production deployments.</p>
+        </div>
+
+        <h2>Direct Python setup (no Docker)</h2>
+        <p>If you prefer running the app directly:</p>
+
+        <pre>python3.12 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+# Edit .env
+uvicorn dashboard.app:app --host 0.0.0.0 --port 8000</pre>
+
+        <p>For production, run uvicorn behind a systemd service so it restarts on failure.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/specvault/docs/docs.js"></script>
+</body>
+</html>

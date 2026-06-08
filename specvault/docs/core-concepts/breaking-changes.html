@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Breaking Changes — SpecVault Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ede9fe;color:#7c3aed;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content a{color:#7c3aed;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/specvault/docs/" class="font-bold text-violet-600">SpecVault <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Breaking Changes</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">A precise definition of what SpecVault flags as a breaking change — and what it deliberately ignores.</p>
+
+        <h2>What SpecVault flags as breaking</h2>
+        <p>A breaking change is any change that would cause an existing consumer to fail without modification to their code. SpecVault's diff engine checks for five categories:</p>
+
+        <h3>1. Removed endpoints</h3>
+        <p>An endpoint is a unique combination of HTTP method and path. If an endpoint that existed in version N is absent from version N+1, it's breaking.</p>
+        <pre># Version 1
+paths:
+  /users/{id}:
+    get: ...      # ← exists
+    delete: ...   # ← exists
+
+# Version 2
+paths:
+  /users/{id}:
+    get: ...      # OK
+    # delete removed ← BREAKING</pre>
+
+        <h3>2. Removed required request parameters</h3>
+        <p>If a query parameter, path parameter, or header that was <code>required: true</code> in version N is removed entirely from version N+1, consumers sending that parameter will not fail — but it signals an API contract change that may indicate different semantics. SpecVault flags this as breaking because consumers relying on the parameter's effect may observe different behaviour.</p>
+
+        <h3>3. New required request parameters</h3>
+        <p>Adding a parameter with <code>required: true</code> and no default breaks any consumer that doesn't send it. This is one of the most common breaking changes in practice:</p>
+        <pre># Version 1
+parameters:
+  - name: user_id
+    in: query
+    required: true
+
+# Version 2
+parameters:
+  - name: user_id
+    in: query
+    required: true
+  - name: tenant_id      # ← NEW
+    in: query
+    required: true       # ← BREAKING — existing consumers don't send this</pre>
+
+        <h3>4. Removed response fields</h3>
+        <p>If a field that was present in the response schema in version N is absent in version N+1, consumers that read that field will break. SpecVault checks the top-level response schema for 200/201 responses and flags removed properties.</p>
+
+        <h3>5. Type changes on existing fields</h3>
+        <p>Changing a field's type — for example from <code>string</code> to <code>integer</code>, or from a scalar to an array — breaks consumers that parse the response. SpecVault detects type changes on request parameters and response fields.</p>
+
+        <h2>What is NOT flagged as breaking</h2>
+        <p>Additive changes are backward-compatible and do not trigger alerts:</p>
+        <ul>
+          <li><strong>New endpoints</strong> — existing consumers don't call them, so they're not affected</li>
+          <li><strong>New optional parameters</strong> — existing consumers don't send them, and they have defaults or aren't required</li>
+          <li><strong>New response fields</strong> — existing consumers that don't know about the field will simply ignore it</li>
+          <li><strong>Description or documentation changes</strong> — changes to <code>description</code>, <code>summary</code>, <code>example</code>, or <code>x-</code> extensions</li>
+          <li><strong>New enum values</strong> — existing consumers receive values they handle; the new value is unknown but doesn't break existing handling</li>
+        </ul>
+
+        <div class="callout callout-warning not-prose">
+          <p class="text-sm text-amber-800"><strong>Spec drift vs. runtime behaviour:</strong> SpecVault detects breaking changes in the OpenAPI spec document. If your spec doesn't accurately reflect your API's actual runtime behaviour, the diff results may miss real breaking changes or flag false positives. Keep your spec up to date.</p>
+        </div>
+
+        <h2>The diff result format</h2>
+        <p>Each breaking change in the diff result has four fields:</p>
+        <ul>
+          <li><code>type</code> — the category of breaking change (e.g. <code>endpoint_removed</code>, <code>required_param_added</code>)</li>
+          <li><code>method</code> — the HTTP method (e.g. <code>GET</code>, <code>POST</code>)</li>
+          <li><code>path</code> — the path template (e.g. <code>/users/{id}</code>)</li>
+          <li><code>description</code> — a human-readable description of the specific change</li>
+        </ul>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/specvault/docs/docs.js"></script>
+</body>
+</html>
