@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Tracker — VigilQA Video Storyboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body{font-family:'Inter',sans-serif}
+        .scene{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #e2e8f0;border-radius:0.75rem;overflow:hidden;margin-bottom:1.25rem}
+        .scene-screen{background:#f8fafc;padding:1.25rem;border-right:1px solid #e2e8f0}
+        .scene-vo{background:#fff;padding:1.25rem}
+        .scene-header{grid-column:1/-1;background:#4f46e5;color:white;padding:0.625rem 1.25rem;display:flex;justify-content:space-between;align-items:center}
+        @media print{.scene{page-break-inside:avoid}}
+    </style>
+</head>
+<body class="bg-white text-slate-900">
+<div class="max-w-5xl mx-auto px-6 py-10">
+
+    <div class="flex items-start justify-between mb-8">
+        <div>
+            <a href="index.html" class="text-xs text-indigo-600 hover:underline mb-2 block">← All storyboards</a>
+            <h1 class="text-2xl font-extrabold text-slate-900">Bug Tracker</h1>
+            <p class="text-slate-500 mt-1">Auto-created, evidence-rich bug entries from test failures</p>
+        </div>
+        <div class="text-right text-sm text-slate-400">
+            <div class="font-semibold text-slate-700">~3:00</div>
+            <div>estimated duration</div>
+            <div class="mt-1">Target: QA engineers, dev teams</div>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 1 — Hook</span><span class="text-indigo-200 text-xs">0:00 – 0:15</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Timer: QA engineer copying traceback from CI, opening JIRA, pasting screenshot, writing description, tagging severity, assigning — each step adds to a running "5 minutes per bug" counter.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Every test failure requires a bug report. Traceback, screenshot, steps to reproduce, severity, assignee. It takes five minutes per failure, and nobody enjoys it. VigilQA's Bug Tracker module creates fully evidenced bug entries automatically — from test failure to tracked bug in seconds."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 2 — Auto-created bug entry</span><span class="text-indigo-200 text-xs">0:15 – 1:00</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Navigate to Bugs. Show the automatically created bug entry. Fields visible: title (derived from test name + failure message), severity (auto-classified by ResultAnalyzer), module, test run link, status (Open). Click to expand the full bug detail.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Every time a test fails and ResultAnalyzer classifies it as a real bug — not a flaky test, not a locator issue — a bug entry is created automatically. The title, severity, and module are set from the failure analysis. No manual triage required."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 3 — Bug detail with evidence</span><span class="text-indigo-200 text-xs">1:00 – 1:45</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Bug detail page: screenshot at failure point, traceback, step log up to failure, the expected vs. actual assertion, link to the Playwright trace, link to the test run. All pre-populated.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"The bug detail page has everything needed to reproduce and fix the issue — screenshot at the moment of failure, full traceback, step-by-step log showing where it diverged from expected behaviour, and a link to the Playwright trace for deep investigation. Everything the engineer needs is already there."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 4 — Workflow: triage, assign, resolve</span><span class="text-indigo-200 text-xs">1:45 – 2:20</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Bug list: change status to In Progress. Add a comment. Change assignee. Then show a "Mark Resolved" button — click it, status changes to Resolved with the resolving test run linked.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"The workflow is simple: Open → In Progress → Resolved. Add comments, assign to a team member, and when the fix ships and the test passes on the next run, the bug is automatically linked to the resolving run. You have a complete audit trail — from first failure to passing test — without touching a separate bug tracker."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 5 — CTA</span><span class="text-indigo-200 text-xs">2:20 – 3:00</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Feature list: Auto-created from failures ✓ · Screenshot + trace included ✓ · Severity classified by AI ✓ · Full workflow ✓ · Linked to test runs ✓. URL: vigilqa.sentinelflux.in</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"No more copy-pasting tracebacks into JIRA. VigilQA creates fully evidenced bug entries automatically from every real test failure — screenshot, trace, severity, all included. Your team goes from failing test to tracked bug in seconds. Try VigilQA at vigilqa.sentinelflux.in."</p>
+        </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-slate-200 flex justify-between text-sm text-slate-400">
+        <a href="performance.html" class="hover:text-indigo-600">← Performance</a>
+        <a href="ai-agents.html" class="hover:text-indigo-600">Next: AI Agents →</a>
+    </div>
+</div>
+</body>
+</html>

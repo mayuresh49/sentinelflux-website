@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Overview — VigilQA Video Storyboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body{font-family:'Inter',sans-serif}
+        .scene{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #e2e8f0;border-radius:0.75rem;overflow:hidden;margin-bottom:1.25rem}
+        .scene-screen{background:#f8fafc;padding:1.25rem;border-right:1px solid #e2e8f0}
+        .scene-vo{background:#fff;padding:1.25rem}
+        .scene-header{grid-column:1/-1;background:#4f46e5;color:white;padding:0.625rem 1.25rem;display:flex;justify-content:space-between;align-items:center}
+        @media print{body{font-size:11px}.scene{page-break-inside:avoid}}
+    </style>
+</head>
+<body class="bg-white text-slate-900">
+<div class="max-w-5xl mx-auto px-6 py-10">
+
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-8">
+        <div>
+            <a href="index.html" class="text-xs text-indigo-600 hover:underline mb-2 block">← All storyboards</a>
+            <h1 class="text-2xl font-extrabold text-slate-900">Platform Overview</h1>
+            <p class="text-slate-500 mt-1">Dashboard · Knowledge Base · Test Plans · CI/CD · Agents</p>
+        </div>
+        <div class="text-right text-sm text-slate-400">
+            <div class="font-semibold text-slate-700">~5:00</div>
+            <div>estimated duration</div>
+            <div class="mt-1">Target: decision-makers, team leads</div>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="flex gap-4 mb-6 text-xs">
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-slate-100 rounded border border-slate-200 inline-block"></span> On screen</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 bg-white rounded border border-slate-200 inline-block"></span> Voiceover</span>
+    </div>
+
+    <!-- Scene 1 -->
+    <div class="scene">
+        <div class="scene-header">
+            <span class="font-semibold text-sm">Scene 1 — Hook</span>
+            <span class="text-indigo-200 text-xs">0:00 – 0:20</span>
+        </div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Text on dark background: <em>"Your team writes tests. Then maintains them. Then maintains the maintenance. What if you didn't have to?"</em></p>
+            <p class="text-xs text-slate-400 mt-2">Fade in VigilQA logo</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Most QA automation starts the same way — someone writes a test suite, it works for a while, and then the maintenance overhead takes over. Selectors break. Coverage gaps widen. The suite that was supposed to give confidence starts generating noise. VigilQA is built to break that cycle."</p>
+        </div>
+    </div>
+
+    <!-- Scene 2 -->
+    <div class="scene">
+        <div class="scene-header">
+            <span class="font-semibold text-sm">Scene 2 — What is VigilQA</span>
+            <span class="text-indigo-200 text-xs">0:20 – 0:50</span>
+        </div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Animated diagram: Knowledge Base → Generation Pipeline → Test Execution → Post-Run Agents → loop back</p>
+            <p class="text-xs text-slate-400 mt-2">Each node highlights as it's mentioned</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"VigilQA is an AI-powered test automation platform that works in four continuous phases. You describe your application in a structured Knowledge Base. AI agents generate test scripts from that description. Tests run on every commit. And after each run, five more agents automatically classify failures, detect regressions, measure coverage, and heal broken selectors — without you touching a line of test code."</p>
+        </div>
+    </div>
+
+    <!-- Scene 3 -->
+    <div class="scene">
+        <div class="scene-header">
+            <span class="font-semibold text-sm">Scene 3 — Dashboard overview</span>
+            <span class="text-indigo-200 text-xs">0:50 – 1:30</span>
+        </div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Screen recording: VigilQA dashboard home page. Cursor moves to highlight: product selector, test run count, pass/fail breakdown, recent agent activity feed.</p>
+            <p class="text-xs text-slate-400 mt-2">Zoom into the activity feed briefly</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"This is the VigilQA dashboard. Each product you're testing appears here with a live pass/fail summary from the latest run. The activity feed on the right shows what the AI agents have been doing — failures classified, locators healed, coverage gaps identified. You get the full picture without digging through logs."</p>
+        </div>
+    </div>
+
+    <!-- Scene 4 -->
+    <div class="scene">
+        <div class="scene-header">
+            <span class="font-semibold text-sm">Scene 4 — Knowledge Base</span>
+            <span class="text-indigo-200 text-xs">1:30 – 2:15</span>
+        </div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Navigate to KB editor. Show a domain file open with scenario entries — id, title, steps, expected. Highlight a specific scenario. Then show the "Extract from Document" button.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"The Knowledge Base is where you tell VigilQA what your application does. Instead of writing test code, you write plain descriptions of user flows — what the user does, what the system should respond with. Each entry becomes the input for AI-generated test scripts. If you already have specs, user stories, or onboarding docs, Extract from Document can convert them into KB entries in minutes."</p>
+        </div>
+    </div>
+
+    <!-- Scene 5 -->
+    <div class="scene">
+        <div class="scene-header">
+            <span class="font-semibold text-sm">Scene 5 — Test Plans and Runs</span>
+            <span class="text-indigo-200 text-xs">2:15 – 3:00</span>
+        </div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Navigate to Test Plans. Show a plan with modules enabled (checkboxes: Web UI ✓, API ✓, Visual ✓). Click "Run Now". Cut to the run progress view showing live test output. Then cut to the completed run summary.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Test Plans let you define exactly which modules to run and against which environment. You can trigger a run manually from here, or set it to fire automatically on every git push via CI/CD. Each run produces a detailed result — passed, failed, and skipped, with full traces for every failure."</p>
+        </div>
+    </div>
+
+    <!-- Scene 6 -->
+    <div class="scene">
+        <div class="scene-header">
+            <span class="font-semibold text-sm">Scene 6 — Approvals workflow</span>
+            <span class="text-indigo-200 text-xs">3:00 – 3:40</span>
+        </div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Navigate to Approvals. Show a locator heal pending approval — before/after selectors highlighted. Click Approve. Show a script patch pending approval — diff view. Click Approve.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Every AI-generated change goes through an approval queue before it's committed. This isn't a limitation — it's a design principle. AI suggests, humans decide. Locator heal proposals, script patches, new test cases — all reviewable before they go live. You stay in control of what changes and when."</p>
+        </div>
+    </div>
+
+    <!-- Scene 7 -->
+    <div class="scene">
+        <div class="scene-header">
+            <span class="font-semibold text-sm">Scene 7 — CI/CD integration</span>
+            <span class="text-indigo-200 text-xs">3:40 – 4:20</span>
+        </div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Show a GitHub Actions YAML snippet with the VigilQA trigger step. Cut to a GitHub Actions run page showing the VigilQA step completing. Cut back to the VigilQA dashboard showing the new run appeared automatically.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Connecting VigilQA to your pipeline is one YAML step. Add it to your GitHub Actions or GitLab CI workflow and every push triggers a full test run automatically. Results appear in the dashboard, failures notify your team, and agents start analysing without any manual intervention."</p>
+        </div>
+    </div>
+
+    <!-- Scene 8 -->
+    <div class="scene">
+        <div class="scene-header">
+            <span class="font-semibold text-sm">Scene 8 — CTA</span>
+            <span class="text-indigo-200 text-xs">4:20 – 4:45</span>
+        </div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">VigilQA logo + tagline: <em>"From Knowledge Base to running tests in under an hour."</em> URL: vigilqa.sentinelflux.in. Module grid icons animate in one by one.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"VigilQA covers nine testing modules — Web UI, REST and GraphQL APIs, API contracts, visual regression, accessibility, security, performance, and bug tracking — all from a single platform. Try it at vigilqa.sentinelflux.in, or request a demo from our team."</p>
+        </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-slate-200 flex justify-between text-sm text-slate-400">
+        <a href="index.html" class="hover:text-indigo-600">← All storyboards</a>
+        <a href="web-ui.html" class="hover:text-indigo-600">Next: Web UI Testing →</a>
+    </div>
+</div>
+</body>
+</html>

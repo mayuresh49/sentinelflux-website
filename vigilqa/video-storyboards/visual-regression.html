@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Regression — VigilQA Video Storyboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body{font-family:'Inter',sans-serif}
+        .scene{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #e2e8f0;border-radius:0.75rem;overflow:hidden;margin-bottom:1.25rem}
+        .scene-screen{background:#f8fafc;padding:1.25rem;border-right:1px solid #e2e8f0}
+        .scene-vo{background:#fff;padding:1.25rem}
+        .scene-header{grid-column:1/-1;background:#4f46e5;color:white;padding:0.625rem 1.25rem;display:flex;justify-content:space-between;align-items:center}
+        @media print{.scene{page-break-inside:avoid}}
+    </style>
+</head>
+<body class="bg-white text-slate-900">
+<div class="max-w-5xl mx-auto px-6 py-10">
+
+    <div class="flex items-start justify-between mb-8">
+        <div>
+            <a href="index.html" class="text-xs text-indigo-600 hover:underline mb-2 block">← All storyboards</a>
+            <h1 class="text-2xl font-extrabold text-slate-900">Visual Regression Testing</h1>
+            <p class="text-slate-500 mt-1">Pixel-level screenshot comparisons — catch UI regressions before users do</p>
+        </div>
+        <div class="text-right text-sm text-slate-400">
+            <div class="font-semibold text-slate-700">~4:00</div>
+            <div>estimated duration</div>
+            <div class="mt-1">Target: frontend engineers, product teams</div>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 1 — Hook</span><span class="text-indigo-200 text-xs">0:00 – 0:20</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Side-by-side screenshots: before CSS refactor (clean layout) vs. after (button slightly shifted, nav link overlapping text). Highlight the difference with a red box. Text: <em>"All functional tests passed."</em></p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Functional tests tell you if the app works. They can't tell you if it looks right. A CSS refactor, a dependency update, a z-index change — all pass your test suite and still leave your users looking at a broken UI. Visual regression testing catches what code tests miss."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 2 — How it works</span><span class="text-indigo-200 text-xs">0:20 – 0:55</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Diagram: Baseline screenshot captured → New build runs → New screenshot taken → Pixel diff computed → Changes above threshold flagged</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Visual regression testing works by comparing screenshots. On the first run, VigilQA captures baseline screenshots of every page in scope. On every subsequent run, new screenshots are captured and compared pixel by pixel. Any difference beyond the configured threshold is flagged as a visual regression — with a diff image showing exactly what changed."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 3 — KB scenario and config</span><span class="text-indigo-200 text-xs">0:55 – 1:35</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">KB editor: visual scenario with <code>module: visual</code>, page URL, viewport sizes listed (desktop 1440px, tablet 768px, mobile 375px), and threshold setting. Show multiple pages listed.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"A visual scenario simply lists the pages to capture and the viewport sizes to test at — desktop, tablet, and mobile. Configure your threshold: zero for exact pixel matching, or a small percentage to allow for font rendering variation. VigilQA handles the rest — navigating to each page, waiting for content to load, and capturing full-page screenshots."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 4 — Visual results view</span><span class="text-indigo-200 text-xs">1:35 – 2:20</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Visual results page: thumbnail grid showing all pages tested. Two thumbnails have red badges ("Diff: 2.3%"). Click one — opens full-screen side-by-side: baseline left, current right, diff highlighted in pink. Toggle between baseline and diff view.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"The visual results view shows every page tested as a thumbnail. Pages with differences are flagged with the diff percentage. Click any flagged page to see a full-size comparison — baseline on the left, current on the right, with the changed pixels highlighted. You can toggle to a diff-only view that isolates exactly what moved or changed."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 5 — Approving baseline updates</span><span class="text-indigo-200 text-xs">2:20 – 3:00</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Approvals view: visual diffs pending. Show a diff that's an intentional redesign. Click "Approve as new baseline". The thumbnail updates to the new screenshot. Show another diff that's clearly a regression — click "Reject".</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Not every visual diff is a regression — sometimes it's an intentional design change. The approvals workflow lets you decide: approve the new screenshot as the updated baseline, or reject it as a regression that needs fixing. Once approved, future runs compare against the new baseline. Your team stays in control of what 'correct' looks like."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 6 — CTA</span><span class="text-indigo-200 text-xs">3:00 – 3:40</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Feature summary: Multi-viewport ✓ · Full-page capture ✓ · Pixel diff images ✓ · Baseline approval workflow ✓. URL: vigilqa.sentinelflux.in</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Visual regression testing across desktop, tablet, and mobile — fully automated, with a human-in-the-loop approval workflow for baseline updates. Catch UI regressions at commit time, not from user reports. Try it at vigilqa.sentinelflux.in."</p>
+        </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-slate-200 flex justify-between text-sm text-slate-400">
+        <a href="api-contract.html" class="hover:text-indigo-600">← API Contract</a>
+        <a href="accessibility.html" class="hover:text-indigo-600">Next: Accessibility →</a>
+    </div>
+</div>
+</body>
+</html>
