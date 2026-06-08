@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications — SpecVault Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ede9fe;color:#7c3aed;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content a{color:#7c3aed;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/specvault/docs/" class="font-bold text-violet-600">SpecVault <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Notifications</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">How SpecVault sends email alerts when breaking changes are detected, and how to configure your SMTP settings.</p>
+
+        <h2>When alerts fire</h2>
+        <p>SpecVault sends an email alert every time a new spec version is published <strong>and</strong> the diff against the previous version contains at least one breaking change. Additive-only changes (new endpoints, new optional fields) do not trigger alerts.</p>
+        <p>Each subscriber on the affected service receives one email per publish event. If a publish has no breaking changes, no email is sent.</p>
+
+        <h2>Alert email format</h2>
+        <p>The alert email contains:</p>
+        <ul>
+          <li><strong>Subject:</strong> <code>[SpecVault] Breaking changes in &lt;Service Name&gt; v&lt;version&gt;</code></li>
+          <li>Service name and the version number that introduced the changes</li>
+          <li>Publish timestamp and the publisher's email</li>
+          <li>A numbered list of each breaking change, including the HTTP method, path, and a plain-English description (e.g. <em>Required parameter "user_id" removed from GET /users</em>)</li>
+          <li>A direct link to the diff detail page in the SpecVault dashboard</li>
+          <li>An unsubscribe link for that specific service</li>
+        </ul>
+
+        <h2>SMTP configuration</h2>
+        <p>SpecVault uses a standard SMTP connection to send alerts. Set the following environment variables in your <code>.env</code> file before starting the application:</p>
+
+        <pre>SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=alerts@yourcompany.com
+SMTP_PASSWORD=your-smtp-password
+SMTP_FROM=alerts@yourcompany.com
+SMTP_TLS=true</pre>
+
+        <h3>Provider examples</h3>
+        <p>Common SMTP providers and their settings:</p>
+        <ul>
+          <li><strong>Gmail (App Password):</strong> host <code>smtp.gmail.com</code>, port <code>587</code>, TLS <code>true</code></li>
+          <li><strong>SendGrid:</strong> host <code>smtp.sendgrid.net</code>, port <code>587</code>, user <code>apikey</code>, password = your API key</li>
+          <li><strong>AWS SES:</strong> host from SES console, port <code>587</code>, SMTP credentials from IAM</li>
+          <li><strong>Mailgun:</strong> host <code>smtp.mailgun.org</code>, port <code>587</code></li>
+          <li><strong>Postmark:</strong> host <code>smtp.postmarkapp.com</code>, port <code>587</code></li>
+        </ul>
+
+        <div class="callout callout-warning not-prose">
+          <p class="text-sm text-amber-800"><strong>Gmail note:</strong> Standard Gmail passwords do not work over SMTP. You must create an App Password in your Google Account security settings and use that instead.</p>
+        </div>
+
+        <h2>Testing your SMTP config</h2>
+        <p>After setting environment variables and restarting, publish a spec version that introduces a breaking change (you can temporarily remove an endpoint from a test spec). If the subscriber address receives the alert, SMTP is working correctly.</p>
+        <p>Check application logs for SMTP errors if the email does not arrive. Common issues include wrong port, TLS mismatch, or firewall rules blocking outbound port 587.</p>
+
+        <h2>No-email option</h2>
+        <p>If SMTP is not configured, SpecVault still detects and stores breaking changes — it simply cannot send outbound alerts. The dashboard diff view will show breaking changes regardless of SMTP status. A warning badge appears in Settings when SMTP is unconfigured.</p>
+
+        <div class="callout callout-tip not-prose">
+          <p class="text-sm text-green-800"><strong>Tip:</strong> For local development, use <a href="https://github.com/mailhog/MailHog" class="underline">MailHog</a> or <a href="https://mailpit.axllent.org" class="underline">Mailpit</a> as a local SMTP sink. They capture outbound emails without actually sending them.</p>
+        </div>
+
+        <h2>Unsubscribe flow</h2>
+        <p>Every alert email includes a one-click unsubscribe link. Clicking it removes the subscriber from that specific service only; they remain subscribed to any other services. Admins can also remove subscribers directly from the Subscribers tab in the dashboard.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/specvault/docs/docs.js"></script>
+</body>
+</html>

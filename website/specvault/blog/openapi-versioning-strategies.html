@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAPI Versioning Strategies That Actually Scale — SpecVault Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="URL versioning, header versioning, or no versioning — the tradeoffs of each, and how your choice affects breaking change detection.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose h3 { font-size: 1.1rem; font-weight: 600; color: #0f172a; margin: 1.5rem 0 0.5rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #7c3aed; }
+        pre { background: #0f172a; color: #e2e8f0; border-radius: 0.5rem; padding: 1.25rem; overflow-x: auto; line-height: 1.7; font-size: 0.85rem; margin-bottom: 1.25rem; font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/specvault/" class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SpecVault</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/specvault/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a>
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener" class="bg-violet-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-violet-100 text-violet-700 text-xs font-semibold px-2.5 py-1 rounded-full">Tutorial</span>
+                <span class="text-slate-400 text-sm">May 26, 2026 · 7 min read</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">OpenAPI Versioning Strategies That Actually Scale</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">URL versioning, header versioning, or no versioning — the tradeoffs of each approach, and how your choice affects breaking change detection in SpecVault.</p>
+        </div>
+
+        <div class="prose">
+            <p>There are three mainstream ways to version an HTTP API. They all work, and they all have real costs. The right choice depends on who your consumers are, how often you break things, and how much backward compatibility you're willing to maintain in parallel.</p>
+
+            <h2>Strategy 1: URL versioning (<code>/v1/</code>, <code>/v2/</code>)</h2>
+            <p>The most common approach. You prefix all routes with a version number:</p>
+            <pre>GET /v1/users/{id}
+GET /v2/users/{id}   # new version, different shape</pre>
+
+            <p><strong>Why teams choose it:</strong> It's explicit, cacheable, and visible in logs. Consumers know exactly which version they're calling. Old versions can be kept alive while new ones roll out.</p>
+
+            <p><strong>The real cost:</strong> You end up maintaining N versions simultaneously. A bug fix has to be applied to both <code>/v1</code> and <code>/v2</code>. Deprecation is a long, awkward process. Over time, old versions accumulate and teams are reluctant to remove them because consumers haven't upgraded.</p>
+
+            <p><strong>With SpecVault:</strong> Register a separate service per version (<code>Payments API v1</code>, <code>Payments API v2</code>). Each has its own spec history and subscriber list. When you deprecate v1, you can see exactly which teams are still subscribed and notify them directly.</p>
+
+            <h2>Strategy 2: Header versioning (<code>Accept</code> or custom header)</h2>
+            <p>The version is specified in the request header rather than the URL:</p>
+            <pre>GET /users/{id}
+Accept: application/vnd.yourapi.v2+json
+# or
+X-API-Version: 2</pre>
+
+            <p><strong>Why teams choose it:</strong> Clean URLs. Feels more REST-pure. Some API gateway products support it natively.</p>
+
+            <p><strong>The real cost:</strong> Much harder to test manually (you need tooling to set headers), harder to cache (proxies often ignore the Accept header for caching), and invisible in browser URL bars. Debugging "which version is this actually calling?" requires inspecting requests rather than reading the path.</p>
+
+            <p><strong>With SpecVault:</strong> The spec you publish should represent the version you're tracking. If you publish one spec per header version, register a separate service for each. If your spec documents all versions together with discriminators, a single service works fine.</p>
+
+            <h2>Strategy 3: No explicit versioning (continuous evolution)</h2>
+            <p>Many internal and microservice APIs skip version numbers entirely. The contract is defined by the OpenAPI spec at a given point in time, and the commitment is: we will not break existing consumers without advance notice.</p>
+
+            <p><strong>Why teams choose it:</strong> No parallel maintenance burden. No deprecation ceremonies. Simpler URLs. Works well when producer and consumer teams are in the same organisation and can coordinate changes.</p>
+
+            <p><strong>The real cost:</strong> Breaking changes must be proactively communicated and coordinated. If you don't have a reliable way to detect and alert on them, consumers find out from production errors.</p>
+
+            <p><strong>With SpecVault:</strong> This is the ideal use case. You register one service with one spec history. Every deploy publishes the current spec. Breaking changes are automatically detected and subscribers are alerted — the communication that makes unversioned APIs safe to use becomes automatic rather than manual.</p>
+
+            <h2>When to bump a major version vs. add a new endpoint</h2>
+            <p>A useful heuristic: if the change requires all existing consumers to update before they can function, that's a major version bump. If consumers can continue as-is and opt into the new behaviour when ready, add a new endpoint or field instead.</p>
+
+            <ul>
+                <li><strong>Rename <code>/users/{id}</code> to <code>/accounts/{id}</code></strong> → major version bump. Old URL breaks all callers.</li>
+                <li><strong>Add a new <code>/users/{id}/preferences</code> endpoint</strong> → no bump needed. Existing callers are unaffected.</li>
+                <li><strong>Change <code>created_at</code> from ISO string to Unix timestamp</strong> → major version bump. All callers parsing the field break.</li>
+                <li><strong>Add a new optional field <code>metadata</code> to the response</strong> → no bump needed. Additive change.</li>
+            </ul>
+
+            <h2>The SpecVault perspective</h2>
+            <p>SpecVault tracks changes between published spec versions, not between URL versions. The spec you publish represents the contract you're making. If you ship a major version and publish it as a new spec version in the same SpecVault service, the breaking changes are flagged and subscribers are alerted — which is exactly the right moment to reach them.</p>
+
+            <p>Whichever versioning strategy you use, the most important thing is consistency: pick one, apply it to all your services, and make sure your spec always reflects what's actually deployed.</p>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/specvault/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                All posts
+            </a>
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener" class="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors flex items-center gap-1.5">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/specvault/" class="flex items-center gap-2 font-bold text-white"><div class="w-6 h-6 bg-violet-600 rounded-md flex items-center justify-center"><svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg></div>SpecVault</a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/specvault/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/specvault/docs/" class="hover:text-white transition-colors">Docs</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+</body>
+</html>

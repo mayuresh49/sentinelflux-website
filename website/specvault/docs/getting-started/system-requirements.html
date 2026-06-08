@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Requirements — SpecVault Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ede9fe;color:#7c3aed;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.9rem}
+    .doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8125rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}
+    .doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}
+    .doc-content a{color:#7c3aed;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/specvault/docs/" class="font-bold text-violet-600">SpecVault <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">System Requirements</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Minimum and recommended requirements for running a SpecVault instance.</p>
+
+        <h2>Server requirements</h2>
+
+        <table>
+          <thead>
+            <tr><th>Component</th><th>Minimum</th><th>Recommended</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>CPU</td><td>1 vCPU</td><td>2 vCPU</td></tr>
+            <tr><td>Memory</td><td>512 MB RAM</td><td>1 GB RAM</td></tr>
+            <tr><td>Disk</td><td>1 GB</td><td>10 GB (for large spec histories)</td></tr>
+            <tr><td>OS</td><td>Linux (any distro)</td><td>Ubuntu 22.04 LTS</td></tr>
+          </tbody>
+        </table>
+
+        <p>A GCP e2-micro or AWS t3.micro is sufficient for teams with up to 50 services and daily publishes. Scale up if you're storing very large OpenAPI specs or have hundreds of services.</p>
+
+        <h2>Python</h2>
+        <p>SpecVault requires <strong>Python 3.12 or later</strong>. Python 3.11 may work but is not tested. Python 3.10 and earlier are not supported.</p>
+        <p>When using Docker, the correct Python version is included in the container image — no manual installation needed.</p>
+
+        <h2>Database</h2>
+        <p>SpecVault uses <strong>SQLite with WAL mode</strong> enabled. No separate database server is required. The database file is created automatically on first startup at the path specified in <code>DATABASE_PATH</code> (default: <code>data/specvault.db</code>).</p>
+        <p>SQLite with WAL mode handles concurrent reads and writes correctly for SpecVault's access patterns. A PostgreSQL migration is on the roadmap for large enterprise deployments but is not currently supported.</p>
+
+        <h2>SMTP for notifications</h2>
+        <p>An SMTP server is required for sending breaking-change email alerts to subscribers. SpecVault supports any standard SMTP server:</p>
+        <ul>
+          <li><strong>SendGrid</strong> — recommended for production. Use SMTP relay on port 587.</li>
+          <li><strong>AWS SES</strong> — good option for AWS-hosted deployments.</li>
+          <li><strong>Mailgun</strong> — straightforward setup with free tier.</li>
+          <li><strong>Gmail SMTP</strong> — acceptable for small teams. Requires an App Password if 2FA is enabled.</li>
+          <li><strong>Self-hosted (Postfix/Exim)</strong> — works but requires correct SPF/DKIM configuration to avoid spam filtering.</li>
+        </ul>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">If SMTP is not configured, SpecVault will still function — breaking changes will be detected and displayed in the dashboard, but no email alerts will be sent to subscribers.</p>
+        </div>
+
+        <h2>Network requirements</h2>
+
+        <h3>Inbound</h3>
+        <ul>
+          <li>Port 443 (HTTPS) — for the dashboard and API, accessed by users and CI/CD pipelines</li>
+          <li>Port 80 (HTTP) — used by Caddy for ACME certificate challenges; all traffic is redirected to HTTPS</li>
+        </ul>
+
+        <h3>Outbound</h3>
+        <ul>
+          <li>Port 443 — required for fetching spec files from remote URLs (when using "Fetch from URL")</li>
+          <li>SMTP port (587 or 465) — required for sending alert emails</li>
+          <li>Port 443 to Let's Encrypt — required for Caddy's automatic TLS certificates</li>
+        </ul>
+
+        <h2>Browser requirements</h2>
+        <p>The SpecVault dashboard works in any modern browser. Tested on:</p>
+        <ul>
+          <li>Chrome 120+</li>
+          <li>Firefox 120+</li>
+          <li>Safari 17+</li>
+          <li>Edge 120+</li>
+        </ul>
+        <p>JavaScript must be enabled. No browser extensions are required.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/specvault/docs/docs.js"></script>
+</body>
+</html>

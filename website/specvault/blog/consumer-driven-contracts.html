@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumer-Driven API Contracts: What They Are and When to Use Them — SpecVault Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="How CDC tools like Pact work, the setup overhead they require, and when SpecVault gives you most of the benefit at a fraction of the cost.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose h3 { font-size: 1.1rem; font-weight: 600; color: #0f172a; margin: 1.5rem 0 0.5rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #7c3aed; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/specvault/" class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SpecVault</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/specvault/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a>
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener" class="bg-violet-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-orange-100 text-orange-700 text-xs font-semibold px-2.5 py-1 rounded-full">Deep Dive</span>
+                <span class="text-slate-400 text-sm">May 22, 2026 · 6 min read</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Consumer-Driven API Contracts: What They Are and When to Use Them</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">How CDC tools like Pact work, the setup overhead they require, and when SpecVault gives you most of the benefit at a fraction of the cost.</p>
+        </div>
+
+        <div class="prose">
+            <p>Consumer-driven contract testing is one of those concepts that sounds obvious once you've heard it: instead of the producer defining what the API does and hoping consumers adjust, consumers define what they need from the API and the producer verifies that every release still satisfies those needs.</p>
+
+            <p>It's a powerful inversion. And tools like Pact have made it practical for microservice teams. But there's a reason CDC adoption is still much lower than "everyone who has experienced a breaking change" would suggest. The setup cost is real, and it's worth being honest about it.</p>
+
+            <h2>How Pact-style CDC works</h2>
+            <p>The Pact workflow looks like this:</p>
+            <ul>
+                <li>Consumer teams write interaction tests that describe the requests they send and the responses they need — these generate a "pact file" (a JSON document capturing the expected contract)</li>
+                <li>Pact files are published to a shared broker (Pactflow, or a self-hosted Pact Broker)</li>
+                <li>Before each producer release, the provider test suite replays every pact against the actual API and verifies the responses match</li>
+                <li>If a consumer's expectations aren't met, the provider can't ship (or at least gets a very clear warning)</li>
+            </ul>
+
+            <p>When it works, it's elegant. The producer genuinely cannot accidentally break a consumer because the consumer's requirements are encoded as tests that run in the producer's pipeline.</p>
+
+            <h2>The real setup cost</h2>
+            <p>Here's what actually needs to happen before Pact adds value:</p>
+            <ul>
+                <li><strong>Both sides must adopt Pact.</strong> Consumer teams need to write pact tests (in addition to their existing integration tests). Producer teams need to run provider verification steps in their pipeline. If only one side adopts it, nothing works.</li>
+                <li><strong>A broker must be deployed and maintained.</strong> Pactflow is paid. Self-hosted Pact Broker requires operational effort. Either way, this is new infrastructure.</li>
+                <li><strong>Pact tests need to be kept current.</strong> As the consumer application evolves, its pact file needs updating. Stale pacts can block valid producer releases or, worse, give false confidence that old behavior is still required.</li>
+                <li><strong>State management for provider verification</strong> is often non-trivial — the provider test harness needs to seed the right data to satisfy the pact's expectations.</li>
+            </ul>
+
+            <p>For a team with eight services, ten consumers, and a dedicated platform team to set it all up, this is tractable. For a four-person startup or a company where each team owns their own toolchain, it's a big ask.</p>
+
+            <h2>What SpecVault does instead</h2>
+            <p>SpecVault takes a simpler bet: most of the value of CDC comes from <em>knowing about breaking changes before consumers hit them</em>, not from the mechanical enforcement of contract tests. If you can guarantee that breaking changes are communicated — immediately, automatically, to the right people — you get most of the practical benefit.</p>
+
+            <p>The tradeoff: SpecVault can't tell you which specific field a specific consumer depends on. It flags changes that are breaking by OpenAPI convention, not by consumer usage. If you remove an optional field that all your consumers happened to use, SpecVault won't flag it as breaking. Pact would.</p>
+
+            <p>For internal services within a single company, that gap is usually small. Teams communicate. If a subscriber to the Payments API gets an alert that an optional field was removed, they can quickly check whether they depend on it. The alert is the critical piece — it changes "discovered in production" to "discovered before deployment".</p>
+
+            <h2>When to use which</h2>
+            <p><strong>Use SpecVault when:</strong></p>
+            <ul>
+                <li>You want contract visibility with minimal setup (under 10 minutes, no new infrastructure)</li>
+                <li>Your consumers are internal teams who can respond to email alerts</li>
+                <li>You're tracking OpenAPI-documented APIs (REST/JSON)</li>
+                <li>You want a registry and audit trail of contract changes over time</li>
+            </ul>
+
+            <p><strong>Use Pact/CDC when:</strong></p>
+            <ul>
+                <li>You have external third-party consumers who cannot simply respond to an alert and coordinate a fix</li>
+                <li>You need hard enforcement — contracts that block a release, not just alert on it</li>
+                <li>Your consumers have precise, non-obvious expectations that OpenAPI diff alone won't capture</li>
+                <li>You have the platform team bandwidth to set up and maintain the broker infrastructure</li>
+            </ul>
+
+            <p>These aren't mutually exclusive. Some teams run SpecVault for quick visibility and rely on Pact for the subset of their most critical external-facing APIs. The two tools solve related but distinct problems. Pick the one that matches your current pain level and organisational capacity.</p>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/specvault/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                All posts
+            </a>
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener" class="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors flex items-center gap-1.5">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/specvault/" class="flex items-center gap-2 font-bold text-white"><div class="w-6 h-6 bg-violet-600 rounded-md flex items-center justify-center"><svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg></div>SpecVault</a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/specvault/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/specvault/docs/" class="hover:text-white transition-colors">Docs</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+</body>
+</html>

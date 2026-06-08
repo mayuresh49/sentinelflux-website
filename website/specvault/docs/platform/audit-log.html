@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Log — SpecVault Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ede9fe;color:#7c3aed;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content a{color:#7c3aed;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/specvault/docs/" class="font-bold text-violet-600">SpecVault <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Audit Log</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">A tamper-evident log of every significant action taken in SpecVault — who did what, and when.</p>
+
+        <h2>What gets logged</h2>
+        <p>SpecVault logs the following event types:</p>
+        <ul>
+          <li><strong>spec.published</strong> — a new spec version was uploaded, including the publisher identity (user email or token name), service ID, version number, and whether breaking changes were detected</li>
+          <li><strong>service.created</strong> — a new service was registered</li>
+          <li><strong>service.updated</strong> — a service's name, team, or base URL was changed</li>
+          <li><strong>service.deleted</strong> — a service and all its versions were deleted</li>
+          <li><strong>subscriber.added</strong> — an email address was subscribed to a service</li>
+          <li><strong>subscriber.removed</strong> — a subscriber was removed (by admin or via unsubscribe link)</li>
+          <li><strong>token.created</strong> — a new API token was created (name only, never the value)</li>
+          <li><strong>token.revoked</strong> — an API token was revoked</li>
+          <li><strong>user.login</strong> — a successful dashboard login</li>
+          <li><strong>alert.sent</strong> — a breaking-change email alert was dispatched, including recipient count</li>
+        </ul>
+
+        <h2>Log entry format</h2>
+        <p>Each entry in the audit log JSON file follows this structure:</p>
+        <pre>{
+  "timestamp": "2026-06-01T14:32:07Z",
+  "event": "spec.published",
+  "actor": "github-actions-prod",
+  "actor_type": "token",
+  "service_id": "svc_01hwx3p9k2",
+  "service_name": "Payments API",
+  "detail": {
+    "version": "v42",
+    "breaking_changes": 2,
+    "endpoints_total": 31
+  }
+}</pre>
+
+        <h3>Actor types</h3>
+        <ul>
+          <li><code>user</code> — action performed via the dashboard (actor is the email address)</li>
+          <li><code>token</code> — action performed via API with a token (actor is the token name)</li>
+          <li><code>system</code> — internal event (e.g. automatic alert dispatch)</li>
+        </ul>
+
+        <h2>Viewing the audit log</h2>
+        <p>The audit log is accessible in two ways:</p>
+
+        <h3>Dashboard view</h3>
+        <p>Navigate to <strong>Audit Log</strong> in the top nav. The page shows a paginated, filterable list of events in reverse chronological order. You can filter by event type and search by service name or actor.</p>
+
+        <h3>File access</h3>
+        <p>The audit log is written to <code>data/audit_log.json</code> as a newline-delimited JSON file (one JSON object per line). On a self-hosted instance, you can tail, grep, or ship this file to any log aggregator (Datadog, Loki, CloudWatch, etc.):</p>
+        <pre>tail -f data/audit_log.json | jq 'select(.event == "spec.published")'</pre>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">The audit log is append-only from the application's perspective. Entries are never modified after writing. Back up <code>data/audit_log.json</code> alongside your SQLite database file.</p>
+        </div>
+
+        <h2>Backup and retention</h2>
+        <p>SpecVault does not automatically rotate or truncate the audit log. For long-running instances, consider periodically archiving older entries with a cron job, or shipping them to an external log store and truncating the local file.</p>
+        <p>If you use the Docker deployment, the <code>data/</code> directory should be mounted as a persistent volume so the audit log survives container restarts.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/specvault/docs/docs.js"></script>
+</body>
+</html>

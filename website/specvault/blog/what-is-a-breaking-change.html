@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Counts as a Breaking Change? A Field Guide — SpecVault Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="A precise taxonomy of breaking vs. non-breaking OpenAPI changes, with before/after YAML examples for each category.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose h3 { font-size: 1.1rem; font-weight: 600; color: #0f172a; margin: 1.5rem 0 0.5rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #7c3aed; }
+        pre { background: #0f172a; color: #e2e8f0; border-radius: 0.5rem; padding: 1.25rem; overflow-x: auto; line-height: 1.7; font-size: 0.85rem; margin-bottom: 1.25rem; font-family: 'JetBrains Mono', monospace; }
+        .change-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.2em 0.6em; border-radius: 4px; }
+        .breaking { background: #fee2e2; color: #dc2626; }
+        .safe { background: #dcfce7; color: #16a34a; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/specvault/" class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">SpecVault</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/specvault/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a>
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener" class="bg-violet-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-orange-100 text-orange-700 text-xs font-semibold px-2.5 py-1 rounded-full">Deep Dive</span>
+                <span class="text-slate-400 text-sm">June 3, 2026 · 6 min read</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">What Counts as a Breaking Change? A Field Guide</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">A precise taxonomy of breaking vs. non-breaking OpenAPI changes, with before/after YAML examples for each category — so you know exactly what SpecVault flags and why.</p>
+        </div>
+
+        <div class="prose">
+            <p>Not all API changes are created equal. Adding a new endpoint is completely safe. Removing one is not. But the line isn't always obvious — especially when it comes to request parameters, response fields, and type changes. Here's a clear taxonomy with examples.</p>
+
+            <p>The guiding principle: a change is breaking if it requires existing consumers to update their code in order to avoid errors. A change is safe if consumers can continue using the API exactly as they do today, with no modifications.</p>
+
+            <h2>Breaking changes</h2>
+
+            <h3>1. Removed endpoint <span class="change-label breaking">Breaking</span></h3>
+            <p>Any endpoint that existed in the previous version but is absent in the new version is breaking. Any consumer calling that path will get a 404.</p>
+            <pre># Before
+paths:
+  /users/{id}:
+    get:
+      ...
+  /users/{id}/profile:   # ← this endpoint
+    get:
+      ...
+
+# After — /users/{id}/profile is gone
+paths:
+  /users/{id}:
+    get:
+      ...</pre>
+
+            <h3>2. Removed required request parameter <span class="change-label breaking">Breaking</span></h3>
+            <p>Wait — why is <em>removing</em> a required parameter breaking? Because consumers are sending it. If the API now returns a 400 for unexpected required fields, those callers break. More commonly, removing it from the spec means the parameter's semantics changed, which is also worth flagging.</p>
+
+            <h3>3. New required request parameter <span class="change-label breaking">Breaking</span></h3>
+            <p>If the new version introduces a required parameter that didn't exist before, consumers who don't send it will get a 400 or 422.</p>
+            <pre># Before
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        properties:
+          name:
+            type: string
+
+# After — "currency" is now required
+        properties:
+          name:
+            type: string
+          currency:
+            type: string
+        required: [name, currency]   # ← breaking</pre>
+
+            <h3>4. Removed response field <span class="change-label breaking">Breaking</span></h3>
+            <p>If a field was in the response schema and consumers read it, removing it breaks those consumers.</p>
+            <pre># Before
+responses:
+  '200':
+    content:
+      application/json:
+        schema:
+          properties:
+            id:
+              type: string
+            legacy_ref:    # ← consumers depend on this
+              type: string
+
+# After — legacy_ref is gone</pre>
+
+            <h3>5. Type change on existing field <span class="change-label breaking">Breaking</span></h3>
+            <p>Changing a field from <code>integer</code> to <code>string</code>, or from <code>string</code> to an <code>enum</code> with fewer valid values, will break consumers that depend on the original type.</p>
+
+            <h2>Safe (non-breaking) changes</h2>
+
+            <h3>New optional request parameter <span class="change-label safe">Safe</span></h3>
+            <p>Adding a new parameter with no <code>required: true</code> flag (or adding it to the <code>required</code> array) is safe. Consumers can choose to send it or not.</p>
+
+            <h3>New endpoint <span class="change-label safe">Safe</span></h3>
+            <p>Consumers who don't know about the new endpoint are completely unaffected.</p>
+
+            <h3>New response field <span class="change-label safe">Safe</span></h3>
+            <p>As long as consumers deserialise responses permissively (the standard approach), an extra field in the response doesn't break anything.</p>
+
+            <h3>Documentation-only changes <span class="change-label safe">Safe</span></h3>
+            <p>Changes to <code>description</code>, <code>summary</code>, <code>example</code>, or <code>externalDocs</code> fields don't affect runtime behaviour.</p>
+
+            <h2>The grey area</h2>
+            <p>Some changes fall between clearly breaking and clearly safe:</p>
+            <ul>
+                <li><strong>Narrowing enum values</strong> — removing a valid enum value from a response field can break consumers that have handling for that value, even if the field itself still exists.</li>
+                <li><strong>Making an optional field required</strong> — in a response, this is typically safe. In a request, it's breaking.</li>
+                <li><strong>Security scheme changes</strong> — switching from API key to OAuth is breaking in practice, even if the endpoints are unchanged.</li>
+            </ul>
+
+            <p>SpecVault currently flags the unambiguously breaking categories. Grey-area changes appear as informational warnings rather than breaking change alerts. We're expanding detection coverage based on feedback from early users.</p>
+
+            <h2>Using this taxonomy day-to-day</h2>
+            <p>The easiest habit to build: before merging any API change, ask "does this remove something, or add something required?" If the answer is yes to either, flag your consumer teams. If the answer is no — you're adding things, making things optional, or changing docs — you're safe to ship.</p>
+
+            <p>And set up SpecVault to catch what you miss.</p>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/specvault/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                All posts
+            </a>
+            <a href="https://specvault.sentinelflux.in" target="_blank" rel="noopener" class="text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors flex items-center gap-1.5">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/specvault/" class="flex items-center gap-2 font-bold text-white"><div class="w-6 h-6 bg-violet-600 rounded-md flex items-center justify-center"><svg style="width:12px;height:12px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg></div>SpecVault</a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/specvault/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/specvault/docs/" class="hover:text-white transition-colors">Docs</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+</body>
+</html>

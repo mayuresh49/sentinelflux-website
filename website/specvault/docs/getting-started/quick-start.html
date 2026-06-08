@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Start — SpecVault Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ede9fe;color:#7c3aed;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content a{color:#7c3aed;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/specvault/docs/" class="font-bold text-violet-600">SpecVault <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Quick Start</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Publish your first spec, set up a subscriber, and trigger a diff — in under 10 minutes.</p>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800"><strong>Prerequisites:</strong> A running SpecVault instance (see <a href="/specvault/docs/getting-started/deployment.html" class="underline">Deployment</a>) and an OpenAPI spec in JSON or YAML format.</p>
+        </div>
+
+        <h2>Step 1 — Log in</h2>
+        <p>Navigate to your SpecVault instance (e.g. <code>https://specvault.example.com</code>). Log in with the admin credentials you configured during deployment. The default admin username is set via the <code>ADMIN_EMAIL</code> environment variable.</p>
+
+        <h2>Step 2 — Create a service</h2>
+        <p>From the dashboard, click <strong>New Service</strong>. Fill in:</p>
+        <ul>
+          <li><strong>Name</strong> — a short identifier for your API (e.g. <code>Payments API</code>)</li>
+          <li><strong>Team</strong> — the owning team name (e.g. <code>platform</code>)</li>
+          <li><strong>Base URL</strong> — the base URL of the running service (e.g. <code>https://api.example.com</code>)</li>
+        </ul>
+        <p>Click <strong>Create Service</strong>. You'll be taken to the service detail page showing an empty version history.</p>
+
+        <h2>Step 3 — Publish your first spec</h2>
+        <p>On the service detail page, click <strong>Publish Spec</strong>. You have two options:</p>
+        <ul>
+          <li><strong>Fetch from URL</strong> — paste the URL to your <code>openapi.json</code> or <code>openapi.yaml</code> endpoint. SpecVault will fetch and store it.</li>
+          <li><strong>Upload file</strong> — upload a local JSON or YAML file directly.</li>
+        </ul>
+        <p>Since this is the first version, no diff is performed — there's nothing to compare against. The version is stored with its endpoint count and publish date.</p>
+
+        <div class="callout callout-tip not-prose">
+          <p class="text-sm text-green-800"><strong>Tip:</strong> Use the Fetch from URL option in your CI/CD pipeline pointing to your staging spec endpoint. This makes publishing automatic on every successful build.</p>
+        </div>
+
+        <h2>Step 4 — Add a subscriber</h2>
+        <p>Click <strong>Add Subscriber</strong> on the service page. Enter the email address of the consumer team member who should receive breaking-change alerts for this service. They don't need a SpecVault account — alerts are sent to the address directly.</p>
+        <p>You can add multiple subscribers per service. Each subscriber can be removed at any time from the Subscribers tab.</p>
+
+        <h2>Step 5 — Publish a second spec version to trigger a diff</h2>
+        <p>Click <strong>Publish Spec</strong> again and upload a modified version of your spec. Make a change that should trigger a breaking-change alert — for example, remove an endpoint or change a required parameter name.</p>
+        <p>SpecVault will:</p>
+        <ol>
+          <li>Store the new spec version</li>
+          <li>Diff it against the previous version</li>
+          <li>Identify any breaking changes</li>
+          <li>Send an email alert to all subscribers if breaking changes are found</li>
+        </ol>
+
+        <h2>Step 6 — View the diff result</h2>
+        <p>On the service page, click the new version in the version history. The diff result shows:</p>
+        <ul>
+          <li>Number of endpoints added, removed, and changed</li>
+          <li>List of breaking changes with HTTP method, path, and description</li>
+          <li>Whether subscriber alerts were sent</li>
+        </ul>
+
+        <h2>Step 7 — Set up CI/CD publishing</h2>
+        <p>For ongoing use, publish specs automatically from your pipeline instead of manually. Generate an API token from <strong>Settings → API Tokens</strong>, then add a publish step to your CI:</p>
+
+        <pre>curl -X POST https://specvault.example.com/api/services/&lt;service-id&gt;/specs \
+  -H "Authorization: Bearer $SPECVAULT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"spec_url": "https://api.example.com/openapi.json"}'</pre>
+
+        <p>See the <a href="/specvault/docs/ci-cd/github-actions.html">GitHub Actions guide</a> for a complete workflow example.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/specvault/docs/docs.js"></script>
+</body>
+</html>
