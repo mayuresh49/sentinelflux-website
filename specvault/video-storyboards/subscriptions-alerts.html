@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscriptions, Alerts &amp; Lifecycle — SpecVault Video Storyboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body{font-family:'Inter',sans-serif}
+        .scene{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #e2e8f0;border-radius:0.75rem;overflow:hidden;margin-bottom:1.25rem}
+        .scene-screen{background:#f8fafc;padding:1.25rem;border-right:1px solid #e2e8f0}
+        .scene-vo{background:#fff;padding:1.25rem}
+        .scene-header{grid-column:1/-1;background:#7c3aed;color:white;padding:0.625rem 1.25rem;display:flex;justify-content:space-between;align-items:center}
+        code{font-family:'JetBrains Mono',monospace;font-size:0.85em;background:#ede9fe;color:#6d28d9;padding:0.05rem 0.3rem;border-radius:0.25rem}
+        @media print{.scene{page-break-inside:avoid}}
+    </style>
+</head>
+<body class="bg-white text-slate-900">
+<div class="max-w-5xl mx-auto px-6 py-10">
+
+    <div class="flex items-start justify-between mb-8">
+        <div>
+            <a href="index.html" class="text-xs text-violet-600 hover:underline mb-2 block">← All storyboards</a>
+            <h1 class="text-2xl font-extrabold text-slate-900">Subscriptions, Alerts &amp; Lifecycle</h1>
+            <p class="text-slate-500 mt-1">Subscribe, get notified, triage the change, close the loop — and keep a full audit trail throughout</p>
+        </div>
+        <div class="text-right text-sm text-slate-400">
+            <div class="font-semibold text-slate-700">~4:30</div>
+            <div>estimated duration</div>
+            <div class="mt-1">Target: consumer teams, API producers, engineering leads</div>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 1 — Subscribing to a service</span><span class="text-violet-200 text-xs">0:00 – 0:40</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Open a service detail page. Click <strong>Subscribe</strong> — button changes to <strong>Subscribed ▾</strong>. Open the dropdown: <em>Breaking changes only / All changes</em> toggle, and an <strong>Unsubscribe</strong> option. Switch to the <strong>My Subscriptions</strong> nav page — shows the service row with its preference chip.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Subscribing is a single click from the service page. Once subscribed, the button becomes a dropdown — you can switch between breaking-changes-only and all changes, or unsubscribe, without going anywhere else. And the My Subscriptions page gives you one place to see and manage every service you follow."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 2 — The alert email</span><span class="text-violet-200 text-xs">0:40 – 1:20</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">An email client opens. Subject: <em>"[SpecVault] Breaking changes in Payments API v2.1.0"</em>. Body: service name, version jump <code>2.0.0 → 2.1.0</code>, <strong>2 breaking changes</strong> table (method, path, description, field), blast-radius line <em>"impacts payments@acme"</em>, link to the change in the portal.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"The alert email carries everything you need without opening the dashboard: the version that changed, every breaking change in a table with method, path, and field, and the blast-radius summary naming the affected consumers. There's a direct link to the change event if you need the full context."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 3 — Change event triage: Acknowledge</span><span class="text-violet-200 text-xs">1:20 – 2:05</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Open the Changes tab. A change event with status badge <strong>New</strong>. Click <strong>Acknowledge</strong> — badge flips to <strong>Acknowledged</strong> in blue. Tooltip/label: <em>"Intentional — consumers have been notified."</em> Show the audit log entry: <code>change_acknowledged</code> with timestamp and user.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"When a breaking change is intentional — a planned deprecation, a known schema migration — click Acknowledge. The status updates to Acknowledged, the alert has done its job, and the audit log records who closed it and when. No confusion about whether it was reviewed."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 4 — Triage: Flag as error, then fix it</span><span class="text-violet-200 text-xs">2:05 – 3:00</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">A second change event — click <strong>Flag as Error</strong>. Badge becomes <strong>Fix Pending</strong> in amber. The producer team publishes a corrective version <code>2.1.1</code> — the spec restores the removed field. Immediately: the <strong>Fix Pending</strong> badge flips to <strong>Resolved</strong> in green. Audit log: <code>change_auto_resolved</code>.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"When a breaking change was a mistake, flag it as an error — the status becomes Fix Pending, signalling the team it needs a correction. When the producer publishes a corrective spec that reverts the change, SpecVault auto-resolves the flag. No manual close. The full sequence — flagged, fixed, resolved — is in the audit log."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 5 — Deactivate a service</span><span class="text-violet-200 text-xs">3:00 – 3:40</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">On the service detail header, click <strong>Deactivate</strong>. The service name gains an <strong>Inactive</strong> badge. The service row on the home page is greyed out. Publish a new version — no email fires. Click <strong>Reactivate</strong> — badge disappears, alerts resume on the next publish.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"When a service is winding down or in maintenance, deactivate it. SpecVault still records change events — the full history is preserved — but no alerts fire. Reactivate when you're ready and alerts resume immediately. Deactivate is not delete: the service, its versions, and its audit trail are all still there."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 6 — Audit trail</span><span class="text-violet-200 text-xs">3:40 – 4:10</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Open <strong>Audit Log</strong> from the nav. Rows: <code>service_created</code>, <code>spec_published</code>, <code>change_acknowledged</code>, <code>change_flagged</code>, <code>change_auto_resolved</code>, <code>service_deactivated</code>. Each row shows timestamp, actor, and event type. Filter by service or event type.</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Every significant action — spec published, change triaged, service deactivated — writes an audit entry. Who did it, when, and what it was. So when an incident asks 'did anyone acknowledge this before it shipped?' — the log has the answer."</p>
+        </div>
+    </div>
+
+    <div class="scene">
+        <div class="scene-header"><span class="font-semibold text-sm">Scene 7 — CTA</span><span class="text-violet-200 text-xs">4:10 – 4:30</span></div>
+        <div class="scene-screen">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">On Screen</p>
+            <p class="text-sm text-slate-700">Lifecycle recap: <strong>Subscribe → Alert → Triage → Resolve → Audit</strong>. URL: specvault.sentinelflux.in</p>
+        </div>
+        <div class="scene-vo">
+            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Voiceover</p>
+            <p class="text-sm text-slate-700 leading-relaxed">"Subscribe to what matters, get alerted when it breaks, triage the change, and close the loop — with a full audit record throughout. That's the full lifecycle. specvault.sentinelflux.in."</p>
+        </div>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-slate-200 flex justify-between text-sm text-slate-400">
+        <a href="blast-radius.html" class="hover:text-violet-600">← Blast Radius</a>
+        <a href="index.html" class="hover:text-violet-600">All Storyboards →</a>
+    </div>
+</div>
+</body>
+</html>
