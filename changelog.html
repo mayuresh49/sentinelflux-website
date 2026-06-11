@@ -65,10 +65,38 @@
         <div class="relative">
             <div class="absolute left-0 top-0 bottom-0 w-px bg-slate-200 ml-3"></div>
 
-            <!-- AgentPulse v0.1.0 -->
+            <!-- AgentPulse v0.2.0 -->
             <div class="relative pl-10 pb-14">
                 <div class="absolute left-0 w-7 h-7 bg-emerald-600 rounded-full flex items-center justify-center shadow-sm shadow-emerald-500/30">
                     <div class="w-2.5 h-2.5 rounded-full bg-white"></div>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <span class="text-lg font-bold text-slate-900 mono">AgentPulse v0.2.0</span>
+                    <span class="bg-emerald-100 text-emerald-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">Full-stack API</span>
+                    <span class="text-slate-400 text-sm">June 2026</span>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <div class="text-xs font-bold text-emerald-600 uppercase tracking-wide mb-1.5">New</div>
+                        <ul class="space-y-1.5 text-sm text-slate-700">
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Full-stack Express + TypeScript API — Express on Node ≥ 24 with built-in SQLite (<code class="bg-slate-100 px-1 rounded text-xs">node:sqlite</code>); no external database required</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Multi-tenant org model — org-scoped isolation for all data; admin/member roles; invite team members via the Users settings</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Webhook ingestion — <code class="bg-slate-100 px-1 rounded text-xs">POST /v1/runs</code> with <code class="bg-slate-100 px-1 rounded text-xs">Authorization: Bearer &lt;secret&gt;</code>; supports status, duration, steps, tokens, and cost_usd; no SDK required</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Cost-by-product dashboard — lead metric showing USD spend per product with % share of total; 24h / 7d / 30d period selector</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Alert engine — 5 configurable metrics (error_rate, success_rate, avg_latency_ms, failed_runs, cost_usd) with gt/lt operators and rolling windows; deduplicates open alerts; resolving re-arms the rule</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Alert delivery — Slack webhook, generic HTTP webhook, and SMTP email channels; delivery is a no-op unless the channel is configured</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Self-hosted auth — bcrypt password hashing, httpOnly <code class="bg-slate-100 px-1 rounded text-xs">ap_session</code> cookie, in-memory login throttle (10 attempts / 15 min per IP + email)</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Free / Pro plan limits — server-enforced (2 products / 5 agents / 2 channels / 10k runs on Free; 20 / 100 / 20 / 1M on Pro); Stripe integration ready behind <code class="bg-slate-100 px-1 rounded text-xs">STRIPE_SECRET_KEY</code></li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>30-test integration suite — <code class="bg-slate-100 px-1 rounded text-xs">node:test</code> covering auth, ingest, alerts, stats, and plan limits; each suite runs in an isolated org</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AgentPulse v0.1.0 -->
+            <div class="relative pl-10 pb-14">
+                <div class="absolute left-0 w-7 h-7 bg-white border-2 border-emerald-300 rounded-full flex items-center justify-center">
+                    <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
                 </div>
                 <div class="flex flex-wrap items-center gap-3 mb-4">
                     <span class="text-lg font-bold text-slate-900 mono">AgentPulse v0.1.0</span>
@@ -83,8 +111,8 @@
                             <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Agent fleet — card grid with per-agent status, success rate, latency, and run count; filterable by status</li>
                             <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Runs list — paginated table of all executions with status, duration, trigger source, and token cost</li>
                             <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Run detail — step-by-step execution trace with per-step timing, token usage, cost breakdown, and error context</li>
-                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Authentication — login/logout and change-password flows backed by localStorage; protected routes</li>
-                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>VigilQA-style sidebar — dark slate-900 sidebar with user panel, initials avatar, and change password shortcut</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Authentication — login/logout and change-password flows; protected routes</li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-0.5 shrink-0">+</span>Dark slate-900 sidebar with user panel, initials avatar, and change password shortcut</li>
                         </ul>
                     </div>
                 </div>
