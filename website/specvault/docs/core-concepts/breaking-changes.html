@@ -44,7 +44,7 @@
         <p class="text-lg text-slate-500 mb-10 leading-relaxed">A precise definition of what SpecVault flags as a breaking change — and what it deliberately ignores.</p>
 
         <h2>What SpecVault flags as breaking</h2>
-        <p>A breaking change is any change that would cause an existing consumer to fail without modification to their code. SpecVault's diff engine checks for five categories:</p>
+        <p>A breaking change is any change that would cause an existing consumer to fail without modification to their code. SpecVault's diff engine resolves <code>$ref</code> and flattens <code>allOf</code>, so schemas defined under <code>components/</code> are compared by their actual shape — through nested objects and arrays, across every response status code. Severity is <em>direction-aware</em>: tightening the request contract breaks producers; dropping or changing the response contract breaks consumers.</p>
 
         <h3>1. Removed endpoints</h3>
         <p>An endpoint is a unique combination of HTTP method and path. If an endpoint that existed in version N is absent from version N+1, it's breaking.</p>
@@ -81,10 +81,22 @@ parameters:
     required: true       # ← BREAKING — existing consumers don't send this</pre>
 
         <h3>4. Removed response fields</h3>
-        <p>If a field that was present in the response schema in version N is absent in version N+1, consumers that read that field will break. SpecVault checks the top-level response schema for 200/201 responses and flags removed properties.</p>
+        <p>If a field that was present in the response schema in version N is absent in version N+1, consumers that read that field will break. SpecVault compares response schemas across every status code, following <code>$ref</code> and <code>allOf</code> into nested objects and array items — not just the top level.</p>
 
         <h3>5. Type changes on existing fields</h3>
-        <p>Changing a field's type — for example from <code>string</code> to <code>integer</code>, or from a scalar to an array — breaks consumers that parse the response. SpecVault detects type changes on request parameters and response fields.</p>
+        <p>Changing a field's type — for example from <code>string</code> to <code>integer</code>, or from a scalar to an array — breaks consumers that parse the response. SpecVault detects type changes on request parameters, request bodies, and response fields at any depth.</p>
+
+        <h3>6. Schema-level tightening</h3>
+        <p>Beyond add/remove/type, SpecVault flags changes that narrow what a consumer can rely on:</p>
+        <ul>
+          <li><strong>Enum values removed from a request</strong> — a client sending the old value is now rejected. (Conversely, a value <em>added</em> to a <em>response</em> enum is breaking too — a consumer may not handle it.)</li>
+          <li><strong>Format changes</strong> on a response field (e.g. <code>date-time</code> → <code>date</code>) that break parsing.</li>
+          <li><strong>Tightened request constraints</strong> — a smaller <code>maxLength</code>/<code>maximum</code>, a larger <code>minLength</code>/<code>minimum</code>, a new <code>pattern</code>, or any such bound introduced where none existed.</li>
+          <li><strong>A response field becoming nullable</strong> when it was always present.</li>
+        </ul>
+
+        <h3>7. Deprecation (advisory)</h3>
+        <p>When an operation, parameter, or field gains <code>deprecated: true</code>, SpecVault records it as a non-breaking advisory change so consumers get early warning before the field actually disappears.</p>
 
         <h2>What is NOT flagged as breaking</h2>
         <p>Additive changes are backward-compatible and do not trigger alerts:</p>
@@ -93,7 +105,8 @@ parameters:
           <li><strong>New optional parameters</strong> — existing consumers don't send them, and they have defaults or aren't required</li>
           <li><strong>New response fields</strong> — existing consumers that don't know about the field will simply ignore it</li>
           <li><strong>Description or documentation changes</strong> — changes to <code>description</code>, <code>summary</code>, <code>example</code>, or <code>x-</code> extensions</li>
-          <li><strong>New enum values</strong> — existing consumers receive values they handle; the new value is unknown but doesn't break existing handling</li>
+          <li><strong>New enum values accepted by a request</strong> — the server simply accepts more than before. (Note: a new value <em>returned</em> in a response enum <em>is</em> flagged breaking — see category 6.)</li>
+          <li><strong>Loosened request constraints</strong> — a larger <code>maxLength</code>, a smaller <code>minimum</code>, a removed <code>pattern</code></li>
         </ul>
 
         <div class="callout callout-warning not-prose">
@@ -101,12 +114,21 @@ parameters:
         </div>
 
         <h2>The diff result format</h2>
-        <p>Each breaking change in the diff result has four fields:</p>
+        <p>Each change in the diff result has five fields:</p>
         <ul>
-          <li><code>type</code> — the category of breaking change (e.g. <code>endpoint_removed</code>, <code>required_param_added</code>)</li>
-          <li><code>method</code> — the HTTP method (e.g. <code>GET</code>, <code>POST</code>)</li>
+          <li><code>severity</code> — <code>breaking</code> or <code>non_breaking</code></li>
+          <li><code>method</code> — the HTTP method (e.g. <code>GET</code>, <code>POST</code>), or <code>*</code> for a whole-path change</li>
           <li><code>path</code> — the path template (e.g. <code>/users/{id}</code>)</li>
+          <li><code>field</code> — the dotted schema path the change touches (e.g. <code>200.user.email</code>); empty for structural changes</li>
           <li><code>description</code> — a human-readable description of the specific change</li>
+        </ul>
+
+        <h2>Known limitations</h2>
+        <p>So you don't over-trust the output:</p>
+        <ul>
+          <li><strong>Renames aren't paired.</strong> A renamed field is reported as a removal (breaking) plus an addition — not a single "renamed" change.</li>
+          <li><strong><code>oneOf</code> / <code>anyOf</code> / <code>discriminator</code></strong> composition isn't deeply compared; only <code>allOf</code> is flattened.</li>
+          <li><strong>Severity is a heuristic.</strong> Always review the diff before acting on it — the same coverage and limitations are shown in the portal on each service's Changes tab.</li>
         </ul>
 
         <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>

@@ -11,11 +11,11 @@
   <h1>SpecVault — Frequently Asked Questions</h1>
   <article>
     <h2>What is SpecVault?</h2>
-    <p>SpecVault stores, versions, and validates API and contract specifications with integrated test generation.</p>
+    <p>SpecVault is an API contract registry: teams publish OpenAPI specs, SpecVault versions them and automatically detects breaking changes between versions with a <code>$ref</code>-aware diff engine, then notifies the consumers who are actually affected.</p>
   </article>
   <article>
     <h2>How does SpecVault integrate with CI?</h2>
-    <p>SpecVault exposes CLI and API hooks that can be added to your CI pipelines to run spec validation and contract tests.</p>
+    <p>Publish a new spec version from your pipeline with an authenticated <code>POST /api/services/{id}/versions</code> using an API token (created under Settings → API Tokens). SpecVault diffs it against the previous version and raises breaking-change alerts. SpecVault does not run tests against your service — it is a registry and a diff engine.</p>
   </article>
 </body>
 </html>
