@@ -1,0 +1,4 @@
+[
+  {"question": "What is SpecVault?", "answer": "SpecVault is an API contract registry. Teams publish OpenAPI specs, SpecVault versions them and detects breaking changes between versions, and it notifies the consumers who are actually affected."},
+  {"question": "How to integrate SpecVault?", "answer": "Publish a new spec version from CI with an authenticated POST to /api/services/{id}/versions using an API token. SpecVault diffs it against the previous version and raises breaking-change alerts. It does not generate or run tests."}
+]

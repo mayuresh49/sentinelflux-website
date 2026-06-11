@@ -74,11 +74,20 @@
         </ul>
         <p>See <a href="/specvault/docs/platform/notifications.html">Notifications</a> for the full alert format and SMTP configuration.</p>
 
-        <h2>Subscription management</h2>
-        <p>The <strong>Subscribers</strong> tab on each service page lists all active subscribers. Any admin can remove a subscriber at any time by clicking the remove button next to their address. Removal takes effect immediately — they will not receive alerts for future versions.</p>
+        <h2>Blast radius — who is actually affected</h2>
+        <p>Detecting a breaking change is only half the job. SpecVault also tells you <em>which consumers</em> it breaks, instead of paging everyone subscribed.</p>
+        <p>On a service's <strong>Subscribers</strong> tab, a consumer can declare the endpoints — and optionally the specific fields — their integration calls (for example <code>GET /orders</code>, or <code>GET /users</code> field <code>email</code>). When a breaking change lands, SpecVault intersects it against those declarations and shows the result on the change event:</p>
+        <ul>
+          <li><strong>Impacted</strong> — consumers whose declared endpoint/field is hit ("impacts payments@acme — uses GET /orders").</li>
+          <li><strong>Impact unknown</strong> — subscribers who haven't declared their usage. They can't be cleared, so they're shown explicitly rather than silently assumed safe.</li>
+        </ul>
+        <p>Field-level matching is leaf-name based: declaring <code>email</code> matches a change to that field wherever it appears, but for deeply nested fields declare the dotted path (<code>user.email</code>) so a parent-object removal still attributes correctly.</p>
 
-        <h2>Unsubscribe flow</h2>
-        <p>In the current version, there is no self-service unsubscribe link in alert emails. Subscribers who want to stop receiving alerts should contact the API owner or SpecVault admin to have their address removed. A one-click unsubscribe link is planned for a future release.</p>
+        <h2>Subscription management</h2>
+        <p>The <strong>Subscribers</strong> tab on each service page lists all subscribers and the endpoints each has declared. Admins can remove any subscriber; each user can also manage their own subscriptions from the <strong>My Subscriptions</strong> page — toggle breaking-only vs. all changes, or unsubscribe — without needing an admin.</p>
+
+        <h2>Pausing a service</h2>
+        <p>Deactivating a service stops alerts while keeping its full history; it stays in the registry, greyed out, and can be reactivated at any time. A deactivated service still records change events — it just doesn't notify. Deleting a service is a hard delete that permanently removes it and all its versions, change events, subscribers, and dependencies.</p>
 
         <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
       </div>
