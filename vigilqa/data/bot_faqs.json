@@ -1,0 +1,4 @@
+[
+  {"question": "What is VigilQA?", "answer": "VigilQA is an AI-driven testing platform by SentinelFlux that generates test suites from your knowledge base and performs failure analysis."},
+  {"question": "How do I start?", "answer": "See /vigilqa/docs/ for quickstart and installation instructions."}
+]
