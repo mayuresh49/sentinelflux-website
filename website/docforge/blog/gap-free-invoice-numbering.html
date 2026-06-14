@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why Invoice Numbers Must Be Gap-Free — DocForge Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="Tax authorities require sequential, gap-free invoice numbers. Why naive auto-increment breaks under concurrency, and how a file lock plus void-keeps-the-number guarantees an auditable sequence.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #d97706; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/docforge/" class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-amber-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">DocForge</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/docforge/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a>
+            <a href="https://docforge.sentinelflux.in" target="_blank" rel="noopener" class="bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-orange-100 text-orange-700 text-xs font-semibold px-2.5 py-1 rounded-full">Deep Dive</span>
+                <span class="text-slate-400 text-sm">June 10, 2026 · 6 min read</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Why Invoice Numbers Must Be Gap-Free — and How We Guarantee It</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">A missing invoice number isn't a cosmetic bug — to a tax auditor it's a question you have to answer. Here's why the sequence matters and what it takes to keep it intact.</p>
+        </div>
+
+        <div class="prose">
+            <p>In most of the world, including under Indian GST, a business's tax invoices must be numbered in a consecutive series with no gaps. The reason is simple: a gap looks like a deleted invoice. If you issued numbers 1001, 1002, and 1004, an auditor's first question is "where is 1003, and what are you hiding?" Even if the answer is innocent — a software glitch, a cancelled order — you now have to prove a negative. Gap-free numbering exists so the sequence itself is evidence that nothing was quietly removed.</p>
+
+            <h2>Why the obvious approach fails</h2>
+            <p>The naive implementation is <code>SELECT MAX(number) + 1</code>, or a database auto-increment column. Both break in ways that matter:</p>
+            <ul>
+                <li><strong>Concurrency.</strong> Two invoices created at the same moment both read the same max and both claim the next number — a collision. Add a unique constraint and one of them now crashes instead.</li>
+                <li><strong>Rollback gaps.</strong> Database auto-increment sequences deliberately do <em>not</em> reuse a number when a transaction rolls back. That's correct for surrogate keys and catastrophic for tax invoices — every failed insert burns a number and punches a permanent hole in your series.</li>
+                <li><strong>Deletion.</strong> If "cancelling" an invoice deletes the row, its number vanishes from the sequence. Now you have a gap with no record of why.</li>
+            </ul>
+
+            <h2>How DocForge does it</h2>
+            <p>DocForge allocates each invoice number under a <strong>file lock</strong>. Acquiring the lock serialises allocation: only one invoice can be claiming a number at any instant, so collisions are impossible and the next number is always exactly one more than the last committed one. The allocation and the invoice record commit together — if the render fails, the number isn't consumed, so failures don't create gaps either.</p>
+
+            <p>The second half is the void rule. You can't delete an invoice in DocForge; you <strong>void</strong> it. A voided invoice keeps its number, clearly marked void, and stays in the series. The number is never reissued to a different invoice. So the sequence is always complete and always explains itself: every number is present, and the void ones say exactly why they're void.</p>
+
+            <h2>What you get from it</h2>
+            <p>The payoff is an invoice register you can hand to an accountant or an auditor without a covering explanation. Run down the numbers — 1001, 1002, 1003 (void), 1004 — and the story is self-evident. No gaps to justify, no collisions to reconcile, no spreadsheet of "numbers we skipped and why." The compliance property is built into how the number is allocated, not bolted on afterward.</p>
+
+            <p>Numbering sounds like the most boring part of an invoice. It's also the part most likely to turn an audit into a bad week — which is exactly why it's worth getting mechanically right.</p>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/docforge/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                All posts
+            </a>
+            <a href="https://docforge.sentinelflux.in" target="_blank" rel="noopener" class="text-sm font-semibold text-amber-600 hover:text-amber-700 transition-colors flex items-center gap-1.5">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/docforge/" class="flex items-center gap-2 font-bold text-white">
+            <div class="w-6 h-6 bg-amber-600 rounded-md flex items-center justify-center"><svg style="width:13px;height:13px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+            DocForge
+        </a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/docforge/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/" class="hover:text-white transition-colors">SentinelFlux</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+</body>
+</html>

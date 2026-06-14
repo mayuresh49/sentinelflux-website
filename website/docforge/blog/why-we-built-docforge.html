@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why We Built DocForge — DocForge Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="The story behind DocForge — from hand-edited Word letters and copy-pasted invoices to a template-once, render-forever document engine.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #d97706; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/docforge/" class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-amber-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">DocForge</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/docforge/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a>
+            <a href="https://docforge.sentinelflux.in" target="_blank" rel="noopener" class="bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">Company</span>
+                <span class="text-slate-400 text-sm">June 12, 2026 · 5 min read</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Why We Built DocForge</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">Every company hand-edits the same letters and invoices in Word, copy-pasting last month's file and hoping the numbers line up. We thought documents deserved a real engine.</p>
+        </div>
+
+        <div class="prose">
+            <p>The template was a Word file named <code>offer_letter_FINAL_v3_USE_THIS.docx</code>. To make a new offer, you opened it, changed the name, the date, the salary, and — if you were lucky — caught the candidate name that was still wrong in paragraph four from the last time someone used it. Then you exported a PDF, noticed the logo had shifted half an inch, and did it again. Multiply that by every HR letter, every invoice, every contract cover, across every month, and you have a quiet, permanent tax on a company's time.</p>
+
+            <p>Invoices were worse, because invoices have rules. The numbers have to be sequential and gap-free for tax compliance. The GST has to split into CGST and SGST for an in-state sale but become IGST across state lines. Get it wrong and it's not an aesthetic problem — it's an audit problem. And yet the tool most teams reach for is a spreadsheet and a steady hand.</p>
+
+            <h2>Documents are data, not prose</h2>
+            <p>The core idea behind DocForge is that a document is structured data rendered through a template — not a prose file you edit by hand. Separate the two and everything gets better. The template defines the layout, branding, and logic once. The data fills it in. The same offer-letter template renders a thousand correct letters, and not one of them has a stray name from a previous draft.</p>
+
+            <p>We built a Template Studio where you author in HTML/CSS and Jinja with a live split preview, then render print-grade PDFs through WeasyPrint. It's sandboxed: authors get templating, never arbitrary code. And it ships with packs ready to use — 11 HR letters, a GST-aware invoice engine, and a set of contract-management letters — so most teams never have to author anything to get started.</p>
+
+            <h2>The invoice engine takes compliance seriously</h2>
+            <p>Numbering is allocated under a file lock so two invoices created at the same instant can never collide or skip. Voiding an invoice keeps its number reserved — it's marked void, never reused — so the sequence stays gap-free and auditable. GST is computed for you: CGST/SGST split or IGST depending on place of supply, with discounts and totals handled correctly and rounded the way the tax rules expect.</p>
+
+            <h2>AI that drafts, signing that seals</h2>
+            <p>Writing the body of a warning letter or an amendment clause is the part people stall on, so DocForge can draft and rewrite letter bodies and contract clauses right in the Studio — accept a suggestion into your template or keep editing. And when a document needs a signature, the built-in signer captures a typed or drawn signature, appends a certificate page, and seals the PDF with SHA-256. Need a qualified provider? eMudhra and DocuSign drop in behind the same interface.</p>
+
+            <h2>Hosted, so it's ready when you are</h2>
+            <p>DocForge is a hosted, managed service. You sign up, pick a template pack, set your branding once, and start rendering — there's no server to run and nothing to maintain. India-first on the defaults, parameterised for global use.</p>
+
+            <p>We built DocForge because the documents a business runs on deserve better than a folder of <code>_FINAL_v3</code> files. Template once. Render forever.</p>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/docforge/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                All posts
+            </a>
+            <a href="https://docforge.sentinelflux.in" target="_blank" rel="noopener" class="text-sm font-semibold text-amber-600 hover:text-amber-700 transition-colors flex items-center gap-1.5">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/docforge/" class="flex items-center gap-2 font-bold text-white">
+            <div class="w-6 h-6 bg-amber-600 rounded-md flex items-center justify-center"><svg style="width:13px;height:13px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+            DocForge
+        </a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/docforge/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/" class="hover:text-white transition-colors">SentinelFlux</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print-Grade PDFs from HTML and CSS — DocForge Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="Browsers were built for screens, not paper. How @page rules, physical units, and WeasyPrint turn HTML/CSS templates into pixel-perfect, paginated documents.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #d97706; }
+        .prose pre { background: #0f172a; color: #e2e8f0; padding: 1rem 1.25rem; border-radius: 0.75rem; overflow-x: auto; margin-bottom: 1.25rem; font-size: 0.825rem; line-height: 1.6; }
+        .prose pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/docforge/" class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-amber-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">DocForge</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/docforge/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a>
+            <a href="https://docforge.sentinelflux.in" target="_blank" rel="noopener" class="bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-amber-100 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full">Tutorial</span>
+                <span class="text-slate-400 text-sm">June 5, 2026 · 7 min read</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Print-Grade PDFs from HTML and CSS</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">HTML is the most productive document-authoring format there is — once you teach it about paper. Here's how page rules, physical units, and WeasyPrint get you pixel-perfect PDFs.</p>
+        </div>
+
+        <div class="prose">
+            <p>Generating a PDF by printing a webpage through a headless browser works until it doesn't: fonts shift, margins drift, page breaks land mid-table, and the output depends on the browser version on the machine that rendered it. The problem is that screen CSS and print CSS are different disciplines. To produce documents that look identical every time, you author for paper from the start.</p>
+
+            <h2>Start with the page box</h2>
+            <p>Print layout begins with the <code>@page</code> rule, which defines the physical sheet and its margins. Use real-world units — millimeters or inches — not pixels:</p>
+            <pre><code>@page {
+  size: A4;
+  margin: 20mm 18mm;
+}
+
+body { font-size: 11pt; line-height: 1.5; }
+h1   { font-size: 18pt; }</code></pre>
+            <p>Points and millimeters mean something physical on paper; pixels don't. An <code>11pt</code> body renders at the same size whether the PDF prints in Mumbai or Berlin.</p>
+
+            <h2>Control pagination deliberately</h2>
+            <p>The thing that separates a print-grade document from a printed webpage is that <em>you</em> decide where pages break, not chance:</p>
+            <ul>
+                <li><code>break-inside: avoid</code> on a table row, a signature block, or a totals box keeps it from being split across two pages.</li>
+                <li><code>break-before: page</code> forces a new page — useful for a terms-and-conditions section or a certificate page.</li>
+                <li><code>orphans</code> and <code>widows</code> stop a paragraph from leaving one lonely line stranded at a page boundary.</li>
+            </ul>
+            <p>For multi-page documents, running headers and footers with the page number live in <code>@page</code> margin boxes, so every sheet carries the invoice number or the company name without you repeating it in the body.</p>
+
+            <h2>Why WeasyPrint instead of a browser</h2>
+            <p>DocForge renders templates with WeasyPrint, a dedicated HTML/CSS-to-PDF engine, rather than driving a headless browser. The difference matters for documents:</p>
+            <ul>
+                <li><strong>Deterministic output.</strong> The same template and data produce a byte-stable PDF — no dependence on a browser version or GPU.</li>
+                <li><strong>Real print CSS.</strong> First-class support for <code>@page</code>, margin boxes, and the fragmentation properties that browsers treat as second-class.</li>
+                <li><strong>Embedded fonts.</strong> Fonts are embedded in the PDF, so the document looks right on a machine that's never heard of your brand typeface.</li>
+                <li><strong>No browser to operate.</strong> No headless Chrome to install, sandbox, and keep patched.</li>
+            </ul>
+
+            <h2>Templating on top</h2>
+            <p>DocForge's Studio pairs this with Jinja templating and a live split preview: you author the HTML/CSS, see it render as you type, and bind fields to your data. The environment is sandboxed — authors get templating, never arbitrary code — so a template is safe to share across a team without it becoming an execution risk.</p>
+
+            <p>Author for paper, render with a real print engine, and a PDF stops being a lucky screenshot of a webpage and becomes a document you can put your company's name on.</p>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/docforge/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                All posts
+            </a>
+            <a href="https://docforge.sentinelflux.in" target="_blank" rel="noopener" class="text-sm font-semibold text-amber-600 hover:text-amber-700 transition-colors flex items-center gap-1.5">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/docforge/" class="flex items-center gap-2 font-bold text-white">
+            <div class="w-6 h-6 bg-amber-600 rounded-md flex items-center justify-center"><svg style="width:13px;height:13px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+            DocForge
+        </a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/docforge/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/" class="hover:text-white transition-colors">SentinelFlux</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+</body>
+</html>

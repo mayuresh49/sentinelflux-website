@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Makes an E-Signature Actually Hold Up — DocForge Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="A typed name isn't enough. Audit trails, certificate pages, SHA-256 sealing, and when you need a qualified provider like eMudhra or DocuSign versus the built-in signer.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #d97706; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/docforge/" class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-amber-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">DocForge</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/docforge/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a>
+            <a href="https://docforge.sentinelflux.in" target="_blank" rel="noopener" class="bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full">Deep Dive</span>
+                <span class="text-slate-400 text-sm">June 2, 2026 · 6 min read</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">What Makes an E-Signature Actually Hold Up</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">Anyone can paste a cursive font onto a PDF. What makes a signature defensible is everything around it — the evidence that this person signed this document, unchanged, at this time.</p>
+        </div>
+
+        <div class="prose">
+            <p>"Electronic signature" covers a huge range, from typing your name in a box to a cryptographically backed certificate issued by a licensed authority. They're not interchangeable, and using a stronger one than you need is wasted friction while using a weaker one than you need is a risk. The useful question isn't "is it signed" but "if this were disputed, what could we prove?"</p>
+
+            <h2>The three things a signature needs</h2>
+            <ul>
+                <li><strong>Intent and attribution.</strong> Evidence that a specific person deliberately signed — captured through the signing act, their identity, and consent to sign electronically.</li>
+                <li><strong>Integrity.</strong> Proof the document hasn't changed since it was signed. If a single character could be altered afterward without detection, the signature proves nothing.</li>
+                <li><strong>An audit trail.</strong> A record of what happened and when — who was sent the document, when they opened it, when they signed, and from where.</li>
+            </ul>
+            <p>A typed name handles intent weakly and integrity not at all. The strength comes from binding the signature to the document and recording the context.</p>
+
+            <h2>How the built-in signer works</h2>
+            <p>DocForge's built-in provider captures a typed or drawn signature, then does the part that matters: it appends a <strong>certificate page</strong> summarising the signing event — signer, timestamps, and trail — and seals the resulting PDF with a <strong>SHA-256</strong> hash. That hash is the integrity guarantee: change one byte of the document afterward and the hash no longer matches, so tampering is detectable. For internal approvals, acknowledgements, and most ordinary business documents, that combination — captured intent, an audit trail, and a tamper-evident seal — is genuinely enough.</p>
+
+            <h2>When you need a qualified provider</h2>
+            <p>Some documents carry legal or regulatory weight where you want a signature backed by a licensed certifying authority and a government-recognised digital identity. In India that's a provider like eMudhra; globally, DocuSign and similar. These add identity verification and a certificate chain that ties the signature to a vetted identity, which matters for high-value contracts, regulated filings, or anything you expect could be contested in court.</p>
+
+            <p>DocForge treats signing as <strong>pluggable</strong>: the built-in signer and qualified providers sit behind the same interface. You can start with the built-in signer for everyday documents and route the high-stakes ones through eMudhra or DocuSign without changing how your templates or workflow work.</p>
+
+            <h2>Match the signature to the stakes</h2>
+            <p>Most documents a business sends — offer letters, acknowledgements, internal approvals — are well served by a sealed PDF with an audit trail and a certificate page. Reserve qualified e-signatures for the documents whose disputes would actually reach a courtroom. The goal isn't the strongest possible signature on everything; it's the right evidence for each document, with none of the friction you don't need.</p>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/docforge/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                All posts
+            </a>
+            <a href="https://docforge.sentinelflux.in" target="_blank" rel="noopener" class="text-sm font-semibold text-amber-600 hover:text-amber-700 transition-colors flex items-center gap-1.5">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/docforge/" class="flex items-center gap-2 font-bold text-white">
+            <div class="w-6 h-6 bg-amber-600 rounded-md flex items-center justify-center"><svg style="width:13px;height:13px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+            DocForge
+        </a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/docforge/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/" class="hover:text-white transition-colors">SentinelFlux</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+</body>
+</html>
