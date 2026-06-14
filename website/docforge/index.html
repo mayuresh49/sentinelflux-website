@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocForge — Document, Invoice &amp; Contract Generation by SentinelFlux</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="mask-icon" href="/favicon.svg" color="#d97706">
+    <meta name="description" content="Generate employee letters, invoices, and contract-management letters from your data — template once, render print-grade PDFs, draft with AI, and sign electronically.">
+    <meta property="og:title" content="DocForge — Document, Invoice & Contract Generation by SentinelFlux">
+    <meta property="og:description" content="Employee letters, GST invoices, and contract letters — generated from structured data, AI-assisted, and optionally e-signed.">
+    <meta property="og:url" content="https://sentinelflux.in/docforge/">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; }
+        .hero-glow {
+            background: radial-gradient(ellipse at 50% -10%, rgba(217,119,6,0.10) 0%, transparent 65%);
+        }
+        .hero-grid {
+            background-image:
+                linear-gradient(rgba(245,158,11,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(245,158,11,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        .feature-card { transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
+        .feature-card:hover { transform: translateY(-3px); }
+        [data-animate] {
+            opacity: 0; transform: translateY(22px);
+            transition: opacity 0.65s ease, transform 0.65s ease;
+        }
+        [data-animate].visible { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; }
+        [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+        [data-delay="4"] { transition-delay: 0.24s; }
+        [data-delay="5"] { transition-delay: 0.30s; }
+        [data-delay="6"] { transition-delay: 0.36s; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-8">
+            <a href="/" class="flex items-center gap-2.5 shrink-0">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                    <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                </div>
+                <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+            </a>
+            <div class="hidden md:flex items-center gap-1">
+                <a href="#features" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Features</a>
+                <a href="#how-it-works" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">How it works</a>
+                <a href="#pricing" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Pricing</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="https://github.com/mayuresh49/sentinelflux-docforge" target="_blank" rel="noopener" class="hidden sm:flex text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">GitHub</a>
+            <a href="https://github.com/mayuresh49/sentinelflux-docforge" target="_blank" rel="noopener" class="bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-amber-700 transition-colors shadow-sm">Get started</a>
+            <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-100 px-6 py-3 space-y-1">
+        <a href="#features" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Features</a>
+        <a href="#how-it-works" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">How it works</a>
+        <a href="#pricing" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Pricing</a>
+        <a href="https://github.com/mayuresh49/sentinelflux-docforge" target="_blank" rel="noopener" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">GitHub</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-glow hero-grid pt-36 pb-24 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-4 py-1.5 rounded-full mb-8" data-animate>
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
+            New in the SentinelFlux suite
+        </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight mb-6 leading-tight" data-animate>
+            Template once.<br>
+            <span style="background:linear-gradient(135deg,#b45309,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Render forever.</span>
+        </h1>
+        <p class="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed" data-animate>
+            DocForge generates employee letters, GST invoices, and contract-management letters from your data — print-grade PDFs, AI-assisted drafting, and optional electronic signing, all in one workspace.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center" data-animate>
+            <a href="https://github.com/mayuresh49/sentinelflux-docforge" target="_blank" rel="noopener"
+               class="flex items-center justify-center gap-2 bg-amber-600 text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-amber-700 transition-colors text-sm shadow-lg shadow-amber-500/20">
+                Get started
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+            <a href="https://github.com/mayuresh49/sentinelflux-docforge" target="_blank" rel="noopener"
+               class="flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 font-semibold px-7 py-3.5 rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-colors text-sm shadow-sm">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                View on GitHub
+            </a>
+        </div>
+        <p class="text-xs text-slate-400 mt-5" data-animate>Self-hostable · FastAPI + WeasyPrint · India-first, global-ready · No vendor lock-in</p>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="py-24 px-6 bg-slate-50">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-16" data-animate>
+            <div class="inline-flex items-center gap-2 text-amber-600 text-xs font-semibold uppercase tracking-widest mb-4">Features</div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">Every document your team sends, generated</h2>
+            <p class="text-slate-500 text-lg max-w-xl mx-auto">HR letters, finance documents, and contract correspondence — from a template and a row of data to a signed PDF.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="feature-card bg-white rounded-2xl border border-amber-200 p-6 shadow-sm" data-animate data-delay="1">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Template Studio</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Author HTML/CSS + Jinja templates with a live split preview, then render print-grade PDFs via WeasyPrint. Sandboxed — authors get templating, never arbitrary code.</p>
+            </div>
+
+            <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 shadow-sm" data-animate data-delay="2">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Employee Letters</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">11 ready HR letters — offer, appointment, welcome, relieving, experience, full-&-final, promotion, increment, employment/address proof, NOC, and warning. India-first, parameterised for global.</p>
+            </div>
+
+            <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 shadow-sm" data-animate data-delay="3">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m-6 4h6m-6 4h4M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Invoice Engine</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Line items, GST (CGST/SGST split or IGST), discounts, and totals with <strong>gap-free numbering</strong> allocated under a file lock. Void keeps the number — never reused.</p>
+            </div>
+
+            <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 shadow-sm" data-animate data-delay="4">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Contract Letters</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">NDA cover letters, renewal notices, amendment notices, termination notices, and vendor-agreement covers — consistent, branded, ready to send.</p>
+            </div>
+
+            <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 shadow-sm" data-animate data-delay="5">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">AI Drafting</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Claude drafts and rewrites letter bodies and contract clauses right inside the Studio — accept the suggestion into your template, or keep editing. Optional, your API key.</p>
+            </div>
+
+            <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 shadow-sm" data-animate data-delay="6">
+                <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Optional e-Signing</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Pluggable signing — the built-in provider captures a typed or drawn signature, appends a certificate page, and seals it with SHA-256. Qualified providers (eMudhra, DocuSign) drop in behind the same interface.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="py-24 px-6 bg-white">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-16" data-animate>
+            <div class="inline-flex items-center gap-2 text-amber-600 text-xs font-semibold uppercase tracking-widest mb-4">How it works</div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">From template to signed PDF</h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center" data-animate data-delay="1">
+                <div class="w-14 h-14 bg-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white font-bold text-xl">1</div>
+                <h3 class="font-bold text-slate-900 mb-2">Template</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Install a built-in pack — employee, invoice, contract — or author your own in the Studio with live preview. Set branding and a default watermark once.</p>
+            </div>
+            <div class="text-center" data-animate data-delay="2">
+                <div class="w-14 h-14 bg-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white font-bold text-xl">2</div>
+                <h3 class="font-bold text-slate-900 mb-2">Render</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Fill the fields — or build an invoice with live totals — and render a pixel-perfect PDF. Every render is immutable, numbered, and retrievable.</p>
+            </div>
+            <div class="text-center" data-animate data-delay="3">
+                <div class="w-14 h-14 bg-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white font-bold text-xl">3</div>
+                <h3 class="font-bold text-slate-900 mb-2">Deliver &amp; sign</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Download it, or send a secure signing link. The signer reviews and signs; you get a sealed, certificate-backed PDF with a full audit trail.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="py-24 px-6 bg-slate-50">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12" data-animate>
+            <div class="inline-flex items-center gap-2 text-amber-600 text-xs font-semibold uppercase tracking-widest mb-4">Pricing</div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">Start free, scale when you need to</h2>
+            <p class="text-slate-500 text-lg leading-relaxed">Self-host on your own infrastructure. No credit card required for the Free tier.</p>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-6" data-animate>
+            <!-- Free -->
+            <div class="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
+                <div class="text-2xl font-extrabold text-slate-900 mb-1">Free</div>
+                <div class="text-sm text-slate-500 mb-1">Self-hosted</div>
+                <div class="text-3xl font-extrabold text-slate-900 mt-4 mb-6">$0<span class="text-base font-medium text-slate-400">/mo</span></div>
+                <ul class="space-y-3 text-sm text-slate-700 mb-8">
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> 1 workspace</li>
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> All template packs (employee, invoice, contract)</li>
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> Unlimited renders</li>
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> Invoice engine + gap-free numbering</li>
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> Built-in e-signing + audit trail</li>
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> Configurable watermark &amp; branding</li>
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> Docker deploy</li>
+                </ul>
+                <a href="https://github.com/mayuresh49/sentinelflux-docforge" target="_blank" rel="noopener"
+                   class="flex items-center justify-center gap-2 w-full bg-slate-900 text-white font-semibold py-3 rounded-xl hover:bg-slate-800 transition-colors text-sm">
+                    Get started free
+                </a>
+            </div>
+            <!-- Pro -->
+            <div class="bg-white rounded-3xl border-2 border-amber-500 p-8 shadow-lg relative">
+                <div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                    <span class="bg-amber-500 text-white text-xs font-bold px-4 py-1 rounded-full">Most popular</span>
+                </div>
+                <div class="text-2xl font-extrabold text-slate-900 mb-1">Pro</div>
+                <div class="text-sm text-slate-500 mb-1">Self-hosted</div>
+                <div class="text-3xl font-extrabold text-slate-900 mt-4 mb-6">$39<span class="text-base font-medium text-slate-400">/mo</span></div>
+                <ul class="space-y-3 text-sm text-slate-700 mb-8">
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> Everything in Free</li>
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> Unlimited workspaces</li>
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> AI drafting (Claude)</li>
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> Qualified e-sign providers (eMudhra, DocuSign)</li>
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> Batch generation from CSV</li>
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> Multi-user teams &amp; roles</li>
+                    <li class="flex items-center gap-2"><span class="text-amber-500 font-bold">✓</span> Priority support</li>
+                </ul>
+                <a href="https://github.com/mayuresh49/sentinelflux-docforge" target="_blank" rel="noopener"
+                   class="flex items-center justify-center gap-2 w-full bg-amber-600 text-white font-semibold py-3 rounded-xl hover:bg-amber-700 transition-colors text-sm shadow-sm">
+                    Start with Pro
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 px-6 bg-slate-900">
+    <div class="max-w-3xl mx-auto text-center" data-animate>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">Generate your first document in minutes.</h2>
+        <p class="text-slate-400 text-lg mb-8 leading-relaxed">Stop hand-editing letters and invoices. Template once, render forever.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="https://github.com/mayuresh49/sentinelflux-docforge" target="_blank" rel="noopener"
+               class="flex items-center justify-center gap-2 bg-amber-500 text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-amber-400 transition-colors text-base shadow-lg shadow-amber-900/50">
+                Get started
+            </a>
+            <a href="https://github.com/mayuresh49/sentinelflux-docforge" target="_blank" rel="noopener"
+               class="flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-slate-700 transition-colors text-base">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+                View source
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-slate-950 text-slate-400 pt-16 pb-8 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+            <div class="col-span-2 md:col-span-1">
+                <a href="/" class="flex items-center gap-2 font-bold text-white mb-4">
+                    <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                        <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                    </div>
+                    SentinelFlux
+                </a>
+                <p class="text-sm leading-relaxed">AI-powered developer tools for modern engineering teams.</p>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-4">Products</div>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="/vigilqa/" class="hover:text-white transition-colors">VigilQA</a></li>
+                    <li><a href="/specvault/" class="hover:text-white transition-colors">SpecVault</a></li>
+                    <li><a href="/agentpulse/" class="hover:text-white transition-colors">AgentPulse</a></li>
+                    <li><a href="/docforge/" class="hover:text-white transition-colors">DocForge</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-4">DocForge</div>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+                    <li><a href="#how-it-works" class="hover:text-white transition-colors">How it works</a></li>
+                    <li><a href="#pricing" class="hover:text-white transition-colors">Pricing</a></li>
+                    <li><a href="https://github.com/mayuresh49/sentinelflux-docforge" target="_blank" rel="noopener" class="hover:text-white transition-colors">GitHub</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-4">Company</div>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="/about.html" class="hover:text-white transition-colors">About</a></li>
+                    <li><a href="/blog.html" class="hover:text-white transition-colors">Blog</a></li>
+                    <li><a href="/#contact" class="hover:text-white transition-colors">Contact</a></li>
+                    <li><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-xs">&copy; 2025 SentinelFlux. All rights reserved.</p>
+            <a href="/status.html" class="flex items-center gap-1.5 text-xs hover:text-white transition-colors">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+                All systems operational
+            </a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const btn = document.getElementById('mobile-menu-btn');
+    const menu = document.getElementById('mobile-menu');
+    btn?.addEventListener('click', () => menu?.classList.toggle('hidden'));
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
+
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            const id = a.getAttribute('href').slice(1);
+            const el = document.getElementById(id);
+            if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        });
+    });
+</script>
+</body>
+</html>
