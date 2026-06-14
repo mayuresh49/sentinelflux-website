@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerting Beats Dashboards for Agent Reliability — AgentPulse Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="Nobody watches a dashboard at 2am. Why agent observability has to be alerting-first, and which thresholds actually catch failures before they cost you.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #059669; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/agentpulse/" class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">AgentPulse</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/agentpulse/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a>
+            <a href="https://agentpulse.sentinelflux.in" target="_blank" rel="noopener" class="bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full">Opinion</span>
+                <span class="text-slate-400 text-sm">June 9, 2026 · 5 min read</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Alerting Beats Dashboards for Agent Reliability</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">A dashboard answers "how are things right now" — but only if someone is looking. The failures that hurt happen when nobody is. Here's how to design alerts that actually catch them.</p>
+        </div>
+
+        <div class="prose">
+            <p>There's a quiet assumption baked into most observability tools: that a human is watching. Charts of latency, run volume, and token spend are useful — when someone has them open. The problem is that agent failures don't schedule themselves for business hours. They happen on weekends, during deploys, in the edge cases your tests never reached. By the time you next open the dashboard, the damage is done.</p>
+
+            <p>The fix isn't a prettier dashboard. It's inverting the model: instead of you polling the system, the system pushes to you the moment something crosses a line.</p>
+
+            <h2>The four failure modes worth alerting on</h2>
+            <p>Agents fail in a handful of recognizable ways, and each maps cleanly to a metric you can threshold:</p>
+            <ul>
+                <li><strong>Correctness collapse</strong> — a deploy or upstream change makes runs start failing. Watch <code>error_rate</code> or <code>success_rate</code> over a rolling window.</li>
+                <li><strong>Cost runaway</strong> — a retry loop or a prompt that ballooned. Watch <code>cost_usd</code> per hour against a budget.</li>
+                <li><strong>Latency creep</strong> — a slow tool or a degraded model provider. Watch <code>avg_latency_ms</code> for a sustained increase.</li>
+                <li><strong>Volume of failures</strong> — even a low error rate is a problem at high traffic. Watch <code>failed_runs</code> as an absolute count.</li>
+            </ul>
+
+            <h2>Thresholds, windows, and not crying wolf</h2>
+            <p>The hard part of alerting isn't firing — it's firing only when it matters. A single failed run is noise; a 5% error rate sustained over fifteen minutes is a signal. That's why AgentPulse alert rules combine a metric, a <code>gt</code>/<code>lt</code> operator, a threshold, and a rolling window. The window smooths out the one-off blips so the alert that reaches your phone is one you should act on.</p>
+
+            <p>Equally important: an alert that fires every minute until you fix it is an alert you'll mute. AgentPulse deduplicates open alerts — one notification per breach — and only re-arms the rule once the condition resolves. You get told once when it breaks, and once when it's healthy again.</p>
+
+            <h2>Route it to where you already are</h2>
+            <p>An alert is only useful if it reaches you. AgentPulse delivers to Slack, a generic HTTP webhook, or email — so the signal lands in the channel your team already watches rather than in yet another tool you have to remember to open. Wire the webhook into PagerDuty or Opsgenie if a breach should page someone.</p>
+
+            <h2>Keep the dashboard — for after</h2>
+            <p>None of this means dashboards are useless. They're exactly the right tool for the second step: once an alert tells you <em>that</em> something is wrong, you open the dashboard and the execution traces to find out <em>why</em>. The mistake is using the dashboard as your detection layer. Detection should be automatic. Investigation is where the human comes in.</p>
+
+            <p>Build alerting first. Then let the charts do what they're actually good at.</p>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/agentpulse/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                All posts
+            </a>
+            <a href="https://agentpulse.sentinelflux.in" target="_blank" rel="noopener" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors flex items-center gap-1.5">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/agentpulse/" class="flex items-center gap-2 font-bold text-white">
+            <div class="w-6 h-6 bg-emerald-600 rounded-md flex items-center justify-center"><svg style="width:13px;height:13px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg></div>
+            AgentPulse
+        </a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/agentpulse/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/" class="hover:text-white transition-colors">SentinelFlux</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+</body>
+</html>
