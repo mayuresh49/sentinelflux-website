@@ -68,12 +68,12 @@
         <h3>Symptom</h3>
         <p>Breaking changes are shown in the dashboard but subscribers are not receiving emails.</p>
         <h3>Causes and fixes</h3>
+        <p>Email delivery is fully managed — there's no SMTP for you to configure. Check the following:</p>
         <ul>
-          <li><strong>SMTP not configured:</strong> Check that all <code>SMTP_*</code> environment variables are set. A missing or empty <code>SMTP_HOST</code> disables email entirely. Restart the application after setting env vars.</li>
-          <li><strong>Wrong SMTP credentials:</strong> Test your SMTP settings with a tool like <code>swaks</code> or Mailpit to confirm the credentials work before blaming SpecVault.</li>
-          <li><strong>Outbound port blocked:</strong> Many cloud providers block outbound port 25. Use port 587 (STARTTLS) or 465 (SSL/TLS) instead.</li>
-          <li><strong>Email in spam:</strong> Check the subscriber's spam folder. Add an SPF record or use a transactional email provider (SendGrid, Postmark) to improve deliverability.</li>
+          <li><strong>Alert never dispatched:</strong> Open the <a href="/specvault/docs/platform/audit-log.html">audit log</a> and look for an <code>alert.sent</code> event for that publish. If there's none, the publish likely contained no breaking changes (additive-only changes don't trigger alerts).</li>
+          <li><strong>Email in spam:</strong> Check the subscriber's spam or quarantine folder and allowlist the SpecVault sending domain.</li>
           <li><strong>Subscriber not added:</strong> Verify the subscriber's email address appears in the Subscribers tab of the service. The alert fires only for listed subscribers.</li>
+          <li><strong>Wrong address:</strong> A typo in the subscriber address means the alert is sent but never lands. Confirm the spelling on the Subscribers tab.</li>
         </ul>
 
         <h2>API token returns 401 Unauthorized</h2>
@@ -84,7 +84,7 @@
           <li><strong>Token was revoked:</strong> Check the API Tokens page in the dashboard. If the token no longer appears, it was revoked and you need to create a new one.</li>
           <li><strong>Authorization header format:</strong> The header must be exactly <code>Authorization: Bearer &lt;token&gt;</code>. A missing <code>Bearer </code> prefix (with a space) is the most common mistake.</li>
           <li><strong>Extra whitespace or newline:</strong> When copying the token from the modal or CI secrets, trailing newlines or spaces can cause auth to fail. Check for invisible characters.</li>
-          <li><strong>Wrong SpecVault URL:</strong> Confirm you're hitting the correct instance URL. A request to the wrong host will fail with a connection error or 404, not a 401.</li>
+          <li><strong>Wrong SpecVault URL:</strong> Confirm you're hitting <code>specvault.sentinelflux.in</code>. A request to the wrong host will fail with a connection error or 404, not a 401.</li>
         </ul>
 
         <h2>Dashboard login fails</h2>
@@ -92,13 +92,13 @@
         <p>The login page accepts your credentials but immediately redirects back to login.</p>
         <h3>Causes and fixes</h3>
         <ul>
-          <li><strong>Wrong credentials:</strong> The default admin password is set via the <code>ADMIN_PASSWORD</code> environment variable. If it was changed, use the current value from your <code>.env</code> file.</li>
+          <li><strong>Wrong credentials:</strong> Use the email and password for your SpecVault account. If you've forgotten your password, use the reset link on the sign-in page.</li>
           <li><strong>Session cookie issue:</strong> SpecVault uses a session cookie. If your browser is blocking cookies for the domain (e.g. in private/incognito mode with strict settings), login will not persist. Try a standard browser window.</li>
-          <li><strong>Secret key changed:</strong> If the <code>SECRET_KEY</code> environment variable was changed and the application restarted, all existing sessions are invalidated. Log in again.</li>
+          <li><strong>No account yet:</strong> If your team hasn't been granted access, request it at <a href="mailto:engage@sentinelflux.in">engage@sentinelflux.in</a>.</li>
         </ul>
 
         <div class="callout callout-tip not-prose">
-          <p class="text-sm text-green-800"><strong>Still stuck?</strong> Check the application logs (<code>docker logs specvault</code> or the systemd journal) for Python tracebacks. Most errors produce a detailed log line that points directly to the cause. You can also email <a href="mailto:engage@sentinelflux.in" class="underline">engage@sentinelflux.in</a> with the log output.</p>
+          <p class="text-sm text-green-800"><strong>Still stuck?</strong> Email <a href="mailto:engage@sentinelflux.in" class="underline">engage@sentinelflux.in</a> with the service name, the approximate time of the issue, and a screenshot of any error. We can look up the corresponding server-side events and get back to you.</p>
         </div>
 
         <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>

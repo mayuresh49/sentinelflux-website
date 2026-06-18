@@ -43,7 +43,7 @@
         <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
 
         <h1 class="text-3xl font-bold text-slate-900 mb-3">Overview</h1>
-        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SpecVault is a self-hosted API contract registry that versions your OpenAPI specs and automatically notifies consumer teams when a new release breaks something they depend on.</p>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SpecVault is a fully hosted API contract registry that versions your OpenAPI specs and automatically notifies consumer teams when a new release breaks something they depend on.</p>
 
         <h2>What is SpecVault?</h2>
         <p>SpecVault solves a specific problem: producer teams publish API changes that break consumers, and nobody finds out until something fails in production. The traditional fix — "communicate changes over Slack" — doesn't scale when you have multiple services, multiple consuming teams, and weekly releases.</p>
@@ -101,17 +101,17 @@
         <h3>Audit log</h3>
         <p>Every significant action — spec publish, service create/update, token create/revoke, login — is recorded in the audit log with timestamp and actor. The log is viewable in the dashboard and exportable as JSON.</p>
 
-        <h3>Self-hostable</h3>
-        <p>SpecVault is designed to be deployed on your own infrastructure. Your specs never leave your servers. The default deployment is a single Python process with a SQLite database — simple to run, simple to back up.</p>
+        <h3>Fully hosted</h3>
+        <p>SpecVault runs as a fully managed service — there is nothing to install, deploy, or maintain. Sign in at <a href="https://specvault.sentinelflux.in">specvault.sentinelflux.in</a>, register your services, and start publishing specs. We handle hosting, TLS, upgrades, and backups for you.</p>
 
         <div class="callout callout-info not-prose">
-          <p class="text-sm text-blue-800"><strong>Self-hosted only.</strong> SpecVault does not offer a shared SaaS plan. Every instance runs on infrastructure you control. The hosted demo at <a href="https://specvault.sentinelflux.in" class="underline">specvault.sentinelflux.in</a> is a reference deployment you can use to evaluate the product.</p>
+          <p class="text-sm text-blue-800"><strong>Hosted SaaS.</strong> SpecVault is a hosted product, not a self-hosted or open-source package. Your data is isolated per account on infrastructure we operate and back up. Access the app any time at <a href="https://specvault.sentinelflux.in" class="underline">specvault.sentinelflux.in</a>.</p>
         </div>
 
         <h2>Where to go next</h2>
         <ul>
           <li><a href="/specvault/docs/getting-started/quick-start.html">Quick Start</a> — create a service, publish a spec, and set up a subscriber in under 10 minutes</li>
-          <li><a href="/specvault/docs/getting-started/deployment.html">Deployment</a> — deploy SpecVault on GCP, AWS, or any Linux server</li>
+          <li><a href="/specvault/docs/getting-started/deployment.html">Hosting & Security</a> — how SpecVault is hosted, isolated, and secured</li>
           <li><a href="/specvault/docs/core-concepts/breaking-changes.html">Breaking Changes</a> — exactly what SpecVault flags and why</li>
           <li><a href="/specvault/docs/ci-cd/github-actions.html">GitHub Actions</a> — automate spec publishing from your pipeline</li>
         </ul>
