@@ -4,7 +4,7 @@ var NAV = [
     pages: [
       { title: 'Overview', href: '/specvault/docs/getting-started/overview.html' },
       { title: 'Quick Start', href: '/specvault/docs/getting-started/quick-start.html' },
-      { title: 'Deployment', href: '/specvault/docs/getting-started/deployment.html' },
+      { title: 'Hosting & Security', href: '/specvault/docs/getting-started/deployment.html' },
       { title: 'System Requirements', href: '/specvault/docs/getting-started/system-requirements.html' }
     ]
   },

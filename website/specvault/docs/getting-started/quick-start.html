@@ -44,11 +44,11 @@
         <p class="text-lg text-slate-500 mb-10 leading-relaxed">Publish your first spec, set up a subscriber, and trigger a diff — in under 10 minutes.</p>
 
         <div class="callout callout-info not-prose">
-          <p class="text-sm text-blue-800"><strong>Prerequisites:</strong> A running SpecVault instance (see <a href="/specvault/docs/getting-started/deployment.html" class="underline">Deployment</a>) and an OpenAPI spec in JSON or YAML format.</p>
+          <p class="text-sm text-blue-800"><strong>Prerequisites:</strong> A SpecVault account and an OpenAPI spec in JSON or YAML format. No installation required — SpecVault is fully hosted.</p>
         </div>
 
-        <h2>Step 1 — Log in</h2>
-        <p>Navigate to your SpecVault instance (e.g. <code>https://specvault.example.com</code>). Log in with the admin credentials you configured during deployment. The default admin username is set via the <code>ADMIN_EMAIL</code> environment variable.</p>
+        <h2>Step 1 — Sign in</h2>
+        <p>Go to <a href="https://specvault.sentinelflux.in"><code>specvault.sentinelflux.in</code></a> and sign in. If your team doesn't have an account yet, request access at <a href="mailto:engage@sentinelflux.in">engage@sentinelflux.in</a>. Once you're in, you'll land on the dashboard with an empty list of services.</p>
 
         <h2>Step 2 — Create a service</h2>
         <p>From the dashboard, click <strong>New Service</strong>. Fill in:</p>
@@ -96,7 +96,7 @@
         <h2>Step 7 — Set up CI/CD publishing</h2>
         <p>For ongoing use, publish specs automatically from your pipeline instead of manually. Generate an API token from <strong>Settings → API Tokens</strong>, then add a publish step to your CI:</p>
 
-        <pre>curl -X POST https://specvault.example.com/api/services/&lt;service-id&gt;/specs \
+        <pre>curl -X POST https://specvault.sentinelflux.in/api/services/&lt;service-id&gt;/specs \
   -H "Authorization: Bearer $SPECVAULT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"spec_url": "https://api.example.com/openapi.json"}'</pre>

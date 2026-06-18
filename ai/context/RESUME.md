@@ -1,6 +1,6 @@
 # SentinelFlux Website — AI Context Resume
 
-**Last updated:** 2026-06-05
+**Last updated:** 2026-06-18
 
 ## Project Overview
 
@@ -19,7 +19,27 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 
 ---
 
-## What Was Just Done (2026-06-05) — 961afd6
+## What Was Just Done (2026-06-18) — b54f04d (branch: reposition-specvault-hosted-saas)
+
+### Reposition SpecVault from open-source/self-hosted to hosted SaaS
+Reviewed all products except FlexGig for over-claims given all repos are now private.
+VigilQA, AgentPulse, DocForge were already correctly positioned as hosted SaaS; SpecVault
+was the outlier still claiming "free and open source" / "self-hosted only."
+- `specvault/index.html`: "Self-Hostable" card → "Fully Hosted"; dropped "deploys anywhere"; CTA + hero microcopy → hosted
+- `specvault/docs/docs.js`: nav "Deployment" → "Hosting & Security"
+- `docs/getting-started/deployment.html`: full rewrite, self-host guide → managed Hosting & Security (isolation, encryption, backups, export)
+- `docs/getting-started/system-requirements.html`: server/Python/SQLite/SMTP specs → browser + CI egress only
+- `docs/getting-started/{overview,quick-start}.html`: self-host framing → hosted sign-in
+- `docs/platform/{audit-log,notifications}.html` + `docs/troubleshooting/index.html`: customer SMTP/.env/Docker → managed service
+- `docs/index.html`: "deploy" wording → hosted
+- blog `self-hosting-specvault.html` → renamed `getting-started-in-10-minutes.html` (hosted onboarding); `why-we-built-specvault.html` open-source line fixed; blog index card updated
+- `portfolio.html`: "Open-source"/"Self-hostable" → "Hosted"/"Hosted SaaS"
+- `terms.html`: "free self-hosted deployments" → hosted plans only
+- Note: completes the 2026-06-04 partial fix (01d18e2) that only removed GitHub links but kept self-hostable framing
+
+---
+
+## Previous Work (2026-06-05) — 961afd6
 
 ### Complete SentinelFlux → VigilQA rename across docs and blog
 - `docs.js`: sidebar logo "SentinelFlux" → "VigilQA", back link → /vigilqa/, breadcrumb href fixed
@@ -29,7 +49,7 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 
 ---
 
-## Previous Work (2026-06-05) — 48b3e9d + 350b459
+## Earlier Work (2026-06-05) — 48b3e9d + 350b459
 
 ### Restructure as company site with per-product pages
 - `website/index.html` → new SentinelFlux company homepage (hero, product cards for VigilQA + SpecVault, mission section, CTA)

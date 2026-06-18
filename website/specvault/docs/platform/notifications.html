@@ -58,39 +58,20 @@
           <li>An unsubscribe link for that specific service</li>
         </ul>
 
-        <h2>SMTP configuration</h2>
-        <p>SpecVault uses a standard SMTP connection to send alerts. Set the following environment variables in your <code>.env</code> file before starting the application:</p>
+        <h2>Email delivery</h2>
+        <p>Email delivery is fully managed — there is no SMTP server to configure. SpecVault sends alerts from a SentinelFlux-managed sending domain, so there's nothing to set up on your side. Just add subscriber addresses to a service and alerts start flowing on the next breaking change.</p>
 
-        <pre>SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=alerts@yourcompany.com
-SMTP_PASSWORD=your-smtp-password
-SMTP_FROM=alerts@yourcompany.com
-SMTP_TLS=true</pre>
-
-        <h3>Provider examples</h3>
-        <p>Common SMTP providers and their settings:</p>
+        <h2>If an alert doesn't arrive</h2>
+        <p>Every breaking-change publish is recorded in the <a href="/specvault/docs/platform/audit-log.html">audit log</a> with an <code>alert.sent</code> event and the recipient count, so you can always confirm whether an alert was dispatched. If a subscriber says they didn't receive one:</p>
         <ul>
-          <li><strong>Gmail (App Password):</strong> host <code>smtp.gmail.com</code>, port <code>587</code>, TLS <code>true</code></li>
-          <li><strong>SendGrid:</strong> host <code>smtp.sendgrid.net</code>, port <code>587</code>, user <code>apikey</code>, password = your API key</li>
-          <li><strong>AWS SES:</strong> host from SES console, port <code>587</code>, SMTP credentials from IAM</li>
-          <li><strong>Mailgun:</strong> host <code>smtp.mailgun.org</code>, port <code>587</code></li>
-          <li><strong>Postmark:</strong> host <code>smtp.postmarkapp.com</code>, port <code>587</code></li>
+          <li>Check the subscriber's spam or quarantine folder, and allowlist the SpecVault sending domain.</li>
+          <li>Confirm the subscriber address is spelled correctly on the Subscribers tab.</li>
+          <li>Confirm the publish actually contained a breaking change — additive-only changes don't trigger alerts.</li>
         </ul>
+        <p>If alerts are confirmed sent in the audit log but consistently aren't delivered, contact <a href="mailto:engage@sentinelflux.in">engage@sentinelflux.in</a>.</p>
 
-        <div class="callout callout-warning not-prose">
-          <p class="text-sm text-amber-800"><strong>Gmail note:</strong> Standard Gmail passwords do not work over SMTP. You must create an App Password in your Google Account security settings and use that instead.</p>
-        </div>
-
-        <h2>Testing your SMTP config</h2>
-        <p>After setting environment variables and restarting, publish a spec version that introduces a breaking change (you can temporarily remove an endpoint from a test spec). If the subscriber address receives the alert, SMTP is working correctly.</p>
-        <p>Check application logs for SMTP errors if the email does not arrive. Common issues include wrong port, TLS mismatch, or firewall rules blocking outbound port 587.</p>
-
-        <h2>No-email option</h2>
-        <p>If SMTP is not configured, SpecVault still detects and stores breaking changes — it simply cannot send outbound alerts. The dashboard diff view will show breaking changes regardless of SMTP status. A warning badge appears in Settings when SMTP is unconfigured.</p>
-
-        <div class="callout callout-tip not-prose">
-          <p class="text-sm text-green-800"><strong>Tip:</strong> For local development, use <a href="https://github.com/mailhog/MailHog" class="underline">MailHog</a> or <a href="https://mailpit.axllent.org" class="underline">Mailpit</a> as a local SMTP sink. They capture outbound emails without actually sending them.</p>
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">Breaking changes are always detected and shown in the dashboard diff view regardless of email delivery, so you never lose visibility even if an inbox bounces.</p>
         </div>
 
         <h2>Unsubscribe flow</h2>

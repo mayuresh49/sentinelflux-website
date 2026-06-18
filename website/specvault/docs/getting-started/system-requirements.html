@@ -43,60 +43,11 @@
         <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
 
         <h1 class="text-3xl font-bold text-slate-900 mb-3">System Requirements</h1>
-        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Minimum and recommended requirements for running a SpecVault instance.</p>
-
-        <h2>Server requirements</h2>
-
-        <table>
-          <thead>
-            <tr><th>Component</th><th>Minimum</th><th>Recommended</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>CPU</td><td>1 vCPU</td><td>2 vCPU</td></tr>
-            <tr><td>Memory</td><td>512 MB RAM</td><td>1 GB RAM</td></tr>
-            <tr><td>Disk</td><td>1 GB</td><td>10 GB (for large spec histories)</td></tr>
-            <tr><td>OS</td><td>Linux (any distro)</td><td>Ubuntu 22.04 LTS</td></tr>
-          </tbody>
-        </table>
-
-        <p>A GCP e2-micro or AWS t3.micro is sufficient for teams with up to 50 services and daily publishes. Scale up if you're storing very large OpenAPI specs or have hundreds of services.</p>
-
-        <h2>Python</h2>
-        <p>SpecVault requires <strong>Python 3.12 or later</strong>. Python 3.11 may work but is not tested. Python 3.10 and earlier are not supported.</p>
-        <p>When using Docker, the correct Python version is included in the container image — no manual installation needed.</p>
-
-        <h2>Database</h2>
-        <p>SpecVault uses <strong>SQLite with WAL mode</strong> enabled. No separate database server is required. The database file is created automatically on first startup at the path specified in <code>DATABASE_PATH</code> (default: <code>data/specvault.db</code>).</p>
-        <p>SQLite with WAL mode handles concurrent reads and writes correctly for SpecVault's access patterns. A PostgreSQL migration is on the roadmap for large enterprise deployments but is not currently supported.</p>
-
-        <h2>SMTP for notifications</h2>
-        <p>An SMTP server is required for sending breaking-change email alerts to subscribers. SpecVault supports any standard SMTP server:</p>
-        <ul>
-          <li><strong>SendGrid</strong> — recommended for production. Use SMTP relay on port 587.</li>
-          <li><strong>AWS SES</strong> — good option for AWS-hosted deployments.</li>
-          <li><strong>Mailgun</strong> — straightforward setup with free tier.</li>
-          <li><strong>Gmail SMTP</strong> — acceptable for small teams. Requires an App Password if 2FA is enabled.</li>
-          <li><strong>Self-hosted (Postfix/Exim)</strong> — works but requires correct SPF/DKIM configuration to avoid spam filtering.</li>
-        </ul>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SpecVault is a hosted service, so there is no server to provision or software to install. All you need is a modern browser and — for automated publishing — outbound network access from your CI/CD runner.</p>
 
         <div class="callout callout-info not-prose">
-          <p class="text-sm text-blue-800">If SMTP is not configured, SpecVault will still function — breaking changes will be detected and displayed in the dashboard, but no email alerts will be sent to subscribers.</p>
+          <p class="text-sm text-blue-800">There are no server, CPU, memory, database, or SMTP requirements on your side — SpecVault handles hosting, storage, and email delivery as part of the managed service.</p>
         </div>
-
-        <h2>Network requirements</h2>
-
-        <h3>Inbound</h3>
-        <ul>
-          <li>Port 443 (HTTPS) — for the dashboard and API, accessed by users and CI/CD pipelines</li>
-          <li>Port 80 (HTTP) — used by Caddy for ACME certificate challenges; all traffic is redirected to HTTPS</li>
-        </ul>
-
-        <h3>Outbound</h3>
-        <ul>
-          <li>Port 443 — required for fetching spec files from remote URLs (when using "Fetch from URL")</li>
-          <li>SMTP port (587 or 465) — required for sending alert emails</li>
-          <li>Port 443 to Let's Encrypt — required for Caddy's automatic TLS certificates</li>
-        </ul>
 
         <h2>Browser requirements</h2>
         <p>The SpecVault dashboard works in any modern browser. Tested on:</p>
@@ -107,6 +58,9 @@
           <li>Edge 120+</li>
         </ul>
         <p>JavaScript must be enabled. No browser extensions are required.</p>
+
+        <h2>Network access for CI/CD</h2>
+        <p>To publish specs automatically from a pipeline, your CI/CD runner needs outbound HTTPS (port 443) access to <code>specvault.sentinelflux.in</code>. If your runners sit behind an egress allowlist, add that host. No inbound ports or firewall changes are required on your side.</p>
 
         <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
       </div>
