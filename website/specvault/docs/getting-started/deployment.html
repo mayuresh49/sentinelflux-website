@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deployment — SpecVault Docs</title>
+  <title>Hosting & Security — SpecVault Docs</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -43,89 +43,38 @@
       <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
         <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
 
-        <h1 class="text-3xl font-bold text-slate-900 mb-3">Deployment</h1>
-        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Deploy SpecVault on your own infrastructure using Docker or a direct Python setup. Supports any Linux server, GCP, or AWS.</p>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Hosting & Security</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">SpecVault is a fully hosted service. There is nothing to install or operate — sign in at <a href="https://specvault.sentinelflux.in">specvault.sentinelflux.in</a> and start publishing specs. This page explains how the hosted service is run and secured.</p>
 
-        <h2>Docker deployment (recommended)</h2>
-        <p>The fastest path to a running instance. Clone the repo, configure your <code>.env</code>, and start:</p>
-
-        <pre>git clone git@github.com:your-org/specvault.git
-cd specvault
-cp .env.example .env
-# Edit .env with your values (see Environment Variables below)
-docker compose up -d</pre>
-
-        <p>The app starts on port 8000 by default. Put Caddy or Nginx in front for TLS.</p>
-
-        <h2>Caddy for TLS</h2>
-        <p>Caddy is the recommended reverse proxy because it handles certificate renewal automatically via Let's Encrypt:</p>
-
-        <pre># Caddyfile
-specvault.example.com {
-    reverse_proxy localhost:8000
-}</pre>
-
-        <pre>caddy start --config /etc/caddy/Caddyfile</pre>
-
-        <p>Point your domain's A record at the server IP, and Caddy will obtain and renew the TLS certificate automatically.</p>
-
-        <h2>GCP deployment</h2>
-        <ol>
-          <li>Create a GCP Compute Engine VM (e2-micro or larger). Choose Ubuntu 22.04.</li>
-          <li>SSH into the VM and install Docker: <code>curl -fsSL https://get.docker.com | sh</code></li>
-          <li>Clone the SpecVault repo and configure <code>.env</code></li>
-          <li>Start with <code>docker compose up -d</code></li>
-          <li>Install Caddy and configure a Caddyfile pointing at port 8000</li>
-          <li>Open ports 80 and 443 in the VM's firewall rules</li>
-        </ol>
-
-        <h2>AWS deployment</h2>
-        <p>The process is identical on an EC2 instance. Use a t3.micro or larger. Open ports 80 and 443 in the security group. Use an Elastic IP for a stable address to point your DNS at.</p>
-
-        <h2>Data volume</h2>
-        <p>SpecVault stores all data in a single SQLite file at <code>data/specvault.db</code>. In Docker Compose, this directory is mounted as a volume:</p>
-
-        <pre># docker-compose.yml (relevant section)
-volumes:
-  - ./data:/app/data</pre>
-
-        <p>Back up the <code>data/</code> directory to keep your spec history. A daily cron job copying <code>specvault.db</code> to object storage is sufficient for most deployments.</p>
-
-        <h2>Environment variables</h2>
-
-        <table>
-          <thead>
-            <tr><th>Variable</th><th>Required</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><td><code>SECRET_KEY</code></td><td>Yes</td><td>Random string used for session signing. Generate with <code>openssl rand -hex 32</code>.</td></tr>
-            <tr><td><code>ADMIN_EMAIL</code></td><td>Yes</td><td>Email address for the default admin account.</td></tr>
-            <tr><td><code>ADMIN_PASSWORD</code></td><td>Yes</td><td>Password for the default admin account. Change after first login.</td></tr>
-            <tr><td><code>SMTP_HOST</code></td><td>Yes</td><td>SMTP server hostname for sending alert emails.</td></tr>
-            <tr><td><code>SMTP_PORT</code></td><td>Yes</td><td>SMTP port (typically 587 for STARTTLS, 465 for SSL).</td></tr>
-            <tr><td><code>SMTP_USER</code></td><td>Yes</td><td>SMTP authentication username.</td></tr>
-            <tr><td><code>SMTP_PASSWORD</code></td><td>Yes</td><td>SMTP authentication password.</td></tr>
-            <tr><td><code>SMTP_FROM</code></td><td>Yes</td><td>From address for outgoing alert emails (e.g. <code>specvault@example.com</code>).</td></tr>
-            <tr><td><code>DATABASE_PATH</code></td><td>No</td><td>Path to the SQLite database file. Defaults to <code>data/specvault.db</code>.</td></tr>
-            <tr><td><code>BASE_URL</code></td><td>No</td><td>Public URL of the SpecVault instance. Used in email alert links.</td></tr>
-          </tbody>
-        </table>
-
-        <div class="callout callout-warning not-prose">
-          <p class="text-sm text-amber-800"><strong>Security note:</strong> Never commit your <code>.env</code> file to version control. Add it to <code>.gitignore</code>. Use a secrets manager (GCP Secret Manager, AWS Secrets Manager) for production deployments.</p>
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800"><strong>Hosted SaaS — nothing to deploy.</strong> SpecVault is not distributed as a self-hosted or open-source package. We run, scale, patch, and back up the service so your team doesn't have to.</p>
         </div>
 
-        <h2>Direct Python setup (no Docker)</h2>
-        <p>If you prefer running the app directly:</p>
+        <h2>How SpecVault is hosted</h2>
+        <p>SpecVault runs on managed cloud infrastructure operated by SentinelFlux. We handle provisioning, deployment, TLS certificates, security patches, and upgrades. New features and fixes roll out continuously — there are no versions for you to install or migrate.</p>
 
-        <pre>python3.12 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-# Edit .env
-uvicorn dashboard.app:app --host 0.0.0.0 --port 8000</pre>
+        <h2>Data isolation</h2>
+        <p>Each account's data — services, spec versions, subscriptions, API tokens, and audit log — is logically isolated. You only ever see and manage data that belongs to your own account.</p>
 
-        <p>For production, run uvicorn behind a systemd service so it restarts on failure.</p>
+        <h2>Encryption</h2>
+        <ul>
+          <li><strong>In transit</strong> — all traffic to the dashboard and API is served over HTTPS (TLS). Plain HTTP is redirected to HTTPS.</li>
+          <li><strong>At rest</strong> — spec history and account data are stored on encrypted managed storage.</li>
+          <li><strong>Tokens</strong> — API tokens are bcrypt-hashed before storage; the plaintext value is shown only once at creation and never recoverable afterwards.</li>
+        </ul>
+
+        <h2>Backups</h2>
+        <p>SpecVault data is backed up regularly as part of the managed service. You don't need to run cron jobs, snapshot volumes, or manage object storage — spec history and the audit log are retained and recoverable on our side.</p>
+
+        <h2>Access control</h2>
+        <p>Dashboard access is authenticated per user. Machine access for CI/CD uses scoped API tokens that you create and revoke from <strong>Settings → API Tokens</strong>. Revoking a token immediately blocks any pipeline still using it.</p>
+
+        <h2>Data export</h2>
+        <p>Your data is portable. Every spec version can be downloaded in its original JSON/YAML form, and the audit log is exportable as JSON from the dashboard. If you ever stop using SpecVault, you can take your spec history with you.</p>
+
+        <div class="callout callout-tip not-prose">
+          <p class="text-sm text-green-800"><strong>Need a dedicated or region-specific deployment?</strong> For enterprise data-residency or isolation requirements, email <a href="mailto:engage@sentinelflux.in">engage@sentinelflux.in</a> to discuss options.</p>
+        </div>
 
         <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
       </div>

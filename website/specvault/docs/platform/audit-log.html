@@ -58,7 +58,7 @@
         </ul>
 
         <h2>Log entry format</h2>
-        <p>Each entry in the audit log JSON file follows this structure:</p>
+        <p>Each entry in the exported audit log follows this structure:</p>
         <pre>{
   "timestamp": "2026-06-01T14:32:07Z",
   "event": "spec.published",
@@ -86,17 +86,17 @@
         <h3>Dashboard view</h3>
         <p>Navigate to <strong>Audit Log</strong> in the top nav. The page shows a paginated, filterable list of events in reverse chronological order. You can filter by event type and search by service name or actor.</p>
 
-        <h3>File access</h3>
-        <p>The audit log is written to <code>data/audit_log.json</code> as a newline-delimited JSON file (one JSON object per line). On a self-hosted instance, you can tail, grep, or ship this file to any log aggregator (Datadog, Loki, CloudWatch, etc.):</p>
-        <pre>tail -f data/audit_log.json | jq 'select(.event == "spec.published")'</pre>
+        <h3>JSON export</h3>
+        <p>From the Audit Log page you can export events as newline-delimited JSON (one object per line) for the current filter. Pipe the export into any log tool — for example, to look at just spec publishes:</p>
+        <pre>cat audit-log-export.json | jq 'select(.event == "spec.published")'</pre>
+        <p>This makes it easy to feed the audit trail into a log aggregator (Datadog, Loki, CloudWatch, etc.) or keep an offline archive for compliance.</p>
 
         <div class="callout callout-info not-prose">
-          <p class="text-sm text-blue-800">The audit log is append-only from the application's perspective. Entries are never modified after writing. Back up <code>data/audit_log.json</code> alongside your SQLite database file.</p>
+          <p class="text-sm text-blue-800">The audit log is append-only — entries are never modified after writing. SpecVault retains and backs up the log for you as part of the hosted service; there is nothing to rotate or maintain on your side.</p>
         </div>
 
-        <h2>Backup and retention</h2>
-        <p>SpecVault does not automatically rotate or truncate the audit log. For long-running instances, consider periodically archiving older entries with a cron job, or shipping them to an external log store and truncating the local file.</p>
-        <p>If you use the Docker deployment, the <code>data/</code> directory should be mounted as a persistent volume so the audit log survives container restarts.</p>
+        <h2>Retention</h2>
+        <p>Audit events are retained on the hosted service and remain available in the dashboard. If you have specific long-term retention or compliance requirements, export the log periodically as JSON, or contact <a href="mailto:engage@sentinelflux.in">engage@sentinelflux.in</a> to discuss enterprise retention options.</p>
 
         <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
       </div>
