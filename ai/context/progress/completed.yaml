@@ -1,5 +1,18 @@
 # Completed work — newest first
 
+- date: 2026-06-18
+  commit: b54f04d
+  branch: reposition-specvault-hosted-saas
+  title: "Reposition SpecVault from open-source/self-hosted to hosted SaaS"
+  details:
+    - Reviewed all products except FlexGig for over-claims (all repos now private)
+    - VigilQA/AgentPulse/DocForge already correct; SpecVault was the outlier
+    - index/docs/blog/portfolio/terms — dropped open-source & self-host claims, lead hosted
+    - deployment.html rewritten as "Hosting & Security"; system-requirements client-only
+    - notifications/troubleshooting/audit-log — customer SMTP/.env/Docker → managed
+    - renamed self-hosting-specvault blog → getting-started-in-10-minutes
+    - completes partial 2026-06-04 fix (01d18e2) that kept self-hostable framing
+
 - date: 2026-06-05
   commit: 961afd6
   title: "Complete SentinelFlux → VigilQA rename across docs and blog"
