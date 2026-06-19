@@ -1,5 +1,16 @@
 # Completed work — newest first
 
+- date: 2026-06-19
+  commit: 42465c4
+  branch: reposition-specvault-hosted-saas
+  title: "Rewrite company About page (was a VigilQA-only page)"
+  details:
+    - about.html was branded "SentinelFlux VigilQA" with VigilQA-only nav + story
+    - title/meta/nav/footer → company-level (SentinelFlux; /#products, /#services)
+    - "What We Build" now lists all four products as linked cards
+    - "How We Work" notes fully hosted/managed + human-in-the-loop; adds services + status
+    - no over-claims (no team-size/customer/revenue numbers)
+
 - date: 2026-06-18
   commit: b54f04d
   branch: reposition-specvault-hosted-saas
