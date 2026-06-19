@@ -127,12 +127,14 @@ python scripts/register_agentpulse.py
           <tbody>
             <tr><td><code>status</code></td><td><code>success</code>, or <code>failed</code> if <code>run()</code> raised</td></tr>
             <tr><td><code>startedAt</code> / <code>durationMs</code></td><td>measured around the wrapped call</td></tr>
+            <tr><td><code>inputTokens</code> / <code>outputTokens</code></td><td>summed from <code>token_usage</code> for the run (via <code>capture_run_usage()</code>)</td></tr>
+            <tr><td><code>costUsd</code></td><td>estimated per model from a price map (override via config <code>pricing</code>)</td></tr>
             <tr><td><code>error</code></td><td>exception message (truncated) on failure</td></tr>
             <tr><td><code>triggeredBy</code></td><td><code>api</code></td></tr>
           </tbody>
         </table>
         <div class="callout callout-info not-prose">
-          <p class="text-sm text-blue-800">Token counts and cost are not yet sent — per-agent token usage is already tracked via <code>usage_scope()</code>, so enriching events with <code>inputTokens</code>/<code>outputTokens</code>/<code>costUsd</code> is a follow-up that lights up AgentPulse’s cost-per-product view.</p>
+          <p class="text-sm text-blue-800">Tokens and cost now flow, so the cost-per-product view is populated. <strong>Cost is an estimate</strong> from a per-model price map — override rates by adding a <code>pricing</code> map to <code>agentpulse.secrets.json</code>. Step-level traces (the per-call Execution Trace breakdown) are the remaining follow-up.</p>
         </div>
 
         <h2>Troubleshooting</h2>
