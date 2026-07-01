@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pulse Reviews — TalentDesk Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ccfbf1;color:#0d9488;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content a{color:#0d9488;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    table.doc-table{width:100%;border-collapse:collapse;margin-bottom:1.25rem;font-size:.875rem}
+    table.doc-table th,table.doc-table td{border:1px solid #e2e8f0;padding:.55rem .75rem;text-align:left;vertical-align:top}
+    table.doc-table th{background:#f8fafc;font-weight:600;color:#0f172a}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/talentdesk/docs/" class="font-bold text-teal-600">TalentDesk <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500">
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Pulse Reviews</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">The Employee Pulse &amp; Growth review — structured 1-on-1s that track whether deployed engineers feel stretched, supported, and growing, and the timeline chart that turns individual reviews into a trend.</p>
+
+<h2>What is a pulse review?</h2>
+<p>A pulse review is a structured 1-on-1 between a manager and a deployed engineer. Unlike an annual performance review, it is lightweight, regular, and consistent in structure — which means the data is comparable across time. It captures the engineer's experience of the placement, not a judgment of their performance.</p>
+
+<p>Pulse reviews are created from the engineer's Talent Profile under the <strong>Pulse</strong> tab, or from an active deployment. Each review is timestamped and attributed to the conducting manager.</p>
+
+<h2>The three core dimensions</h2>
+<p>Every pulse review captures 1–5 slider ratings on three dimensions:</p>
+<table class="doc-table not-prose">
+<thead><tr><th>Dimension</th><th>The question it answers</th></tr></thead>
+<tbody>
+<tr><td><strong>Stretched</strong></td><td>Is the engineer being challenged at the right level — not bored, not overwhelmed? Persistent low scores may mean the placement is a poor fit; persistent high scores may mean they are ready for a more senior role.</td></tr>
+<tr><td><strong>Supported</strong></td><td>Does the engineer feel supported by the account manager, the client team, and their access to resources and feedback? Low scores are an early signal of isolation, a common precursor to disengagement.</td></tr>
+<tr><td><strong>Growing</strong></td><td>Is the engineer learning and developing in this placement? Consistently low scores on a long-running placement predict that the engineer will start looking elsewhere.</td></tr>
+</tbody>
+</table>
+
+<h2>Additional context fields</h2>
+<p>Beyond the three core sliders, a pulse review captures structured notes and scores across five further areas:</p>
+<ul>
+<li><strong>Blockers</strong> — what is actively impeding the engineer (access issues, unclear requirements, interpersonal friction, tool gaps)</li>
+<li><strong>Skill alignment</strong> — how well the current work matches the skills the engineer was placed for; drift here flags a mismatch</li>
+<li><strong>Operations</strong> — the day-to-day operational experience: meetings, processes, tools, clarity on priorities</li>
+<li><strong>Delivery</strong> — the engineer's own assessment of how their delivery is tracking against expectations</li>
+<li><strong>Open notes</strong> — free text for anything not covered by the structured fields</li>
+</ul>
+
+<h2>The pulse-score timeline chart</h2>
+<p>The Talent Profile includes a timeline chart that plots the three core dimensions across every recorded pulse review for that engineer. A single review is a snapshot; the timeline is the story. The chart reveals patterns that individual data points hide:</p>
+<ul>
+<li>A downward trend in Supported across consecutive reviews is more significant than a single low score</li>
+<li>A sudden drop in Growing after a stable period may coincide with a project or team change at the client</li>
+<li>High Stretched combined with low Growing is a specific pattern — the engineer is overloaded but not developing</li>
+</ul>
+<p>Below the chart, the history log lists every review with its scores and notes in chronological order. This log is the data you bring to a placement renewal conversation.</p>
+
+<h2>Pulse reviews vs. performance reviews</h2>
+<div class="callout callout-info not-prose"><p class="text-sm text-blue-800"><strong>Important distinction.</strong> The pulse review captures the engineer's <em>experience</em> of the placement, not an evaluation of their performance. The scores on Stretched, Supported, and Growing are the engineer's self-assessment, elicited through conversation. This makes engineers more likely to be honest and makes the data a leading indicator of placement health rather than a backward-looking grade.</p></div>
+
+<h2>Analytics integration</h2>
+<p>The analytics module aggregates pulse review data into an average pulse score per engineer and across the firm, and contributes to the employee experience distribution. This lets you spot systemic issues — for example, if engineers placed at a particular client consistently score low on Supported, that is an account-level signal worth investigating.</p>
+
+<h2>Relationship to health signals</h2>
+<p>The pulse review is the internal counterpart to the <a href="/talentdesk/docs/core-concepts/health-signals.html">Weekly Engagement Health Signal</a>. The health signal tells you how the client thinks the placement is going. The pulse review tells you how the engineer thinks it is going. Together they form the two-sided feedback loop that keeps a placement healthy.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/talentdesk/docs/docs.js"></script>
+</body>
+</html>

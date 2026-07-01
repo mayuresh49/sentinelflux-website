@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overview — TalentDesk Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ccfbf1;color:#0d9488;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    table.doc-table{width:100%;border-collapse:collapse;margin-bottom:1.25rem;font-size:.875rem}
+    table.doc-table th,table.doc-table td{border:1px solid #e2e8f0;padding:.55rem .75rem;text-align:left;vertical-align:top}
+    table.doc-table th{background:#f8fafc;font-weight:600;color:#0f172a}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content a{color:#0d9488;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/talentdesk/docs/" class="font-bold text-teal-600">TalentDesk <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500">
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Overview</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">TalentDesk is a client and talent management application built for consulting and staffing firms. It tracks clients, open hiring needs, employee deployments, and the ongoing feedback loops between your firm, your engineers, and your clients.</p>
+
+<h2>What is TalentDesk?</h2>
+<p>TalentDesk answers a specific operational question: <em>where are my people, how are the placements going, and what needs attention right now?</em> Consulting firms typically manage this across spreadsheets, email threads, and Slack channels. TalentDesk brings it into a structured application where every piece of the operation has a home.</p>
+
+<p>The application is built around three core feedback loops:</p>
+<ul>
+<li><strong>The placement loop</strong> — matching engineers to client needs through a structured hiring pipeline and a mandatory quality gate before deputation</li>
+<li><strong>The employee pulse loop</strong> — regular structured 1-on-1s that track whether deployed engineers feel stretched, supported, and growing</li>
+<li><strong>The client health loop</strong> — weekly Green/Amber/Red signals per placement and monthly retrospectives that keep account managers informed of relationship health</li>
+</ul>
+
+<h2>Key modules</h2>
+<h3>Global Dashboard</h3>
+<p>Active clients, open positions, bench vs. deployed headcount, and flagged placements — all in a single view. The dashboard is the operational pulse of the firm.</p>
+
+<h3>Clients &amp; Hiring Needs</h3>
+<p>Each client has a profile and a set of open positions. Positions carry role title, required skills, experience range, target start date, compensation, and current status. A 3-phase hiring pipeline tracks every opening from sourcing through offer.</p>
+
+<h3>Talent Roster</h3>
+<p>The full list of engineers, with their deployment status (bench, deployed, on notice), skills, and experience. Each engineer has a Talent Profile with a pulse-score timeline chart built from their review history.</p>
+
+<h3>Deployments</h3>
+<p>Assignments linking an engineer to a client, with manager, start/end dates, and allocation percentage. TalentDesk supports ending a deployment, transferring an engineer to a new client, and logging the offboarding checklist.</p>
+
+<h3>Placement Quality Gate</h3>
+<p>A 4-point checklist — pre-screen, technical bar, background check, client alignment — that must be completed before an engineer can be marked Deputed. See <a href="/talentdesk/docs/core-concepts/deployments-and-placement-gate.html">Deployments &amp; Placement Gate</a>.</p>
+
+<h3>Employee Pulse &amp; Growth Reviews</h3>
+<p>Structured 1-on-1s with 1–5 sliders on stretched, supported, and growing, plus fields for blockers, skill alignment, operations, and delivery. The review history feeds the pulse-score timeline on the Talent Profile. See <a href="/talentdesk/docs/core-concepts/pulse-reviews.html">Pulse Reviews</a>.</p>
+
+<h3>Client Account Health</h3>
+<p>Per-placement weekly health signals (Green, Amber, Red) with mandatory notes for non-green statuses. Monthly Retrospective logger for structured account reviews. See <a href="/talentdesk/docs/core-concepts/health-signals.html">Health Signals</a>.</p>
+
+<h3>Analytics</h3>
+<p>Client-level stats, employee experience distribution, average pulse scores, skills supply vs. demand, and skills deployed per client. Useful for capacity planning and business reviews.</p>
+
+<h3>Action Center</h3>
+<p>A single view of everything that needs attention: hiring deadlines approaching, incomplete placement gates, onboarding/offboarding in progress, and placements with pending weekly health updates.</p>
+
+<h3>RBAC</h3>
+<p>Four scoped roles — Master Admin, Account Manager (assigned clients only), Recruiter, and Viewer. See <a href="/talentdesk/docs/core-concepts/roles-and-access.html">Roles &amp; Access</a>.</p>
+
+<h3>Audit Log</h3>
+<p>Per-entity activity trails with timestamp, actor, and action. Exportable as CSV.</p>
+
+<div class="callout callout-info not-prose"><p class="text-sm text-blue-800"><strong>Stack.</strong> TalentDesk is built with Next.js 14 (App Router), React, TypeScript, and Tailwind CSS. It uses SQLite (better-sqlite3) for all data and cookie-session auth with bcrypt. It is designed to be self-hosted — no external database or managed service required.</p></div>
+
+<h2>Where to go next</h2>
+<ul>
+<li><a href="/talentdesk/docs/getting-started/quick-start.html">Quick Start</a> — add your first client and open position</li>
+<li><a href="/talentdesk/docs/core-concepts/clients-and-hiring.html">Clients &amp; Hiring</a> — how the hiring pipeline works</li>
+<li><a href="/talentdesk/docs/core-concepts/deployments-and-placement-gate.html">Deployments &amp; Placement Gate</a> — how to place an engineer and clear the quality gate</li>
+</ul>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/talentdesk/docs/docs.js"></script>
+</body>
+</html>

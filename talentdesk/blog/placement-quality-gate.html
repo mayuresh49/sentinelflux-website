@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Placement Quality Gate: A Hiring Bar That Sticks — TalentDesk Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="A mandatory 4-point checklist before any engineer can be deputed. Why a gate beats a process document, and how TalentDesk's Placement Quality Gate enforces your hiring bar.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ol li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #0d9488; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/talentdesk/" class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">TalentDesk</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/talentdesk/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a>
+            <a href="https://talentdesk.sentinelflux.in" target="_blank" rel="noopener" class="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full">Deep Dive</span>
+                <span class="text-slate-400 text-sm">June 23, 2026 · 5 min read</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">The Placement Quality Gate: A Hiring Bar That Sticks</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">A 4-point gate that must be cleared before any engineer can be marked Deputed. Why a checklist beats a process document, and how enforcing it in software changes the whole dynamic.</p>
+        </div>
+
+        <div class="prose">
+            <p>Every consulting firm has a hiring bar. Most have written it down somewhere — a process document, an onboarding guide, a Notion page that someone updated in 2023. The problem is that process documents are advisory. They tell you what should happen. They don't prevent something from being skipped when a deadline is pressing and the client is waiting.</p>
+
+            <p>We built the Placement Quality Gate into TalentDesk because we believe the hiring bar should be enforceable, not aspirational. It's not a reminder. It's a gate. Until all four checkpoints are cleared, the system will not let you mark an engineer as Deputed.</p>
+
+            <h2>The four checkpoints</h2>
+            <p>The gate consists of four items that must be explicitly checked off for each placement:</p>
+            <ol>
+                <li><strong>Pre-screen completed.</strong> The initial call or evaluation confirming the engineer understands the client context, working arrangements, and basic expectations. This is the first filter — it catches obvious mismatches before anyone wastes time on a technical interview.</li>
+                <li><strong>Technical bar passed.</strong> A structured technical assessment relevant to the role's requirements. The skills on the hiring need must map to what the engineer was actually evaluated on. A checkbox without evidence is just permission for wishful thinking — the gate requires this to be explicitly confirmed by the person responsible.</li>
+                <li><strong>Background check cleared.</strong> Verification appropriate to the engagement — whether that's a formal background check, reference calls, or a combination. The specific form this takes depends on the firm and the client's requirements, but the gate ensures it happened.</li>
+                <li><strong>Client alignment confirmed.</strong> The client has reviewed and confirmed they're happy with the proposed engineer before the engagement begins. No surprises on day one. This step alone prevents a significant category of failed placements.</li>
+            </ol>
+
+            <h2>Why a gate, not a checklist</h2>
+            <p>There's a meaningful difference between a checklist you fill out and a gate you have to pass. A checklist can be skipped, backdated, or partially completed. A gate is a hard dependency: the status transition from "Scheduled" to "Deputed" is blocked until all four items are ticked.</p>
+
+            <p>In TalentDesk, when you open a deployment and try to mark an engineer as Deputed, the system checks the gate. If any of the four checkpoints is unchecked, the action is unavailable. The incomplete items are shown. You fix them, or you escalate the decision — but you can't quietly skip them and pretend they happened.</p>
+
+            <p>This matters operationally because it creates accountability. When a placement goes wrong, you can look at the gate history and know exactly what was cleared and when. If the technical bar checkbox was never ticked, that's a process failure. If it was ticked six hours before the engineer was deputed, that's a different conversation than if it was completed two weeks prior.</p>
+
+            <h2>What happens when the gate is cleared</h2>
+            <p>Clearing all four checkpoints does something concrete in TalentDesk: it automatically transitions the engineer's status to Deputed and triggers the onboarding checklist. The deputation is recorded in the audit log with a timestamp and the identity of the person who completed each checkpoint. The engineer's talent profile updates to reflect their deployed status, and the global dashboard's bench vs. deployed headcount adjusts accordingly.</p>
+
+            <p>This automatic transition is deliberate. It removes a manual step that would otherwise be forgettable. The gate isn't an approval workflow — it's a prerequisite that, once satisfied, executes the next step without needing someone to remember to do it.</p>
+
+            <h2>The Action Center integration</h2>
+            <p>Deployments with incomplete placement gates show up in the Action Center under "Incomplete Placement Gates." This gives anyone with visibility into the Action Center — typically an Account Manager or Master Admin — a real-time list of placements that are blocked and why. Nobody has to chase anyone to find out whether the background check for a specific engineer has been completed. The system shows it.</p>
+
+            <p>The hiring bar is only as good as its enforcement. A process document is a suggestion. A gate is a contract with yourself that you'll do the work before you ship the engineer.</p>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/talentdesk/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                All posts
+            </a>
+            <a href="https://talentdesk.sentinelflux.in" target="_blank" rel="noopener" class="text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors flex items-center gap-1.5">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/talentdesk/" class="flex items-center gap-2 font-bold text-white">
+            <div class="w-6 h-6 bg-teal-600 rounded-md flex items-center justify-center"><svg style="width:13px;height:13px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg></div>
+            TalentDesk
+        </a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/talentdesk/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/" class="hover:text-white transition-colors">SentinelFlux</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why We Built TalentDesk — TalentDesk Blog</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="Most consulting firm operations live in a tangle of spreadsheets. The story behind TalentDesk — from a missed placement red flag to a structured operations tool for the full talent lifecycle.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .prose p { margin-bottom: 1.25rem; color: #475569; line-height: 1.8; }
+        .prose h2 { font-size: 1.375rem; font-weight: 700; color: #0f172a; margin: 2rem 0 0.75rem; }
+        .prose ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; color: #475569; }
+        .prose ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+        .prose code { font-family: 'JetBrains Mono', monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.875em; color: #0d9488; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/talentdesk/" class="flex items-center gap-2.5 shrink-0">
+            <div class="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center shrink-0">
+                <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+            </div>
+            <span class="font-bold text-slate-900 text-lg tracking-tight">TalentDesk</span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/talentdesk/blog.html" class="text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">← Blog</a>
+            <a href="https://talentdesk.sentinelflux.in" target="_blank" rel="noopener" class="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-10">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-teal-100 text-teal-700 text-xs font-semibold px-2.5 py-1 rounded-full">Company</span>
+                <span class="text-slate-400 text-sm">June 25, 2026 · 6 min read</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-slate-900 leading-tight mb-4">Why We Built TalentDesk</h1>
+            <p class="text-lg text-slate-500 leading-relaxed">Most consulting firm operations live in a tangle of spreadsheets, Slack threads, and email chains. This is the story of how a missed placement red flag turned into a structured operations tool for the full talent lifecycle.</p>
+        </div>
+
+        <div class="prose">
+            <p>The client called on a Thursday afternoon. Their words were measured but the message was clear: the engineer we had placed three months ago wasn't working out. Communication issues, missed deadlines, a general sense that something wasn't aligned. We had no early warning. No weekly signal. No structured feedback from the engineer's side either. The first we heard was when the client was already at the decision point.</p>
+
+            <p>What made it worse was that the data existed. Account Managers had spoken to both sides. Notes lived in different places — a Slack message here, an email thread there, a cell in a shared spreadsheet that nobody had updated in six weeks. The information that would have told us something was wrong was there; it just wasn't organised anywhere we could act on it.</p>
+
+            <h2>The spreadsheet problem</h2>
+            <p>Consulting and staffing firms run on relationships, and relationship data is notoriously hard to structure. You have clients with multiple open positions, each at a different hiring stage. You have engineers — some deployed, some on bench, some mid-transition. You have feedback flowing in both directions: clients telling you how the placement is going, engineers telling you whether they feel stretched, supported, and like they're growing. And you have a constant operational backdrop: onboarding checklists, background checks, contract dates, and the bureaucratic tail of every placement ending.</p>
+
+            <p>Most firms manage all of this in Excel or Google Sheets, with some combination of email and Slack stitching the gaps. It works until it doesn't. It breaks when:</p>
+            <ul>
+                <li>Two account managers are working the same client and neither knows what the other logged</li>
+                <li>A placement's weekly health signal hasn't been updated in three weeks and nobody flagged it</li>
+                <li>An engineer was placed without a technical screening being completed, but the process doc said one was required</li>
+                <li>You're trying to answer "who on bench has Node.js and more than 4 years of experience" and the answer is buried in a cell somewhere</li>
+            </ul>
+
+            <h2>What we actually needed</h2>
+            <p>We didn't need a CRM. We didn't need an ATS. We needed something that understood the specific shape of a consulting firm's operation — the triangular relationship between a firm, its client, and its deployed engineer, and the feedback loops that keep that triangle healthy.</p>
+
+            <p>Specifically, we needed:</p>
+            <ul>
+                <li>A single source of truth for every client and every open position, with a structured hiring pipeline that anyone on the team could read in 30 seconds</li>
+                <li>A quality gate that made placement standards non-optional — not a process document, but a checklist that physically prevented deputation until it was cleared</li>
+                <li>A structured feedback loop from the engineer's side: not annual reviews but regular, lightweight 1-on-1s with consistent structure so you could track trends over time</li>
+                <li>A weekly signal from the account manager's side: a color-coded health check per placement that forced someone to say, every week, whether things were green, amber, or red</li>
+                <li>An action center that surfaced everything overdue — incomplete gates, missed health updates, hiring deadlines — so nothing fell through the gaps between roles</li>
+            </ul>
+
+            <h2>What we built</h2>
+            <p>TalentDesk is a Next.js 14 application with a SQLite backend, built to be self-hosted by small and mid-sized consulting and staffing firms. It is not a general-purpose HR tool. Every module is specific to the consulting firm context: clients have hiring needs with skill requirements and target dates; engineers have talent profiles with pulse-score timelines; deployments track the assignment of an engineer to a client with a manager, dates, and allocation percentage.</p>
+
+            <p>The Placement Quality Gate is one of the features we're most deliberate about. Before any engineer can be marked Deputed, four checkboxes must be ticked: pre-screen completed, technical bar passed, background check cleared, client alignment confirmed. Clearing all four automatically transitions the engineer's status. It's a small thing, but it makes the standard enforceable rather than aspirational.</p>
+
+            <p>The Weekly Engagement Health Signal is the other one. Every active placement has a weekly update slot — Green, Amber, or Red — with a free-text note. The Action Center flags any placement that hasn't had a health update in the past seven days. This is the mechanism that would have caught the problem that prompted us to build TalentDesk in the first place.</p>
+
+            <p>We built TalentDesk because we'd seen what happens when the feedback loops break. If you run a consulting or staffing operation and your client relationship data lives in a spreadsheet, this is for you.</p>
+        </div>
+
+        <div class="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+            <a href="/talentdesk/blog.html" class="text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                All posts
+            </a>
+            <a href="https://talentdesk.sentinelflux.in" target="_blank" rel="noopener" class="text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors flex items-center gap-1.5">
+                Open App
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/talentdesk/" class="flex items-center gap-2 font-bold text-white">
+            <div class="w-6 h-6 bg-teal-600 rounded-md flex items-center justify-center"><svg style="width:13px;height:13px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg></div>
+            TalentDesk
+        </a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/talentdesk/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/" class="hover:text-white transition-colors">SentinelFlux</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+</body>
+</html>

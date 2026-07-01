@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Signals — TalentDesk Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ccfbf1;color:#0d9488;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content a{color:#0d9488;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    table.doc-table{width:100%;border-collapse:collapse;margin-bottom:1.25rem;font-size:.875rem}
+    table.doc-table th,table.doc-table td{border:1px solid #e2e8f0;padding:.55rem .75rem;text-align:left;vertical-align:top}
+    table.doc-table th{background:#f8fafc;font-weight:600;color:#0f172a}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/talentdesk/docs/" class="font-bold text-teal-600">TalentDesk <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500">
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Health Signals</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">The Weekly Engagement Health Signal board and Monthly Retrospective — the client-side feedback loop that tells you whether each placement is on track.</p>
+
+<h2>Weekly Engagement Health Signal</h2>
+<p>Every active deployment (status: Deputed) has a weekly health signal slot. The Account Manager responsible for the deployment logs the signal once per week by opening the deployment and going to the <strong>Health</strong> tab.</p>
+
+<h3>Signal levels</h3>
+<table class="doc-table not-prose">
+<thead><tr><th>Signal</th><th>Meaning</th><th>Note required?</th></tr></thead>
+<tbody>
+<tr><td><span class="inline-block w-3 h-3 rounded-full bg-green-500 mr-1"></span> Green</td><td>Placement is running smoothly. Communication is good, deliverables are on track, no open concerns from either side.</td><td>Optional</td></tr>
+<tr><td><span class="inline-block w-3 h-3 rounded-full bg-amber-400 mr-1"></span> Amber</td><td>A concern exists that needs attention — a communication gap, a deliverable that slipped, a client concern raised informally.</td><td>Required</td></tr>
+<tr><td><span class="inline-block w-3 h-3 rounded-full bg-red-500 mr-1"></span> Red</td><td>The placement is at risk. An active problem requires immediate escalation — direct client complaint, repeated missed expectations, or relationship breakdown.</td><td>Required</td></tr>
+</tbody>
+</table>
+
+<p>Amber and Red signals require a mandatory note explaining the specific concern. This note is what makes the history useful — it creates a searchable record of what was happening at each point in the placement's life.</p>
+
+<h3>Signal history</h3>
+<p>The Health tab on a deployment shows the full week-by-week signal history as a timeline. This history is the data you use to spot trends — a placement that has been Amber for three consecutive weeks is in a different category than one with a single Amber in an otherwise Green history.</p>
+
+<h3>Global dashboard</h3>
+<p>The main dashboard displays a "Flagged Placements" count showing how many active deployments are currently rated Amber or Red. The placement grid uses color badges to indicate each placement's current signal level at a glance.</p>
+
+<h2>Action Center — pending health updates</h2>
+<p>Any Deputed deployment that has not had a health signal logged in the past 7 days appears in the Action Center under "Pending Weekly Health Updates." This count is visible to Master Admins and Account Managers for their assigned clients.</p>
+<p>The cadence is a rolling 7 days — if a signal was logged on Monday and it is now Tuesday of the following week, the placement will appear in the Action Center.</p>
+
+<h2>Monthly Retrospective</h2>
+<p>In addition to the weekly signal, TalentDesk provides a Monthly Retrospective logger per client. A retrospective is a structured account review that captures:</p>
+<ul>
+<li>Review period (month and year)</li>
+<li>What went well</li>
+<li>Concerns that emerged during the period</li>
+<li>Actions taken or planned</li>
+<li>Focus areas for the coming month</li>
+</ul>
+<p>Retrospectives are logged from the client detail page under the <strong>Account Health</strong> tab. The full history is available for review and export. This is the data you bring to a monthly client check-in call — a structured record that prevents account reviews from being reactive.</p>
+
+<div class="callout callout-tip not-prose"><p class="text-sm text-green-800"><strong>Tip.</strong> The combination of weekly signals and monthly retrospectives gives you two layers of client health data. The signal board is high-frequency and low-effort. The retrospective is lower-frequency but structured and comprehensive. Together they prevent both drift (missed by weekly signals) and loss of institutional memory (missed by not writing anything down).</p></div>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/talentdesk/docs/docs.js"></script>
+</body>
+</html>

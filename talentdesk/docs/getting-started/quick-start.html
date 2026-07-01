@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Start — TalentDesk Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ccfbf1;color:#0d9488;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content a{color:#0d9488;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/talentdesk/docs/" class="font-bold text-teal-600">TalentDesk <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500">
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Quick Start</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">From a fresh install to your first placement — in under 15 minutes.</p>
+
+<h2>Step 1: Install and run</h2>
+<p>TalentDesk is a Next.js 14 application. Clone the repository, install dependencies, and run the development server:</p>
+<pre>git clone https://github.com/mayuresh49/sentinelflux-talentdesk.git
+cd sentinelflux-talentdesk
+npm install
+npm run dev</pre>
+<p>The application starts at <code>http://localhost:3000</code>. On first launch, it creates a SQLite database file at <code>data/talentdesk.db</code> and seeds a Master Admin account.</p>
+
+<div class="callout callout-tip not-prose"><p class="text-sm text-green-800"><strong>Default credentials.</strong> The seed admin email and password are printed to the terminal on first run. Change the password immediately after your first login via Profile &rarr; Change Password.</p></div>
+
+<h2>Step 2: Add your first client</h2>
+<p>Navigate to <strong>Clients</strong> in the sidebar and click <strong>Add Client</strong>. Fill in:</p>
+<ul>
+<li>Client name and industry</li>
+<li>Primary contact name and email</li>
+<li>Account Manager (assign a user in your team, or yourself)</li>
+</ul>
+<p>Save the client. You'll land on the client detail page.</p>
+
+<h2>Step 3: Create a hiring need</h2>
+<p>From the client detail page, click <strong>Add Position</strong>. Each position requires:</p>
+<ul>
+<li>Role title (e.g. "Senior Backend Engineer")</li>
+<li>Required skills (multi-select from your skills library)</li>
+<li>Experience range (minimum and maximum years)</li>
+<li>Target start date</li>
+<li>Compensation range (optional)</li>
+</ul>
+<p>The position is created in Phase 1 of the hiring pipeline (Sourcing). Move it through Phase 2 (Screening) and Phase 3 (Offer) as you progress.</p>
+
+<h2>Step 4: Add an engineer to the talent roster</h2>
+<p>Navigate to <strong>Talent</strong> and click <strong>Add Engineer</strong>. Enter their name, email, skills, and years of experience. New engineers default to Bench status.</p>
+
+<h2>Step 5: Create a deployment and clear the placement gate</h2>
+<p>Navigate to <strong>Deployments</strong> and click <strong>New Deployment</strong>. Select the client, the position, and the engineer. Set the managing account manager, start date, and allocation percentage.</p>
+<p>The deployment is created in "Scheduled" status. Before the engineer can be marked Deputed, open the deployment and go to the <strong>Placement Gate</strong> tab. Check off all four items:</p>
+<ol>
+<li>Pre-screen completed</li>
+<li>Technical bar passed</li>
+<li>Background check cleared</li>
+<li>Client alignment confirmed</li>
+</ol>
+<p>Once all four are checked, the <strong>Mark as Deputed</strong> button becomes active. Clicking it transitions the engineer's status to Deputed, triggers the onboarding checklist, and records the event in the audit log.</p>
+
+<h2>Step 6: Log the first health signal</h2>
+<p>Navigate to the deployment and open the <strong>Health</strong> tab. Log this week's engagement signal — Green, Amber, or Red — with a brief note. The Action Center will flag any active placements that have not had a health update in the past 7 days.</p>
+
+<div class="callout callout-info not-prose"><p class="text-sm text-blue-800"><strong>Next steps.</strong> Invite team members under <strong>Settings &rarr; Users</strong>, assign them roles, and scope Account Managers to specific clients. See <a href="/talentdesk/docs/core-concepts/roles-and-access.html" class="underline">Roles &amp; Access</a> for the full permission matrix.</p></div>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/talentdesk/docs/docs.js"></script>
+</body>
+</html>

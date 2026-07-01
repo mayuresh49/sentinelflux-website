@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Common Issues — TalentDesk Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ccfbf1;color:#0d9488;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    table.doc-table{width:100%;border-collapse:collapse;margin-bottom:1.25rem;font-size:.875rem}
+    table.doc-table th,table.doc-table td{border:1px solid #e2e8f0;padding:.55rem .75rem;text-align:left;vertical-align:top}
+    table.doc-table th{background:#f8fafc;font-weight:600;color:#0f172a}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content a{color:#0d9488;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/talentdesk/docs/" class="font-bold text-teal-600">TalentDesk <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500">
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Common Issues</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Quick fixes for the issues teams hit most often when setting up and running TalentDesk.</p>
+<h2>Cannot mark an engineer as Deputed</h2><p>The <strong>Mark as Deputed</strong> button stays disabled until all four Placement Quality Gate checkpoints are ticked. Open the deployment's <strong>Placement Gate</strong> tab and confirm that pre-screen, technical bar, background check, and client alignment are all checked. Any unchecked item blocks deputation. See <a href="/talentdesk/docs/core-concepts/deployments-and-placement-gate.html">Deployments &amp; Placement Gate</a>.</p><h2>An Account Manager cannot see a client</h2><p>Account Managers only see clients assigned to them. Confirm the client's assigned Account Manager under the client detail page. A Master Admin can reassign the client under <strong>Settings &rarr; Users</strong> or on the client record. See <a href="/talentdesk/docs/core-concepts/roles-and-access.html">Roles &amp; Access</a>.</p><h2>A placement keeps appearing under pending health updates</h2><ul><li>The Action Center flags any Deputed deployment with no health signal in the past 7 days. Log this week's Green / Amber / Red signal on the deployment's <strong>Health</strong> tab to clear it.</li><li>Amber and Red signals require a note &mdash; the signal will not save without one.</li></ul><h2>Cannot save an Amber or Red health signal</h2><p>A note is mandatory for non-green signals. Add a short explanation of the concern before saving. Only Green signals can be logged without a note.</p><h2>Cannot add a new skill to a position or profile</h2><p>Only Master Admins can add skills to the shared skills library. Account Managers and Recruiters can use existing skills but cannot create new ones. Ask a Master Admin to add the skill under <strong>Settings &rarr; Skills</strong>.</p><h2>Database or first-run issues</h2><p>On first launch, TalentDesk creates a SQLite database at <code>data/talentdesk.db</code> and seeds a Master Admin account whose credentials are printed to the terminal. If login fails, confirm the database file was created and check the startup logs for the seed credentials.</p><h2>Still stuck?</h2><p>Email <a href="mailto:engage@sentinelflux.in">engage@sentinelflux.in</a> with a description of what you are seeing, or open an issue on the <a href="https://github.com/mayuresh49/sentinelflux-talentdesk">GitHub repository</a>.</p>
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/talentdesk/docs/docs.js"></script>
+</body>
+</html>
