@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TalentDesk — Client &amp; Talent Management by SentinelFlux</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <link rel="mask-icon" href="/favicon.svg" color="#0d9488">
+    <meta name="description" content="TalentDesk tracks clients, open hiring needs, employee deployments, and ongoing feedback loops — with a structured placement quality gate and weekly engagement health signals — all in one place.">
+    <meta property="og:title" content="TalentDesk — Client &amp; Talent Management by SentinelFlux">
+    <meta property="og:description" content="Clients, talent, and the feedback loops between them — in one place. Built for consulting and staffing firms.">
+    <meta property="og:url" content="https://sentinelflux.in/talentdesk/">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; }
+        .hero-glow {
+            background: radial-gradient(ellipse at 50% -10%, rgba(13,148,136,0.10) 0%, transparent 65%);
+        }
+        .hero-grid {
+            background-image:
+                linear-gradient(rgba(20,184,166,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(20,184,166,0.04) 1px, transparent 1px);
+            background-size: 44px 44px;
+        }
+        .feature-card { transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease; }
+        .feature-card:hover { transform: translateY(-3px); }
+        [data-animate] {
+            opacity: 0; transform: translateY(22px);
+            transition: opacity 0.65s ease, transform 0.65s ease;
+        }
+        [data-animate].visible { opacity: 1 !important; transform: none !important; }
+        [data-delay="1"] { transition-delay: 0.06s; }
+        [data-delay="2"] { transition-delay: 0.12s; }
+        [data-delay="3"] { transition-delay: 0.18s; }
+        [data-delay="4"] { transition-delay: 0.24s; }
+        [data-delay="5"] { transition-delay: 0.30s; }
+        [data-delay="6"] { transition-delay: 0.36s; }
+    </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-8">
+            <a href="/" class="flex items-center gap-2.5 shrink-0">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                    <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                </div>
+                <span class="font-bold text-slate-900 text-lg tracking-tight">SentinelFlux</span>
+            </a>
+            <div class="hidden md:flex items-center gap-1">
+                <a href="#features" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Features</a>
+                <a href="#how-it-works" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">How it works</a>
+                <a href="#pricing" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Pricing</a>
+                <a href="/talentdesk/docs/" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Docs</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="https://talentdesk.sentinelflux.in" target="_blank" rel="noopener" class="hidden sm:flex text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">Sign in</a>
+            <a href="https://talentdesk.sentinelflux.in" target="_blank" rel="noopener" class="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors shadow-sm">Get started</a>
+            <button id="mobile-menu-btn" class="md:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-100 px-6 py-3 space-y-1">
+        <a href="#features" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Features</a>
+        <a href="#how-it-works" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">How it works</a>
+        <a href="#pricing" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Pricing</a>
+        <a href="/talentdesk/docs/" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Docs</a>
+        <a href="https://talentdesk.sentinelflux.in" target="_blank" rel="noopener" class="block text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Sign in</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-glow hero-grid pt-36 pb-24 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 bg-teal-50 border border-teal-200 text-teal-700 text-xs font-semibold px-4 py-1.5 rounded-full mb-8" data-animate>
+            <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse shrink-0"></span>
+            New in the SentinelFlux suite
+        </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight mb-6 leading-tight" data-animate>
+            Clients, talent, and<br>
+            <span style="background:linear-gradient(135deg,#0d9488,#14b8a6,#5eead4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">the loops between them.</span>
+        </h1>
+        <p class="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed" data-animate>
+            TalentDesk gives consulting and staffing firms a single place to track clients, open hiring needs, employee deployments, placement quality gates, pulse reviews, and weekly engagement health — without spreadsheets.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center" data-animate>
+            <a href="https://talentdesk.sentinelflux.in" target="_blank" rel="noopener"
+               class="flex items-center justify-center gap-2 bg-teal-600 text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-teal-700 transition-colors text-sm shadow-lg shadow-teal-500/20">
+                Get started
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+            <a href="https://github.com/mayuresh49/sentinelflux-talentdesk" target="_blank" rel="noopener"
+               class="flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 font-semibold px-7 py-3.5 rounded-xl hover:border-slate-300 hover:bg-slate-50 transition-colors text-sm shadow-sm">
+                View on GitHub
+            </a>
+        </div>
+        <p class="text-xs text-slate-400 mt-5" data-animate>Next.js 14 · TypeScript · SQLite · Fully self-hostable</p>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="py-24 px-6 bg-slate-50">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-16" data-animate>
+            <div class="inline-flex items-center gap-2 text-teal-600 text-xs font-semibold uppercase tracking-widest mb-4">Features</div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">Everything a consulting firm needs to run its talent operation</h2>
+            <p class="text-slate-500 text-lg max-w-xl mx-auto">From the first client meeting to the final offboarding checklist — with structured quality gates and health signals at every step.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="feature-card bg-white rounded-2xl border border-teal-200 p-6 shadow-sm" data-animate data-delay="1">
+                <div class="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Global Dashboard</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Active clients, open positions, bench vs. deployed headcount, and flagged placements — at a glance. Know your operational health without opening a single spreadsheet.</p>
+            </div>
+
+            <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 shadow-sm" data-animate data-delay="2">
+                <div class="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Clients &amp; Hiring Needs</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Track every open role with required skills, experience range, target date, compensation, and status. A 3-phase hiring pipeline keeps every opening moving from sourcing to offer.</p>
+            </div>
+
+            <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 shadow-sm" data-animate data-delay="3">
+                <div class="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Placement Quality Gate</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">A mandatory 4-point checklist — pre-screen, technical bar, background check, client alignment — that must be cleared before an engineer can be marked Deputed. Clearing it deputes the engineer automatically.</p>
+            </div>
+
+            <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 shadow-sm" data-animate data-delay="4">
+                <div class="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Employee Pulse Reviews</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Structured 1-on-1s with 1–5 sliders across stretched / supported / growing, blockers, skill alignment, operations, and delivery. Each review logs to a history and timeline chart on the Talent Profile.</p>
+            </div>
+
+            <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 shadow-sm" data-animate data-delay="5">
+                <div class="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Client Account Health</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">A color-coded Weekly Engagement Health Signal board — Green, Amber, or Red — per placement. Monthly Retrospective logger for structured account reviews. Never let a client relationship drift without a signal.</p>
+            </div>
+
+            <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 shadow-sm" data-animate data-delay="6">
+                <div class="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0H3"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Analytics &amp; Action Center</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Client-level stats, employee experience distribution, average pulse scores, and skills supply vs. demand. The Action Center surfaces hiring deadlines, incomplete gates, and pending health updates in one view.</p>
+            </div>
+        </div>
+
+        <!-- Secondary feature row -->
+        <div class="grid md:grid-cols-2 gap-6 mt-6">
+            <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 shadow-sm" data-animate data-delay="1">
+                <div class="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">Checklists &amp; Offboarding</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Onboarding and deputation checklists keep day-one smooth. Engineer and client offboarding checklists ensure nothing is missed when a placement ends — equipment returns, access revocations, and exit reviews included.</p>
+            </div>
+
+            <div class="feature-card bg-white rounded-2xl border border-slate-200 p-6 shadow-sm" data-animate data-delay="2">
+                <div class="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 mb-2">RBAC &amp; Audit Log</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Four scoped roles — Master Admin, Account Manager (sees only assigned clients), Recruiter, and Viewer — with full audit logs per entity and CSV export. Every action is traceable.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works" class="py-24 px-6 bg-white">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-16" data-animate>
+            <div class="inline-flex items-center gap-2 text-teal-600 text-xs font-semibold uppercase tracking-widest mb-4">How it works</div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">From client win to engineer offboarding</h2>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-8">
+            <div class="text-center" data-animate data-delay="1">
+                <div class="w-14 h-14 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white font-bold text-xl">1</div>
+                <h3 class="font-bold text-slate-900 mb-2">Add the client</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Register the client, assign an Account Manager, and create open positions with skill requirements, experience range, and target date.</p>
+            </div>
+            <div class="text-center" data-animate data-delay="2">
+                <div class="w-14 h-14 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white font-bold text-xl">2</div>
+                <h3 class="font-bold text-slate-900 mb-2">Gate the placement</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Clear the 4-point Placement Quality Gate — pre-screen, technical bar, background check, client alignment — before the engineer can be deputed.</p>
+            </div>
+            <div class="text-center" data-animate data-delay="3">
+                <div class="w-14 h-14 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white font-bold text-xl">3</div>
+                <h3 class="font-bold text-slate-900 mb-2">Run the feedback loops</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">Log weekly Green/Amber/Red health signals for each placement, conduct monthly retrospectives with clients, and run structured pulse reviews with engineers.</p>
+            </div>
+            <div class="text-center" data-animate data-delay="4">
+                <div class="w-14 h-14 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-5 text-white font-bold text-xl">4</div>
+                <h3 class="font-bold text-slate-900 mb-2">Act on signals</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">The Action Center surfaces every overdue health update, incomplete gate, and upcoming deadline so nothing slips between roles.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="py-24 px-6 bg-slate-50">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12" data-animate>
+            <div class="inline-flex items-center gap-2 text-teal-600 text-xs font-semibold uppercase tracking-widest mb-4">Pricing</div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">Self-hostable, free to run</h2>
+            <p class="text-slate-500 text-lg leading-relaxed">TalentDesk is open-source and fully self-hostable. Run it on your own infrastructure at no cost, or reach out for a managed deployment.</p>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-6" data-animate>
+            <!-- Self-hosted -->
+            <div class="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
+                <div class="text-2xl font-extrabold text-slate-900 mb-1">Self-hosted</div>
+                <div class="text-sm text-slate-500 mb-1">Open source</div>
+                <div class="text-3xl font-extrabold text-slate-900 mt-4 mb-6">$0<span class="text-base font-medium text-slate-400">/mo</span></div>
+                <ul class="space-y-3 text-sm text-slate-700 mb-8">
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> Unlimited clients &amp; talent</li>
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> Full placement quality gate</li>
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> Pulse reviews &amp; health signals</li>
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> Analytics &amp; Action Center</li>
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> RBAC (4 roles)</li>
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> Audit log + CSV export</li>
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> SQLite — no database server needed</li>
+                </ul>
+                <a href="https://github.com/mayuresh49/sentinelflux-talentdesk" target="_blank" rel="noopener"
+                   class="flex items-center justify-center gap-2 w-full bg-slate-900 text-white font-semibold py-3 rounded-xl hover:bg-slate-800 transition-colors text-sm">
+                    Clone on GitHub
+                </a>
+            </div>
+            <!-- Managed -->
+            <div class="bg-white rounded-3xl border-2 border-teal-500 p-8 shadow-lg relative">
+                <div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                    <span class="bg-teal-500 text-white text-xs font-bold px-4 py-1 rounded-full">Managed</span>
+                </div>
+                <div class="text-2xl font-extrabold text-slate-900 mb-1">Managed</div>
+                <div class="text-sm text-slate-500 mb-1">Hosted by SentinelFlux</div>
+                <div class="text-3xl font-extrabold text-slate-900 mt-4 mb-6"><span class="text-xl font-medium text-slate-500">Contact us</span></div>
+                <ul class="space-y-3 text-sm text-slate-700 mb-8">
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> Everything in Self-hosted</li>
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> Hosted &amp; managed by SentinelFlux</li>
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> Custom domain setup</li>
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> Onboarding assistance</li>
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> Priority support</li>
+                    <li class="flex items-center gap-2"><span class="text-teal-500 font-bold">✓</span> Data migration help</li>
+                </ul>
+                <a href="mailto:engage@sentinelflux.in?subject=TalentDesk managed deployment"
+                   class="flex items-center justify-center gap-2 w-full bg-teal-600 text-white font-semibold py-3 rounded-xl hover:bg-teal-700 transition-colors text-sm shadow-sm">
+                    Get in touch
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 px-6 bg-slate-900">
+    <div class="max-w-3xl mx-auto text-center" data-animate>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">Stop managing talent in spreadsheets.</h2>
+        <p class="text-slate-400 text-lg mb-8 leading-relaxed">Clients, talent, and the feedback loops between them — in one place.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="https://github.com/mayuresh49/sentinelflux-talentdesk" target="_blank" rel="noopener"
+               class="flex items-center justify-center gap-2 bg-teal-500 text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-teal-400 transition-colors text-base shadow-lg shadow-teal-900/50">
+                View on GitHub
+            </a>
+            <a href="mailto:engage@sentinelflux.in?subject=TalentDesk demo"
+               class="flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-slate-700 transition-colors text-base">
+                Book a demo
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-slate-950 text-slate-400 pt-16 pb-8 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+            <div class="col-span-2 md:col-span-1">
+                <a href="/" class="flex items-center gap-2 font-bold text-white mb-4">
+                    <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                        <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                    </div>
+                    SentinelFlux
+                </a>
+                <p class="text-sm leading-relaxed">AI-powered developer tools for modern engineering teams.</p>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-4">Products</div>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="/vigilqa/" class="hover:text-white transition-colors">VigilQA</a></li>
+                    <li><a href="/specvault/" class="hover:text-white transition-colors">SpecVault</a></li>
+                    <li><a href="/agentpulse/" class="hover:text-white transition-colors">AgentPulse</a></li>
+                    <li><a href="/docforge/" class="hover:text-white transition-colors">DocForge</a></li>
+                    <li><a href="/talentdesk/" class="hover:text-white transition-colors">TalentDesk</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-4">TalentDesk</div>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="#features" class="hover:text-white transition-colors">Features</a></li>
+                    <li><a href="#how-it-works" class="hover:text-white transition-colors">How it works</a></li>
+                    <li><a href="#pricing" class="hover:text-white transition-colors">Pricing</a></li>
+                    <li><a href="/talentdesk/docs/" class="hover:text-white transition-colors">Docs</a></li>
+                    <li><a href="https://talentdesk.sentinelflux.in" target="_blank" rel="noopener" class="hover:text-white transition-colors">Open app</a></li>
+                </ul>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-4">Company</div>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="/about.html" class="hover:text-white transition-colors">About</a></li>
+                    <li><a href="/blog.html" class="hover:text-white transition-colors">Blog</a></li>
+                    <li><a href="/#contact" class="hover:text-white transition-colors">Contact</a></li>
+                    <li><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-xs">&copy; 2026 SentinelFlux. All rights reserved.</p>
+            <a href="/status.html" class="flex items-center gap-1.5 text-xs hover:text-white transition-colors">
+                <span class="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0"></span>
+                All systems operational
+            </a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    const btn = document.getElementById('mobile-menu-btn');
+    const menu = document.getElementById('mobile-menu');
+    btn?.addEventListener('click', () => menu?.classList.toggle('hidden'));
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
+
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            const id = a.getAttribute('href').slice(1);
+            const el = document.getElementById(id);
+            if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        });
+    });
+</script>
+</body>
+</html>

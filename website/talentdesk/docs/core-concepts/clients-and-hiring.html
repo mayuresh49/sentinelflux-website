@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clients &amp; Hiring — TalentDesk Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Inter',sans-serif}
+    code,pre{font-family:'JetBrains Mono',monospace}
+    .sidebar-link.active{background:#ccfbf1;color:#0d9488;font-weight:500}
+    .sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}
+    pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}
+    code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}
+    table.doc-table{width:100%;border-collapse:collapse;margin-bottom:1.25rem;font-size:.875rem}
+    table.doc-table th,table.doc-table td{border:1px solid #e2e8f0;padding:.55rem .75rem;text-align:left;vertical-align:top}
+    table.doc-table th{background:#f8fafc;font-weight:600;color:#0f172a}
+    .doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}
+    .doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}
+    .doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}
+    .doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}
+    .doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}
+    .doc-content ul li{list-style-type:disc}
+    .doc-content ol li{list-style-type:decimal}
+    .doc-content a{color:#0d9488;text-decoration:none}
+    .doc-content a:hover{text-decoration:underline}
+    .callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}
+    .callout-info{background:#eff6ff;border-left:4px solid #3b82f6}
+    .callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}
+    .callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}
+  </style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/talentdesk/docs/" class="font-bold text-teal-600">TalentDesk <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500">
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Clients &amp; Hiring</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">How TalentDesk models client relationships and open positions, and how the 3-phase hiring pipeline keeps every opening moving.</p>
+
+<h2>Client records</h2>
+<p>A client in TalentDesk represents a company that has engaged your firm. Each client record holds:</p>
+<ul>
+<li>Company name and industry</li>
+<li>Primary contact (name, email, phone)</li>
+<li>Assigned Account Manager — the team member responsible for this relationship. If the current user's role is Account Manager, they will only see clients assigned to them.</li>
+<li>Status (Active, On Hold, Churned)</li>
+<li>Notes and any relevant context</li>
+</ul>
+<p>From the client detail page you can see all open positions, active deployments, health signals, and the monthly retrospective history for that client in one place.</p>
+
+<h2>Hiring needs (positions)</h2>
+<p>Each client can have multiple open positions. A position captures the full requirements for a role:</p>
+
+<table class="doc-table not-prose">
+<thead><tr><th>Field</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>Role title</td><td>The name of the role as agreed with the client</td></tr>
+<tr><td>Required skills</td><td>Multi-select from your skills library; these are matched against the talent roster when searching for candidates</td></tr>
+<tr><td>Experience range</td><td>Minimum and maximum years of relevant experience</td></tr>
+<tr><td>Target start date</td><td>When the client needs the engineer to begin; the Action Center surfaces positions where this is approaching and no deployment is created</td></tr>
+<tr><td>Compensation range</td><td>Optional; helps align expectations during engineer sourcing</td></tr>
+<tr><td>Status</td><td>Derived from the pipeline phase (see below) or manually set to Closed/Cancelled</td></tr>
+</tbody>
+</table>
+
+<h2>The 3-phase hiring pipeline</h2>
+<p>Every open position moves through three phases:</p>
+<ol>
+<li><strong>Phase 1 — Sourcing.</strong> The position is open and the team is identifying potential engineers from the bench or external pipeline. No candidate has been formally screened yet.</li>
+<li><strong>Phase 2 — Screening.</strong> One or more engineers are being evaluated for this position. Pre-screens and technical assessments are in progress. This phase overlaps with steps 1 and 2 of the Placement Quality Gate.</li>
+<li><strong>Phase 3 — Offer.</strong> A specific engineer has been selected and the offer or placement agreement is being finalized with the client. Moving to this phase typically precedes creating a deployment record.</li>
+</ol>
+<p>Positions can be moved between phases manually. When a deployment is created and an engineer is deputed, the position status transitions to Filled automatically.</p>
+
+<h2>Skills library</h2>
+<p>TalentDesk maintains a shared skills library used across both positions and engineer profiles. This enables the analytics module to compute skills supply vs. demand — how many engineers with a given skill are on bench versus how many positions require it.</p>
+<p>Master Admins can add skills to the library via <strong>Settings &rarr; Skills</strong>. Account Managers and Recruiters can use existing skills but cannot add new ones.</p>
+
+<h2>Action Center — hiring deadlines</h2>
+<p>The Action Center surfaces positions where the target start date is within the next 14 days and no active deployment exists for that position. This gives the team a predictive view of upcoming fulfillment pressure rather than discovering gaps after the deadline passes.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/talentdesk/docs/docs.js"></script>
+</body>
+</html>

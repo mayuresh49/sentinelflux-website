@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog — TalentDesk</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/favicon.svg">
+    <meta name="description" content="Writing on client and talent management for consulting firms — placement quality, employee pulse, engagement health signals, and how TalentDesk works under the hood.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-100/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-10">
+            <a href="/talentdesk/" class="flex items-center gap-2.5 shrink-0">
+                <div class="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center shrink-0">
+                    <svg style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+                </div>
+                <span class="font-bold text-slate-900 text-lg tracking-tight">TalentDesk</span>
+            </a>
+            <div class="hidden md:flex items-center gap-1">
+                <a href="/talentdesk/#features" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Features</a>
+                <a href="/talentdesk/#pricing" class="text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-sm font-medium px-3 py-2 rounded-lg transition-colors">Pricing</a>
+                <a href="/talentdesk/blog.html" class="text-teal-600 bg-teal-50 text-sm font-medium px-3 py-2 rounded-lg">Blog</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="mailto:engage@sentinelflux.in?subject=TalentDesk" class="hidden sm:flex text-slate-600 hover:text-slate-900 text-sm font-medium px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors">Contact</a>
+            <a href="https://talentdesk.sentinelflux.in" target="_blank" rel="noopener" class="bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-teal-700 transition-colors shadow-sm">Open App</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-28 pb-24 px-6">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <div class="mb-14">
+            <div class="text-xs font-semibold text-teal-600 uppercase tracking-widest mb-3">Blog</div>
+            <h1 class="text-4xl font-extrabold text-slate-900 mb-3">Writing on client &amp; talent management</h1>
+            <p class="text-lg text-slate-500 max-w-xl">How consulting and staffing firms can run tighter placement pipelines, better feedback loops, and healthier client accounts — and how TalentDesk is built to support all of it.</p>
+        </div>
+
+        <!-- Featured post -->
+        <a href="/talentdesk/blog/why-we-built-talentdesk.html" class="group block mb-12 bg-slate-50 border border-slate-200 rounded-2xl p-8 hover:border-teal-200 hover:bg-teal-50/30 transition-all">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="bg-teal-100 text-teal-700 text-xs font-semibold px-2.5 py-1 rounded-full">Company</span>
+                <span class="text-slate-400 text-sm">June 25, 2026 · 6 min read</span>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-3 group-hover:text-teal-700 transition-colors">Why We Built TalentDesk</h2>
+            <p class="text-slate-600 leading-relaxed mb-4">Most consulting firm operations live in a tangle of spreadsheets, Slack threads, and email chains. The story behind TalentDesk — from a missed placement red flag to a structured operations tool built for the full lifecycle.</p>
+            <span class="text-teal-600 text-sm font-semibold group-hover:underline">Read post →</span>
+        </a>
+
+        <!-- Post grid -->
+        <div class="grid md:grid-cols-2 gap-6">
+
+            <a href="/talentdesk/blog/placement-quality-gate.html" class="group block border border-slate-200 rounded-xl p-6 hover:border-teal-200 hover:shadow-md transition-all">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-full">Deep Dive</span>
+                    <span class="text-slate-400 text-sm">June 23, 2026 · 5 min</span>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-2 group-hover:text-teal-700 transition-colors">The Placement Quality Gate: A Hiring Bar That Sticks</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">A 4-point gate — pre-screen, technical bar, background check, client alignment — that must be cleared before any engineer can be marked Deputed. Why a checklist beats a process doc every time.</p>
+            </a>
+
+            <a href="/talentdesk/blog/green-amber-red-health-signals.html" class="group block border border-slate-200 rounded-xl p-6 hover:border-teal-200 hover:shadow-md transition-all">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-teal-100 text-teal-700 text-xs font-semibold px-2.5 py-1 rounded-full">How-to</span>
+                    <span class="text-slate-400 text-sm">June 20, 2026 · 4 min</span>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-2 group-hover:text-teal-700 transition-colors">Green, Amber, Red: Weekly Engagement Health Signals</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">A color-coded signal board per placement, logged weekly. How a simple traffic-light system catches client relationship drift before it becomes a churn risk.</p>
+            </a>
+
+            <a href="/talentdesk/blog/pulse-reviews.html" class="group block border border-slate-200 rounded-xl p-6 hover:border-teal-200 hover:shadow-md transition-all">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full">Opinion</span>
+                    <span class="text-slate-400 text-sm">June 17, 2026 · 5 min</span>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-2 group-hover:text-teal-700 transition-colors">Pulse Reviews: Are They Stretched, Supported, Growing?</h3>
+                <p class="text-slate-500 text-sm leading-relaxed">Three questions that tell you more about an engineer's deployment than any engagement survey. How TalentDesk's structured 1-on-1 sliders surface the signals that matter.</p>
+            </a>
+
+        </div>
+    </div>
+</main>
+
+<footer class="bg-slate-950 text-slate-400 pt-10 pb-8 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm">
+        <a href="/talentdesk/" class="flex items-center gap-2 font-bold text-white">
+            <div class="w-6 h-6 bg-teal-600 rounded-md flex items-center justify-center"><svg style="width:13px;height:13px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg></div>
+            TalentDesk
+        </a>
+        <div class="flex gap-6"><a href="/privacy.html" class="hover:text-white transition-colors">Privacy</a><a href="/terms.html" class="hover:text-white transition-colors">Terms</a><a href="/talentdesk/blog.html" class="hover:text-white transition-colors">Blog</a><a href="/" class="hover:text-white transition-colors">SentinelFlux</a></div>
+        <span>&copy; 2026 SentinelFlux</span>
+    </div>
+</footer>
+
+</body>
+</html>
