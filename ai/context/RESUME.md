@@ -19,7 +19,21 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 
 ---
 
-## What Was Just Done (2026-06-18) — b54f04d (branch: reposition-specvault-hosted-saas)
+## What Was Just Done (2026-06-19) — 42465c4 (branch: reposition-specvault-hosted-saas)
+
+### Rewrite company About page (was a VigilQA page)
+`website/about.html` still branded "SentinelFlux VigilQA," used VigilQA-only nav
+(Modules/Platform/Pricing/Docs), and told a test-automation-only story. Rewrote it
+as a true company About page now that SentinelFlux is a four-product suite.
+- title/meta/nav/footer → company-level (SentinelFlux; nav → /#products, /#services, /about.html, blog)
+- hero "AI-native tools for the software delivery lifecycle"; "Why We Exist" reframed lifecycle-wide
+- "What We Build" lists all four products as linked cards (VigilQA, SpecVault, AgentPulse, DocForge)
+- "How We Work" notes fully hosted/managed + human-in-the-loop; adds services + founder-led status
+- no over-claims (no team-size/customer/revenue numbers)
+
+---
+
+## Previous Work (2026-06-18) — b54f04d + 34e3412 (branch: reposition-specvault-hosted-saas)
 
 ### Reposition SpecVault from open-source/self-hosted to hosted SaaS
 Reviewed all products except FlexGig for over-claims given all repos are now private.

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentPulse Setup — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content ol li{list-style-type:decimal}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-info{background:#eff6ff;border-left:4px solid #3b82f6}.callout-tip{background:#f0fdf4;border-left:4px solid #22c55e}.callout-warn{background:#fffbeb;border-left:4px solid #f59e0b}.flow-box{border:1px solid #e2e8f0;border-radius:.5rem;padding:.75rem 1rem;background:#fff;text-align:center}.flow-arrow{color:#94a3b8;font-weight:700}.step-num{display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;border-radius:9999px;background:#4f46e5;color:#fff;font-size:.8rem;font-weight:600;margin-right:.5rem}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">AgentPulse Setup</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">AgentPulse is real-time observability for AI agents — cost-per-product, run traces, and alerting. This guide is the reference starting point for instrumenting any agent codebase. SentinelFlux ships with a one-line integration that monitors <strong>every</strong> agent at once.</p>
+
+        <h2>How it works</h2>
+        <p>AgentPulse is <strong>push-based</strong>. Registering an agent only mints a webhook secret — nothing is monitored until your agent code <em>sends a run event</em> to <code>POST /v1/runs</code> after each execution. The dashboard shows each agent as “awaiting run data” until the first event arrives.</p>
+
+        <div class="not-prose my-6 p-5 bg-slate-50 border border-slate-200 rounded-xl">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-sm text-slate-700">
+            <div class="flow-box flex-1">
+              <div class="font-semibold text-slate-900">Agent run</div>
+              <div class="text-xs text-slate-500">your code · per execution</div>
+            </div>
+            <div class="flow-arrow text-center">→</div>
+            <div class="flow-box flex-1">
+              <div class="font-semibold text-slate-900">BaseAgent wrapper</div>
+              <div class="text-xs text-slate-500">times it · catches errors</div>
+            </div>
+            <div class="flow-arrow text-center">→</div>
+            <div class="flow-box flex-1">
+              <div class="font-semibold text-slate-900">POST /v1/runs</div>
+              <div class="text-xs text-slate-500">Bearer webhook secret</div>
+            </div>
+            <div class="flow-arrow text-center">→</div>
+            <div class="flow-box flex-1 bg-indigo-50 border-indigo-200">
+              <div class="font-semibold text-indigo-700">AgentPulse</div>
+              <div class="text-xs text-indigo-500">dashboard · alerts</div>
+            </div>
+          </div>
+        </div>
+
+        <h2>The single integration point</h2>
+        <p>Every SentinelFlux agent subclasses <code>BaseAgent</code> and implements <code>run(**kwargs) -&gt; dict</code>. That shared base class is the one place to instrument: a <code>__init_subclass__</code> hook auto-wraps each subclass’s <code>run()</code> as the class is defined — so all agents emit run events with <strong>zero changes to the agent classes or their callers</strong>. The wrapper times the call, marks the run <code>failed</code> on exception (and re-raises), and tags the event with the instance’s <code>name</code>.</p>
+
+        <pre><code># ai/agents/base_agent.py
+class BaseAgent:
+    name: str = "base"
+
+    # Auto-wrap every subclass's run() with AgentPulse telemetry (no-op unless configured).
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if "run" in cls.__dict__:
+            from sentinelflux.agentpulse import instrument_run
+            cls.run = instrument_run(cls.__dict__["run"])</code></pre>
+
+        <div class="callout callout-tip not-prose">
+          <p class="text-sm text-green-800"><strong>Why this scales:</strong> <code>__init_subclass__</code> fires for subclasses at any depth, so a new agent — or one that inherits <code>run()</code> from another agent — is covered automatically. Attribution is by <code>self.name</code> at call time, so inherited <code>run()</code> still reports under the right agent.</p>
+        </div>
+
+        <p>The wrapper itself is small and never lets telemetry surface in the agent:</p>
+        <pre><code># sentinelflux/agentpulse.py
+def instrument_run(fn):
+    @functools.wraps(fn)
+    def wrapper(self, *args, **kwargs):
+        started = datetime.now(timezone.utc)
+        t0 = time.monotonic()
+        status, error = "success", None
+        try:
+            return fn(self, *args, **kwargs)
+        except Exception as e:
+            status, error = "failed", str(e)[:2000]
+            raise
+        finally:
+            record_run(getattr(self, "name", "unknown"), status,
+                       started.isoformat(), int((time.monotonic() - t0) * 1000), error)
+    return wrapper</code></pre>
+
+        <h2>1 · Register your agents</h2>
+        <p>Each agent maps to one AgentPulse agent (so the dashboard breaks cost and reliability down per agent). The registration script logs in, creates a <strong>VigilQA</strong> product, registers every agent, and writes their webhook secrets to a gitignored file. It is idempotent — re-running only creates what’s missing.</p>
+        <pre><code>AGENTPULSE_URL=https://agentpulse.sentinelflux.in \
+AGENTPULSE_EMAIL=you@example.com \
+AGENTPULSE_PASSWORD=•••••• \
+python scripts/register_agentpulse.py
+# → wrote 19 secrets → config/agentpulse.secrets.json</code></pre>
+
+        <div class="callout callout-warn not-prose">
+          <p class="text-sm text-amber-800"><strong>Plan limits:</strong> the Free plan allows 5 agents. SentinelFlux registers ~19, so the AgentPulse org must be on <strong>Pro</strong> (100 agents) before running the script, or registration stops at the limit with a 402.</p>
+        </div>
+
+        <h2>2 · Configure</h2>
+        <p>The client reads the AgentPulse base URL and per-agent secrets from either source. If neither is present, telemetry is a <strong>silent no-op</strong> — agents run exactly as before.</p>
+        <ul>
+          <li><code>AGENTPULSE_URL</code> env + <code>config/agentpulse.secrets.json</code> (written by the script), or</li>
+          <li><code>AGENTPULSE_SECRETS</code> env pointing at that JSON file.</li>
+        </ul>
+        <pre><code>// config/agentpulse.secrets.json  (gitignored — contains secrets)
+{
+  "base_url": "https://agentpulse.sentinelflux.in",
+  "agents": {
+    "api_test_synthesis": "whsec_…",
+    "flaky_detector": "whsec_…",
+    "result_analyzer": "whsec_…"
+  }
+}</code></pre>
+
+        <h2>3 · Verify</h2>
+        <ol>
+          <li>Run any agent (e.g. a generation or post-run agent) as you normally would.</li>
+          <li>Open the AgentPulse dashboard — the agent flips from “awaiting run data” to live, with run count, success rate, and latency.</li>
+          <li>Force a failure and confirm the run shows <code>failed</code> with the error message.</li>
+        </ol>
+
+        <h2>What gets sent</h2>
+        <p>One run event per agent execution:</p>
+        <table>
+          <thead><tr><th>Field</th><th>Source</th></tr></thead>
+          <tbody>
+            <tr><td><code>status</code></td><td><code>success</code>, or <code>failed</code> if <code>run()</code> raised</td></tr>
+            <tr><td><code>startedAt</code> / <code>durationMs</code></td><td>measured around the wrapped call</td></tr>
+            <tr><td><code>inputTokens</code> / <code>outputTokens</code></td><td>summed from <code>token_usage</code> for the run (via <code>capture_run_usage()</code>)</td></tr>
+            <tr><td><code>costUsd</code></td><td>estimated per model from a price map (override via config <code>pricing</code>)</td></tr>
+            <tr><td><code>error</code></td><td>exception message (truncated) on failure</td></tr>
+            <tr><td><code>triggeredBy</code></td><td><code>api</code></td></tr>
+          </tbody>
+        </table>
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800">Tokens and cost now flow, so the cost-per-product view is populated. <strong>Cost is an estimate</strong> from a per-model price map — override rates by adding a <code>pricing</code> map to <code>agentpulse.secrets.json</code>. Step-level traces (the per-call Execution Trace breakdown) are the remaining follow-up.</p>
+        </div>
+
+        <h2>Troubleshooting</h2>
+        <ul>
+          <li><strong>Agent stays “awaiting run data”</strong> — the run completed but no event was sent. Check that <code>AGENTPULSE_URL</code> is set and the agent’s <code>name</code> exists in the secrets file.</li>
+          <li><strong>Registration stops early with 402</strong> — the org hit its plan’s agent limit; upgrade to Pro and re-run (idempotent).</li>
+          <li><strong>401 on ingest</strong> — the webhook secret was regenerated in AgentPulse; re-run the registration script to refresh the secrets file.</li>
+          <li><strong>Nothing breaks but no data</strong> — telemetry is intentionally fire-and-forget and swallows all errors, so a misconfigured URL never fails a run. Verify connectivity to <code>/v1/runs</code> manually with <code>curl</code>.</li>
+        </ul>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>

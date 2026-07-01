@@ -74,6 +74,12 @@ var NAV = [
     ]
   },
   {
+    section: 'Observability',
+    pages: [
+      { title: 'AgentPulse Setup', href: '/docs/observability/agentpulse.html' }
+    ]
+  },
+  {
     section: 'Troubleshooting',
     pages: [
       { title: 'Common Issues', href: '/docs/troubleshooting/index.html' }
