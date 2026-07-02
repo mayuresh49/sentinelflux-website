@@ -46,7 +46,7 @@ scenarios:
     steps:
       - Send GET request to /api/v1/products with query params page=1&limit=20
       - Include Authorization header with valid bearer token
-    expected: >
+    expected: &gt;
       HTTP 200 response.
       Body is JSON object with keys: data (array), total (number), page (number).
       data array contains up to 20 items, each with id, name, price, and category fields.
@@ -59,7 +59,7 @@ scenarios:
     steps:
       - Send POST to /api/v1/products with valid JSON body (name, price, category)
       - Include Authorization header with admin bearer token
-    expected: >
+    expected: &gt;
       HTTP 201 response.
       Body includes id (UUID), name matching request, created_at timestamp.
 
@@ -70,7 +70,7 @@ scenarios:
     method: POST
     steps:
       - Send POST to /api/v1/products with body missing the name field
-    expected: >
+    expected: &gt;
       HTTP 422 response.
       Body includes errors array with field "name" and message "is required".</pre>
 
@@ -87,7 +87,7 @@ scenarios:
     steps:
       - Send GraphQL query { user(id: "test-user-id") { id name email createdAt } }
       - Include Authorization header with valid bearer token
-    expected: >
+    expected: &gt;
       HTTP 200, no errors array in response.
       data.user.id matches "test-user-id".
       data.user.email is a valid email format.</pre>
@@ -125,7 +125,7 @@ def test_prod_001_get_products_paginated(api_client, auth_token):
     body = response.json()
     assert "data" in body
     assert isinstance(body["data"], list)
-    assert len(body["data"]) <= 20
+    assert len(body["data"]) &lt;= 20
     assert "total" in body
     assert "page" in body</pre>
 

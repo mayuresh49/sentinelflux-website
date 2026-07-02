@@ -68,7 +68,7 @@ scenarios:
       - Click "Continue to Payment"
       - Enter valid test card details in the payment form
       - Click "Place Order"
-    expected: >
+    expected: &gt;
       Redirected to /order-confirmation page.
       Order confirmation number is displayed.
       "Thank you for your order" heading is visible.
@@ -77,7 +77,7 @@ scenarios:
     title: "Empty cart shows message and disabled checkout button"
     steps:
       - Navigate to /cart with an empty cart
-    expected: >
+    expected: &gt;
       "Your cart is empty" message is visible.
       "Proceed to Checkout" button is either absent or disabled.</pre>
 

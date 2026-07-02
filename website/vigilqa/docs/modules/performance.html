@@ -57,7 +57,7 @@ scenarios:
     max_response_ms: 500
     steps:
       - Send GET to /api/v1/products with valid auth
-    expected: >
+    expected: &gt;
       HTTP 200 within 500ms at p95 latency.
       p99 latency below 1000ms.
 
@@ -69,7 +69,7 @@ scenarios:
     steps:
       - Navigate to / (homepage)
       - Wait for page to be fully loaded
-    expected: >
+    expected: &gt;
       Lighthouse Performance score ≥ 80.
       LCP ≤ 2500ms.
       CLS ≤ 0.1.</pre>
