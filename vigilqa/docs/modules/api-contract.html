@@ -60,7 +60,7 @@ scenarios:
     method: GET
     steps:
       - Send GET to /api/v1/orders/{id} with a valid order ID
-    expected: >
+    expected: &gt;
       HTTP 200.
       Response body includes: id (string/UUID), status (string enum: pending/processing/shipped/delivered/cancelled),
       created_at (ISO 8601 datetime), total_amount (number), line_items (array).

@@ -56,7 +56,7 @@ scenarios:
     steps:
       - Navigate to / (homepage)
       - Wait for hero section to be fully rendered
-    expected: >
+    expected: &gt;
       Hero section screenshot matches the approved baseline.
       No layout shifts or missing images.
 
@@ -69,7 +69,7 @@ scenarios:
     steps:
       - Navigate to /pricing
       - Scroll to the pricing section
-    expected: >
+    expected: &gt;
       Pricing cards render correctly at 375px width.
       No text overflow or truncation.</pre>
 

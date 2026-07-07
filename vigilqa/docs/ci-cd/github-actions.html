@@ -59,7 +59,7 @@ jobs:
                 "pr_number": "${{ github.event.pull_request.number }}"
               }
             }' | jq -r '.run_id')
-          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          echo "run_id=$RUN_ID" &gt;&gt; $GITHUB_OUTPUT
 
       - name: Wait for results
         run: |
