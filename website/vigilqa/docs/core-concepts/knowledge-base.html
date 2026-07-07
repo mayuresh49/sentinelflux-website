@@ -69,7 +69,7 @@ scenarios:
       - Enter valid email address
       - Enter correct password
       - Click the "Sign In" button
-    expected: >
+    expected: &gt;
       User is redirected to /dashboard.
       Navigation bar shows the user's name.
       Session cookie is set.
@@ -82,7 +82,7 @@ scenarios:
       - Enter registered email
       - Enter incorrect password
       - Click "Sign In"
-    expected: >
+    expected: &gt;
       Page remains on /login.
       Error message "Invalid email or password" is visible.
       No session cookie is set.
@@ -94,7 +94,7 @@ scenarios:
       - Navigate to /forgot-password
       - Enter registered email address
       - Click "Send reset link"
-    expected: >
+    expected: &gt;
       Success message "Check your email" is displayed.
       Confirmation email is sent to the address entered.</pre>
 

@@ -52,7 +52,7 @@ scenarios:
     auth_required: false
     steps:
       - Send POST to /api/auth/login with email containing SQL injection payload
-    expected: >
+    expected: &gt;
       HTTP 400 or 422 response.
       No database error messages exposed in response body.
       Application does not return HTTP 200 or 500 for injection payloads.
@@ -62,7 +62,7 @@ scenarios:
     module: security
     steps:
       - Send GET to /api/v1/users/me without any Authorization header
-    expected: >
+    expected: &gt;
       HTTP 401 response.
       Response does not include any user data.
       WWW-Authenticate header is present.</pre>
