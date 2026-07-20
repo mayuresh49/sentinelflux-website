@@ -75,7 +75,7 @@ var NAV = [
       { title: 'Config Reference', href: '/vigilqa/docs/configuration/config-reference.html' },
       { title: 'Environments', href: '/vigilqa/docs/configuration/environments.html' },
       { title: 'LLM Configuration', href: '/vigilqa/docs/configuration/llm-configuration.html' },
-      { title: 'Quality Thresholds', href: '/vigilqa/docs/configuration/quality-thresholds.html' },
+      { title: 'Quality Bands', href: '/vigilqa/docs/configuration/quality-thresholds.html' },
       { title: 'Service Registry', href: '/vigilqa/docs/configuration/service-registry.html' }
     ]
   },

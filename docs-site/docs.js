@@ -70,7 +70,7 @@ var NAV = [
       { title: 'Config Reference', href: '/docs/configuration/config-reference.html' },
       { title: 'Environments', href: '/docs/configuration/environments.html' },
       { title: 'LLM Configuration', href: '/docs/configuration/llm-configuration.html' },
-      { title: 'Quality Thresholds', href: '/docs/configuration/quality-thresholds.html' },
+      { title: 'Quality Bands', href: '/docs/configuration/quality-thresholds.html' },
       { title: 'Service Registry', href: '/docs/configuration/service-registry.html' }
     ]
   },
