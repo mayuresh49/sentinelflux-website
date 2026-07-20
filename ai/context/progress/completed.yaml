@@ -1,6 +1,20 @@
 # Completed work — newest first
 
 - date: 2026-07-20
+  commit: 72ad426
+  branch: reposition-specvault-hosted-saas
+  title: "Docs: rewrite Quality Bands page to match shipped product behaviour"
+  details:
+    - feature shipped in sentinelflux-vigilqa as DD-030 (c86afc5, branch feat/mcp-server)
+    - configured at Configurations -> Quality Bands per product; not by hand-editing KB YAML
+    - three metrics with real defaults; flake_rate + contract_drift rows were invented, removed
+    - two cutoffs per metric, third implied; no label overrides, no fail_below/warn_below
+    - release doc-coverage floor derives from the band; explicit stored gate value wins
+    - documented real limits — no env/domain scoping, fixed names/colours, risk weights fixed
+    - nav label -> "Quality Bands"; filename/URL kept so the published link stays valid
+    - supersedes the invented schema published in 5ae23b6 (see RESUME.md warning)
+
+- date: 2026-07-20
   commit: 5ae23b6
   branch: reposition-specvault-hosted-saas
   title: "Docs: configurable Quality Thresholds schema (risk/coverage/health bands)"

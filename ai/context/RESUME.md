@@ -26,23 +26,27 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 
 ---
 
-## What Was Just Done (2026-07-20) — 5ae23b6 + follow-up (branch: reposition-specvault-hosted-saas)
+## What Was Just Done (2026-07-20) — 72ad426 (branch: reposition-specvault-hosted-saas)
 
-### Document a configurable Quality Thresholds schema
-Test Quality stats (risk score, doc coverage, test health) had hardcoded bands with no
-documented way to tune them. Designed a `quality` block for the Knowledge Base YAML and
-added `configuration/quality-thresholds.html` to both docs copies, wired into both navs
-and into `website/sitemap.xml`.
-- lower-is-better metrics use `max`, higher-is-better use `min` — prevents inverted bands
-- named bands so CI gates say `fail_below: amber` rather than repeating the number
-- domain + environment scoping, merged band-by-band; validation fails at config load
-- **Not implemented.** This is a spec — no code in this repo or (yet) the product repo
-  reads a `quality` block. Next step is implementing it in the VigilQA product repo.
-- **Unverified defaults.** The bands documented for `test_health`, `flake_rate`, and
-  `contract_drift` were invented to round out the table; only the risk-score and
-  doc-coverage figures came from the user. Confirm against real product behaviour.
-- Caught late: the page was first added to `docs-site/` only, which left the sitemap
-  pointing at a nonexistent `/vigilqa/docs/` URL. See the two-copies warning above.
+### Quality Bands docs — now matching shipped product behaviour
+`configuration/quality-thresholds.html` exists in both docs copies, in both navs, and in
+`website/sitemap.xml`. Nav label is **Quality Bands**; the filename and URL were kept so the
+published link stays valid.
+
+The feature shipped in the **sentinelflux-vigilqa** repo as DD-030 (`c86afc5`,
+branch `feat/mcp-server`): per-product band cutoffs set at **Configurations → Quality Bands**,
+stored under `run_config.quality_bands`, with the release doc-coverage gate floor derived from
+`doc_coverage.green`. The docs page now describes that.
+
+> ⚠️ **Cautionary note for future sessions.** The first version of this page (5ae23b6)
+> documented a schema invented without reading the product — a `quality:` block in "Knowledge
+> Base YAML", band objects with `label` overrides, `quality.gate.fail_below`, plus made-up
+> default bands for `flake_rate` and `contract_drift`. It was published live to two sites
+> before anyone looked at the product repo. **This repo is website + docs only; the product
+> lives in sibling repos.** Verify against the product before documenting its behaviour.
+
+- Also caught late in that first pass: the page was added to `docs-site/` only, leaving the
+  sitemap pointing at a nonexistent `/vigilqa/docs/` URL. See the two-copies warning above.
 
 ---
 
