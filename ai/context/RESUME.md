@@ -1,6 +1,6 @@
 # SentinelFlux Website — AI Context Resume
 
-**Last updated:** 2026-06-18
+**Last updated:** 2026-07-20
 
 ## Project Overview
 
@@ -12,14 +12,41 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 - `/` — SentinelFlux company homepage (hero, product cards, mission)
 - `/vigilqa/` — VigilQA product landing page (with "By SentinelFlux" breadcrumb)
 - `/vigilqa/blog.html` + `/vigilqa/blog/` — VigilQA blog (14 posts, VigilQA branding)
-- `/vigilqa/docs/` — VigilQA docs (moved from docs-site/, 41 pages)
+- `/vigilqa/docs/` — VigilQA docs, served from `website/vigilqa/docs/` (41 pages)
+
+> ⚠️ **Two live docs copies.** `docs-site/` at repo root is NOT stale — it has its own
+> CNAME and publishes to **docs.sentinelflux.in**, while `website/vigilqa/docs/` serves
+> **sentinelflux.in/vigilqa/docs/**. They have drifted: the docs-site copy says
+> "SentinelFlux" and links `/docs/...`; the vigilqa copy says "VigilQA" and links
+> `/vigilqa/docs/...`. A docs change must be applied to **both**, and each has its own
+> `docs.js` nav. `website/sitemap.xml` lists only the `/vigilqa/docs/` URLs.
 - `/specvault/` — SpecVault product landing page
 - `/blog.html` — company-level blog stub (links to product blogs)
 - Supporting pages: about, changelog, status, privacy, terms, security, features/, modules/
 
 ---
 
-## What Was Just Done (2026-06-19) — 42465c4 (branch: reposition-specvault-hosted-saas)
+## What Was Just Done (2026-07-20) — 5ae23b6 + follow-up (branch: reposition-specvault-hosted-saas)
+
+### Document a configurable Quality Thresholds schema
+Test Quality stats (risk score, doc coverage, test health) had hardcoded bands with no
+documented way to tune them. Designed a `quality` block for the Knowledge Base YAML and
+added `configuration/quality-thresholds.html` to both docs copies, wired into both navs
+and into `website/sitemap.xml`.
+- lower-is-better metrics use `max`, higher-is-better use `min` — prevents inverted bands
+- named bands so CI gates say `fail_below: amber` rather than repeating the number
+- domain + environment scoping, merged band-by-band; validation fails at config load
+- **Not implemented.** This is a spec — no code in this repo or (yet) the product repo
+  reads a `quality` block. Next step is implementing it in the VigilQA product repo.
+- **Unverified defaults.** The bands documented for `test_health`, `flake_rate`, and
+  `contract_drift` were invented to round out the table; only the risk-score and
+  doc-coverage figures came from the user. Confirm against real product behaviour.
+- Caught late: the page was first added to `docs-site/` only, which left the sitemap
+  pointing at a nonexistent `/vigilqa/docs/` URL. See the two-copies warning above.
+
+---
+
+## Previous Work (2026-06-19) — 42465c4 (branch: reposition-specvault-hosted-saas)
 
 ### Rewrite company About page (was a VigilQA page)
 `website/about.html` still branded "SentinelFlux VigilQA," used VigilQA-only nav

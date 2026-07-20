@@ -1,6 +1,18 @@
 # Completed work — newest first
 
-- date: 2026-06-19
+- date: 2026-07-20
+  commit: 5ae23b6
+  branch: reposition-specvault-hosted-saas
+  title: "Docs: configurable Quality Thresholds schema (risk/coverage/health bands)"
+  details:
+    - new `quality` KB YAML block so band cutoffs are per-project, not generic defaults
+    - lower-is-better metrics use `max`, higher-is-better use `min` — direction is explicit
+    - named bands let CI gate via `fail_below: amber` instead of duplicating numbers
+    - domain/environment scoping merges band-by-band; validation fails at config load
+    - added to BOTH docs copies + nav — docs-site/ and website/vigilqa/docs/
+    - CAVEAT: documents an unimplemented schema; no product code reads `quality` yet
+    - CAVEAT: default bands for test_health/flake_rate/contract_drift are invented,
+      not sourced from product behaviour — verify before treating as authoritative
   commit: 42465c4
   branch: reposition-specvault-hosted-saas
   title: "Rewrite company About page (was a VigilQA-only page)"
