@@ -154,14 +154,14 @@
                         <div class="font-bold text-slate-900 text-xl">VigilQA</div>
                         <div class="text-slate-500 text-sm">AI-Powered Test Automation</div>
                     </div>
-                    <span class="ml-auto text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full font-semibold shrink-0">Early Access</span>
+                    <span class="ml-auto text-xs bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-semibold shrink-0">Free 14-day trial</span>
                 </div>
                 <p class="text-slate-600 leading-relaxed mb-6">
                     Generate complete test suites from your knowledge base, heal broken locators automatically, and get AI-powered failure analysis — across API, Web, Security, Performance, and more.
                 </p>
                 <div class="flex flex-wrap gap-2 mb-6">
-                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">9 testing modules</span>
-                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">11 AI agents</span>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">11+ testing modules</span>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">20+ AI agents</span>
                     <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">Self-healing locators</span>
                     <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">CI/CD native</span>
                 </div>
@@ -789,7 +789,7 @@
     },
     {
       keys: ['pricing','cost','plan','pro','enterprise','how much','tiers','trial','14 day','$49'],
-      md: '**Three tiers:**\n\n• **Free Trial — 14 days** · Full Pro access, no credit card required. Every test module, all 20+ AI agents, hosted dashboard, CI/CD integrations.\n\n• **Pro — $49 /seat/month** · Cloud-hosted, billed annually. Unlimited projects, all 20+ AI agents, hosted dashboard, CI/CD integrations, priority email support.\n\n• **Enterprise — Custom** · Dedicated private cloud instance, SSO/SAML, air-gapped LLM support, SLA + dedicated support, custom integrations.\n\nEmail `engage@sentinelflux.in` to start your free trial or get an Enterprise quote.'
+      md: '**Three tiers:**\n\n• **Free Trial — 14 days** · Full Pro access, no credit card required. Every test module, all 20+ AI agents, hosted dashboard, CI/CD integrations.\n\n• **Pro — $49 /seat/month** · Cloud-hosted, billed annually. Unlimited projects, all 20+ AI agents, hosted dashboard, CI/CD integrations, priority email support.\n\n• **Enterprise — Custom** · Dedicated private cloud instance, SSO/SAML, air-gapped LLM support, SLA + dedicated support, custom integrations.\n\n**Start free at `vigilqa.sentinelflux.in/signup`** — self-service, no credit card, no sales call. For an Enterprise quote, email `engage@sentinelflux.in`.'
     },
     {
       keys: ['approvals','human in the loop','approve','approval dashboard','review suggestions'],
@@ -801,7 +801,7 @@
     },
     {
       keys: ['get started','getting started','install','setup','quick start','how to start','how do i use'],
-      md: '**Quick start:**\n\n1. Install SentinelFlux VigilQA (Python package, available on request)\n2. Write YAML KB files describing your app modules and scenarios\n3. Run **App Exploration** — SentinelFlux VigilQA crawls your live app for real DOM selectors\n4. Run **Test Generation** — AI pipeline produces pytest scripts from your KB\n5. **Execute the suite** — locally or in your CI pipeline\n6. Open the dashboard to review agent analysis and results\n\nCurrently in early access. Email `engage@sentinelflux.in` to request access.'
+      md: '**Quick start:**\n\n1. **Sign up free at `vigilqa.sentinelflux.in/signup`** — corporate email + company name, no credit card\n2. Verify your email and your hosted workspace is created instantly — pre-seeded with data across every module\n3. Explore Test Plans, Runs, Agent Activities and the Quality Dashboard on live seeded results\n4. Add your own product, describe its modules in the KB, and run **App Exploration** + **Test Generation** to produce pytest scripts\n5. Execute the suite from the dashboard or your CI pipeline\n\nFully hosted — nothing to install. 14-day trial, no credit card required.'
     },
     {
       keys: ['export','download script','export test','take the script','use the script outside','get the scripts','my own runner'],
@@ -1183,7 +1183,7 @@
     },
     {
       keys: ['free trial','pro trial','try pro','evaluate pro','trial period','trial length'],
-      md: '**Pro trial:**\n\n• 14-day free trial with full Pro feature access\n• No credit card required to start\n• Unlimited projects and all 20+ agents during the trial\n• Trial data and runs carry over when you upgrade\n\nTo start a trial: email `engage@sentinelflux.in` with subject "Pro Trial" or click "Start free trial" on the pricing page. The team typically activates trials within 24 hours during early access.'
+      md: '**Pro trial:**\n\n• 14-day free trial with full Pro feature access\n• No credit card required to start\n• Unlimited projects and all 20+ agents during the trial\n• Trial data and runs carry over when you upgrade\n\nTo start a trial: **sign up at `vigilqa.sentinelflux.in/signup`** with your corporate email and company name. Your workspace is created instantly the moment you verify your email — no waiting, no sales call.'
     },
     {
       keys: ['billing','annual billing','monthly billing','invoice','receipt','payment','billing cycle'],
@@ -1481,7 +1481,7 @@
     if (/test|script|generat|pytest|file|code/.test(t))
       return 'That\'s a great question! For anything about generated scripts — exporting, editing, running independently — try asking **"can I export the test scripts?"** or **"can I customize generated tests?"**.\n\nFor the full generation pipeline ask: **"how does the generation pipeline work?"**\n\nStill not finding what you need? Email **engage@sentinelflux.in** and the team will help.';
     if (/price|cost|free|paid|money|trial|fee/.test(t))
-      return 'For pricing details ask **"what are the pricing tiers?"** — 14-day free trial, then Pro at $49/seat/month, Enterprise is custom.\n\nEmail `engage@sentinelflux.in` to start your free trial.';
+      return 'For pricing details ask **"what are the pricing tiers?"** — 14-day free trial, then Pro at $49/seat/month, Enterprise is custom.\n\nStart your free trial at `vigilqa.sentinelflux.in/signup` — self-service, no credit card.';
     if (/support|help|contact|email|team|human/.test(t))
       return 'For questions not covered here, reach the SentinelFlux team directly at **engage@sentinelflux.in**.\n\nDocumentation is at **sentinelflux.in/docs/**.';
     if (/integrat|connect|plugin|jira|linear|github issue|slack/.test(t))
