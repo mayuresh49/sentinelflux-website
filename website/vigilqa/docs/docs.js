@@ -29,6 +29,8 @@ var NAV = [
       { title: 'Accessibility', href: '/vigilqa/docs/modules/accessibility.html' },
       { title: 'Security & VAPT', href: '/vigilqa/docs/modules/security-vapt.html' },
       { title: 'Performance', href: '/vigilqa/docs/modules/performance.html' },
+      { title: 'AI Agent Testing', href: '/vigilqa/docs/modules/ai-agent-testing.html' },
+      { title: 'Model Evals', href: '/vigilqa/docs/modules/model-evals.html' },
       { title: 'Bug Tracker', href: '/vigilqa/docs/modules/bug-tracker.html' }
     ]
   },
@@ -49,10 +51,13 @@ var NAV = [
     pages: [
       { title: 'Test Plans', href: '/vigilqa/docs/platform/test-plans.html' },
       { title: 'Test Runs', href: '/vigilqa/docs/platform/test-runs.html' },
+      { title: 'Requirements & Traceability', href: '/vigilqa/docs/platform/traceability.html' },
+      { title: 'Release Readiness', href: '/vigilqa/docs/platform/release-readiness.html' },
       { title: 'Agent Activities', href: '/vigilqa/docs/platform/agent-activities.html' },
       { title: 'Approvals', href: '/vigilqa/docs/platform/approvals.html' },
       { title: 'Team & Roles', href: '/vigilqa/docs/platform/team-roles.html' },
       { title: 'Notifications', href: '/vigilqa/docs/platform/notifications.html' },
+      { title: 'Test Tools Support', href: '/vigilqa/docs/platform/test-tools.html' },
       { title: 'Integrations', href: '/vigilqa/docs/platform/integrations.html' }
     ]
   },
@@ -70,6 +75,7 @@ var NAV = [
       { title: 'Config Reference', href: '/vigilqa/docs/configuration/config-reference.html' },
       { title: 'Environments', href: '/vigilqa/docs/configuration/environments.html' },
       { title: 'LLM Configuration', href: '/vigilqa/docs/configuration/llm-configuration.html' },
+      { title: 'Quality Bands', href: '/vigilqa/docs/configuration/quality-thresholds.html' },
       { title: 'Service Registry', href: '/vigilqa/docs/configuration/service-registry.html' }
     ]
   },

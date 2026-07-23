@@ -1,6 +1,6 @@
 # SentinelFlux Website — AI Context Resume
 
-**Last updated:** 2026-06-18
+**Last updated:** 2026-07-20
 
 ## Project Overview
 
@@ -12,14 +12,45 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 - `/` — SentinelFlux company homepage (hero, product cards, mission)
 - `/vigilqa/` — VigilQA product landing page (with "By SentinelFlux" breadcrumb)
 - `/vigilqa/blog.html` + `/vigilqa/blog/` — VigilQA blog (14 posts, VigilQA branding)
-- `/vigilqa/docs/` — VigilQA docs (moved from docs-site/, 41 pages)
+- `/vigilqa/docs/` — VigilQA docs, served from `website/vigilqa/docs/` (41 pages)
+
+> ⚠️ **Two live docs copies.** `docs-site/` at repo root is NOT stale — it has its own
+> CNAME and publishes to **docs.sentinelflux.in**, while `website/vigilqa/docs/` serves
+> **sentinelflux.in/vigilqa/docs/**. They have drifted: the docs-site copy says
+> "SentinelFlux" and links `/docs/...`; the vigilqa copy says "VigilQA" and links
+> `/vigilqa/docs/...`. A docs change must be applied to **both**, and each has its own
+> `docs.js` nav. `website/sitemap.xml` lists only the `/vigilqa/docs/` URLs.
 - `/specvault/` — SpecVault product landing page
 - `/blog.html` — company-level blog stub (links to product blogs)
 - Supporting pages: about, changelog, status, privacy, terms, security, features/, modules/
 
 ---
 
-## What Was Just Done (2026-06-19) — 42465c4 (branch: reposition-specvault-hosted-saas)
+## What Was Just Done (2026-07-20) — 72ad426 (branch: reposition-specvault-hosted-saas)
+
+### Quality Bands docs — now matching shipped product behaviour
+`configuration/quality-thresholds.html` exists in both docs copies, in both navs, and in
+`website/sitemap.xml`. Nav label is **Quality Bands**; the filename and URL were kept so the
+published link stays valid.
+
+The feature shipped in the **sentinelflux-vigilqa** repo as DD-030 (`c86afc5`,
+branch `feat/mcp-server`): per-product band cutoffs set at **Configurations → Quality Bands**,
+stored under `run_config.quality_bands`, with the release doc-coverage gate floor derived from
+`doc_coverage.green`. The docs page now describes that.
+
+> ⚠️ **Cautionary note for future sessions.** The first version of this page (5ae23b6)
+> documented a schema invented without reading the product — a `quality:` block in "Knowledge
+> Base YAML", band objects with `label` overrides, `quality.gate.fail_below`, plus made-up
+> default bands for `flake_rate` and `contract_drift`. It was published live to two sites
+> before anyone looked at the product repo. **This repo is website + docs only; the product
+> lives in sibling repos.** Verify against the product before documenting its behaviour.
+
+- Also caught late in that first pass: the page was added to `docs-site/` only, leaving the
+  sitemap pointing at a nonexistent `/vigilqa/docs/` URL. See the two-copies warning above.
+
+---
+
+## Previous Work (2026-06-19) — 42465c4 (branch: reposition-specvault-hosted-saas)
 
 ### Rewrite company About page (was a VigilQA page)
 `website/about.html` still branded "SentinelFlux VigilQA," used VigilQA-only nav

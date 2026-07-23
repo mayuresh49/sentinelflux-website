@@ -154,14 +154,14 @@
                         <div class="font-bold text-slate-900 text-xl">VigilQA</div>
                         <div class="text-slate-500 text-sm">AI-Powered Test Automation</div>
                     </div>
-                    <span class="ml-auto text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full font-semibold shrink-0">Early Access</span>
+                    <span class="ml-auto text-xs bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-semibold shrink-0">Free 14-day trial</span>
                 </div>
                 <p class="text-slate-600 leading-relaxed mb-6">
                     Generate complete test suites from your knowledge base, heal broken locators automatically, and get AI-powered failure analysis — across API, Web, Security, Performance, and more.
                 </p>
                 <div class="flex flex-wrap gap-2 mb-6">
-                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">9 testing modules</span>
-                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">11 AI agents</span>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">11+ testing modules</span>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">20+ AI agents</span>
                     <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">Self-healing locators</span>
                     <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">CI/CD native</span>
                 </div>
@@ -597,6 +597,936 @@
             window.location.href = `mailto:engage@sentinelflux.in?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         });
     }
+</script>
+
+<!-- ===================== AI ASSISTANT WIDGET ===================== -->
+<style>
+  #sfx-btn { transition: transform 0.18s, box-shadow 0.18s; }
+  #sfx-btn:hover { transform: scale(1.07); box-shadow: 0 8px 30px rgba(79,70,229,0.45); }
+  #sfx-win {
+    opacity: 0; pointer-events: none;
+    transform: translateY(14px) scale(0.97);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  #sfx-win.sfx-open { opacity: 1; pointer-events: auto; transform: none; }
+  .sfx-msg-user {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    border-radius: 16px 16px 4px 16px;
+    max-width: 82%; padding: 9px 13px;
+    font-size: 13px; line-height: 1.55; word-wrap: break-word;
+  }
+  .sfx-msg-bot {
+    background: #fff; color: #0f172a;
+    border-radius: 16px 16px 16px 4px;
+    border: 1px solid #e2e8f0;
+    max-width: 88%; padding: 9px 13px;
+    font-size: 13px; line-height: 1.55; word-wrap: break-word;
+  }
+  .sfx-chip {
+    cursor: pointer; font-size: 11px; padding: 4px 10px;
+    border-radius: 999px; background: #f1f5f9; color: #475569;
+    font-weight: 500; border: 1px solid #e2e8f0;
+    transition: background 0.14s, color 0.14s, border-color 0.14s;
+    white-space: nowrap;
+  }
+  .sfx-chip:hover { background: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+  #sfx-msgs { scrollbar-width: thin; scrollbar-color: #e2e8f0 transparent; }
+  .sfx-typing-dot {
+    display: inline-block; width: 7px; height: 7px;
+    background: #94a3b8; border-radius: 50%; margin: 0 2px;
+    animation: sfx-dot-bounce 1.1s infinite ease-in-out;
+  }
+  .sfx-typing-dot:nth-child(2) { animation-delay: 0.18s; }
+  .sfx-typing-dot:nth-child(3) { animation-delay: 0.36s; }
+  @keyframes sfx-dot-bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-7px); }
+  }
+  @media (max-width: 480px) {
+    #sfx-win { right: 12px !important; left: 12px !important; width: auto !important; }
+    #sfx-btn { right: 16px !important; bottom: 16px !important; }
+  }
+</style>
+
+<!-- Floating button -->
+<button id="sfx-btn" aria-label="Ask SentinelFlux VigilQA AI"
+  style="position:fixed;bottom:24px;right:24px;z-index:9999;width:56px;height:56px;
+         background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:50%;
+         box-shadow:0 4px 20px rgba(79,70,229,0.4);border:none;cursor:pointer;
+         display:flex;align-items:center;justify-content:center;color:#fff">
+  <svg id="sfx-ico-open" style="width:24px;height:24px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+  </svg>
+  <svg id="sfx-ico-close" style="width:20px;height:20px;display:none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+  </svg>
+</button>
+
+<!-- Chat window -->
+<div id="sfx-win"
+  style="position:fixed;bottom:92px;right:24px;z-index:9998;width:390px;
+         max-height:580px;display:flex;flex-direction:column;
+         background:#fff;border-radius:20px;border:1px solid #e2e8f0;
+         box-shadow:0 20px 60px rgba(15,23,42,0.18)">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;
+              padding:12px 16px;flex-shrink:0;border-radius:20px 20px 0 0;
+              background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:34px;height:34px;background:rgba(255,255,255,0.18);border-radius:10px;
+                  display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+        </svg>
+      </div>
+      <div>
+        <div style="color:#fff;font-weight:700;font-size:14px;line-height:1.2">SentinelFlux VigilQA AI</div>
+        <div style="color:rgba(255,255,255,0.65);font-size:11px;margin-top:1px">Ask anything · Run agents live</div>
+      </div>
+    </div>
+    <button id="sfx-hdr-close"
+      style="background:rgba(255,255,255,0.15);border:none;cursor:pointer;
+             width:28px;height:28px;border-radius:8px;display:flex;
+             align-items:center;justify-content:center;color:#fff;transition:background 0.15s"
+      onmouseover="this.style.background='rgba(255,255,255,0.28)'"
+      onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+      <svg style="width:14px;height:14px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div id="sfx-msgs"
+    style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;
+           gap:10px;background:#f8fafc;min-height:0">
+  </div>
+
+  <!-- Quick chips -->
+  <div id="sfx-chips"
+    style="padding:8px 12px;display:flex;gap:6px;flex-wrap:wrap;
+           border-top:1px solid #f1f5f9;background:#fff;flex-shrink:0">
+  </div>
+
+  <!-- Input row -->
+  <div style="padding:10px 12px 12px;background:#fff;flex-shrink:0;border-top:1px solid #f1f5f9;border-radius:0 0 20px 20px">
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="sfx-inp" type="text" placeholder="Ask about SentinelFlux VigilQA or run an agent…"
+        style="flex:1;font-size:13px;background:#f1f5f9;border:1px solid transparent;
+               border-radius:12px;padding:9px 12px;outline:none;color:#334155;
+               transition:border-color 0.15s,background 0.15s"
+        onfocus="this.style.borderColor='#a5b4fc';this.style.background='#fff'"
+        onblur="this.style.borderColor='transparent';this.style.background='#f1f5f9'">
+      <button id="sfx-send"
+        style="width:38px;height:38px;background:#4f46e5;border:none;cursor:pointer;
+               border-radius:11px;display:flex;align-items:center;justify-content:center;
+               color:#fff;flex-shrink:0;transition:background 0.15s"
+        onmouseover="this.style.background='#4338ca'"
+        onmouseout="this.style.background='#4f46e5'">
+        <svg style="width:16px;height:16px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.269 20.876L5.999 12zm0 0h7.5"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Knowledge base Q&A ───────────────────────────────────────────────────────
+  var QA = [
+    {
+      keys: ['what is sentinelflux','tell me about','overview','introduce'],
+      md: '**SentinelFlux VigilQA** is an AI-powered test automation platform.\n\nYou write YAML knowledge base files describing your app — SentinelFlux VigilQA automatically:\n• Generates test suites across a **full library of modules** — web, API, security, performance, plus **AI agent testing** and **model evals**\n• Runs them in your CI pipeline via one CLI command\n• Analyses every failure with **20+ specialized AI agents**\n• Tracks requirements-to-test **traceability** and computes **release readiness**\n• Self-heals broken locators (no manual maintenance)\n\nNo dedicated test-maintenance engineers needed.'
+    },
+    {
+      keys: ['pipeline','agentic pipeline','how does it work','how it works','how does sentinelflux work','explain the flow'],
+      md: 'SentinelFlux VigilQA runs two coordinated agent pipelines:\n\n**Generation Pipeline** (when creating tests)\nAppExplorer → DocGen → DocReview → ScriptGen → ScriptReview\n\nCrawls your live app for real DOM selectors, generates test docs from your KB, writes pytest scripts, reviews them — zero hallucinated fields.\n\n**Post-Run Analysis** (after every test suite)\nResultAnalyzer → FlakyDetector → RegressionGuard → CoverageGap → LocatorHealer\n\nRuns automatically. You wake up to structured analysis, not raw logs.'
+    },
+    {
+      keys: ['agents','20 agents','20+ agents','how many agents','list agents','what agents','all agents','which agents'],
+      md: '**20+ specialized agents — each with one job.** The roster keeps growing; the core agents are:\n\n*Post-run (automatic after every suite):*\n• **ResultAnalyzer** — classifies failures: Product Bug / Script / Flaky / Env\n• **FlakyDetector** — 5-run history analysis, stability score\n• **RegressionGuard** — alerts on pass→fail deltas vs. previous run\n• **CoverageGap** — finds KB scenarios with no test coverage\n• **LocatorHealer** — re-discovers broken DOM selectors from live app\n\n*Generation pipeline:*\n• **AppExplorer** — crawls live app DOM\n• **DocGen** → **DocReview** — writes and reviews test docs\n• **ScriptGen** → **ScriptReview** — writes and validates pytest scripts\n\nPlus specialized agents for AI-agent testing, model evals, and requirements traceability.'
+    },
+    {
+      keys: ['coveragegap','coverage gap','coverage agent','coverage check','uncovered scenario'],
+      md: '**CoverageGap Agent** cross-references every KB scenario against existing test IDs.\n\nIt outputs:\n• Total KB scenarios vs tested (% coverage)\n• List of untested KB scenarios by domain\n• Option to auto-generate test cases for gaps\n\n*Example: "83% coverage — 8 KB scenarios have no test. Generate them?"*\n\nType **"run coveragegap on [module]"** to see a live simulation.'
+    },
+    {
+      keys: ['flakydetector','flaky detector','flaky test','flakiness','intermittent failure'],
+      md: '**FlakyDetector** analyses the last 5 run histories per failing test.\n\nIt computes a **stability score** (threshold: 0.75). Below that = flaky.\n\nAlso checks:\n• Timing correlation (race conditions at page load)\n• Locator consistency across runs\n• Code change correlation in last 48h\n\nFlaky tests with locator suspects are automatically queued for LocatorHealer.'
+    },
+    {
+      keys: ['regressionguard','regression guard','regression','regression detection'],
+      md: '**RegressionGuard** compares pass/fail patterns run-over-run.\n\nAlerts when a test that previously passed now fails — even subtly. It ignores known flaky tests (flagged by FlakyDetector) to reduce noise.\n\nOutput includes which version / commit the regression likely entered.'
+    },
+    {
+      keys: ['resultanalyzer','result analyzer','classify failure','failure classification','analyze results'],
+      md: '**ResultAnalyzer** classifies every test failure into one of four categories:\n\n• **Product Bug** — real app behavior is wrong → auto-creates a bug tracker entry\n• **Script Issue** — test logic error (wrong selector or assertion)\n• **Flaky** — intermittent → sends to FlakyDetector for deeper analysis\n• **Environment** — infra/network issue (timeout, DNS, port down)\n\nOnly Product Bugs trigger automatic bug tracker entries.'
+    },
+    {
+      keys: ['locator','locatorhealer','self-healing','self healing','healing','broken selector','broken locator'],
+      md: '**Self-Healing Locators** — 3-tier strategy:\n\n1. **Primary locator** — try original selector\n2. **Alternatives** — ranked fallbacks pre-generated by AppExplorer\n3. **LocatorHealer agent** — re-discovers from live DOM if all fail\n\nHealing patches queue in the Approvals dashboard. Your team reviews before anything is committed.\n\n*AI suggests, you decide.*'
+    },
+    {
+      keys: ['modules','8 modules','9 modules','11 modules','testing modules','what modules','all modules','list modules'],
+      md: '**A full library of testing modules:**\n\n1. **REST/GraphQL API** — schema validation, CRUD, curl logs on failure\n2. **Web UI** — Playwright, self-healing locators, visual flows\n3. **API Contract** — validates live responses vs. your OpenAPI spec\n4. **Visual Regression** — pixel-diff screenshots vs. baseline\n5. **Accessibility** — WCAG 2.1 AA compliance, axe-core\n6. **Security/VAPT** — OWASP Top 10, injection tests, auth bypass checks\n7. **Performance** — Locust-based, P50/P95/P99 latency tracking\n8. **AI Agent Testing** — multi-turn conversations, tool calls, guardrails, grounding for LLM apps\n9. **Model Evals** — score models/prompts on datasets: accuracy, faithfulness, safety, regressions\n10. **Bug Tracker** — AI-created entries linked to test failures\n11. **Compliance Reports** *(Pro)* — SOC 2, ISO 27001, GDPR audit PDFs from test run evidence'
+    },
+    {
+      keys: ['knowledge base','yaml','kb structure','how to define','kb yaml','knowledge base structure'],
+      md: 'The **Knowledge Base (KB)** is YAML files describing your app:\n\n```yaml\nmodule: employee_management\nscenarios:\n  - id: emp_create\n    description: Create new employee record\n    fields: [name, email, department]\n    validations: [required, email format]\n```\n\nKB scenario IDs drive test generation, coverage gap analysis, and failure classification. SentinelFlux VigilQA never generates tests for fields not in your KB — no hallucinations.'
+    },
+    {
+      keys: ['ollama','local llm','air-gapped','airgapped','mistral','qwen','which llm','llm support','anthropic','claude llm'],
+      md: '**Three LLM configurations:**\n\n• **Anthropic Claude** (cloud) — default; claude-sonnet via API, prompt-cached for speed\n• **Mistral** (cloud) — alternative cloud option, fast and cost-effective\n• **Local / Air-gapped:** Ollama + Qwen — zero data leaves your environment\n\nSwitch in the dashboard Settings → LLM Configuration. The local option is popular for teams with strict data residency requirements.'
+    },
+    {
+      keys: ['cicd','ci/cd','github actions','gitlab ci','jenkins','continuous integration','pipeline integration','integrate with ci'],
+      md: '**SentinelFlux VigilQA integrates with any CI/CD pipeline.**\n\nAdd a SentinelFlux VigilQA test step to your existing workflow — works natively with GitHub Actions, GitLab CI, Jenkins, CircleCI, or any pipeline that executes shell steps. Test results are automatically pushed to the dashboard after each run.\n\nSlack and webhook notifications are configurable — alert your team on failures, regressions, or coverage gaps without checking the dashboard manually.'
+    },
+    {
+      keys: ['pricing','cost','plan','pro','enterprise','how much','tiers','trial','14 day','$49'],
+      md: '**Three tiers:**\n\n• **Free Trial — 14 days** · Full Pro access, no credit card required. Every test module, all 20+ AI agents, hosted dashboard, CI/CD integrations.\n\n• **Pro — $49 /seat/month** · Cloud-hosted, billed annually. Unlimited projects, all 20+ AI agents, hosted dashboard, CI/CD integrations, priority email support.\n\n• **Enterprise — Custom** · Dedicated private cloud instance, SSO/SAML, air-gapped LLM support, SLA + dedicated support, custom integrations.\n\n**Start free at `vigilqa.sentinelflux.in/signup`** — self-service, no credit card, no sales call. For an Enterprise quote, email `engage@sentinelflux.in`.'
+    },
+    {
+      keys: ['approvals','human in the loop','approve','approval dashboard','review suggestions'],
+      md: '**Approvals Dashboard** — human-in-the-loop for every AI suggestion:\n\nItems that queue for review:\n• LocatorHealer healing patches\n• Script fixes from ResultAnalyzer\n• New test cases generated by CoverageGap\n• Visual regression baseline updates\n\nYou see a diff, approve or reject with one click. Nothing is committed without your sign-off.'
+    },
+    {
+      keys: ['dashboard','platform features','what does the dashboard show','dashboard sections'],
+      md: '**Dashboard sections:**\n\n• **Test Plans** — AI-generated test cases from your KB, coverage per domain\n• **Test Runs** — Live run progress, per-test status, failure classification\n• **Agent Activities** — Real-time agent logs and structured outputs per run\n• **Approvals** — Review AI suggestions before commit\n\nOne pipeline trigger → CI pushes results up → agents analyze → dashboard shows everything.'
+    },
+    {
+      keys: ['get started','getting started','install','setup','quick start','how to start','how do i use'],
+      md: '**Quick start:**\n\n1. **Sign up free at `vigilqa.sentinelflux.in/signup`** — corporate email + company name, no credit card\n2. Verify your email and your hosted workspace is created instantly — pre-seeded with data across every module\n3. Explore Test Plans, Runs, Agent Activities and the Quality Dashboard on live seeded results\n4. Add your own product, describe its modules in the KB, and run **App Exploration** + **Test Generation** to produce pytest scripts\n5. Execute the suite from the dashboard or your CI pipeline\n\nFully hosted — nothing to install. 14-day trial, no credit card required.'
+    },
+    {
+      keys: ['export','download script','export test','take the script','use the script outside','get the scripts','my own runner'],
+      md: 'Yes — **generated test scripts are plain pytest files** stored in your project directory under `tests/<domain>/`.\n\nYou own them completely:\n• Run them directly with `pytest tests/web/` — no SentinelFlux VigilQA CLI needed\n• Commit them to your own repo\n• Plug them into any test runner or CI pipeline\n• Edit them manually like any Python file\n\nSentinelFlux VigilQA generates the scripts; after that they\'re just regular `.py` files with no proprietary lock-in.'
+    },
+    {
+      keys: ['browser','chrome','firefox','webkit','playwright','supported browser'],
+      md: '**Supported browsers (Web UI module):**\n\nSentinelFlux VigilQA uses **Playwright** under the hood, so it supports:\n• Chromium / Chrome\n• Firefox\n• WebKit / Safari\n\nConfigure the target browser in `sentinelflux.config.yaml`. The default is Chromium. AppExplorer also uses a headless browser to crawl your app for DOM selectors before test generation.'
+    },
+    {
+      keys: ['customize','edit generated','modify test','change generated','override','custom test'],
+      md: 'Yes — **you can edit generated test scripts at any time**.\n\nGenerated scripts are plain pytest files. You can:\n• Add custom assertions or steps\n• Parameterize with your own data sets\n• Extend with fixtures or conftest.py logic\n\nIf SentinelFlux VigilQA re-generates tests for a scenario (e.g. after a KB update), it creates new files rather than overwriting edits. The DocReview and ScriptReview agents also flag low-quality generations before they\'re saved.'
+    },
+    {
+      keys: ['multiple environment','staging','production','env','environment','target env'],
+      md: '**Multiple environments** are fully supported.\n\nEnvironment-specific base URLs, credentials, and config live in `sentinelflux.config.yaml` under each env key:\n\n```yaml\nenvironments:\n  staging:\n    base_url: https://staging.myapp.com\n  production:\n    base_url: https://myapp.com\n```\n\nRuns are tagged by environment in the dashboard — results and agent analysis are tracked per-environment so you can compare staging vs production failure patterns.'
+    },
+    {
+      keys: ['data driven','test data','parameterized','multiple data','csv','fixtures','test data set'],
+      md: '**Data-driven tests** are first-class in SentinelFlux VigilQA.\n\nThe REST/GraphQL API module automatically generates CRUD tests with multiple data sets (valid, boundary, invalid inputs) from your KB field definitions.\n\nFor Web UI tests, ScriptGen can parameterize scenarios using `@pytest.mark.parametrize` when your KB defines multiple example values per field. You can also supply your own fixtures in `conftest.py`.'
+    },
+    {
+      keys: ['report','html report','test report','results report','junit','xml report','output format'],
+      md: '**Test results are available in multiple formats:**\n\n• **Dashboard** — live pass/fail, agent analysis, per-test history\n• **JUnit XML** — auto-generated for CI integrations (`--report junit`)\n• **JSON** — machine-readable output for custom tooling\n• **Slack notification** — configurable webhook with pass/fail summary\n\nThe dashboard is the richest view — it shows failure classifications, agent outputs, coverage trends, and approvals queue all in one place.'
+    },
+    {
+      keys: ['slack','notification','webhook','alert','notify','integration notify','email notification','smtp'],
+      md: '**Notifications are configurable** from Dashboard → Settings:\n\n• **Slack** — webhook URL, triggers on failure / regression / coverage gap\n• **Webhook** — any HTTP endpoint, with full run JSON payload\n• **Email (SMTP)** — configure outbound SMTP (Zoho defaults included) with per-product override; alert emails for failures and regressions\n\nThe in-app **notification bell** (top-right of the dashboard) shows unread alerts with type icons and polls every 60 seconds — no page refresh needed.'
+    },
+    {
+      keys: ['security test','owasp','vapt','penetration','injection','xss','sql injection','vulnerability'],
+      md: '**Security / VAPT module** covers OWASP Top 10 automatically:\n\n• SQL/NoSQL injection on all form fields\n• XSS reflection and stored XSS probes\n• Auth bypass and privilege escalation tests\n• Insecure direct object reference (IDOR)\n• Sensitive data exposure checks\n• Security headers validation\n\nTests are generated from your KB — SentinelFlux VigilQA knows your endpoints, fields, and auth flows, so probes are targeted rather than generic. No manual attack script writing needed.'
+    },
+
+    // ── NEW CAPABILITIES ─────────────────────────────────────────────────────
+    {
+      keys: ['ai agent test','test ai agent','llm app','test llm','agent testing','test my agent','chatbot test','test chatbot','copilot test','rag test','test rag','multi-turn','tool call test','guardrail'],
+      md: '**AI Agent Testing** module tests LLM-powered apps — chat assistants, copilots, RAG apps, and tool-using agents.\n\nIt validates:\n• **Task completion** across multi-turn conversations\n• **Tool / function calls** — right tool, right args, valid order\n• **Grounding / faithfulness** — answers supported by retrieved context\n• **Guardrails & safety** — refusals for out-of-scope requests\n• **Prompt-injection resistance**\n• **PII handling** and **format adherence** (JSON/schema)\n\nBecause output is non-deterministic, assertions combine deterministic checks with an **LLM-as-judge** scorer against a rubric you define, plus consistency across repeated runs.\n\nDocs: sentinelflux.in/vigilqa/docs/modules/ai-agent-testing.html'
+    },
+    {
+      keys: ['model eval','model evals','eval','evaluation','llm eval','prompt regression','model regression','hallucination','faithfulness','accuracy dataset','toxicity','judge','llm as judge','compare model','compare prompt'],
+      md: '**Model Evals** module scores a model or prompt against a **labeled dataset**.\n\nMetrics:\n• **Accuracy / exact match**\n• **Semantic similarity**\n• **Faithfulness** (no hallucination)\n• **Relevance**\n• **Safety / toxicity**\n• **Format adherence** (JSON/schema)\n\nDatasets live alongside your KB as YAML/JSONL. Run the same dataset across `model A vs B` or `prompt v1 vs v2` for a side-by-side scorecard with per-metric deltas — and **RegressionGuard** alerts when a metric drops below baseline in CI.\n\n*Agent testing = end-to-end agent app behavior. Model Evals = model/prompt quality on a dataset.*\n\nDocs: sentinelflux.in/vigilqa/docs/modules/model-evals.html'
+    },
+    {
+      keys: ['release readiness','ready to release','ready to ship','go no go','go/no-go','release gate','deploy gate','ship it','can i release','readiness'],
+      md: '**Release Readiness** rolls your latest signals into one verdict: **Ready / At Risk / Blocked**.\n\nSignals it aggregates:\n• Pass rate\n• Requirement coverage\n• Open Critical/High bugs\n• New regressions (RegressionGuard)\n• Flaky ratio (FlakyDetector)\n• Critical security findings\n\nYou define a **gate policy** (hard vs soft gates) in versioned config. The readiness check can gate CI — it exits non-zero when the verdict is *Blocked*, stopping the deploy. The full report exports to PDF for sign-off.\n\nDocs: sentinelflux.in/vigilqa/docs/platform/release-readiness.html'
+    },
+    {
+      keys: ['traceability','requirement','requirements','rtm','trace','coverage matrix','requirement coverage','which tests cover','test coverage requirement','orphan test'],
+      md: '**Requirements & Traceability** links every requirement → test cases → run results in a live matrix.\n\n• **Forward:** requirement → which tests verify it, are they passing?\n• **Backward:** test → which requirement it protects\n\nRequirements come from KB scenarios, imported requirement docs (Word/PDF/Markdown via Extract from Document), or external IDs (e.g. `req: JIRA-1420`). Generated tests map automatically via the `test_<scenario_id>_*` naming; hand-written tests use a `@requirement:` docstring tag.\n\nIt surfaces **uncovered requirements** and **orphan tests**, and exports an audit-ready RTM (CSV/PDF). Requirement coverage is also a Release Readiness gate signal.\n\nDocs: sentinelflux.in/vigilqa/docs/platform/traceability.html'
+    },
+    {
+      keys: ['test tools','test tool','existing tests','import test','bring your own','byo','postman','junit import','existing suite','pytest suite','playwright suite','tool support','tool registry','interoperate'],
+      md: '**Test Tools Support** — VigilQA works with the tools you already use rather than a walled garden.\n\n• The agents drive standard open tools under the hood: **Playwright**, **pytest**, **axe-core**, **Locust**, OpenAPI schema validation, and the model/agent judge.\n• **Bring your existing tests** — point VigilQA at a `tests/` dir or a JUnit report and its post-run agents analyse those results too (failure classification, flakiness, regressions, coverage).\n• **Import assets** — OpenAPI/Swagger, Postman collections, requirement docs.\n• **Export & interoperate** — generated tests are plain Python you own; results export as JUnit XML / JSON.\n\nDocs: sentinelflux.in/vigilqa/docs/platform/test-tools.html'
+    },
+
+    // ── PRODUCT POSITIONING ──────────────────────────────────────────────────
+    {
+      keys: ['what problem','why sentinelflux','problem solve','why use'],
+      md: 'The core problem SentinelFlux VigilQA solves: **test suites rot**.\n\nEvery app change breaks locators, adds untested scenarios, and introduces regressions. Traditional automation requires dedicated QA engineers to write, fix, and maintain scripts full-time.\n\nSentinelFlux VigilQA eliminates that maintenance loop:\n• Generates scripts from your KB — no manual writing\n• Heals broken locators automatically\n• Flags regressions and coverage gaps after every run\n• So engineers ship faster without sacrificing test coverage.'
+    },
+    {
+      keys: ['who is it for','target user','who uses','use case','team size','good for'],
+      md: 'SentinelFlux VigilQA is built for:\n\n• **Small teams and startups** — get comprehensive test coverage without a dedicated QA hire\n• **Engineering teams maintaining legacy test suites** — reduce the cost of keeping tests green\n• **Regulated industries** — air-gapped / local LLM mode for teams that can\'t send data to cloud\n• **Teams shipping fast** — CI integration with automatic post-run analysis so broken tests don\'t slow deploys\n\nAnyone writing YAML can onboard. No Playwright or pytest expertise required upfront.'
+    },
+    {
+      keys: ['vs selenium','vs cypress','vs playwright','compare to','difference from','alternative to','better than'],
+      md: 'SentinelFlux VigilQA **uses** Playwright under the hood — it\'s not a replacement for the runner, it\'s a layer above:\n\n| | Playwright/Cypress/Selenium | SentinelFlux VigilQA |\n|---|---|---|\n| Script writing | Manual | AI-generated from KB |\n| Locator maintenance | Manual | Self-healing (3-tier) |\n| Failure analysis | Raw logs | 20+ AI agents |\n| Coverage tracking | Manual | CoverageGap agent |\n\nIf you already have Playwright tests, you can still use SentinelFlux VigilQA for the agent analysis layer on top.'
+    },
+    {
+      keys: ['vs testim','vs mabl','vs functionize','vs test.ai','no-code test','low-code ai test','ai testing tool'],
+      md: 'Key differences vs no-code AI tools (Testim, mabl, Functionize):\n\n• **You own the scripts** — SentinelFlux VigilQA generates plain pytest files. No proprietary format, no lock-in.\n• **KB-driven, not recorder-driven** — you define intent in YAML; it generates scenarios. Recorder tools are brittle when UI changes.\n• **Air-gapped option** — Ollama/local LLM for teams that can\'t use cloud AI tools at all.\n• **Agent pipeline** — post-run analysis (flakiness, regression, gaps) isn\'t available in most recorder tools.\n\nSentinelFlux VigilQA is closer to a code-generation + analysis platform than a visual test recorder.'
+    },
+    {
+      keys: ['replace tester','replace qa','need testers','still need humans','automate away qa'],
+      md: 'SentinelFlux VigilQA is designed for **human-in-the-loop** automation, not replacement.\n\nAI generates and analyzes — humans review and decide:\n• Healing patches queue for approval before commit\n• Coverage gap suggestions need a human to trigger generation\n• Agent outputs are reviewed in the dashboard\n\nQA engineers shift from writing and fixing scripts to **reviewing AI decisions** and **defining the knowledge base**. Teams typically find their QA capacity multiplies — one engineer can oversee test coverage that previously needed three.'
+    },
+    {
+      keys: ['open source','github repo','source code','license','free to use','mit license'],
+      md: 'SentinelFlux VigilQA is a **commercial product**, not open source.\n\nAll plans are cloud-hosted — there is no self-hosted or open-source edition. A **14-day free trial** (full Pro access, no credit card) lets you evaluate before committing.\n\nThe generated test scripts are plain pytest files — those are entirely yours. You can commit them to any repo and run them anywhere.'
+    },
+
+    // ── KNOWLEDGE BASE ───────────────────────────────────────────────────────
+    {
+      keys: ['how many kb','kb files count','multiple kb files','kb size','large kb','scale kb'],
+      md: 'There\'s **no hard limit** on KB files. SentinelFlux VigilQA loads all YAML files under `ai/knowledge_base/<project>/` recursively.\n\nRecommended structure for large apps:\n```\nai/knowledge_base/myapp/\n  ui_pages.yaml       # all web UI scenarios\n  api_endpoints.yaml  # REST/GraphQL endpoints\n  application.yaml    # business rules, validations\n  security.yaml       # auth flows, roles\n```\n\nThe CoverageGap agent tracks coverage per file, so splitting by domain makes gap reports more readable.'
+    },
+    {
+      keys: ['update kb','change kb','kb update','new scenario','add scenario','kb change'],
+      md: 'After updating your KB:\n\n1. Trigger **test generation** for the updated domain — SentinelFlux VigilQA generates docs and scripts only for new/changed scenarios\n2. Existing tests for unchanged scenarios are **not overwritten**\n3. CoverageGap will automatically pick up the new KB scenarios on the next run and report them as gaps if no tests exist yet\n\nKB updates are incremental — you don\'t need to regenerate the entire suite when you add a scenario.'
+    },
+    {
+      keys: ['extract from document','upload word','upload pdf','extract kb','docx to kb','pdf to kb','import kb','kb from document'],
+      md: '**Extract from Document** converts a Word (.docx), PDF, or Markdown file into multiple validated KB YAML files in one step.\n\nHow it works:\n1. Upload your document from Dashboard → Knowledge Base → Extract from Document\n2. The AI splits the content into separate files (application.yaml, ui_pages.yaml, api_specs.yaml, product_knowledge.yaml)\n3. Each file shows a per-file preview with error/warning badges and an editable YAML textarea\n4. Check the files you want to save, uncheck any with errors, and click Save\n5. Nothing is written until you confirm — so you can review and correct before committing\n\nUseful for teams with existing test documentation in Word or Confluence exports who want to bootstrap their KB quickly.'
+    },
+    {
+      keys: ['validate kb','kb error','kb lint','kb format','kb schema','kb invalid'],
+      md: '**KB validation** runs automatically before generation.\n\nIt checks:\n• Required fields (id, description) are present on each scenario\n• No duplicate scenario IDs within a domain\n• Field names match what AppExplorer discovered in the live app\n• YAML syntax is valid\n\nValidation errors are reported with file + line number. Fix them before triggering generation. You can also run validation independently from the dashboard or on-demand before a generation run.'
+    },
+    {
+      keys: ['api kb','kb for api','rest kb','endpoint kb','define api endpoint','graphql kb'],
+      md: 'For **API modules**, the KB defines endpoints rather than UI pages:\n\n```yaml\nmodule: user_api\nbase_url: /api/v1/users\nendpoints:\n  - id: user_create\n    method: POST\n    description: Create a new user account\n    required_fields: [email, password, name]\n    validations: [unique email, password min 8 chars]\n    responses: [201 created, 400 validation error, 409 conflict]\n  - id: user_get\n    method: GET\n    path: /{id}\n    description: Fetch user by ID\n    responses: [200, 404]\n```\n\nThe REST/GraphQL module generates data-driven CRUD tests + a full curl log on failure.'
+    },
+    {
+      keys: ['mobile','ios','android','react native','flutter','mobile app','mobile testing'],
+      md: 'SentinelFlux VigilQA **does not currently support native mobile app testing** (iOS/Android).\n\nIt covers:\n• Web apps (any browser via Playwright)\n• REST/GraphQL APIs (including mobile backends)\n• Security, performance, and accessibility on web\n\nIf your mobile app has a web-based admin panel or exposes a REST API, those can be tested. Native mobile support is on the product roadmap — email `engage@sentinelflux.in` to register interest.'
+    },
+
+    // ── TEST GENERATION ──────────────────────────────────────────────────────
+    {
+      keys: ['how long generat','generation time','time to generate','how fast generate','generation speed'],
+      md: '**Generation time** depends on KB size and LLM mode:\n\n| Setup | ~Time for 50 scenarios |\n|---|---|\n| Mistral cloud | 3–6 minutes |\n| Ollama local (GPU) | 8–15 minutes |\n| Ollama local (CPU) | 20–40 minutes |\n\nGeneration is a one-time cost per KB update. After that, tests run directly via pytest — no LLM involved during test execution.'
+    },
+    {
+      keys: ['regenerate','re-generate','refresh tests','update tests after change','regenerate after update'],
+      md: 'To regenerate tests after a KB update, trigger generation for the relevant domain from the dashboard or your CI pipeline.\n\nTwo modes are available:\n• **Incremental** (default) — only generates scripts for scenarios with no existing test file. Manual edits to existing scripts are preserved.\n• **Full regeneration** — all scripts are regenerated from the latest KB. Use this after major KB restructuring — any manual edits to existing scripts will be overwritten, so commit them first.'
+    },
+    {
+      keys: ['generate specific','single scenario','one scenario','partial generate','generate one test'],
+      md: 'Yes — you can trigger generation for a **single KB scenario** or a **tagged subset** of your KB, rather than regenerating the entire domain.\n\nThis is useful when you\'ve added one new scenario mid-sprint and want a script for it immediately without waiting for a full domain regeneration.\n\nScenario-level and tag-based generation are available from the Test Plans dashboard and from your CI pipeline configuration.'
+    },
+    {
+      keys: ['generation fail','failed to generate','generation error','empty output','generation stuck'],
+      md: 'If generation fails, check these in order:\n\n1. **KB validation** — run validation first; it surfaces most root causes (missing required fields, duplicate IDs, YAML syntax errors)\n2. **LLM connectivity** — verify your LLM API key (Mistral) or Ollama endpoint is reachable from the environment running SentinelFlux VigilQA\n3. **AppExplorer failure** — if the live app URL isn\'t reachable, AppExplorer can\'t discover selectors. Check `logs/appexplorer.log` for the connection error\n4. **Empty scripts** — usually means DocReview rejected generated docs due to low quality. Check `logs/docreview.log` for the rejection reason and update your KB descriptions to be more specific.'
+    },
+    {
+      keys: ['how many tests','number of tests','test count','tests per scenario','test volume'],
+      md: 'The number of generated tests depends on your KB scenario complexity:\n\n• **Simple scenario** (1–2 fields, 1 happy path) → 2–4 tests\n• **Form with validations** (5+ fields, required + format rules) → 8–15 tests\n• **API endpoint** → 3–6 tests (happy path, missing fields, boundary values, error responses)\n\nA KB with 50 scenarios typically produces **200–400 pytest test functions**. CoverageGap agent tracks which KB scenarios have corresponding tests.'
+    },
+    {
+      keys: ['appexplorer','app explorer','crawl app','dom crawl','crawl live app','selector discovery'],
+      md: '**AppExplorer** is a headless Playwright session that crawls your live app before test generation.\n\nWhat it does:\n• Navigates to each page listed in your KB\n• Captures real DOM selectors for every interactive element\n• Stores them in `locators/<domain>/*.json`\n• Ranks multiple selector strategies per element (data-testid, aria-label, CSS, XPath)\n\nThis prevents hallucinated selectors. If AppExplorer can\'t reach the app (auth wall, VPN, wrong URL), you can re-trigger exploration independently from the dashboard or pipeline config — it runs as a standalone step before generation.'
+    },
+    {
+      keys: ['docgen','doc gen','test document','generate test document','test case document'],
+      md: '**DocGen** converts your KB scenarios into structured test case documents.\n\nEach document includes:\n• Test objective (from KB description)\n• Pre-conditions (login state, test data)\n• Step-by-step actions\n• Expected outcomes\n• Edge cases derived from KB validations\n\nDocuments are stored in `docs/test_cases/<domain>/` as markdown files. DocReview then scores each doc for completeness before passing to ScriptGen. You can read and edit these docs directly.'
+    },
+    {
+      keys: ['scriptgen','script gen','generate script detail','how scriptgen works','pytest script generation'],
+      md: '**ScriptGen** converts DocGen\'s test case documents into executable pytest scripts.\n\nFor each test document it:\n• Writes a `test_<scenario_id>.py` file with proper pytest fixtures\n• Uses the AppExplorer-discovered selectors (never makes up selectors)\n• Adds assertions from the expected outcomes in the doc\n• Includes a full curl/request log on failure for API tests\n\nScriptReview then validates the generated code (syntax check, locator existence, assertion quality) before saving. Scripts that don\'t pass ScriptReview are flagged and re-queued.'
+    },
+
+    // ── LOCATOR HEALING DETAIL ───────────────────────────────────────────────
+    {
+      keys: ['healing accuracy','how accurate healer','heal confidence','confidence score heal'],
+      md: '**LocatorHealer accuracy** is expressed as a confidence score (0.0–1.0).\n\nScoring factors:\n• Semantic match — does the element\'s role/label match what the test expects?\n• Structural similarity — is it in the same DOM position as the original?\n• Text content match — does visible text match?\n\n**Confidence ≥ 0.85** → queued for auto-approval suggestion\n**0.60–0.84** → queued with a "review carefully" flag\n**< 0.60** → not queued; human must locate the element manually\n\nYou see the confidence score in the Approvals dashboard alongside the proposed selector change.'
+    },
+    {
+      keys: ['reject heal','decline heal','reject patch','reject suggestion','dismiss approval'],
+      md: 'Yes — every healing patch in the Approvals dashboard can be **rejected with one click**.\n\nWhen you reject:\n• The proposed selector is discarded\n• The test remains in a "needs attention" state\n• You can manually edit the test script or re-trigger App Exploration for that scenario from the dashboard\n\nRejected patches are logged so the LocatorHealer doesn\'t re-propose the same fix on the next run.'
+    },
+    {
+      keys: ['healer fail','healer cannot find','element not found heal','heal fails','locator not healable'],
+      md: 'If LocatorHealer can\'t find the element with confidence ≥ 0.60:\n\n1. It logs the failure in Agent Activities with the DOM snapshot it searched\n2. The test is tagged **"needs manual fix"** in the dashboard\n3. You\'ll see the last known selector and the DOM excerpt to help you find the new location\n\nCommon causes: the element was removed from the app (intentional), the page requires an auth state the healer couldn\'t reach, or the element is inside an iframe or shadow DOM (limited support currently).'
+    },
+    {
+      keys: ['healing frequency','when heal runs','how often heal','heal trigger','healing schedule'],
+      md: 'LocatorHealer runs **automatically** as part of the post-run agent pipeline — after every test suite execution.\n\nIt only activates when:\n1. A test fails with a locator-related error (NoSuchElementException, StaleElementReferenceException)\n2. FlakyDetector flags a test with locator instability\n\nYou can also trigger it manually for a specific failing test directly from the dashboard — useful if you want to attempt a heal without re-running the full suite.'
+    },
+
+    // ── AGENT CONFIGURATION ──────────────────────────────────────────────────
+    {
+      keys: ['disable agent','turn off agent','skip agent','exclude agent','agent config'],
+      md: 'Agents can be selectively disabled in `sentinelflux.config.yaml`:\n\n```yaml\nagents:\n  post_run:\n    flakydetector: true\n    coveragegap: true\n    regressionguard: false   # disabled\n    locatorhealer: true\n    resultanalyzer: true\n```\n\nYou can also skip specific agents for a single run from the dashboard Run Settings panel — useful for temporarily disabling a noisy agent without changing your config permanently.'
+    },
+    {
+      keys: ['agent time','how long agent','agent duration','agent run time','how slow are agents'],
+      md: 'Post-run agents run **in parallel** where possible and typically complete in **30–120 seconds** after a suite finishes.\n\nApproximate per-agent time:\n• ResultAnalyzer — 10–20s (reads run results)\n• FlakyDetector — 5–15s (history lookup)\n• RegressionGuard — 5–10s (run diff)\n• CoverageGap — 10–30s (KB cross-reference, scales with KB size)\n• LocatorHealer — 30–90s (requires headless browser session if triggered)\n\nAgent results appear in the dashboard as they complete — you don\'t wait for all to finish.'
+    },
+    {
+      keys: ['run agent manually','trigger agent manually','on-demand agent run','invoke agent','manual agent trigger'],
+      md: 'All post-run agents can be triggered manually from the **Agent Activities** dashboard — select any past run and click **Re-run Agent** next to the agent you want.\n\nUseful scenarios:\n• Updated your KB mid-sprint? Re-run CoverageGap to get a fresh gap report without re-executing the full test suite\n• Fixed a flaky locator? Re-run LocatorHealer to verify the heal\n• Want a fresh regression comparison? Re-run RegressionGuard against a specific baseline run'
+    },
+    {
+      keys: ['agent log','agent output log','where are agent logs','agent log file'],
+      md: '**Agent logs are available in three places:**\n\n1. **Dashboard → Agent Activities** — real-time log stream and structured output per agent per run\n2. **Local log files** — `logs/agents/<run-id>/<agent-name>.log` for every run\n3. **Verbose run output** — enable verbose logging in your run configuration to stream agent logs inline during execution\n\nLogs are retained locally per the `log_retention_days` config value (default: 30 days). The dashboard retains the last 90 days.'
+    },
+    {
+      keys: ['threshold','flaky threshold','stability threshold','configure flaky','adjust flaky'],
+      md: 'The **FlakyDetector stability threshold** is configurable:\n\n```yaml\nagents:\n  flakydetector:\n    stability_threshold: 0.75  # default\n    history_runs: 5            # how many runs to analyse\n```\n\nLower the threshold (e.g. 0.60) if you want fewer flaky flags. Raise it (e.g. 0.90) for stricter flakiness detection.\n\nThe RegressionGuard and CoverageGap agents don\'t have numeric thresholds — they\'re binary (regression detected or not; scenario covered or not).'
+    },
+    {
+      keys: ['coverage percentage','what counts as coverage','test coverage meaning','kb coverage definition'],
+      md: 'For CoverageGap, **a KB scenario is "covered"** when at least one test function in the test index has an ID that maps back to that scenario\'s `id` field.\n\nSentinelFlux VigilQA uses a naming convention: generated test functions are named `test_<scenario_id>_*` so the mapping is automatic. If you write custom tests, add a docstring with `@scenario: <id>` and they\'ll be picked up too.\n\nCoverage % = (covered scenarios / total KB scenarios) × 100. Reported per domain (web, api, etc.) and in aggregate.'
+    },
+    {
+      keys: ['regression history','how far back regression','run comparison depth','regressionguard depth'],
+      md: 'By default **RegressionGuard compares against the immediately previous run** (run N vs run N-1).\n\nYou can configure a baseline run to compare against:\n\n```yaml\nagents:\n  regressionguard:\n    compare_to: previous   # default: previous run\n    # compare_to: baseline # compare to a pinned baseline run\n    # baseline_run: RUN-200\n```\n\nPinning a baseline is useful before a major release — you compare every run against the last known-good state, not just run-over-run.'
+    },
+
+    // ── CI/CD EXAMPLES ───────────────────────────────────────────────────────
+    {
+      keys: ['reportportal','report portal','rp integration','test results reporting','rp launch'],
+      md: '**ReportPortal integration** pushes test results directly to your ReportPortal instance after each run.\n\nConfigure from Dashboard → Settings → ReportPortal:\n• Enter your RP URL and API token\n• Enable or disable per product with a toggle\n• Each run creates a launch named after the product\n\nReportPortal gives you a centralised test analytics view across multiple projects and runs — useful for teams that already use RP as their reporting hub alongside the SentinelFlux VigilQA dashboard.'
+    },
+    {
+      keys: ['github actions','github action yaml','github workflow example','gh actions'],
+      md: '**GitHub Actions integration** works by adding a SentinelFlux VigilQA test step to your existing workflow.\n\nThe step:\n• Checks out your repo (including KB and test scripts)\n• Installs SentinelFlux VigilQA from your private package registry\n• Runs the test suite against the target environment\n• Uploads the JUnit XML report as a workflow artifact for inline PR status\n\nTest results are automatically pushed to the dashboard. The full workflow YAML template is available in the documentation at sentinelflux.in/docs/.'
+    },
+    {
+      keys: ['gitlab ci','gitlab yaml','gitlab pipeline example','gitlab-ci'],
+      md: '**GitLab CI integration** works by adding a SentinelFlux VigilQA job to your `.gitlab-ci.yml` pipeline.\n\nThe job:\n• Runs as a dedicated `test` stage after your build\n• Executes the test suite against your staging environment\n• Publishes JUnit XML as a GitLab test report (shows pass/fail inline on MRs)\n• Artifacts expire after 7 days by default\n\nThe full pipeline template is available in the documentation at sentinelflux.in/docs/.'
+    },
+    {
+      keys: ['run locally','local run','without ci','run on laptop','run on local machine','not in ci'],
+      md: 'Yes — SentinelFlux VigilQA can run locally during development (trial and Pro plans).\n\nWhen running locally:\n• The local dashboard is accessible at `http://localhost:8080`\n• Results sync to the cloud dashboard automatically\n• All 10 post-run agents execute the same as in CI\n\nLocal runs are common during development to catch failures before pushing to CI.'
+    },
+    {
+      keys: ['how long suite','run time','execution time','suite duration','how long does a run take'],
+      md: '**Total run time** = test execution + agent analysis.\n\nTypical breakdown for 200 tests:\n• Test execution (Web UI) — 8–20 minutes (depends on app speed)\n• Test execution (API) — 1–5 minutes\n• Post-run agents — 1–2 minutes (parallel)\n\nParallel execution (`--workers N`) cuts test execution time significantly. The agents always run post-execution and can\'t be parallelized with the tests themselves.'
+    },
+    {
+      keys: ['parallel','parallel test','concurrent test','parallel execution','workers','run tests faster'],
+      md: '**Parallel test execution** is supported via pytest-xdist.\n\nConfigure in `sentinelflux.config.yaml`:\n```yaml\nexecution:\n  workers: 4  # number of parallel workers\n```\n\nWeb UI tests use separate browser contexts per worker so they don\'t interfere with each other. API tests parallelize freely.\n\nRecommended: set workers = number of CPU cores. Tests with shared state (e.g. modifying the same DB record) can be tagged `@pytest.mark.serial` to run sequentially.'
+    },
+
+    // ── DASHBOARD & COLLABORATION ────────────────────────────────────────────
+    {
+      keys: ['multiple user','team member','team access','user account','invite team','add user'],
+      md: '**All plans** (trial and paid) support multiple users:\n\n• Invite team members via the dashboard Settings → Team\n• Each member gets their own login\n• Roles: **Admin** (full access), **Engineer** (run + review), **Viewer** (read-only)\n\nTrial accounts support up to 3 team members. Pro and Enterprise have no user limit. Contact `engage@sentinelflux.in` to set up your team.'
+    },
+    {
+      keys: ['filter result','search result','filter test','filter run','search dashboard'],
+      md: 'The dashboard supports **filtering test results** by:\n\n• Status (passed, failed, flaky, skipped)\n• Domain / module (web, api, security…)\n• Failure classification (Product Bug, Script, Environment)\n• Date range\n• Run ID\n• Scenario ID or test name (free-text search)\n\nFilters persist per session and can be saved as named views for team members.'
+    },
+    {
+      keys: ['test history','run history','how long history','data retention','history retention'],
+      md: '**Run history retention:**\n\n• **Trial / Pro** — 90 days of full run data in the dashboard; downloadable JUnit XML kept for 1 year\n• **Enterprise** — configurable retention, up to unlimited on your dedicated private cloud instance\n\nAgent analysis outputs (flaky scores, coverage trends, regression alerts) are retained with the run data.'
+    },
+    {
+      keys: ['share dashboard','stakeholder view','share report','read only link','public link'],
+      md: 'You can share dashboard views with stakeholders:\n\n• **Read-only links** — generate a shareable URL for a specific run or report (Pro+)\n• **Viewer role** — invite stakeholders as Viewers; they can browse the dashboard but can\'t trigger runs or approve suggestions\n• **Exported reports** — download HTML, PDF, or JUnit XML from any run and share directly\n\nNo login required for read-only links — useful for sharing results with non-technical stakeholders.'
+    },
+    {
+      keys: ['role permission','rbac','user role','admin role','viewer role','access control'],
+      md: '**Role-based access control (Pro+):**\n\n| Role | Run tests | Approve patches | Manage settings | View only |\n|---|---|---|---|---|\n| Admin | ✓ | ✓ | ✓ | ✓ |\n| Engineer | ✓ | ✓ | — | ✓ |\n| Viewer | — | — | — | ✓ |\n\nEnterprise plans support SSO/SAML for role mapping from your identity provider (Okta, Azure AD, Google Workspace).'
+    },
+
+    // ── MODULE DEEP DIVES ────────────────────────────────────────────────────
+    {
+      keys: ['rest module detail','graphql module','api testing detail','rest graphql deep','what does api test'],
+      md: '**REST/GraphQL API module** generates and runs:\n\n• **CRUD suite** — Create, Read, Update, Delete for every endpoint in KB\n• **Data-driven tests** — valid data, boundary values, missing required fields, type mismatches\n• **Schema validation** — response body matches expected structure\n• **Status code checks** — 2xx for success, 4xx for validation errors\n• **Curl log on failure** — full request + response logged so you can reproduce outside the suite\n\nGraphQL queries and mutations are generated from your schema or KB endpoint definitions.'
+    },
+    {
+      keys: ['web ui module detail','web testing detail','what does web test','playwright detail','ui module'],
+      md: '**Web UI module** uses Playwright and generates:\n\n• **Happy-path flows** — full user journeys from KB (login → navigate → fill form → submit)\n• **Validation tests** — submitting with missing/invalid fields, checking error messages\n• **Navigation tests** — page loads, link integrity, redirect chains\n• **State tests** — logged in vs. logged out behavior per scenario\n\nAll selectors come from AppExplorer — no hard-coded XPaths. Self-healing is active for every locator.'
+    },
+    {
+      keys: ['api contract','openapi','swagger','contract test','what is contract module','contract vs rest'],
+      md: '**API Contract module vs REST module:**\n\n| | REST/GraphQL | API Contract |\n|---|---|---|\n| What it tests | Functional CRUD behavior | Spec conformance |\n| Input | KB scenarios | Your OpenAPI/Swagger file |\n| Checks | Status, body content, edge cases | Status code + full response schema matches spec |\n| Use case | "Does the API do the right thing?" | "Does the API match what it promises?" |\n\nContract tests are fast and great for catching breaking changes in CI. Run both modules for full coverage.'
+    },
+    {
+      keys: ['visual baseline','set baseline','update baseline','reset baseline','baseline screenshot'],
+      md: 'The **visual regression baseline** is the set of reference screenshots that all future runs are compared against.\n\nManaging baselines from the dashboard:\n• **Set initial baseline** — capture screenshots on first run; everything after is compared to this\n• **Update a scenario\'s baseline** — after an intentional UI change, approve the new screenshot as the new reference\n• **Reset all baselines** — recapture the full domain (useful after a major redesign)\n\nUpdating specific scenario baselines (rather than bulk-resetting) prevents accidentally approving unintended visual changes alongside intended ones.'
+    },
+    {
+      keys: ['visual threshold','pixel diff','visual sensitivity','diff threshold','pixel difference threshold'],
+      md: '**Visual regression threshold** controls how much pixel difference is allowed before a test fails.\n\nConfigure globally or per scenario:\n```yaml\nmodules:\n  visual_regression:\n    threshold: 0.02       # 2% pixel difference allowed (default)\n    ignore_regions:       # mask dynamic content\n      - selector: \'.timestamp\'\n      - selector: \'#ad-banner\'\n```\n\nSet higher threshold (0.05) for pages with animations or dynamic content. Use `ignore_regions` to mask banners, timestamps, or user-specific content.'
+    },
+    {
+      keys: ['wcag','accessibility level','a11y','axe-core','wcag level','aa or aaa','accessibility detail'],
+      md: '**Accessibility module** targets **WCAG 2.1 Level AA** by default.\n\nIt uses **axe-core** under the hood and checks:\n• Color contrast ratios (AA: 4.5:1 for normal text)\n• Keyboard navigation and focus order\n• ARIA roles, labels, and landmark regions\n• Image alt text\n• Form labels and error associations\n• Screen reader compatibility signals\n\nYou can target Level A (fewer rules) or Level AAA (stricter) in config:\n```yaml\nmodules:\n  accessibility:\n    wcag_level: AA  # A | AA | AAA\n```'
+    },
+    {
+      keys: ['performance metric','latency metric','p95 p99','response time metric','throughput metric','performance result'],
+      md: '**Performance module** tracks these metrics per endpoint:\n\n• **P50 / P95 / P99 latency** — response time percentiles\n• **Throughput** — requests per second at steady state\n• **Error rate** — % of requests returning 4xx/5xx\n• **Time to first byte (TTFB)**\n• **Baseline comparison** — flags when P95 exceeds a configured threshold vs last run\n\nResults are stored per run and trended in the dashboard over time. Set alert thresholds:\n```yaml\nperformance:\n  thresholds:\n    p95_ms: 500\n    error_rate_pct: 1.0\n```'
+    },
+    {
+      keys: ['load test','virtual user','concurrent user','locust config','load test setup','ramp up'],
+      md: '**Performance / load testing** uses Locust under the hood.\n\nConfigure load shape in your KB or config:\n```yaml\nmodules:\n  performance:\n    users: 50           # peak concurrent virtual users\n    spawn_rate: 5       # users added per second (ramp-up)\n    duration: 120       # test duration in seconds\n    tasks:              # endpoints to hit, from KB\n      - user_login\n      - product_search\n      - checkout_create\n```\n\nLocust runs are visible in the dashboard with a real-time chart of latency and RPS as users ramp up.'
+    },
+    {
+      keys: ['bug tracker module','bug tracker integration','bug management','jira','linear','what is bug tracker'],
+      md: '**Bug Tracker module** auto-creates bug entries when ResultAnalyzer classifies a failure as "Product Bug".\n\nBuilt-in bug tracker (default): entries visible in Dashboard → Bug Tracker with status tracking, linked test runs, and assignee fields.\n\n**External integrations (Pro+):**\n• **Jira** — creates issues in a configured project\n• **Linear** — creates issues in a configured team\n• **GitHub Issues** — creates issues in a configured repo\n\nConfigure in `sentinelflux.config.yaml`:\n```yaml\nbug_tracker:\n  provider: jira\n  project_key: QA\n  auto_create: true\n```'
+    },
+    {
+      keys: ['security auth test','auth testing security','login security','jwt test','session security test'],
+      md: '**Security module auth testing** covers:\n\n• Forced browsing (accessing pages without authentication)\n• JWT tampering (algorithm confusion, expired token acceptance)\n• Session fixation and session invalidation after logout\n• Privilege escalation (user A accessing user B\'s resources)\n• Password policy enforcement (weak password acceptance)\n• Brute-force protection (rate limiting on login)\n\nSentinelFlux VigilQA uses your KB-defined auth flows — it knows which endpoints require which roles, so tests are targeted and context-aware.'
+    },
+
+    // ── INSTALLATION / INFRASTRUCTURE ────────────────────────────────────────
+    {
+      keys: ['system requirement','requirements','python version','minimum requirement','prerequisites'],
+      md: '**System requirements:**\n\n| Requirement | Minimum |\n|---|---|\n| Python | 3.9+ |\n| RAM | 4 GB (8 GB recommended for parallel runs) |\n| OS | macOS 12+, Ubuntu 20.04+, Windows 10+ |\n| Browsers | Playwright auto-installs Chromium |\n| Disk | 2 GB for SentinelFlux VigilQA + Playwright browsers |\n\n**For local LLM (Ollama mode):**\n• GPU: 8 GB VRAM recommended for Qwen2.5-7B\n• CPU-only mode works but is slower\n\nUse the built-in environment check tool (available after install) to verify all prerequisites are met.'
+    },
+    {
+      keys: ['docker','container','docker image','dockerfile','run in docker','containerize'],
+      md: 'SentinelFlux VigilQA has an **official Docker image** (`sentinelflux/runner`) that bundles Python, Playwright browsers, and all dependencies.\n\nMount your project directory and pass your API key as an environment variable — the container runs the full test suite and outputs results to the mounted volume.\n\nUseful for CI environments where you don\'t want to manage Python/Playwright installs. `docker-compose` examples for local development are available in the docs at sentinelflux.in/docs/.'
+    },
+    {
+      keys: ['windows support','mac support','linux support','operating system','windows run','os support'],
+      md: 'SentinelFlux VigilQA supports:\n\n• **macOS** 12+ (Intel + Apple Silicon native)\n• **Linux** Ubuntu 20.04+, Debian 11+, RHEL 8+, Alpine (via Docker)\n• **Windows** 10/11 (PowerShell or WSL2 recommended for best experience)\n\nWindows is supported but the team primarily develops on macOS/Linux. If you hit Windows-specific issues, the Docker image is the most reliable path.'
+    },
+    {
+      keys: ['update sentinelflux','upgrade sentinelflux','new version','pip upgrade','latest version'],
+      md: 'SentinelFlux VigilQA is distributed as a Python package and updated via pip (standard Python package management).\n\n• **Minor updates** (1.x.y) are non-breaking and safe to apply immediately\n• **Major updates** (2.x) may require KB migration — always check the Changelog at sentinelflux.in/changelog.html before upgrading a major version\n\nYou can pin to a specific version in your `requirements.txt` to control when CI picks up updates.'
+    },
+    {
+      keys: ['cloud run','vps','server run','hosted run','run on server','remote run','ec2','gcp','azure vm'],
+      md: 'SentinelFlux VigilQA runs on any cloud VM or server (EC2, GCP Compute, Azure VM) — just install and point it at your target environment.\n\nUseful for:\n• Running against staging environments on the same VPC (no public internet required)\n• Scheduled nightly runs via cron\n• Faster execution with more CPU/RAM than your local machine\n\nHeadless browser mode is the default on Linux. The dashboard is accessible via SSH port-forwarding for local review after a remote run.'
+    },
+
+    // ── LLM / AI CONFIGURATION ───────────────────────────────────────────────
+    {
+      keys: ['switch llm','change model','configure llm','ollama setup how','how to use ollama'],
+      md: 'Switch LLM provider in Dashboard → Settings → LLM Configuration or in `sentinelflux.config.yaml`:\n\n```yaml\n# Anthropic Claude (default):\nllm:\n  provider: anthropic\n  api_key: ${ANTHROPIC_API_KEY}\n  model: claude-sonnet-4-6\n\n# Mistral cloud:\nllm:\n  provider: mistral\n  api_key: ${MISTRAL_API_KEY}\n  model: mistral-large-latest\n\n# Local / air-gapped:\nllm:\n  provider: ollama\n  model: qwen2.5:7b\n  base_url: http://localhost:11434\n```\n\nFor local mode, install Ollama separately (ollama.ai) and pull your preferred model before running SentinelFlux VigilQA.'
+    },
+    {
+      keys: ['which ollama model','ollama model list','qwen version','recommended ollama','best local model'],
+      md: '**Recommended Ollama models:**\n\n| Model | VRAM | Quality | Speed |\n|---|---|---|---|\n| qwen2.5:7b | 6 GB | Good | Fast |\n| qwen2.5:14b | 12 GB | Better | Medium |\n| qwen2.5:32b | 24 GB | Best | Slow |\n| mistral:7b | 6 GB | Good | Fast |\n\n**Recommended:** `qwen2.5:7b` for most teams (good quality/speed balance on consumer GPUs). Use `qwen2.5:14b` if generation quality is more important than speed.'
+    },
+    {
+      keys: ['llm cost','api cost','token cost','mistral cost','ai api cost','how much llm'],
+      md: 'SentinelFlux VigilQA LLM costs are **test generation only** — not test execution.\n\nApproximate Mistral API cost per generation run:\n• Small KB (20 scenarios): ~$0.05–0.15\n• Medium KB (100 scenarios): ~$0.20–0.60\n• Large KB (500 scenarios): ~$1–3\n\nAfter generation, tests run as plain pytest — **zero LLM cost** per test execution. The LLM is only called again when you regenerate from an updated KB.\n\nUse **Ollama locally** to eliminate API costs entirely.'
+    },
+    {
+      keys: ['what data sent llm','data sent to cloud','llm data privacy','what does sentinelflux send','data to mistral'],
+      md: '**What is sent to the LLM (Mistral cloud mode):**\n\n✓ Your KB YAML content (scenario descriptions, field names, validation rules)\n✓ AppExplorer-discovered selector lists\n✗ Your app\'s source code (never sent)\n✗ Your actual test data or user data\n✗ Credentials or secrets\n\n**In Ollama/local mode:** nothing is sent externally. All generation runs on your machine.\n\nFor teams with strict data residency, use Ollama mode or an Enterprise dedicated cloud instance in your preferred region.'
+    },
+    {
+      keys: ['openai','gpt','chatgpt','use openai','azure openai','gpt-4','other llm provider'],
+      md: 'SentinelFlux VigilQA currently supports **Anthropic Claude**, **Mistral** (cloud) and **Ollama** (local) as LLM providers.\n\nOpenAI / Azure OpenAI support is planned — email `engage@sentinelflux.in` to register interest or inquire about Enterprise custom integrations.\n\nIf you\'re on Enterprise, custom LLM integrations (including OpenAI, Bedrock, Vertex AI) are available as part of the plan.'
+    },
+    {
+      keys: ['generation quality','ai accuracy','hallucination','how good','quality of tests','accurate generation'],
+      md: '**SentinelFlux VigilQA\'s anti-hallucination design:**\n\nThe generation pipeline is built specifically to prevent LLM hallucinations:\n\n1. **AppExplorer** provides real DOM selectors — ScriptGen can\'t invent selectors\n2. **KB-bound** — DocGen only writes test cases for scenarios and fields explicitly in your KB\n3. **DocReview** rejects docs that reference non-existent fields or impossible states\n4. **ScriptReview** validates generated Python syntax and locator existence before saving\n\nThe result: scripts that run on first attempt without selector errors. Edge cases (complex dynamic pages, iframes) may still need manual review.'
+    },
+
+    // ── SECURITY / PRIVACY ───────────────────────────────────────────────────
+    {
+      keys: ['data stored','where is data','data storage location','where results stored','data center'],
+      md: '**Data storage:**\n\n• **Trial / Pro** — run results and agent outputs stored on AWS (us-east-1 by default; EU region available on request)\n• **Enterprise** — dedicated private cloud instance, your choice of AWS region (US, EU, APAC)\n\nTest scripts are stored in your project repo — they never leave your environment.'
+    },
+    {
+      keys: ['gdpr','privacy compliance','data compliance','data regulation','eu data','privacy policy'],
+      md: 'SentinelFlux VigilQA is **GDPR-compliant**:\n\n• Data Processing Agreement (DPA) available on request\n• EU data residency option available (Pro+)\n• Right to erasure: delete your account and all associated run data via dashboard Settings → Account → Delete\n• Data is not used to train LLM models\n\nEnterprise customers on dedicated instances get full control over data region — choose EU, US, or APAC to meet local compliance requirements.'
+    },
+    {
+      keys: ['soc2','soc 2','iso 27001','security certification','compliance certification'],
+      md: 'SentinelFlux VigilQA is working toward **SOC 2 Type II** certification (expected 2026).\n\nCurrent security posture:\n• All cloud data encrypted at rest (AES-256) and in transit (TLS 1.3)\n• Access logs and audit trails for all dashboard actions\n• Secrets (API keys) stored via AWS Secrets Manager, not in plain text\n• Penetration testing conducted annually\n\nEnterprise customers can request a security questionnaire and current audit reports. Email `engage@sentinelflux.in`.'
+    },
+    {
+      keys: ['secret','credential','password in test','env var test','sensitive data','api key in test'],
+      md: '**Credentials and secrets in tests** are handled via environment variables:\n\n```yaml\n# sentinelflux.config.yaml\nenvironments:\n  staging:\n    base_url: https://staging.myapp.com\n    auth:\n      username: ${TEST_USER}       # from env\n      password: ${TEST_PASSWORD}   # from env\n```\n\nGenerated test scripts use `os.environ` references — secrets are never hard-coded in test files. In CI, inject them as environment secrets (GitHub Actions secrets, GitLab CI variables, etc.). SentinelFlux VigilQA never logs secret values.'
+    },
+
+    // ── ADVANCED USE CASES ───────────────────────────────────────────────────
+    {
+      keys: ['monorepo','multiple service','microservice','multi-service','multiple project'],
+      md: 'SentinelFlux VigilQA supports **monorepos and microservice architectures** via per-project KB organization:\n\n```\nai/knowledge_base/\n  auth-service/\n    api_endpoints.yaml\n  user-service/\n    api_endpoints.yaml\n  frontend/\n    ui_pages.yaml\n```\n\nRuns are scoped per project and domain — you can run the auth-service API suite independently of the frontend Web UI suite. Each project has independent test results, coverage tracking, and agent analysis in the dashboard.'
+    },
+    {
+      keys: ['import existing','migrate test','bring existing test','existing pytest','migrate from selenium'],
+      md: 'SentinelFlux VigilQA can **co-exist with existing pytest suites**.\n\nYou don\'t need to delete existing tests — configure SentinelFlux VigilQA to include your existing test directory alongside generated tests. Existing tests are included in coverage calculations and post-run agent analysis.\n\nCoverageGap maps them to KB scenarios automatically if test IDs follow the naming convention, or you can add `@scenario: <id>` docstrings manually.\n\nMigration from Selenium/Cypress is incremental — keep old tests running while SentinelFlux VigilQA takes over new ones.'
+    },
+    {
+      keys: ['authentication','login flow','oauth','sso login','handle login','sign in test','auth flow'],
+      md: 'SentinelFlux VigilQA handles **authentication** via a configured login flow in your KB:\n\n```yaml\nauth:\n  type: form    # form | oauth | api_token | basic\n  login_url: /login\n  username_field: input[name="email"]\n  password_field: input[name="password"]\n  submit: button[type="submit"]\n  success_indicator: .dashboard-header\n```\n\nAppExplorer performs the login before crawling, so all authenticated pages are discoverable. Tests that require login receive the session automatically via Playwright context sharing.\n\nOAuth 2.0 and SAML flows are supported via pre-configured bearer tokens in the environment config.'
+    },
+    {
+      keys: ['file upload','upload test','test file upload','attachment test','upload form'],
+      md: 'File upload testing is supported in the Web UI module.\n\nIn your KB, mark a field as a file upload:\n```yaml\nfields:\n  - name: document_upload\n    type: file\n    accepted_types: [pdf, docx, jpg]\n    max_size_mb: 10\n```\n\nSentinelFlux VigilQA generates tests that:\n• Upload valid files (from a fixtures directory)\n• Attempt invalid file types (expect rejection)\n• Attempt oversized files (expect error)\n• Verify upload success state\n\nSample fixture files are auto-generated for test runs.'
+    },
+    {
+      keys: ['cookie','session state','token handling','cookie handling','session persistence','state between tests'],
+      md: 'SentinelFlux VigilQA handles **session state** via Playwright\'s browser context:\n\n• Each test module (web domain) shares a single authenticated context — login happens once, not before every test\n• Cookies and local storage are preserved within a run\n• Between tests that need clean state, `@pytest.mark.fresh_session` triggers a new context\n\nFor API tests, auth tokens are injected as headers from your environment config. Token refresh (OAuth) is handled automatically when the token expires mid-run.'
+    },
+    {
+      keys: ['ssl','certificate','https','self-signed cert','tls','certificate error','ssl error'],
+      md: 'For apps with **self-signed certificates** (common in staging), configure TLS handling in `sentinelflux.config.yaml`:\n\n```yaml\nenvironments:\n  staging:\n    base_url: https://staging.myapp.com\n    tls:\n      ignore_errors: true   # bypasses cert validation\n      # OR provide your own CA bundle:\n      ca_bundle: /path/to/staging-ca.crt\n```\n\nNever use `ignore_errors: true` in production environment configs — it masks real certificate problems.'
+    },
+    {
+      keys: ['community','discord','forum','slack community','support channel','ask questions','contact support'],
+      md: '**SentinelFlux VigilQA support channels:**\n\n• **Email** — engage@sentinelflux.in (fastest for product questions)\n• **Discord** — community server for Q&A, tips, and sharing KB examples (link in the docs)\n• **GitHub Issues** — bug reports and feature requests at github.com/sentinelflux\n• **Documentation** — sentinelflux.in/docs/ for guides and API reference\n• **Pro/Enterprise support** — dedicated Slack channel with the engineering team'
+    },
+    {
+      keys: ['roadmap','future feature','upcoming','planned feature','what is coming','product roadmap'],
+      md: '**SentinelFlux VigilQA roadmap highlights (2026):**\n\n• **Native mobile testing** (iOS/Android via Appium integration) — H2 2026\n• **OpenAI/Bedrock LLM support** — Q3 2026\n• **VS Code extension** — inline coverage gap indicators and test generation from the editor\n• **Test impact analysis** — only run tests affected by changed code (git diff aware)\n• **Multi-language scripts** — TypeScript/Jest generation alongside Python/pytest\n\nRegister interest or vote on features at sentinelflux.in/docs/'
+    },
+    {
+      keys: ['free trial','pro trial','try pro','evaluate pro','trial period','trial length'],
+      md: '**Pro trial:**\n\n• 14-day free trial with full Pro feature access\n• No credit card required to start\n• Unlimited projects and all 20+ agents during the trial\n• Trial data and runs carry over when you upgrade\n\nTo start a trial: **sign up at `vigilqa.sentinelflux.in/signup`** with your corporate email and company name. Your workspace is created instantly the moment you verify your email — no waiting, no sales call.'
+    },
+    {
+      keys: ['billing','annual billing','monthly billing','invoice','receipt','payment','billing cycle'],
+      md: '**Billing details:**\n\n• **Pro** — $49/seat/month billed annually ($588/seat/year). Monthly billing available at $59/seat/month.\n• **Enterprise** — custom, typically annual contracts with volume pricing\n• Invoices are emailed automatically each billing cycle\n• PDF receipts available in Dashboard → Settings → Billing\n• Payment via credit card (Stripe) or bank transfer for Enterprise\n\nFor billing questions: billing@sentinelflux.in'
+    },
+    {
+      keys: ['downgrade','cancel','cancel subscription','pause plan','cancel pro','stop subscription'],
+      md: '**Changing or cancelling your plan:**\n\n• **Cancel** — cancel before renewal from Dashboard → Settings → Plan → Cancel Subscription. You retain access until the end of the current billing period.\n• **Data export** — download all run data, scripts, and KB files before cancelling via Settings → Export\n• **Downgrade** — moving from Enterprise to Pro is available on request via `engage@sentinelflux.in`\n\nNo lock-in. Generated test scripts are plain files you own — nothing is lost when you cancel.'
+    }
+  ];
+
+  // ── Agent simulations ────────────────────────────────────────────────────────
+  var AGENT_SIMS = {
+    coveragegap: function (m) {
+      var count = m === 'recruitment' ? 47 : m === 'api' ? 32 : 38;
+      var tested = m === 'recruitment' ? 28 : m === 'api' ? 19 : 24;
+      var gaps = count - tested;
+      var pct = Math.round((tested / count) * 100) + '%';
+      return {
+        label: 'CoverageGap', color: '#f59e0b',
+        logs: [
+          'Loading KB for module: ' + m + '…',
+          'Found ' + count + ' scenarios across ' + (m === 'recruitment' ? 3 : 2) + ' YAML files',
+          'Loading test index: ' + tested + ' test functions in ' + m + ' domain',
+          'Mapping KB scenarios → test IDs…',
+          'Mapped: ' + tested + ' existing tests to KB items',
+          'Checking for unmapped KB scenarios…',
+          'Found ' + gaps + ' KB scenarios with no corresponding test:',
+          '  ' + (m === 'recruitment' ? 'employee_bulk_import' : m === 'api' ? 'api_bulk_create' : 'product_advanced_filter') + ' (ui_pages.yaml)',
+          '  ' + (m === 'recruitment' ? 'leave_balance_report' : m === 'api' ? 'pagination_large_dataset' : 'checkout_promo_code') + ' (application.yaml)',
+          '  … +' + (gaps - 2) + ' more',
+          'Coverage: ' + pct + ' (' + tested + '/' + count + ' KB scenarios tested)',
+          'Gap report saved. Offering to generate missing test cases.'
+        ],
+        output: 'Coverage: ' + pct + '\n' + gaps + ' uncovered KB scenarios\nSuggestion: generate ' + gaps + ' new test cases'
+      };
+    },
+    flakydetector: function (m) {
+      return {
+        label: 'FlakyDetector', color: '#8b5cf6',
+        logs: [
+          'Analysing test stability for module: ' + m + '…',
+          'Fetching run history (last 5 runs)…',
+          'test_' + m + '_search_partial: PASS · FAIL · PASS · FAIL · FAIL',
+          'Failure pattern: intermittent (60% fail rate)',
+          'Locator: [data-testid="' + m + '-search-input"] inconsistent',
+          'Timing check: 3 failures within 200ms of page load',
+          'Stability score: 0.40  (threshold: 0.75)',
+          'Flagging test_' + m + '_search_partial as FLAKY',
+          'Queuing LocatorHealer for search-input element…',
+          'Flaky report saved. Approval item AQ-018 created.'
+        ],
+        output: '1 flaky test detected\nStability score: 0.40\nLocator healing queued → AQ-018'
+      };
+    },
+    regressionguard: function (m) {
+      var total = m === 'api' ? 20 : 28;
+      return {
+        label: 'RegressionGuard', color: '#ef4444',
+        logs: [
+          'Comparing RUN-247 vs RUN-246 for module: ' + m + '…',
+          'RUN-246: ' + (total - 2) + '/' + total + ' passed · RUN-247: ' + (total - 3) + '/' + total + ' passed',
+          'Checking per-test deltas…',
+          'test_' + m + '_login_flow: PASS → FAIL ⚠',
+          'test_' + m + '_search_partial: FAIL → FAIL (known flaky, skipped)',
+          'Regression detected: test_' + m + '_login_flow',
+          'Likely introduced in commits on main (last 2).',
+          'Alert sent to dashboard.'
+        ],
+        output: '1 regression detected\ntest_' + m + '_login_flow\nAlert queued for team review'
+      };
+    },
+    resultanalyzer: function (m) {
+      var total = m === 'api' ? 20 : 28;
+      return {
+        label: 'ResultAnalyzer', color: '#6366f1',
+        logs: [
+          'Loaded run RUN-247 — ' + total + ' test results',
+          'Analysing ' + 2 + ' failures…',
+          'test_' + m + '_login_invalid → assertion on .error-msg',
+          'Context: element in DOM but visibility=hidden',
+          'Classification: PRODUCT BUG',
+          'test_' + m + '_search_partial → NoSuchElementException',
+          'History: failed 3/5 recent runs, no code changes',
+          'Classification: FLAKY — SCRIPT',
+          'Creating BUG-043 for product bug…',
+          'Analysis complete. 1 product bug, 1 flaky, ' + (total - 2) + ' passed.'
+        ],
+        output: '1 Product Bug → BUG-043 created\n1 Flaky test → FlakyDetector queued\n' + (total - 2) + ' tests passed ✓'
+      };
+    },
+    locatorhealer: function (m) {
+      return {
+        label: 'LocatorHealer', color: '#10b981',
+        logs: [
+          'Received heal request for [data-testid="' + m + '-search-input"]',
+          'Launching headless browser → staging.' + m + '.sentinelflux.in',
+          'Navigating to ' + m.charAt(0).toUpperCase() + m.slice(1) + ' module page…',
+          'DOM snapshot captured. Searching for element…',
+          'Primary locator not found: [data-testid="search-input"]',
+          'Trying semantic heuristics: role=searchbox, aria-label~=search',
+          'Match found: input[placeholder="Search ' + m + '…"]',
+          'Confidence: 0.94 (high)',
+          'Generating patch: replace data-testid with placeholder selector',
+          'Patch queued in Approvals → AQ-019. Awaiting sign-off.'
+        ],
+        output: 'Healed: [data-testid] → input[placeholder="Search…"]\nConfidence: 0.94\nPatch queued → AQ-019'
+      };
+    }
+  };
+
+  // ── Minimal markdown renderer ────────────────────────────────────────────────
+  function md(text) {
+    // code blocks first
+    text = text.replace(/```[\s\S]*?```/g, function (m) {
+      var code = m.replace(/^```\w*\n?/, '').replace(/\n?```$/, '');
+      return '<pre style="background:#1e293b;color:#94a3b8;padding:10px 12px;border-radius:9px;font-size:11px;overflow-x:auto;margin:5px 0;font-family:\'JetBrains Mono\',monospace;line-height:1.5">' + esc(code) + '</pre>';
+    });
+    text = text.replace(/`([^`]+)`/g, '<code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:11px;font-family:\'JetBrains Mono\',monospace">$1</code>');
+    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    text = text.replace(/\n/g, '<br>');
+    return text;
+  }
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── DOM refs ─────────────────────────────────────────────────────────────────
+  var btn      = document.getElementById('sfx-btn');
+  var win      = document.getElementById('sfx-win');
+  var msgs     = document.getElementById('sfx-msgs');
+  var chipsEl  = document.getElementById('sfx-chips');
+  var inp      = document.getElementById('sfx-inp');
+  var sendBtn  = document.getElementById('sfx-send');
+  var hdrClose = document.getElementById('sfx-hdr-close');
+  var icoOpen  = document.getElementById('sfx-ico-open');
+  var icoClose = document.getElementById('sfx-ico-close');
+
+  var isOpen = false;
+
+  // ── Quick chips ──────────────────────────────────────────────────────────────
+  var CHIPS = ['How does it work?', 'AI agent testing?', 'Release readiness', 'What modules?', 'Pricing', 'Run CoverageGap'];
+
+  function renderChips() {
+    chipsEl.innerHTML = CHIPS.map(function (c) {
+      return '<button class="sfx-chip" data-chip="' + c + '">' + c + '</button>';
+    }).join('');
+    chipsEl.querySelectorAll('[data-chip]').forEach(function (el) {
+      el.addEventListener('click', function () { handleInput(el.dataset.chip); });
+    });
+  }
+
+  // ── Open / close ─────────────────────────────────────────────────────────────
+  function openChat() {
+    isOpen = true;
+    win.classList.add('sfx-open');
+    icoOpen.style.display = 'none';
+    icoClose.style.display = 'block';
+    setTimeout(function () { inp.focus(); scrollBottom(); }, 220);
+  }
+  function closeChat() {
+    isOpen = false;
+    win.classList.remove('sfx-open');
+    icoOpen.style.display = 'block';
+    icoClose.style.display = 'none';
+  }
+  btn.addEventListener('click', function () { isOpen ? closeChat() : openChat(); });
+  hdrClose.addEventListener('click', closeChat);
+
+  // ── Message helpers ──────────────────────────────────────────────────────────
+  function scrollBottom() { setTimeout(function () { msgs.scrollTop = msgs.scrollHeight; }, 60); }
+
+  function addMsg(html, role) {
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;justify-content:' + (role === 'user' ? 'flex-end' : 'flex-start');
+    var bubble = document.createElement('div');
+    bubble.className = role === 'user' ? 'sfx-msg-user' : 'sfx-msg-bot';
+    bubble.innerHTML = html;
+    wrap.appendChild(bubble);
+    msgs.appendChild(wrap);
+    scrollBottom();
+    return bubble;
+  }
+
+  function showTyping() {
+    var wrap = document.createElement('div');
+    wrap.id = 'sfx-typ';
+    wrap.style.cssText = 'display:flex;justify-content:flex-start';
+    wrap.innerHTML = '<div class="sfx-msg-bot" style="padding:11px 15px"><span class="sfx-typing-dot"></span><span class="sfx-typing-dot"></span><span class="sfx-typing-dot"></span></div>';
+    msgs.appendChild(wrap);
+    scrollBottom();
+  }
+  function hideTyping() { var t = document.getElementById('sfx-typ'); if (t) t.remove(); }
+
+  // ── Welcome message ──────────────────────────────────────────────────────────
+  addMsg("Hey! I'm the <strong>SentinelFlux VigilQA AI assistant</strong>.<br><br>Ask me how the platform works, about any agent or module, or type <strong>run [agent] on [module]</strong> to see a live agent simulation.", 'bot');
+
+  // ── Q&A router ───────────────────────────────────────────────────────────────
+  function findAnswer(text) {
+    var t = text.toLowerCase();
+    for (var i = 0; i < QA.length; i++) {
+      var entry = QA[i];
+      for (var j = 0; j < entry.keys.length; j++) {
+        if (t.indexOf(entry.keys[j]) !== -1) return entry;
+      }
+    }
+    return null;
+  }
+
+  // ── Agent-run intent detection ───────────────────────────────────────────────
+  var AGENT_KEYS = {
+    'coveragegap': 'coveragegap', 'coverage gap': 'coveragegap', 'coverage': 'coveragegap',
+    'flakydetector': 'flakydetector', 'flaky detector': 'flakydetector', 'flaky': 'flakydetector',
+    'regressionguard': 'regressionguard', 'regression guard': 'regressionguard', 'regression': 'regressionguard',
+    'resultanalyzer': 'resultanalyzer', 'result analyzer': 'resultanalyzer', 'result': 'resultanalyzer',
+    'locatorhealer': 'locatorhealer', 'locator healer': 'locatorhealer', 'locator': 'locatorhealer', 'healer': 'locatorhealer'
+  };
+  var RUN_WORDS = ['run', 'trigger', 'invoke', 'execute', 'launch', 'start', 'check'];
+  var MODULES   = ['recruitment', 'api', 'web', 'rest', 'graphql', 'security', 'performance', 'visual', 'accessibility', 'ui'];
+
+  function detectAgentRun(text) {
+    var t = text.toLowerCase();
+    if (!RUN_WORDS.some(function (k) { return t.indexOf(k) !== -1; })) return null;
+    var agent = null;
+    var agentKeys = Object.keys(AGENT_KEYS);
+    for (var i = 0; i < agentKeys.length; i++) {
+      if (t.indexOf(agentKeys[i]) !== -1) { agent = AGENT_KEYS[agentKeys[i]]; break; }
+    }
+    if (!agent) return null;
+    var module = 'web';
+    for (var j = 0; j < MODULES.length; j++) {
+      if (t.indexOf(MODULES[j]) !== -1) { module = MODULES[j]; break; }
+    }
+    return { agent: agent, module: module };
+  }
+
+  // ── Agent simulation renderer ────────────────────────────────────────────────
+  function runAgentSim(agentKey, module) {
+    var simFn = AGENT_SIMS[agentKey];
+    if (!simFn) return;
+    var sim = simFn(module);
+
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;justify-content:flex-start;width:100%';
+
+    var card = document.createElement('div');
+    card.style.cssText = 'width:100%;background:#0f172a;border-radius:12px;padding:12px 14px;font-family:"JetBrains Mono",monospace;font-size:11px;border:1px solid #1e293b';
+
+    card.innerHTML =
+      '<div style="display:flex;align-items:center;gap:8px;padding-bottom:9px;margin-bottom:9px;border-bottom:1px solid #1e293b">' +
+        '<div style="width:9px;height:9px;border-radius:50%;background:' + sim.color + ';flex-shrink:0;animation:sfx-dot-bounce 1s infinite"></div>' +
+        '<span style="color:#e2e8f0;font-weight:600;font-size:12px">' + sim.label + '</span>' +
+        '<span style="color:#334155;margin-left:auto;font-size:10px">module: ' + module + '</span>' +
+      '</div>' +
+      '<div id="sfx-log-' + agentKey + '-' + Date.now() + '"></div>';
+
+    wrap.appendChild(card);
+    msgs.appendChild(wrap);
+    scrollBottom();
+
+    var logEl = card.querySelector('[id^="sfx-log-"]');
+
+    sim.logs.forEach(function (line, i) {
+      setTimeout(function () {
+        var lineDiv = document.createElement('div');
+        lineDiv.style.cssText = 'padding:1.5px 0;opacity:0;transform:translateX(-3px);transition:opacity 0.14s,transform 0.14s';
+        var isHighlight = /found|coverage:|complete|saved|queued|healed|match/i.test(line);
+        var isWarn = /⚠|regression|flaky/i.test(line);
+        var color = isWarn ? '#fbbf24' : isHighlight ? '#34d399' : '#64748b';
+        lineDiv.innerHTML = '<span style="color:#334155;margin-right:5px">›</span><span style="color:' + color + '">' + esc(line) + '</span>';
+        logEl.appendChild(lineDiv);
+        requestAnimationFrame(function () { lineDiv.style.opacity = '1'; lineDiv.style.transform = 'none'; });
+        scrollBottom();
+
+        if (i === sim.logs.length - 1) {
+          setTimeout(function () {
+            var out = document.createElement('div');
+            out.style.cssText = 'margin-top:10px;padding:10px 12px;background:#1e293b;border-radius:9px;border:1px solid #334155';
+            out.innerHTML =
+              '<div style="color:#475569;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Agent Output</div>' +
+              '<div style="color:#e2e8f0;white-space:pre-line;line-height:1.6">' + esc(sim.output) + '</div>';
+            card.appendChild(out);
+            scrollBottom();
+          }, 500);
+        }
+      }, i * 260);
+    });
+  }
+
+  // ── Smart fallback hint ──────────────────────────────────────────────────────
+  function smartHint(text) {
+    var t = text.toLowerCase();
+    // Detect topic clusters and point to nearby Q&A
+    if (/test|script|generat|pytest|file|code/.test(t))
+      return 'That\'s a great question! For anything about generated scripts — exporting, editing, running independently — try asking **"can I export the test scripts?"** or **"can I customize generated tests?"**.\n\nFor the full generation pipeline ask: **"how does the generation pipeline work?"**\n\nStill not finding what you need? Email **engage@sentinelflux.in** and the team will help.';
+    if (/price|cost|free|paid|money|trial|fee/.test(t))
+      return 'For pricing details ask **"what are the pricing tiers?"** — 14-day free trial, then Pro at $49/seat/month, Enterprise is custom.\n\nStart your free trial at `vigilqa.sentinelflux.in/signup` — self-service, no credit card.';
+    if (/support|help|contact|email|team|human/.test(t))
+      return 'For questions not covered here, reach the SentinelFlux team directly at **engage@sentinelflux.in**.\n\nDocumentation is at **sentinelflux.in/docs/**.';
+    if (/integrat|connect|plugin|jira|linear|github issue|slack/.test(t))
+      return 'SentinelFlux VigilQA integrates with CI/CD pipelines (GitHub Actions, GitLab, Jenkins) and sends **Slack / webhook notifications** on failures and regressions.\n\nFor bug tracking, the Bug Tracker module auto-creates entries from ResultAnalyzer. Try asking **"how do Slack notifications work?"** or **"how does CI/CD integration work?"**.';
+    if (/selenium|cypress|playwright|puppeteer|compare|vs|alternative/.test(t))
+      return 'SentinelFlux VigilQA uses **Playwright** for Web UI testing under the hood, so it supports Chromium, Firefox, and WebKit.\n\nThe key difference from Playwright/Cypress/Selenium alone: SentinelFlux VigilQA **generates** the test scripts from your knowledge base and **self-heals** broken locators automatically — you don\'t write or maintain selectors manually.';
+    if (/language|python|javascript|java|typescript|framework/.test(t))
+      return 'Generated test scripts are **Python / pytest** files. The CLI is also Python (`pip install sentinelflux`).\n\nThe dashboard and agent pipeline run on the backend — the only thing you need locally is Python 3.9+ and optionally Ollama for the local LLM mode.';
+    // Generic fallback
+    return 'I don\'t have specific information on that yet, but here are things I can help with:\n\n• How the **agentic pipeline** works\n• Any of the **20+ AI agents** (e.g. CoverageGap, FlakyDetector)\n• The **full library of test modules** — including **AI agent testing** and **model evals**\n• **Release readiness** and **requirements traceability**\n• **Pricing** tiers\n• **Exporting / customizing** generated test scripts\n• **CI/CD** and **Slack** integrations\n\nOr type **run [agent] on [module]** for a live agent simulation.\n\nFor anything else: **engage@sentinelflux.in**';
+  }
+
+  // ── Main input handler ───────────────────────────────────────────────────────
+  function handleInput(text) {
+    text = (text || '').trim();
+    if (!text) return;
+    addMsg(esc(text), 'user');
+    inp.value = '';
+
+    // Agent run?
+    var run = detectAgentRun(text);
+    if (run) {
+      setTimeout(function () { runAgentSim(run.agent, run.module); }, 380);
+      return;
+    }
+
+    // Q&A
+    showTyping();
+    setTimeout(function () {
+      hideTyping();
+      var entry = findAnswer(text);
+      if (entry) {
+        addMsg(md(entry.md), 'bot');
+      } else {
+        var hint = smartHint(text);
+        addMsg(md(hint), 'bot');
+      }
+    }, 500 + Math.floor(Math.random() * 400));
+  }
+
+  sendBtn.addEventListener('click', function () { handleInput(inp.value); });
+  inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') handleInput(inp.value); });
+
+  renderChips();
+})();
 </script>
 </body>
 </html>

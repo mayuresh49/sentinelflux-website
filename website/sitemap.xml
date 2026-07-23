@@ -145,6 +145,7 @@
   <url><loc>https://sentinelflux.in/vigilqa/docs/configuration/config-reference.html</loc><lastmod>2026-07-01</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://sentinelflux.in/vigilqa/docs/configuration/environments.html</loc><lastmod>2026-07-01</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://sentinelflux.in/vigilqa/docs/configuration/llm-configuration.html</loc><lastmod>2026-07-01</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://sentinelflux.in/vigilqa/docs/configuration/quality-thresholds.html</loc><lastmod>2026-07-20</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://sentinelflux.in/vigilqa/docs/configuration/service-registry.html</loc><lastmod>2026-07-01</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://sentinelflux.in/vigilqa/docs/core-concepts/approvals.html</loc><lastmod>2026-07-01</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://sentinelflux.in/vigilqa/docs/core-concepts/generation-pipeline.html</loc><lastmod>2026-07-01</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>

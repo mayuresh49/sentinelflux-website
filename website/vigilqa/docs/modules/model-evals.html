@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model Evals — VigilQA Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-info{background:#eff6ff;border-left:4px solid #3b82f6}.callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/vigilqa/docs/" class="font-bold text-indigo-600">VigilQA <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Model Evals</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Score a model or prompt against a labeled dataset — accuracy, faithfulness, safety, and format — and catch regressions when you change the model or the prompt.</p>
+
+        <h2>What this module does</h2>
+        <p>The Model Evals module runs <strong>dataset-driven evaluations</strong> against an LLM endpoint or prompt template. You supply a dataset of inputs (and, where available, reference answers); VigilQA runs each example through the model, scores the output against your chosen metrics, and reports aggregate results with a full per-example breakdown.</p>
+        <p>Where the <a href="/vigilqa/docs/modules/ai-agent-testing.html">AI Agent Testing</a> module tests a live agent application end to end, Model Evals answers a narrower question: <em>how good is this model/prompt on this task, and did the latest change make it better or worse?</em></p>
+
+        <h2>Metrics</h2>
+        <table>
+          <thead><tr><th>Metric</th><th>Measures</th><th>Scoring</th></tr></thead>
+          <tbody>
+            <tr><td>Accuracy / Exact&nbsp;Match</td><td>Output matches the reference answer</td><td>Exact, regex, or normalized string</td></tr>
+            <tr><td>Semantic&nbsp;Similarity</td><td>Output is equivalent in meaning to the reference</td><td>LLM-judge / embedding score</td></tr>
+            <tr><td>Faithfulness</td><td>Output is grounded in provided context (no hallucination)</td><td>LLM-judge</td></tr>
+            <tr><td>Relevance</td><td>Output actually answers the question</td><td>LLM-judge</td></tr>
+            <tr><td>Safety / Toxicity</td><td>Output avoids unsafe, biased, or toxic content</td><td>Classifier / LLM-judge</td></tr>
+            <tr><td>Format&nbsp;Adherence</td><td>Output conforms to an expected JSON/schema shape</td><td>Deterministic schema check</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Dataset format</h2>
+        <p>Evaluation datasets live alongside your Knowledge Base as YAML or JSONL. Each row is one example; reference fields are optional depending on the metric.</p>
+        <pre>eval: support-classifier
+model: ${LLM_MODEL}
+metrics: [accuracy, faithfulness, safety]
+threshold: 0.85
+dataset:
+  - id: EV-001
+    input: "My payment failed but I was still charged."
+    expected: "billing_issue"
+  - id: EV-002
+    input: "How do I reset my password?"
+    expected: "account_access"
+  - id: EV-003
+    input: "Summarise this ticket."
+    context: "Customer reports the export button does nothing on Safari."
+    judge_rubric: "Summary mentions the export button and Safari; no invented details."</pre>
+
+        <h2>Prompt &amp; model regression</h2>
+        <p>Model Evals is designed for comparison. Run the same dataset against two candidates — <code>model A vs model B</code>, or <code>prompt v1 vs prompt v2</code> — and VigilQA produces a side-by-side scorecard with per-metric deltas and the specific examples that changed verdict.</p>
+        <p>When an eval is part of your CI pipeline, <a href="/vigilqa/docs/agents/regression-guard.html">RegressionGuard</a> alerts on any metric that drops below its baseline, so a prompt tweak that quietly degrades faithfulness is caught before it ships.</p>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800"><strong>Reproducibility.</strong> Set <code>temperature: 0</code> (or a fixed seed where the provider supports it) for the model under test, and pin the judge model version. Record both in the eval file so a score is always reproducible.</p>
+        </div>
+
+        <h2>Reporting</h2>
+        <p>Results appear in the <strong>Model Evals</strong> tab of the run: aggregate score per metric, pass/fail against threshold, and a searchable table of every example with its input, output, reference, and judge rationale. Scorecards export to PDF and JSON, and per-example results can be fed into <a href="/vigilqa/docs/platform/release-readiness.html">Release Readiness</a> as a gate signal.</p>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/vigilqa/docs/docs.js"></script>
+</body>
+</html>

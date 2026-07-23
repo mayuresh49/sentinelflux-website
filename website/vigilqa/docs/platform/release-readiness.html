@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Release Readiness — VigilQA Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul,.doc-content ol{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.callout{border-radius:.5rem;padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:.9rem}.callout-info{background:#eff6ff;border-left:4px solid #3b82f6}.callout-warning{background:#fffbeb;border-left:4px solid #f59e0b}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/vigilqa/docs/" class="font-bold text-indigo-600">VigilQA <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Release Readiness</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">A single go / no-go verdict for a release, computed from your latest test signals — pass rate, coverage, open bugs, regressions, and security findings — against a policy you define.</p>
+
+        <h2>What it answers</h2>
+        <p>Release Readiness rolls the state of a project up into one question: <strong>is this build safe to ship?</strong> Instead of asking each team to eyeball separate dashboards, it evaluates the latest run against a configurable gate policy and returns a clear verdict: <strong>Ready</strong>, <strong>At Risk</strong>, or <strong>Blocked</strong>.</p>
+
+        <h2>Signals</h2>
+        <p>The readiness verdict aggregates signals that VigilQA already tracks:</p>
+        <table>
+          <thead><tr><th>Signal</th><th>Source</th><th>Typical gate</th></tr></thead>
+          <tbody>
+            <tr><td>Pass rate</td><td>Latest test run</td><td>≥ 98%</td></tr>
+            <tr><td>Requirement coverage</td><td><a href="/vigilqa/docs/platform/traceability.html">Traceability</a> / CoverageGap</td><td>≥ 90%</td></tr>
+            <tr><td>Open Critical / High bugs</td><td><a href="/vigilqa/docs/modules/bug-tracker.html">Bug Tracker</a></td><td>0</td></tr>
+            <tr><td>New regressions</td><td><a href="/vigilqa/docs/agents/regression-guard.html">RegressionGuard</a></td><td>0</td></tr>
+            <tr><td>Flaky ratio</td><td><a href="/vigilqa/docs/agents/flaky-detector.html">FlakyDetector</a></td><td>&lt; 2%</td></tr>
+            <tr><td>Critical security findings</td><td><a href="/vigilqa/docs/modules/security-vapt.html">Security &amp; VAPT</a></td><td>0</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Gate policy</h2>
+        <p>Each project defines a readiness policy. Any signal can be a hard gate (a single breach blocks the release) or a soft gate (it degrades the verdict to <em>At Risk</em> but does not block). Policies live in config so they are versioned with your project.</p>
+        <pre>release_readiness:
+  policy:
+    - signal: pass_rate
+      min: 0.98
+      gate: hard
+    - signal: requirement_coverage
+      min: 0.90
+      gate: hard
+    - signal: open_bugs
+      severity: [critical, high]
+      max: 0
+      gate: hard
+    - signal: new_regressions
+      max: 0
+      gate: hard
+    - signal: flaky_ratio
+      max: 0.02
+      gate: soft
+    - signal: security_findings
+      severity: [critical]
+      max: 0
+      gate: hard</pre>
+
+        <h2>The readiness report</h2>
+        <p>Open <strong>Release Readiness</strong> in the dashboard to see the current verdict, each signal with its measured value versus its gate, and the exact items that are blocking — the failing tests, the open Critical bugs, the regressed cases. Every blocker links straight to its detail so the owner can act. The full report exports to PDF for release sign-off and audit trails.</p>
+
+        <h2>Gating CI/CD</h2>
+        <p>Readiness can gate a deploy. Add the readiness check as a step in your pipeline; it exits non-zero when the verdict is <em>Blocked</em>, stopping the deploy job before it runs.</p>
+        <pre># GitHub Actions example
+- name: Release readiness gate
+  run: vigilqa readiness check --project myapp --fail-on blocked</pre>
+
+        <div class="callout callout-info not-prose">
+          <p class="text-sm text-blue-800"><strong>Tip.</strong> Start with soft gates while you calibrate thresholds against a few real releases, then promote the signals your team trusts to hard gates. This avoids blocking deploys on a policy nobody has tuned yet.</p>
+        </div>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/vigilqa/docs/docs.js"></script>
+</body>
+</html>

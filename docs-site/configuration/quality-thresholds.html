@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quality Bands — SentinelFlux Docs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>body{font-family:'Inter',sans-serif}code,pre{font-family:'JetBrains Mono',monospace}.sidebar-link.active{background:#eef2ff;color:#4f46e5;font-weight:500}.sidebar-link:hover:not(.active){background:#f8fafc;color:#1e293b}pre{background:#0f172a;color:#e2e8f0;border-radius:.5rem;padding:1.25rem;overflow-x:auto;line-height:1.7;font-size:.85rem}code:not(pre code){background:#f1f5f9;color:#0f172a;padding:.125rem .375rem;border-radius:.25rem;font-size:.875em}.doc-content h2{font-size:1.375rem;font-weight:600;margin-top:2.5rem;margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid #e2e8f0;color:#0f172a}.doc-content h3{font-size:1.0625rem;font-weight:600;margin-top:1.75rem;margin-bottom:.625rem;color:#1e293b}.doc-content p{line-height:1.8;margin-bottom:1rem;color:#374151}.doc-content ul{margin-bottom:1rem;padding-left:1.5rem}.doc-content li{margin-bottom:.375rem;line-height:1.75;color:#374151}.doc-content ul li{list-style-type:disc}.doc-content table{width:100%;border-collapse:collapse;margin-bottom:1.5rem;font-size:.875rem}.doc-content th{background:#f8fafc;text-align:left;padding:.625rem 1rem;font-weight:600;border:1px solid #e2e8f0;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:#64748b}.doc-content td{padding:.625rem 1rem;border:1px solid #e2e8f0;color:#374151}.doc-content a{color:#4f46e5;text-decoration:none}.doc-content a:hover{text-decoration:underline}.note{background:#f8fafc;border-left:3px solid #6366f1;padding:.875rem 1.125rem;border-radius:.25rem;margin-bottom:1.5rem}.note p{margin-bottom:0;font-size:.9rem}</style>
+</head>
+<body class="bg-white text-slate-900">
+  <div id="mobile-header" class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <a href="/docs/" class="font-bold text-indigo-600">SentinelFlux <span class="text-slate-400 font-normal text-sm">Docs</span></a>
+    <button id="menu-btn" class="p-1 text-slate-500"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div id="overlay" class="fixed inset-0 bg-black/30 z-30 hidden lg:hidden"></div>
+  <div class="flex min-h-screen">
+    <aside id="sidebar" class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 overflow-y-auto z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-200 text-sm"></aside>
+    <main class="flex-1 lg:ml-64 pt-12 lg:pt-0">
+      <div class="max-w-3xl mx-auto px-6 lg:px-10 py-12 doc-content">
+        <div id="breadcrumb" class="text-xs text-slate-400 mb-6"></div>
+        <h1 class="text-3xl font-bold text-slate-900 mb-3">Quality Bands</h1>
+        <p class="text-lg text-slate-500 mb-10 leading-relaxed">Tune the cutoffs that classify Risk Score, Documentation Coverage, and Test Case Health for a product, so the Quality dashboard reflects your product's tolerance rather than a generic default.</p>
+
+        <h2>Why change the bands</h2>
+        <p>The defaults are tuned for a typical business application. A payments ledger, a medical device portal, or an authentication service is not typical. On those products a risk score of 30 is not "low" — anything above 15 warrants review — and 70% documentation coverage is a gap, not a pass.</p>
+        <p>Bands change how a number is <em>classified and coloured</em>. They never change how the number is calculated, so scores stay comparable against a product's own history after you retune.</p>
+
+        <h2>Where to set them</h2>
+        <p>Go to <strong>Configurations → Quality Bands</strong> and pick the product from the filter at the top of the page. Each metric is one row, pre-filled with the value currently in effect.</p>
+        <ul>
+          <li>A row shows <strong>default 30 / 60</strong> while it is untouched, meaning it is tracking the framework default and will follow if that default ever changes.</li>
+          <li>Once you save, the row is marked <strong>Overridden</strong> and a <strong>Reset to Default</strong> button appears.</li>
+          <li>Each row prints the bands your two numbers produce — for example <code>Low ≤ 15 · Medium ≤ 40 · High &gt; 40</code> — so you can see the full classification before leaving the page.</li>
+        </ul>
+        <p>Setting bands is an admin action. Non-admin users see a note that bands are administrator-managed rather than the values themselves.</p>
+
+        <h2>The three metrics</h2>
+        <p>You set <strong>two cutoffs per metric</strong>. The third band is whatever falls outside them, which is why there is no way to configure a range that no value can land in.</p>
+        <table>
+          <thead><tr><th>Metric</th><th>Direction</th><th>Cutoffs you set</th><th>Defaults</th></tr></thead>
+          <tbody>
+            <tr><td>Risk Score</td><td>Lower is better</td><td>Low, Medium</td><td>Low ≤ 30 · Medium ≤ 60 · High &gt; 60</td></tr>
+            <tr><td>Documentation Coverage</td><td>Higher is better</td><td>Green, Amber</td><td>Green ≥ 70 · Amber ≥ 40 · Red &lt; 40</td></tr>
+            <tr><td>Test Case Health</td><td>Higher is better</td><td>Green, Amber</td><td>Green ≥ 70 · Amber ≥ 45 · Red &lt; 45</td></tr>
+          </tbody>
+        </table>
+        <p>Boundaries are inclusive. With Low set to 15, a risk score of exactly 15 is Low and 16 is Medium. With Green set to 85, coverage of exactly 85% is Green and 84% is Amber.</p>
+
+        <h3>Worked example</h3>
+        <p>A team shipping a critical product wants low risk to mean 15 or under, and coverage to be green only at 85% or above. In <strong>Configurations → Quality Bands</strong> they set:</p>
+        <table>
+          <thead><tr><th>Metric</th><th>First cutoff</th><th>Second cutoff</th></tr></thead>
+          <tbody>
+            <tr><td>Risk Score</td><td>Low = 15</td><td>Medium = 40</td></tr>
+            <tr><td>Documentation Coverage</td><td>Green = 85</td><td>Amber = 60</td></tr>
+          </tbody>
+        </table>
+        <p>A scenario scoring 22 that previously displayed as <strong>Low risk</strong> now displays as <strong>Medium</strong>, and a suite at 78% coverage that previously showed green now shows amber. Every other product is unaffected — bands are per product, and a product you have not configured behaves exactly as it did before.</p>
+
+        <h2>What the validator rejects</h2>
+        <p>Because the two cutoffs are related, they are saved together and checked as a pair. An invalid pair is rejected with an inline error rather than being quietly adjusted:</p>
+        <ul>
+          <li>Cutoffs outside 0–100.</li>
+          <li>Values that are not whole numbers.</li>
+          <li>Cutoffs in the wrong order — Low must be below Medium; Green must be above Amber. Saving <code>Low 50 / Medium 20</code> is refused, because it would describe a band nothing can fall into.</li>
+        </ul>
+
+        <h2>Effect on release gates</h2>
+        <p>The <strong>Documentation Coverage</strong> release gate takes its floor from the same band you configure here, so the Quality dashboard and the release gate cannot disagree about what "good coverage" means for a product.</p>
+        <div class="note">
+          <p><strong>An explicit gate value always wins.</strong> If a release gate's Documentation Coverage floor has been set directly on the Release page, that stored value is kept and the band does not override it. Note that saving the release gate form stores every field, so after one save the floor becomes explicit and stops following the band. Clear it there if you want it to track the band again.</p>
+        </div>
+
+        <h2>Storage</h2>
+        <p>Overrides are written to the product's configuration file under <code>run_config.quality_bands</code>. Only metrics you actually changed are stored, so an untouched metric keeps tracking the framework default.</p>
+        <pre><code>run_config:
+  quality_bands:
+    risk_score:
+      low: 15
+      medium: 40
+    doc_coverage:
+      green: 85
+      amber: 60</code></pre>
+        <p>Editing this file by hand is not the supported path — the dashboard validates a pair before writing it, and a hand-edited invalid pair is ignored in favour of the defaults rather than applied.</p>
+
+        <h2>Limits</h2>
+        <ul>
+          <li>Bands are <strong>per product</strong>. There is no per-environment or per-domain scoping.</li>
+          <li>Band names and colours are fixed. Low/Medium/High and Green/Amber/Red cannot be renamed or recoloured.</li>
+          <li>The <strong>weighting inside the risk score</strong> is not configurable — only the cutoffs that classify the result. Reweighting would change what the number means and break comparison against a product's own history.</li>
+          <li>The Quality page with no product filter aggregates every product, and falls back to the framework defaults for that combined view.</li>
+        </ul>
+
+        <h2>Related</h2>
+        <ul>
+          <li><a href="/docs/configuration/config-reference.html">Config Reference</a> — all other configuration fields</li>
+          <li><a href="/docs/configuration/environments.html">Environments</a> — per-environment run settings</li>
+        </ul>
+
+        <div id="prev-next" class="mt-16 pt-8 border-t border-slate-200"></div>
+      </div>
+    </main>
+  </div>
+  <script src="/docs/docs.js"></script>
+</body>
+</html>
