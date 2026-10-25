@@ -26,7 +26,14 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 
 ---
 
-## What Was Just Done (2026-10-25) — 4533c8e (branch: reposition-specvault-hosted-saas)
+## What Was Just Done (2026-10-25) — feat/site-standardization
+
+Site standardization pass: contact form now POSTs to FormSubmit (`formsubmit.co/ajax/engage@sentinelflux.in`) with inline status and a mailto fallback — **first submission triggers an activation email to engage@; confirm it once**. New `website/og-image.png` (1200x630) wired as og:image + `summary_large_image` on all company and product pages. Canonical + OG/Twitter tags added where missing. Footer on the 9 company pages (index, about, blog, careers, privacy, terms, security, status, changelog) replaced with the homepage footer; copyright 2026 everywhere. Open: legal pages' nav still says "SentinelFlux VigilQA"; compliance claims (GDPR/SOC 2) in bot KB need owner verification; no social proof section yet.
+
+---
+
+## Previous (2026-10-25) — Careers page 4533c8e
+
 
 ### Careers page — 7 remote internship openings
 `website/careers.html` (company-level, About-page styling). Roles: Digital Sales & Marketing
