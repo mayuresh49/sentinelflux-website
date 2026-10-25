@@ -26,7 +26,12 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 
 ---
 
-## What Was Just Done (2026-10-25) — feat/site-standardization
+## What Was Just Done (2026-10-25) — brand standard
+Added `website/brand/BRAND.md` + `tokens.css` (Inter + JetBrains Mono, indigo master brand, indigo->violet gradient only, product accents follow the shipped app: default indigo, SpecVault violet, TalentDesk teal). AgentPulse (was emerald) and DocForge (was amber) pages moved to indigo; pink removed from gradients. Follow-ups: migrate VigilQA/DocForge/SpecVault dashboards to Inter; amend app design-system typography line (still says system stack) in the vigilqa repo.
+
+---
+
+## Previous (2026-10-25) — feat/site-standardization
 
 Site standardization pass: contact form now POSTs to FormSubmit (`formsubmit.co/ajax/engage@sentinelflux.in`) with inline status and a mailto fallback — **first submission triggers an activation email to engage@; confirm it once**. New `website/og-image.png` (1200x630) wired as og:image + `summary_large_image` on all company and product pages. Canonical + OG/Twitter tags added where missing. Footer on the 9 company pages (index, about, blog, careers, privacy, terms, security, status, changelog) replaced with the homepage footer; copyright 2026 everywhere. Nav standardized: one company nav (Products/Services/About/Careers/Blog + Contact + Explore products) on about, careers, blog, privacy, terms, security, status, changelog; Careers link added to homepage nav; blog.html got the missing mobile-menu script. Careers applications: on-page form (`#apply`) POSTs to FormSubmit -> **careers@sentinelflux.in** with mailto fallback; Apply buttons preselect the role. **careers@ mailbox must exist and the one-time FormSubmit activation email must be clicked.** Open: compliance claims (GDPR/SOC 2) in bot KB need owner verification; no social proof section yet.
 
