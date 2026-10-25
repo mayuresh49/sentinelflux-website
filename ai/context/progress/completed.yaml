@@ -1,6 +1,14 @@
 # Completed work — newest first
 
 - date: 2026-10-25
+  branch: feat/site-standardization
+  title: "Site: working contact form, OG image, shared footer, canonical/OG tags"
+  details:
+    - contact form via FormSubmit AJAX + mailto fallback (needs one-time activation)
+    - og-image.png + summary_large_image on all company/product pages
+    - homepage footer reused on 9 company pages; copyright years unified to 2026
+
+- date: 2026-10-25
   commit: 4533c8e
   branch: reposition-specvault-hosted-saas
   title: "Site: add Careers page for 7 remote internship openings"
