@@ -1,0 +1,26 @@
+/* SentinelFlux brand tokens — single source for marketing, website and product landing pages.
+   Mirrors the app design system (sentinelflux-vigilqa/docs/design-system). Keep values in sync. */
+:root {
+  /* Brand (indigo) — the master brand and every product's default accent */
+  --sf-brand-50:  #eef2ff;  --sf-brand-100: #e0e7ff;  --sf-brand-200: #c7d2fe;
+  --sf-brand-300: #a5b4fc;  --sf-brand-400: #818cf8;  --sf-brand-500: #6366f1;
+  --sf-brand-600: #4f46e5;  --sf-brand-700: #4338ca;  --sf-brand-800: #3730a3;
+  --sf-accent:    #7c3aed;  /* violet — secondary highlight, gradient end */
+
+  /* Neutrals (slate) */
+  --sf-ink:       #0f172a;  /* slate-900: headings, dark surfaces */
+  --sf-text:      #334155;  /* slate-700: body */
+  --sf-muted:     #64748b;  /* slate-500: helper text */
+  --sf-border:    #e2e8f0;  /* slate-200 */
+  --sf-surface:   #f8fafc;  /* slate-50: page / section alt background */
+
+  /* Semantic — fixed meaning, never used as a brand hue */
+  --sf-success: #059669;  --sf-warning: #d97706;  --sf-danger: #dc2626;
+
+  /* Gradient: headline text and hero accents only */
+  --sf-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+
+  /* Type */
+  --sf-font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --sf-font-mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+}
