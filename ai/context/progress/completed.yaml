@@ -1,5 +1,15 @@
 # Completed work — newest first
 
+- date: 2026-10-25
+  commit: 4533c8e
+  branch: reposition-specvault-hosted-saas
+  title: "Site: add Careers page for 7 remote internship openings"
+  details:
+    - new website/careers.html with 4 roles (S&M 2, AI QA 1, AI full stack 2, AI DevOps 2)
+    - terms: remote, 6-12 months, Sunday off, unpaid 3 months then Rs 2k eng / Rs 1k S&M + incentives
+    - footer links on index.html and about.html; sitemap entry added
+    - duty/skill bullets drafted by inference, owner to verify
+
 - date: 2026-07-20
   commit: 72ad426
   branch: reposition-specvault-hosted-saas

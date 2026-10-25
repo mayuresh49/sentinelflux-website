@@ -1,6 +1,6 @@
 # SentinelFlux Website — AI Context Resume
 
-**Last updated:** 2026-07-20
+**Last updated:** 2026-10-25
 
 ## Project Overview
 
@@ -26,7 +26,21 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 
 ---
 
-## What Was Just Done (2026-07-20) — 72ad426 (branch: reposition-specvault-hosted-saas)
+## What Was Just Done (2026-10-25) — 4533c8e (branch: reposition-specvault-hosted-saas)
+
+### Careers page — 7 remote internship openings
+`website/careers.html` (company-level, About-page styling). Roles: Digital Sales & Marketing
+Executive Intern (2), AI QA Intern (1), AI Full Stack Developer Intern (2), AI DevOps Intern (2).
+Remote, 6–12 months, Sunday off + yearly holidays, own laptop/internet. Unpaid first 3 months,
+then ₹2,000/mo (engineering) or ₹1,000/mo + per-conversion incentives (sales & marketing).
+Engineering: BE CSE / AI / Data Science; S&M: MBA/BBA, strong communication. Apply via
+`mailto:engage@sentinelflux.in`. Linked from the footers of `index.html` and `about.html`, added to
+`sitemap.xml`. Role duty/skill bullets and the certificate line are drafted, **owner to verify**.
+Not yet in the top nav of other pages (only careers.html's own nav has the Careers link).
+
+---
+
+## Previous (2026-07-20) — 72ad426 (branch: reposition-specvault-hosted-saas)
 
 ### Quality Bands docs — now matching shipped product behaviour
 `configuration/quality-thresholds.html` exists in both docs copies, in both navs, and in
