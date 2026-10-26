@@ -26,7 +26,12 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 
 ---
 
-## What Was Just Done (2026-10-25) — brand standard
+## What Was Just Done (2026-10-26) — VigilQA logo
+Chose the **V-Check tile** mark (white V with checkmark long arm on indigo->violet gradient) from 5 options. Assets in `website/brand/logos/vigilqa/final/` (SVG mark, light/dark horizontal + stacked lockups, PNGs, apple-touch icon; rejected options in `options/`). Applied to `vigilqa/index.html` nav, footer and favicon via `/vigilqa/logo-mark.svg`, `/vigilqa/favicon.svg`, `/vigilqa/apple-touch-icon.png`. BRAND.md section 4 updated. Not yet applied: VigilQA docs pages (`vigilqa/docs`, `docs-site`), the product app (sentinelflux-vigilqa dashboard), company-homepage VigilQA card icon.
+
+---
+
+## Previous (2026-10-25) — brand standard
 Added `website/brand/BRAND.md` + `tokens.css` (Inter + JetBrains Mono, indigo master brand, indigo->violet gradient only, product accents follow the shipped app: default indigo, SpecVault violet, TalentDesk teal). AgentPulse (was emerald) and DocForge (was amber) pages moved to indigo; pink removed from gradients. Follow-ups: migrate VigilQA/DocForge/SpecVault dashboards to Inter; amend app design-system typography line (still says system stack) in the vigilqa repo.
 
 ---

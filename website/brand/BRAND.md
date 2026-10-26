@@ -41,10 +41,22 @@ Marketing follows what the product app actually ships:
 - One shared nav and footer across all company pages (copy from `about.html`; footer from `index.html`).
 
 ## 4. Logo and assets
-- Mark: white shield-check on an indigo `rounded-lg` tile, followed by the word "SentinelFlux" in Inter bold.
-  Product pages add a "By SentinelFlux" pill. Do not recolor the tile per product.
-- Favicon `/favicon.svg`; social preview `/og-image.png` (1200×630, dark indigo gradient, wordmark + tagline).
-- Every public page needs: title, description, canonical, OG + Twitter tags with `og-image.png`.
+**SentinelFlux (company):** white shield-check on an indigo `rounded-lg` tile, followed by "SentinelFlux" in Inter bold.
+Product pages add a "By SentinelFlux" pill.
+
+**VigilQA (product):** the *V-Check tile* — a white "V" whose longer right arm is a checkmark, on an
+indigo → violet gradient rounded square. Chosen from five explored options (kept in
+`brand/logos/vigilqa/options/`). Wordmark is "Vigil" in slate-900 (white on dark) + "QA" in indigo-600
+(indigo-300 on dark), Inter bold/extrabold, tight tracking.
+- Files in `brand/logos/vigilqa/final/`: `vigilqa-mark.svg`, horizontal and stacked lockups (light/dark),
+  PNG exports and `apple-touch-icon.png`. Lockup SVGs use live text and need Inter installed; use the PNGs
+  where the font can't be guaranteed.
+- Live copies: `/vigilqa/logo-mark.svg` (nav and footer), `/vigilqa/favicon.svg`, `/vigilqa/apple-touch-icon.png`.
+- Clear space: at least half the tile's width on all sides. Minimum size: 16 px for the mark, 80 px wide for lockups.
+- Do not recolor, rotate, add effects, change the gradient direction, or swap the wordmark font.
+
+Favicon `/favicon.svg` (company) and `/og-image.png` (1200×630, dark indigo gradient, wordmark + tagline).
+Every public page needs: title, description, canonical, OG + Twitter tags with `og-image.png`.
 
 ## 5. Voice
 Plain, specific, confident. Lead with the outcome for the team. Avoid hard numbers for growing counts
