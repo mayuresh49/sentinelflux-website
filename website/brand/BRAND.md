@@ -41,6 +41,11 @@ Marketing follows what the product app actually ships:
 - One shared nav and footer across all company pages (copy from `about.html`; footer from `index.html`).
 
 ## 4. Logo and assets
+**SentinelFlux (company) — proposed mark:** the *Flux S* — a white flowing "S" with a small sentinel node on an
+indigo → violet rounded-square tile. Files in `brand/logos/sentinelflux/final/` (mark, light/dark lockups, 400 and
+1024 px PNGs); LinkedIn banners in `brand/logos/sentinelflux/banner/` (1584×396 profile banner and a 1128×191
+company cover at 2x, plus their HTML sources). Not yet adopted on the website, which still uses the shield-check tile.
+
 **SentinelFlux (company):** white shield-check on an indigo `rounded-lg` tile, followed by "SentinelFlux" in Inter bold.
 Product pages add a "By SentinelFlux" pill.
 
