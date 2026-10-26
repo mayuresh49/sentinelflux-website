@@ -41,10 +41,33 @@ Marketing follows what the product app actually ships:
 - One shared nav and footer across all company pages (copy from `about.html`; footer from `index.html`).
 
 ## 4. Logo and assets
-- Mark: white shield-check on an indigo `rounded-lg` tile, followed by the word "SentinelFlux" in Inter bold.
-  Product pages add a "By SentinelFlux" pill. Do not recolor the tile per product.
-- Favicon `/favicon.svg`; social preview `/og-image.png` (1200×630, dark indigo gradient, wordmark + tagline).
-- Every public page needs: title, description, canonical, OG + Twitter tags with `og-image.png`.
+**SentinelFlux (company) — proposed mark:** the *Flux S* — a white flowing "S" with a small sentinel node on an
+indigo → violet rounded-square tile. Files in `brand/logos/sentinelflux/final/` (mark, light/dark lockups, 400 and
+1024 px PNGs); LinkedIn banners in `brand/logos/sentinelflux/banner/` (1584×396 profile banner and a 1128×191
+company cover at 2x, plus their HTML sources). Not yet adopted on the website, which still uses the shield-check tile.
+
+**SentinelFlux (company):** white shield-check on an indigo `rounded-lg` tile, followed by "SentinelFlux" in Inter bold.
+Product pages add a "By SentinelFlux" pill.
+
+**VigilQA (product):** the *Radar Scan* mark — a four-segment scanning ring around a verified (checkmark) core,
+indigo → violet gradient. Meaning: continuous monitoring with a verified result. Chosen from five explored
+options (kept in `brand/logos/vigilqa/options/`; the shield-check was rejected as too generic).
+Wordmark: "Vigil" in slate-900 (white on dark) + "QA" in indigo-600 (indigo-300 on dark), Inter bold/extrabold,
+tight tracking.
+- **Two forms:** the bare *mark* (`vigilqa-mark.svg`) for headers and footers on any background, and the
+  *tile icon* (`vigilqa-icon.svg`: white ring and core on a gradient rounded square) for favicons, app icons
+  and avatars where a filled shape is needed. Don't use the bare mark below 20 px; use the tile icon.
+- Files in `brand/logos/vigilqa/final/`: SVG mark and icon, horizontal and stacked lockups (light/dark) and
+  PNG exports. Lockup SVGs use live text and need Inter installed; use the PNGs where the font can't be guaranteed.
+- Live copies: `/vigilqa/logo-mark.svg` (nav, footer, docs, blog, homepage card), `/vigilqa/favicon.svg`,
+  `/vigilqa/apple-touch-icon.png`.
+- Clear space: at least a quarter of the mark's width on all sides. Minimum: 20 px mark, 16 px tile icon,
+  100 px wide for lockups.
+- Do not recolor, rotate, add effects, change the gradient direction, change the number of ring segments,
+  or swap the wordmark font.
+
+Favicon `/favicon.svg` (company) and `/og-image.png` (1200×630, dark indigo gradient, wordmark + tagline).
+Every public page needs: title, description, canonical, OG + Twitter tags with `og-image.png`.
 
 ## 5. Voice
 Plain, specific, confident. Lead with the outcome for the team. Avoid hard numbers for growing counts
