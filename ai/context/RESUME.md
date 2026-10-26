@@ -26,7 +26,17 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 
 ---
 
-## What Was Just Done (2026-10-25) — brand standard
+## What Was Just Done (2026-10-26) — SentinelFlux logo + LinkedIn banners
+Proposed company mark **Flux S** (white flowing S + node on indigo->violet tile) in `website/brand/logos/sentinelflux/final/`; LinkedIn banners (1584x396 profile, 1128x191 company cover at 2x) with logo lockup top-left in `.../banner/` (HTML sources included). **Not yet adopted on the website** (still the shield-check tile) — decide, then swap into nav/footers/favicon/OG image/homepage.
+
+---
+
+## Previous (2026-10-26) — VigilQA logo (Radar Scan)
+Chose **D, Radar Scan** (four-segment ring + verified core) after rejecting the shield-check as generic. Final assets in `website/brand/logos/vigilqa/final/` (mark, tile icon, light/dark horizontal + stacked lockups, PNGs); options kept in `options/`. Applied: `vigilqa/index.html` (nav, footer, favicon), docs landing + `vigilqa/docs/docs.js` sidebar, `vigilqa/blog.html` + 15 posts + `_shared_header.txt`, and the VigilQA card on the company homepage. BRAND.md section 4 rewritten. Not changed (by design): `docs-site/` (docs.sentinelflux.in, company-branded "SentinelFlux" header, separate host). Open: product dashboard in sentinelflux-vigilqa still has the old logo.
+
+---
+
+## Previous (2026-10-25) — brand standard
 Added `website/brand/BRAND.md` + `tokens.css` (Inter + JetBrains Mono, indigo master brand, indigo->violet gradient only, product accents follow the shipped app: default indigo, SpecVault violet, TalentDesk teal). AgentPulse (was emerald) and DocForge (was amber) pages moved to indigo; pink removed from gradients. Follow-ups: migrate VigilQA/DocForge/SpecVault dashboards to Inter; amend app design-system typography line (still says system stack) in the vigilqa repo.
 
 ---

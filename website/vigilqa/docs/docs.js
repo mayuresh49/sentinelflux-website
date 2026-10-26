@@ -97,9 +97,7 @@ function buildSidebar() {
   var current = getCurrentPath();
   var html = '<div class="px-5 py-4 border-b border-slate-200">'
     + '<a href="/vigilqa/docs/" class="flex items-center gap-2 group">'
-    + '<div class="w-7 h-7 bg-indigo-600 rounded-md flex items-center justify-center">'
-    + '<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
-    + '</div>'
+    + '<img src="/vigilqa/logo-mark.svg" alt="" width="28" height="28" class="w-7 h-7 shrink-0">'
     + '<div><div class="font-semibold text-slate-900 text-sm leading-tight">VigilQA</div>'
     + '<div class="text-xs text-slate-400 leading-tight">Documentation</div></div>'
     + '</a></div>'
