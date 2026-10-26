@@ -26,8 +26,8 @@ sentinelflux.in is now a **company homepage** for SentinelFlux, with products on
 
 ---
 
-## What Was Just Done (2026-10-26) — VigilQA logo
-Chose the **V-Check tile** mark (white V with checkmark long arm on indigo->violet gradient) from 5 options. Assets in `website/brand/logos/vigilqa/final/` (SVG mark, light/dark horizontal + stacked lockups, PNGs, apple-touch icon; rejected options in `options/`). Applied to `vigilqa/index.html` nav, footer and favicon via `/vigilqa/logo-mark.svg`, `/vigilqa/favicon.svg`, `/vigilqa/apple-touch-icon.png`. BRAND.md section 4 updated. Not yet applied: VigilQA docs pages (`vigilqa/docs`, `docs-site`), the product app (sentinelflux-vigilqa dashboard), company-homepage VigilQA card icon.
+## What Was Just Done (2026-10-26) — VigilQA logo (Radar Scan)
+Chose **D, Radar Scan** (four-segment ring + verified core) after rejecting the shield-check as generic. Final assets in `website/brand/logos/vigilqa/final/` (mark, tile icon, light/dark horizontal + stacked lockups, PNGs); options kept in `options/`. Applied: `vigilqa/index.html` (nav, footer, favicon), docs landing + `vigilqa/docs/docs.js` sidebar, `vigilqa/blog.html` + 15 posts + `_shared_header.txt`, and the VigilQA card on the company homepage. BRAND.md section 4 rewritten. Not changed (by design): `docs-site/` (docs.sentinelflux.in, company-branded "SentinelFlux" header, separate host). Open: product dashboard in sentinelflux-vigilqa still has the old logo.
 
 ---
 
